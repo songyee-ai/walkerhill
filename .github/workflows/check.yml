@@ -1,0 +1,35 @@
+name: check
+
+on:
+  push:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 충돌 표시 검사
+        run: |
+          if git grep -nE '^(<<<<<<<|>>>>>>>)( |$)' -- . ':!.github/workflows/check.yml'; then
+            echo "::error::충돌 표시가 남아 있습니다. 위 파일을 정리한 뒤 다시 푸시하세요."
+            exit 1
+          fi
+          echo "충돌 표시 없음"
+
+      - name: main 이 develop 에 들어 있는 커밋인지 검사
+        if: github.ref == 'refs/heads/main'
+        run: |
+          git fetch origin develop
+          if ! git merge-base --is-ancestor HEAD origin/develop; then
+            echo "::error::main 에 develop 에 없는 커밋이 있습니다. main 에서 따로 고치지 않습니다."
+            exit 1
+          fi
+          echo "main 은 develop 과 같은 흐름"
+
+      # 스택 확정 후 추가: 타입 검사, 빌드
