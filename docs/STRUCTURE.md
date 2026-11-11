@@ -21,6 +21,7 @@ PRD 와 기술 스택이 정해지면 채운다. 남의 폴더 파일은 가져�
 | `CLAUDE.md` | songyee-ai | 규칙을 바꾸자는 제안은 누구나 "알릴 것"에 적는다 |
 | `.gitignore`, `.gitattributes`, `.env.example` | songyee-ai | |
 | `.github/workflows/check.yml` | songyee-ai | |
+| `.github/pull_request_template.md` | songyee-ai | PR 을 열 때 뜨는 확인 양식 |
 | (스택 확정 후 추가: 설정 파일, 패키지 목록, 최상위 진입 파일 등) | | |
 
 ## 영역 사이의 약속
