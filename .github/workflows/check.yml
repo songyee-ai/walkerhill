@@ -35,4 +35,19 @@ jobs:
           fi
           echo "main 은 develop 과 같은 흐름"
 
+      - name: 문서 동반 검사
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          changed=$(git -c core.quotepath=false diff --name-only "origin/$BASE_REF...HEAD")
+          code=$(echo "$changed" | grep -vE '(^docs/|\.md$)' || true)
+          if [ -n "$code" ] && ! echo "$changed" | grep -qx 'docs/PROGRESS.md'; then
+            echo "::error::문서가 아닌 파일을 바꿨는데 docs/PROGRESS.md 가 함께 바뀌지 않았습니다."
+            echo "문서가 아닌 변경 파일:"
+            echo "$code"
+            exit 1
+          fi
+          echo "문서 동반 확인"
+
       # 스택 확정 후 추가: 타입 검사, 빌드
