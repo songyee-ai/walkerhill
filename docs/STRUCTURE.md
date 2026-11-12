@@ -8,11 +8,11 @@
 
 | 폴더 | 주인 | 담는 것 |
 |---|---|---|
-| `docs/` | 전원 (자기 작업의 절만) | 진행 문서, 구조 문서, PRD |
+| `docs/` | 전원 (자기 작업의 절만) | 진행 문서, 구조 문서, PRD, 데이터 형식 약속 |
 | `.github/` | songyee-ai | 자동 검사 |
 | `private/` | 각자 (깃에 올라가지 않음) | 내부 자료와 실행 결과(저장된 LLM 응답, 소비 원장, 기본 데이터 집계 파일, 대조 결과), 페르소나 정의의 비공개 층, 후기 주소 목록. 안내 파일 `README.md` 만 저장소에 있다 |
 | `engine/` | songyee-ai | 후보 추리기와 검사 규칙, 방문 조건 묶음과 가중 합산, 소비 원장, LLM 연결, 실행기, 가상 예시 값으로 만든 저장 응답 |
-| `data/venues/`, `data/samples/` | hojitea-ui | 워커힐 8개 업장과 경쟁 업장의 정의 파일 (이용 상황, 상품과 가격, 판매 단위, 운영 정보, 출처), 가상 예시 값 |
+| `data/venues/`, `data/samples/`, `data/evidence/extra/` | hojitea-ui | 워커힐 8개 업장과 경쟁 업장의 정의 파일 (이용 상황, 상품과 가격, 판매 단위, 운영 정보, 출처), 가상 예시 값 |
 | `data/evidence/`, `personas/` | borigunbbang | 후기를 요약하고 라벨을 붙인 결과, 라벨 값 목록, 페르소나 정의의 공개 층, LLM 프롬프트 |
 | `app/` | wilstein91 | Streamlit 화면 |
 | `scenarios/` | wilstein91 | 상황 정의 (시연 시나리오) |
@@ -35,11 +35,19 @@
 
 ## 영역 사이의 약속
 
-영역끼리 주고받는 데이터 형식(예: 페르소나 정의, 시뮬레이션 응답)을 여기에 적는다.
+영역끼리 주고받는 데이터 형식이다. 자세한 모양과 예시는 [FORMATS.md](FORMATS.md) 에 있다 (11-13 초안. 쓰는 사람이 확인하면 확정한다).
 형식을 바꿀 때는 "알릴 것"에 적고 쓰는 사람 모두가 체크한 뒤 바꾼다.
 
-정할 형식의 목록은 [PRD.md](PRD.md) 8절의 "준비 단계에서 정할 데이터 형식"에 있다.
-엔진 담당이 11-13 에 정해 이 절에 적는다. (11-13 현재 아직 비어 있다)
+| 형식 | 만드는 사람 | 쓰는 사람 | `FORMATS.md` 의 절 |
+|---|---|---|---|
+| 업장 정의 (경쟁 업장 포함) | hojitea-ui | songyee-ai, wilstein91, borigunbbang | 3절 |
+| 후기 라벨, 라벨 값 목록, 후기 주소 목록 | borigunbbang (떼어 둔 후기는 hojitea-ui) | songyee-ai, hojitea-ui | 4절 |
+| 페르소나 정의 (공개 층과 비공개 층) | borigunbbang | songyee-ai, wilstein91 | 5절 |
+| 방문 조건 묶음 | songyee-ai | hojitea-ui, wilstein91 | 6절 |
+| 상황 정의 | wilstein91 | songyee-ai | 7절 |
+| 기본 데이터 집계 파일, 가상 예시 값 | hojitea-ui | songyee-ai, borigunbbang | 8절 |
+| 선택 요청과 응답 | songyee-ai (프롬프트의 문장은 borigunbbang) | songyee-ai | 9절 |
+| 실행 결과 (실행 기록, 소비 원장, 저장된 LLM 응답, 대조 결과) | songyee-ai | wilstein91, borigunbbang | 10절 |
 
 ## 알려진 함정
 
