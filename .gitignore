@@ -3,6 +3,10 @@
 .env.*
 !.env.example
 
+# 내부 자료 — 안내 파일만 빼고 모두 무시한다
+private/*
+!private/README.md
+
 # 운영체제·편집기
 .DS_Store
 Thumbs.db
