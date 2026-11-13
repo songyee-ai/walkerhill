@@ -1,3 +1,4 @@
 ﻿review_id,venue_id,source_kind,posted_ym,customer_group,purpose,party,adults,children,occasion,meal,day_type,stay,ordered,paid_total,reasons_chosen,pain_points,compared_with,would_return,summary,labeler,labeled_on
 R-geumryong-0003,geumryong,blog,2026-05,가족·친족,가족 행사,3대 가족,5,1,meal,dinner,weekend,visitor,course-a,,별실;주차·접근,가격,examplehotel-chinese,yes,어르신 생신이라 별실이 있는 곳을 찾았고 주차가 편해 골랐다. 가격은 부담스러웠다고 적었다.,borigunbbang,2026-11-13
 R-geumryong-0011,geumryong,map,2026-08,가족·친족,가족 행사,3대 가족,,,meal,lunch,weekend,,course-a,,별실;서비스,,,yes,상견례 자리였고 응대가 좋았다고 적었다.,borigunbbang,2026-11-13
+R-geumryong-0027,geumryong,map,2026-03,,,,,,meal,dinner,,,,,,대기,,no,예약하고 갔는데도 오래 기다렸다고 적었다. 누구와 왜 갔는지는 글에 없다.,borigunbbang,2026-11-13

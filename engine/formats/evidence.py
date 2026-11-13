@@ -57,6 +57,9 @@ REVIEW_COLUMNS = [
 URL_LIST_COLUMNS = ["venue_id", "url", "source_kind", "review_id", "dropped"]
 URL_LIST_FILENAMES = frozenset({"review_urls.csv", "holdout_urls.csv", "build_urls.csv"})
 
+# 근거가 되는 칸. 이 칸이 모두 빈 줄은 근거가 없는 후기라 올리지 않는다.
+EVIDENCE_COLUMNS = ("purpose", "party", "ordered", "reasons_chosen", "pain_points", "compared_with", "would_return")
+
 
 class ReviewLabel(FormatModel):
     """후기 한 건이 한 줄이다. 원문과 작성자 아이디와 주소는 적지 않는다."""
@@ -66,8 +69,9 @@ class ReviewLabel(FormatModel):
     source_kind: SourceKind
     posted_ym: YearMonth | None
     customer_group: str | None
-    purpose: Text
-    party: Text
+    # 글과 화면에 없으면 비운다. 화면의 방문 목적과 동행은 최근 후기에만 붙어 있다.
+    purpose: Text | None
+    party: Text | None
     adults: int | None = Field(ge=0)
     children: int | None = Field(ge=0)
     occasion: Occasion | None
@@ -80,7 +84,8 @@ class ReviewLabel(FormatModel):
     pain_points: list[str]
     compared_with: list[str]
     would_return: Literal["yes", "no"] | None
-    summary: Text
+    # 본문이 있으면 꼭 쓴다. 본문 없이 화면 값만 있는 후기만 비운다 (본문이 있는지는 형식으로 알 수 없다).
+    summary: Text | None
     labeler: Text
     labeled_on: date
 
@@ -91,6 +96,14 @@ class ReviewLabel(FormatModel):
             raise ValueError("review_id 는 <종류>-<venue_id>-<네 자리 번호> 다 (예: R-geumryong-0003)")
         if match["venue_id"] != self.venue_id:
             raise ValueError("review_id 안의 업장이 venue_id 와 다르다")
+        for name in ("ordered", "compared_with"):
+            if any(item.removeprefix(FREE_NAME_PREFIX).strip() == "" for item in getattr(self, name)):
+                raise ValueError(f"{name} 에 '{FREE_NAME_PREFIX}' 만 있고 이름이 없다")
+        if not any(getattr(self, name) for name in EVIDENCE_COLUMNS):
+            raise ValueError(
+                "근거가 되는 칸이 모두 비어 있다 (방문 목적, 동행, 주문, 고른 이유, 걸린 점, 견준 곳, 다시 올 뜻 가운데 "
+                "하나는 있어야 한다)"
+            )
         return self
 
     @property

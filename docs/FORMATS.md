@@ -276,8 +276,8 @@
 | `source_kind` | 출처 종류 | 코드 값 |
 | `posted_ym` | 게시 연월 | 모르면 빈 칸 |
 | `customer_group` | 고객군 | 값 목록에서 고른다. 판단할 수 없으면 빈 칸 |
-| `purpose` | 방문 목적 | 값 목록에서 하나 |
-| `party` | 동행 | 값 목록에서 하나 |
+| `purpose` | 방문 목적 | 값 목록에서 하나. 글과 화면에 없으면 빈 칸 |
+| `party` | 동행 | 값 목록에서 하나. 글과 화면에 없으면 빈 칸 |
 | `adults`, `children` | 성인 수, 어린이 수 | 글에 없으면 빈 칸 |
 | `occasion`, `meal`, `day_type`, `stay` | 이용 상황, 끼니, 평일·주말, 투숙 여부 | 코드 값. 글에 없으면 빈 칸 |
 | `ordered` | 주문한 것 | 업장 정의의 `product_id`. 여러 개면 `;` 로 나눈다. 정의에 없는 메뉴면 `이름:` 뒤에 한국어로 적는다 |
@@ -286,8 +286,15 @@
 | `pain_points` | 걸린 점 | 값 목록에서. 여러 개면 `;` |
 | `compared_with` | 견준 곳 | 경쟁 업장의 `venue_id`. 정의에 없는 곳이면 `이름:` 뒤에 한국어로 적는다 |
 | `would_return` | 다시 올 뜻 | `yes`, `no`, 글에 없으면 빈 칸 |
-| `summary` | 한두 문장 요약 | 우리 말로 쓴다. 원문을 따오지 않는다 |
+| `summary` | 한두 문장 요약 | 우리 말로 쓴다. 원문을 따오지 않는다. 본문이 있으면 꼭 쓰고, 본문 없이 화면 값만 있는 후기만 비운다 |
 | `labeler`, `labeled_on` | 라벨을 붙인 사람(깃헙 아이디), 붙인 날 | |
+
+**빈 칸**: 글과 화면에 없는 것은 지어내지 않고 비운다. 빈 칸이 많은 것이 정상이다. 지도 서비스의 방문 목적과 동행은 최근 후기에만 붙어 있다.
+
+- 근거가 되는 칸(`purpose`, `party`, `ordered`, `reasons_chosen`, `pain_points`, `compared_with`, `would_return`)이
+  모두 빈 줄은 올리지 않는다. 근거가 없는 후기다. 형식 검사가 오류로 본다.
+- `summary` 를 비워도 형식 검사는 지나간다. 본문이 있는지는 검사가 알 수 없어서, 본문이 있는 후기에 요약을 쓰는 것은 라벨을 붙이는 사람이 지킨다.
+  (11-13 에 정했다. 처음에는 `purpose`, `party`, `summary` 가 꼭 채우는 칸이었다)
 
 **후기 번호**: `<종류>-<venue_id>-<네 자리 번호>`.
 
@@ -303,12 +310,13 @@
 | 떼어 둔 후기 (`H`) | `private/evidence/holdout/<venue_id>.csv` | 업장 데이터 담당. 페르소나가 다 만들어질 때까지 저장소에 올리지 않고 페르소나 담당에게 주지 않는다 |
 | 받은 참고 소스의 후기 (`P`) | `private/evidence/reference/<venue_id>.csv` | 페르소나 담당. 저장소에 올리지 않는다 |
 
-예시 (지어낸 후기다)
+예시 (지어낸 후기다. 셋째 줄은 방문 목적과 동행이 글에 없는 후기다)
 
 ```csv
 review_id,venue_id,source_kind,posted_ym,customer_group,purpose,party,adults,children,occasion,meal,day_type,stay,ordered,paid_total,reasons_chosen,pain_points,compared_with,would_return,summary,labeler,labeled_on
 R-geumryong-0003,geumryong,blog,2026-05,가족·친족,가족 행사,3대 가족,5,1,meal,dinner,weekend,visitor,course-a,,별실;주차·접근,가격,examplehotel-chinese,yes,어르신 생신이라 별실이 있는 곳을 찾았고 주차가 편해 골랐다. 가격은 부담스러웠다고 적었다.,borigunbbang,2026-11-13
 R-geumryong-0011,geumryong,map,2026-08,가족·친족,가족 행사,3대 가족,,,meal,lunch,weekend,,course-a,,별실;서비스,,,yes,상견례 자리였고 응대가 좋았다고 적었다.,borigunbbang,2026-11-13
+R-geumryong-0027,geumryong,map,2026-03,,,,,,meal,dinner,,,,,,대기,,no,예약하고 갔는데도 오래 기다렸다고 적었다. 누구와 왜 갔는지는 글에 없다.,borigunbbang,2026-11-13
 ```
 
 ### 4.2 라벨 값 목록
@@ -606,7 +614,7 @@ customer_group,venue_id,product_id,occasion,meal,day_type,month,unit,quantity,pa
 | `prompt_version` | 프롬프트의 판 이름. 프롬프트를 고치면 바꾼다 |
 | `scenario_id` | 어느 상황인가 |
 | `persona` | 두 층을 합친 페르소나. 기본 데이터로 돌릴 때는 엔진이 붙인 `base_profile` 과, 비공개 층의 흔적 `overridden_by_private` (5절)가 들어 있다. 가상 예시로 돌릴 때는 둘 다 없거나 비어 있다 |
-| `condition` | 이번 방문 조건. 6절의 조건에 `adults`, `children`, `budget`, `purpose`, `party` 를 더한 것. `purpose` 와 `party` 는 검증할 때 후기의 라벨을 넣고, 다른 때는 `null` 이다 |
+| `condition` | 이번 방문 조건. 6절의 조건에 `adults`, `children`, `budget`, `purpose`, `party` 를 더한 것. `purpose` 와 `party` 는 검증할 때 후기의 라벨을 넣고 (후기에 비어 있으면 `null`), 다른 때는 `null` 이다 |
 | `candidates` | 규칙으로 추린 후보 업장. 업장마다 고를 수 있는 주문(`options`)이 들어 있다 |
 | `allow_none` | "이용하지 않음"을 고를 수 있는가. 늘 `true` |
 | `vocab` | 이유로 쓸 수 있는 라벨: `reasons_chosen`, `pain_points` |
@@ -931,7 +939,7 @@ run_id,scenario_id,visit_id,persona_id,customer_group,condition_id,choice_kind,v
 | 열 | 뜻 |
 |---|---|
 | `review_id`, `venue_id`, `customer_group` | 떼어 둔 후기 |
-| `persona_id` | 돌린 페르소나. 그 고객군에 페르소나가 둘이면 후기의 `purpose`, `party` 가 더 많이 겹치는 쪽, 같으면 몫이 큰 쪽 (PRD 6.6절) |
+| `persona_id` | 돌린 페르소나. 그 고객군에 페르소나가 둘이면 후기의 `purpose`, `party` 가 더 많이 겹치는 쪽, 같으면 몫이 큰 쪽 (PRD 6.6절). 후기에 비어 있는 칸은 겹치지 않는 것으로 센다 |
 | `occasion`, `meal`, `day_type` | 돌린 조건. 후기에 끼니나 요일이 비어 있으면 그 페르소나의 `visit.meals`, `visit.day_types` 의 첫 값을 쓴다 |
 | `chosen_venue_id` | 페르소나가 고른 곳. "이용하지 않음"이면 빈 칸 |
 | `venue_match`, `reason_match` | 업장이 같은가, 이유 라벨이 하나 이상 겹치는가 (`Y`, `N`) |
@@ -958,7 +966,8 @@ uv run python -m tools.check_formats --strict   # 다 만든 뒤의 기준으로
 - 다른 파일을 가리키는 식별자가 실제로 있다: 경쟁 업장의 `competes_with`, 페르소나의 `compares_with`, 상황의 `venue_id`·`product_id`, 후기의 `venue_id`.
 - 상품의 `occasion` 이 업장의 `occasions` 안에 있다. 워커힐 업장마다 경쟁 업장이 하나 이상 있다.
 - 업장 정의의 모든 `source_id` 가 `sources` 에 있고 `checked_on` 이 있다.
-- 라벨(방문 목적, 동행, 고른 이유, 걸린 점, 고객군)이 값 목록에 있다.
+- 라벨(방문 목적, 동행, 고른 이유, 걸린 점, 고객군)이 값 목록에 있다. 후기 라벨의 방문 목적과 동행은 비어 있어도 된다.
+- 후기 라벨의 줄마다 근거가 되는 칸이 하나 이상 있다 (4.1절). `ordered` 와 `compared_with` 의 `이름:` 뒤에는 이름이 있다.
 - 페르소나의 `evidence` 에 묶음 일곱 개가 모두 있고, 한 고객군의 `share_in_group.value` 를 더하면 1 이다.
 - 묶음의 조건은 `month` 와 `stay` 가 `null` 이고 조식 조건이 없다. 상황의 `our_price`·`our_promo` 는 워커힐 업장만, `competitor` 는 경쟁 업장만 바꾼다.
 - `engine/samples/runs/` 의 실행 기록은 모두 `data_mode` 가 `sample` 이다. 가중치가 빠짐없이 있고 등급에 `internal` 이 없다.
@@ -991,6 +1000,7 @@ uv run python -m tools.check_formats --strict   # 다 만든 뒤의 기준으로
 **이 도구가 보지 못하는 것** — 이것은 사람이 지킨다 (`CLAUDE.md` 의 "비밀값과 공개 저장소").
 
 - 지어낸 값이라고 적은 파일의 값이 정말 지어낸 것인지. 문서에 풀어 쓴 수치. 발표 자료와 그림, 노트북의 출력.
+- 본문이 있는 후기에 요약(`summary`)을 썼는지 (4.1절).
 - 열 이름을 바꾼 표: 다른 이름의 열에 담은 기본 데이터의 금액, 약속과 다른 열 이름의 주소 목록.
 - 번호도 주소도 없이 옮겨 적은 후기의 문장.
 

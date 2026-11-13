@@ -445,9 +445,10 @@ class Checker:
             return
         if review.customer_group is not None and review.customer_group not in self.vocab.customer_group:
             bad(f"customer_group '{review.customer_group}' 가 값 목록에 없다")
-        if review.purpose not in self.vocab.purpose:
+        # 방문 목적과 동행은 글과 화면에 없으면 비운다. 적었을 때만 값 목록과 견준다.
+        if review.purpose is not None and review.purpose not in self.vocab.purpose:
             bad(f"purpose '{review.purpose}' 가 값 목록에 없다")
-        if review.party not in self.vocab.party:
+        if review.party is not None and review.party not in self.vocab.party:
             bad(f"party '{review.party}' 가 값 목록에 없다")
         for label in review.reasons_chosen:
             if label not in self.vocab.reasons_chosen:

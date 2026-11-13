@@ -17,7 +17,7 @@
       "open": "12:00",
       "last_order": null,
       "close": "15:00",
-      "source_id": null
+      "source_id": "S1"
     },
     {
       "meal": "dinner",
@@ -25,7 +25,7 @@
       "open": "18:00",
       "last_order": null,
       "close": "21:00",
-      "source_id": null
+      "source_id": "S1"
     }
   ],
   "reservation": {
@@ -33,7 +33,7 @@
     "party_min": 1,
     "party_max": null,
     "note": "사전 예약제. 코스와 주중 특선 SET 는 2인 이상. 주말·공휴일 저녁은 코스만. 홀 30석, 별실 12개 99석",
-    "source_id": null
+    "source_id": "S1"
   },
   "products": [
     {
