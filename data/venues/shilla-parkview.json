@@ -1,0 +1,98 @@
+{
+  "format_version": 1,
+  "venue_id": "shilla-parkview",
+  "name": "더 파크뷰",
+  "hotel": "서울신라호텔",
+  "is_competitor": true,
+  "competes_with": [
+    "thebuffet"
+  ],
+  "cuisine": "뷔페",
+  "occasions": [
+    "meal"
+  ],
+  "months": null,
+  "hours": null,
+  "reservation": null,
+  "products": [
+    {
+      "product_id": "weekday-lunch-adult",
+      "name": "평일 점심 성인",
+      "occasion": "meal",
+      "meals": [
+        "lunch"
+      ],
+      "day_types": [
+        "weekday"
+      ],
+      "months": null,
+      "audience": "adult",
+      "unit": "1인",
+      "serves": 1,
+      "qty_rule": "per_person",
+      "qty_max": null,
+      "price": 178000,
+      "price_basis": "unknown",
+      "grade": "assumption",
+      "source_id": "S2"
+    },
+    {
+      "product_id": "weekday-dinner-adult",
+      "name": "평일 저녁 성인",
+      "occasion": "meal",
+      "meals": [
+        "dinner"
+      ],
+      "day_types": [
+        "weekday"
+      ],
+      "months": null,
+      "audience": "adult",
+      "unit": "1인",
+      "serves": 1,
+      "qty_rule": "per_person",
+      "qty_max": null,
+      "price": 198000,
+      "price_basis": "unknown",
+      "grade": "assumption",
+      "source_id": "S2"
+    },
+    {
+      "product_id": "weekend-dinner-adult",
+      "name": "주말·공휴일 저녁 성인",
+      "occasion": "meal",
+      "meals": [
+        "dinner"
+      ],
+      "day_types": [
+        "weekend"
+      ],
+      "months": null,
+      "audience": "adult",
+      "unit": "1인",
+      "serves": 1,
+      "qty_rule": "per_person",
+      "qty_max": null,
+      "price": 208000,
+      "price_basis": "unknown",
+      "grade": "official",
+      "source_id": null
+    }
+  ],
+  "promotions": [],
+  "sources": [
+    {
+      "source_id": "S1",
+      "title": "SBS Biz — 신라 더 파크뷰 주말 저녁 208,000 과 12월 인상 (2026-10-20)",
+      "url": "https://biz.sbs.co.kr/amp/article/20000341003",
+      "checked_on": "2026-11-13"
+    },
+    {
+      "source_id": "S2",
+      "title": "23expo — 서울 호텔 뷔페 가격 비교 (2026-08 기준, 블로그)",
+      "url": "https://23expo.com/hotel-buffet-price/",
+      "checked_on": "2026-11-13"
+    }
+  ],
+  "default_source_id": "S1"
+}

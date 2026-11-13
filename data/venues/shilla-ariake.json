@@ -1,0 +1,95 @@
+{
+  "format_version": 1,
+  "venue_id": "shilla-ariake",
+  "name": "아리아께",
+  "hotel": "서울신라호텔",
+  "is_competitor": true,
+  "competes_with": [
+    "moegi"
+  ],
+  "cuisine": "일식",
+  "occasions": [
+    "meal"
+  ],
+  "months": null,
+  "hours": null,
+  "reservation": null,
+  "products": [
+    {
+      "product_id": "bento-lunch",
+      "name": "벤토 런치 코스",
+      "occasion": "meal",
+      "meals": [
+        "lunch"
+      ],
+      "day_types": [
+        "weekday",
+        "weekend"
+      ],
+      "months": null,
+      "audience": "all",
+      "unit": "1인",
+      "serves": 1,
+      "qty_rule": "per_person",
+      "qty_max": null,
+      "price": 148000,
+      "price_basis": "unknown",
+      "grade": "assumption",
+      "source_id": null
+    },
+    {
+      "product_id": "goku-course",
+      "name": "고쿠 코스",
+      "occasion": "meal",
+      "meals": [
+        "lunch"
+      ],
+      "day_types": [
+        "weekday",
+        "weekend"
+      ],
+      "months": null,
+      "audience": "all",
+      "unit": "1인",
+      "serves": 1,
+      "qty_rule": "per_person",
+      "qty_max": null,
+      "price": 160000,
+      "price_basis": "unknown",
+      "grade": "assumption",
+      "source_id": null
+    },
+    {
+      "product_id": "lunch-special-set",
+      "name": "셰프 추천 런치 스페셜 세트",
+      "occasion": "meal",
+      "meals": [
+        "lunch"
+      ],
+      "day_types": [
+        "weekday",
+        "weekend"
+      ],
+      "months": null,
+      "audience": "all",
+      "unit": "1인",
+      "serves": 1,
+      "qty_rule": "per_person",
+      "qty_max": null,
+      "price": 125000,
+      "price_basis": "unknown",
+      "grade": "assumption",
+      "source_id": null
+    }
+  ],
+  "promotions": [],
+  "sources": [
+    {
+      "source_id": "S1",
+      "title": "와도씨 — 서울신라호텔 아리아께 메뉴 정보 (가격 시점 불명)",
+      "url": "https://www.wadossi.com/mobile/subRestaurant/mSub31Detail.php?restaurantNumber=603",
+      "checked_on": "2026-11-13"
+    }
+  ],
+  "default_source_id": "S1"
+}

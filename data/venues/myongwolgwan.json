@@ -1,0 +1,100 @@
+{
+  "format_version": 1,
+  "venue_id": "myongwolgwan",
+  "name": "명월관",
+  "hotel": "워커힐",
+  "is_competitor": false,
+  "competes_with": [],
+  "cuisine": "한우 숯불구이",
+  "occasions": [
+    "meal"
+  ],
+  "months": null,
+  "hours": [
+    {
+      "meal": "lunch",
+      "day_type": "all",
+      "open": "12:00",
+      "last_order": null,
+      "close": "15:00"
+    },
+    {
+      "meal": "dinner",
+      "day_type": "all",
+      "open": "17:30",
+      "last_order": null,
+      "close": "21:00"
+    }
+  ],
+  "reservation": {
+    "required": false,
+    "party_min": 1,
+    "party_max": null,
+    "note": "예약 필수 여부는 공식 페이지에 없음 (false 로 둠). 본당 예약은 2개월 전 1일 10시부터. 본당 168석 (홀 88석, 별실 9개 80석)"
+  },
+  "products": [
+    {
+      "product_id": "special-platter-set",
+      "name": "명월관 스페셜 모둠 특선 (2인 식사 포함)",
+      "occasion": "meal",
+      "meals": [
+        "lunch",
+        "dinner"
+      ],
+      "day_types": [
+        "weekday",
+        "weekend"
+      ],
+      "months": null,
+      "audience": "all",
+      "unit": "세트",
+      "serves": 2,
+      "qty_rule": "per_serves",
+      "qty_max": null,
+      "price": 350000,
+      "price_basis": "unknown",
+      "grade": "official",
+      "source_id": null
+    },
+    {
+      "product_id": "weekday-lunch",
+      "name": "주중 점심 한상 (가을 시즌)",
+      "occasion": "meal",
+      "meals": [
+        "lunch"
+      ],
+      "day_types": [
+        "weekday"
+      ],
+      "months": [
+        9,
+        10
+      ],
+      "audience": "all",
+      "unit": "1인",
+      "serves": 1,
+      "qty_rule": "per_person",
+      "qty_max": null,
+      "price": null,
+      "price_basis": "unknown",
+      "grade": "unknown",
+      "source_id": "S2"
+    }
+  ],
+  "promotions": [],
+  "sources": [
+    {
+      "source_id": "S1",
+      "title": "명월관 공식 소개",
+      "url": "https://www.walkerhill.com/vistawalkerhillseoul/dining/Myongwolgwan",
+      "checked_on": "2026-11-13"
+    },
+    {
+      "source_id": "S2",
+      "title": "명월관 공식 메뉴판",
+      "url": "https://www.walkerhill.com/FileDownload.wh?guid=DE1838B1-EC33-A2FE-902A-2A98160C4175",
+      "checked_on": "2026-11-13"
+    }
+  ],
+  "default_source_id": "S2"
+}

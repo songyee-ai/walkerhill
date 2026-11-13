@@ -1,0 +1,88 @@
+{
+  "format_version": 1,
+  "venue_id": "parnas-weilou",
+  "name": "웨이루",
+  "hotel": "그랜드 인터컨티넨탈 서울 파르나스",
+  "is_competitor": true,
+  "competes_with": [
+    "geumryong"
+  ],
+  "cuisine": "중식 (베이징덕·산둥 요리)",
+  "occasions": [
+    "meal"
+  ],
+  "months": null,
+  "hours": [
+    {
+      "meal": "lunch",
+      "day_type": "all",
+      "open": "11:30",
+      "last_order": "14:00",
+      "close": "14:30"
+    },
+    {
+      "meal": "dinner",
+      "day_type": "all",
+      "open": "18:00",
+      "last_order": "21:30",
+      "close": "22:00"
+    }
+  ],
+  "reservation": null,
+  "products": [
+    {
+      "product_id": "weekend-choice",
+      "name": "위켄드 초이스 (주말 점심)",
+      "occasion": "meal",
+      "meals": [
+        "lunch"
+      ],
+      "day_types": [
+        "weekend"
+      ],
+      "months": null,
+      "audience": "all",
+      "unit": "1인",
+      "serves": 1,
+      "qty_rule": "per_person",
+      "qty_max": null,
+      "price": 150000,
+      "price_basis": "unknown",
+      "grade": "official",
+      "source_id": null
+    },
+    {
+      "product_id": "chef-signature",
+      "name": "셰프 시그니처 코스",
+      "occasion": "meal",
+      "meals": [
+        "lunch",
+        "dinner"
+      ],
+      "day_types": [
+        "weekday",
+        "weekend"
+      ],
+      "months": null,
+      "audience": "all",
+      "unit": "1인",
+      "serves": 1,
+      "qty_rule": "per_person",
+      "qty_max": null,
+      "price": 250000,
+      "price_basis": "unknown",
+      "grade": "official",
+      "source_id": null
+    }
+  ],
+  "promotions": [],
+  "sources": [
+    {
+      "source_id": "S1",
+      "title": "웨이루 공식 소개 (프로모션 가격은 '~부터', 2026-01-01~12-31)",
+      "url": "https://seoul.intercontinental.com/ko/dining/restaurants/weilou",
+      "checked_on": "2026-11-13"
+    }
+  ],
+  "default_source_id": "S1"
+}

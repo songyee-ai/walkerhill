@@ -1,0 +1,69 @@
+{
+  "format_version": 1,
+  "venue_id": "josun-deli",
+  "name": "조선델리",
+  "hotel": "웨스틴 조선 서울",
+  "is_competitor": true,
+  "competes_with": [
+    "lepassage"
+  ],
+  "cuisine": "호텔 델리 (베이커리·선물 상품)",
+  "occasions": [
+    "takeout"
+  ],
+  "months": null,
+  "hours": null,
+  "reservation": null,
+  "products": [
+    {
+      "product_id": "cookie-gift-set",
+      "name": "쿠키 선물세트 448g",
+      "occasion": "takeout",
+      "meals": [],
+      "day_types": [
+        "weekday",
+        "weekend"
+      ],
+      "months": null,
+      "audience": "all",
+      "unit": "세트",
+      "serves": 1,
+      "qty_rule": "choice",
+      "qty_max": 3,
+      "price": 52000,
+      "price_basis": "unknown",
+      "grade": "assumption",
+      "source_id": null
+    },
+    {
+      "product_id": "macaron-gift-set",
+      "name": "마카롱 기프트 세트 200g",
+      "occasion": "takeout",
+      "meals": [],
+      "day_types": [
+        "weekday",
+        "weekend"
+      ],
+      "months": null,
+      "audience": "all",
+      "unit": "세트",
+      "serves": 1,
+      "qty_rule": "choice",
+      "qty_max": 3,
+      "price": 35000,
+      "price_basis": "unknown",
+      "grade": "assumption",
+      "source_id": null
+    }
+  ],
+  "promotions": [],
+  "sources": [
+    {
+      "source_id": "S1",
+      "title": "컬리 — 조선델리 쿠키 선물세트 (판매 페이지, 시점 불명)",
+      "url": "https://www.kurly.com/goods/1001737667",
+      "checked_on": "2026-11-13"
+    }
+  ],
+  "default_source_id": "S1"
+}

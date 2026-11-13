@@ -1,0 +1,131 @@
+﻿customer_group,venue_id,product_id,occasion,meal,day_type,unit,quantity,revenue_net,price_unconfirmed
+가족·친족,geumryong,signature-course,meal,,weekday,1인,191,26913636,N
+가족·친족,geumryong,signature-course,meal,,weekend,1인,331,46640909,N
+공항 이동·여행,geumryong,signature-course,meal,,weekday,1인,9,1268182,N
+공항 이동·여행,geumryong,signature-course,meal,,weekend,1인,239,33677273,N
+공항 이동·여행,geumryong,private-room-course,meal,,weekday,1인,53,11322727,N
+공항 이동·여행,geumryong,private-room-course,meal,,weekend,1인,29,6195455,N
+휴식·산책 동행,geumryong,private-room-course,meal,,weekday,1인,205,43795455,N
+휴식·산책 동행,geumryong,private-room-course,meal,,weekend,1인,31,6622727,N
+가족·친족,geumryong,weekday-set,meal,,weekday,1인,260,28363636,N
+골프·스포츠 모임,geumryong,weekday-set,meal,,weekday,1인,12,1309091,N
+공항 이동·여행,geumryong,weekday-set,meal,,weekday,1인,339,36981818,N
+비즈니스·접대,geumryong,weekday-set,meal,,weekday,1인,352,38400000,N
+가족·친족,geumryong,autumn-course,meal,,weekday,1인,254,11545455,Y
+가족·친족,geumryong,autumn-course,meal,,weekend,1인,395,17954545,Y
+공항 이동·여행,geumryong,autumn-course,meal,,weekday,1인,206,9363636,Y
+공항 이동·여행,geumryong,autumn-course,meal,,weekend,1인,175,7954545,Y
+비즈니스·접대,geumryong,autumn-course,meal,,weekday,1인,355,16136364,Y
+비즈니스·접대,geumryong,autumn-course,meal,,weekend,1인,377,17136364,Y
+커플·기념일,geumryong,autumn-course,meal,,weekday,1인,149,6772727,Y
+커플·기념일,geumryong,autumn-course,meal,,weekend,1인,73,3318182,Y
+골프·스포츠 모임,lepassage,gourmet-basket,takeout,,weekday,건,251,11409091,Y
+골프·스포츠 모임,lepassage,gourmet-basket,takeout,,weekend,건,389,17681818,Y
+친구·모임,lepassage,gourmet-basket,takeout,,weekday,건,206,9363636,Y
+친구·모임,lepassage,gourmet-basket,takeout,,weekend,건,143,6500000,Y
+가족·친족,moegi,dinner-course,meal,dinner,weekday,1인,230,43909091,N
+가족·친족,moegi,dinner-course,meal,dinner,weekend,1인,343,65481818,N
+비즈니스·접대,moegi,dinner-course,meal,dinner,weekday,1인,382,72927273,N
+비즈니스·접대,moegi,dinner-course,meal,dinner,weekend,1인,218,41618182,N
+친구·모임,moegi,dinner-course,meal,dinner,weekday,1인,185,35318182,N
+친구·모임,moegi,dinner-course,meal,dinner,weekend,1인,282,53836364,N
+골프·스포츠 모임,moegi,lunch-course,meal,lunch,weekday,1인,145,27681818,N
+골프·스포츠 모임,moegi,lunch-course,meal,lunch,weekend,1인,18,3436364,N
+비즈니스·접대,moegi,lunch-course,meal,lunch,weekday,1인,5,954545,N
+비즈니스·접대,moegi,lunch-course,meal,lunch,weekend,1인,384,73309091,N
+커플·기념일,moegi,lunch-course,meal,lunch,weekday,1인,85,16227273,N
+커플·기념일,moegi,lunch-course,meal,lunch,weekend,1인,363,69300000,N
+골프·스포츠 모임,moegi,sashimi-set,meal,lunch,weekday,1인,247,35927273,N
+골프·스포츠 모임,moegi,sashimi-set,meal,lunch,weekend,1인,195,28363636,N
+공항 이동·여행,moegi,sashimi-set,meal,lunch,weekday,1인,78,11345455,N
+공항 이동·여행,moegi,sashimi-set,meal,lunch,weekend,1인,267,38836364,N
+친구·모임,moegi,autumn-lunch,meal,lunch,weekday,1인,352,16000000,Y
+친구·모임,moegi,autumn-lunch,meal,lunch,weekend,1인,128,5818182,Y
+커플·기념일,moegi,autumn-lunch,meal,lunch,weekday,1인,111,5045455,Y
+커플·기념일,moegi,autumn-lunch,meal,lunch,weekend,1인,219,9954545,Y
+골프·스포츠 모임,myongwolgwan,special-platter-set,meal,,weekday,세트,85,27045455,N
+골프·스포츠 모임,myongwolgwan,special-platter-set,meal,,weekend,세트,315,100227273,N
+비즈니스·접대,myongwolgwan,special-platter-set,meal,,weekday,세트,132,42000000,N
+비즈니스·접대,myongwolgwan,special-platter-set,meal,,weekend,세트,370,117727273,N
+휴식·산책 동행,myongwolgwan,special-platter-set,meal,,weekday,세트,262,83363636,N
+휴식·산책 동행,myongwolgwan,special-platter-set,meal,,weekend,세트,227,72227273,N
+가족·친족,myongwolgwan,weekday-lunch,meal,lunch,weekday,1인,367,16681818,Y
+골프·스포츠 모임,myongwolgwan,weekday-lunch,meal,lunch,weekday,1인,318,14454545,Y
+공항 이동·여행,myongwolgwan,weekday-lunch,meal,lunch,weekday,1인,286,13000000,Y
+커플·기념일,myongwolgwan,weekday-lunch,meal,lunch,weekday,1인,335,15227273,Y
+가족·친족,ondal,royal-table-course,meal,,weekday,1인,346,51900000,N
+가족·친족,ondal,royal-table-course,meal,,weekend,1인,74,11100000,N
+공항 이동·여행,ondal,royal-table-course,meal,,weekday,1인,391,58650000,N
+공항 이동·여행,ondal,royal-table-course,meal,,weekend,1인,276,41400000,N
+미식 방문,ondal,royal-table-course,meal,,weekday,1인,109,16350000,N
+미식 방문,ondal,royal-table-course,meal,,weekend,1인,253,37950000,N
+비즈니스·접대,ondal,royal-table-course,meal,,weekday,1인,164,24600000,N
+비즈니스·접대,ondal,royal-table-course,meal,,weekend,1인,335,50250000,N
+비즈니스·접대,ondal,lunch-table,meal,lunch,weekday,1인,5,568182,N
+휴식·산책 동행,ondal,lunch-table,meal,lunch,weekday,1인,369,41931818,N
+공항 이동·여행,pavilion,fall-dessert-set,dessert,,weekday,세트,195,17372727,N
+공항 이동·여행,pavilion,fall-dessert-set,dessert,,weekend,세트,29,2583636,N
+미식 방문,pavilion,fall-dessert-set,dessert,,weekday,세트,324,28865455,N
+미식 방문,pavilion,fall-dessert-set,dessert,,weekend,세트,396,35280000,N
+비즈니스·접대,pavilion,fall-dessert-set,dessert,,weekday,세트,164,14610909,N
+비즈니스·접대,pavilion,fall-dessert-set,dessert,,weekend,세트,58,5167273,N
+커플·기념일,pavilion,fall-dessert-set,dessert,,weekday,세트,218,19421818,N
+커플·기념일,pavilion,fall-dessert-set,dessert,,weekend,세트,124,11047273,N
+공항 이동·여행,pavilion,bingsu,dessert,,weekday,개,132,6000000,Y
+공항 이동·여행,pavilion,bingsu,dessert,,weekend,개,398,18090909,Y
+친구·모임,pavilion,bingsu,dessert,,weekday,개,28,1272727,Y
+친구·모임,pavilion,bingsu,dessert,,weekend,개,324,14727273,Y
+골프·스포츠 모임,pizzahill,couple-set,meal,,weekday,세트,358,59883636,N
+골프·스포츠 모임,pizzahill,couple-set,meal,,weekend,세트,113,18901818,N
+친구·모임,pizzahill,couple-set,meal,,weekday,세트,291,48676364,N
+친구·모임,pizzahill,couple-set,meal,,weekend,세트,71,11876364,N
+공항 이동·여행,pizzahill,triple-set,meal,,weekday,세트,179,40844545,N
+공항 이동·여행,pizzahill,triple-set,meal,,weekend,세트,43,9811818,N
+비즈니스·접대,pizzahill,triple-set,meal,,weekday,세트,205,46777273,N
+비즈니스·접대,pizzahill,triple-set,meal,,weekend,세트,127,28979091,N
+친구·모임,pizzahill,triple-set,meal,,weekday,세트,15,3422727,N
+친구·모임,pizzahill,triple-set,meal,,weekend,세트,141,32173636,N
+커플·기념일,pizzahill,triple-set,meal,,weekday,세트,39,8899091,N
+커플·기념일,pizzahill,triple-set,meal,,weekend,세트,293,66857273,N
+비즈니스·접대,pizzahill,seis-pizza,meal,,weekday,판,260,33800000,N
+비즈니스·접대,pizzahill,seis-pizza,meal,,weekend,판,159,20670000,N
+친구·모임,pizzahill,seis-pizza,meal,,weekday,판,121,15730000,N
+친구·모임,pizzahill,seis-pizza,meal,,weekend,판,280,36400000,N
+가족·친족,pizzahill,takeout-combination-l,takeout,,weekday,판,287,17324364,N
+가족·친족,pizzahill,takeout-combination-l,takeout,,weekend,판,167,10080727,N
+공항 이동·여행,pizzahill,takeout-combination-l,takeout,,weekday,판,246,14849455,N
+공항 이동·여행,pizzahill,takeout-combination-l,takeout,,weekend,판,296,17867636,N
+친구·모임,pizzahill,takeout-combination-l,takeout,,weekday,판,307,18531636,N
+친구·모임,pizzahill,takeout-combination-l,takeout,,weekend,판,72,4346182,N
+커플·기념일,pizzahill,takeout-combination-l,takeout,,weekday,판,86,5191273,N
+커플·기념일,pizzahill,takeout-combination-l,takeout,,weekend,판,292,17626182,N
+골프·스포츠 모임,pizzahill,set-ade-upgrade,meal,,weekday,잔,224,1629091,N
+골프·스포츠 모임,pizzahill,set-ade-upgrade,meal,,weekend,잔,184,1338182,N
+비즈니스·접대,pizzahill,set-ade-upgrade,meal,,weekday,잔,63,458182,N
+비즈니스·접대,pizzahill,set-ade-upgrade,meal,,weekend,잔,89,647273,N
+가족·친족,thebuffet,breakfast-adult,meal,breakfast,weekday,1인,366,28281818,N
+가족·친족,thebuffet,breakfast-adult,meal,breakfast,weekend,1인,259,20013636,N
+비즈니스·접대,thebuffet,breakfast-adult,meal,breakfast,weekday,1인,35,2704545,N
+비즈니스·접대,thebuffet,breakfast-adult,meal,breakfast,weekend,1인,254,19627273,N
+친구·모임,thebuffet,breakfast-adult,meal,breakfast,weekday,1인,89,6877273,N
+친구·모임,thebuffet,breakfast-adult,meal,breakfast,weekend,1인,312,24109091,N
+혼자 휴식,thebuffet,breakfast-adult,meal,breakfast,weekday,1인,46,3554545,N
+혼자 휴식,thebuffet,breakfast-adult,meal,breakfast,weekend,1인,399,30831818,N
+골프·스포츠 모임,thebuffet,weekday-lunch-adult,meal,lunch,weekday,1인,215,34400000,N
+공항 이동·여행,thebuffet,weekday-lunch-adult,meal,lunch,weekday,1인,68,10880000,N
+비즈니스·접대,thebuffet,weekday-lunch-adult,meal,lunch,weekday,1인,226,36160000,N
+친구·모임,thebuffet,weekday-lunch-adult,meal,lunch,weekday,1인,286,45760000,N
+가족·친족,thebuffet,weekday-lunch-child,meal,lunch,weekday,1인,290,23200000,N
+친구·모임,thebuffet,weekday-lunch-child,meal,lunch,weekday,1인,50,4000000,N
+가족·친족,thebuffet,peak-adult,meal,,weekday,1인,345,62100000,N
+가족·친족,thebuffet,peak-adult,meal,,weekend,1인,150,27000000,N
+골프·스포츠 모임,thebuffet,peak-adult,meal,,weekday,1인,160,28800000,N
+골프·스포츠 모임,thebuffet,peak-adult,meal,,weekend,1인,107,19260000,N
+미식 방문,thebuffet,peak-child,meal,,weekday,1인,72,6414545,N
+미식 방문,thebuffet,peak-child,meal,,weekend,1인,200,17818182,N
+비즈니스·접대,thebuffet,peak-child,meal,,weekday,1인,306,27261818,N
+비즈니스·접대,thebuffet,peak-child,meal,,weekend,1인,139,12383636,N
+친구·모임,thebuffet,peak-child,meal,,weekday,1인,94,8374545,N
+친구·모임,thebuffet,peak-child,meal,,weekend,1인,167,14878182,N
+휴식·산책 동행,thebuffet,peak-child,meal,,weekday,1인,162,14432727,N
+휴식·산책 동행,thebuffet,peak-child,meal,,weekend,1인,288,25658182,N

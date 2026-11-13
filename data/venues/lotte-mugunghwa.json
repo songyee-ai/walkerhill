@@ -1,0 +1,80 @@
+{
+  "format_version": 1,
+  "venue_id": "lotte-mugunghwa",
+  "name": "무궁화",
+  "hotel": "더그랜드롯데 서울 (옛 롯데호텔 서울)",
+  "is_competitor": true,
+  "competes_with": [
+    "ondal"
+  ],
+  "cuisine": "한식 코스",
+  "occasions": [
+    "meal"
+  ],
+  "months": null,
+  "hours": null,
+  "reservation": null,
+  "products": [
+    {
+      "product_id": "taebaek-course",
+      "name": "태백 코스",
+      "occasion": "meal",
+      "meals": [
+        "lunch",
+        "dinner"
+      ],
+      "day_types": [
+        "weekday",
+        "weekend"
+      ],
+      "months": null,
+      "audience": "all",
+      "unit": "1인",
+      "serves": 1,
+      "qty_rule": "per_person",
+      "qty_max": null,
+      "price": 210000,
+      "price_basis": "unknown",
+      "grade": "official",
+      "source_id": null
+    },
+    {
+      "product_id": "geumgang-lunch-course",
+      "name": "금강 코스 (런치)",
+      "occasion": "meal",
+      "meals": [
+        "lunch"
+      ],
+      "day_types": [
+        "weekday",
+        "weekend"
+      ],
+      "months": null,
+      "audience": "all",
+      "unit": "1인",
+      "serves": 1,
+      "qty_rule": "per_person",
+      "qty_max": null,
+      "price": 160000,
+      "price_basis": "unknown",
+      "grade": "assumption",
+      "source_id": "S2"
+    }
+  ],
+  "promotions": [],
+  "sources": [
+    {
+      "source_id": "S1",
+      "title": "롯데호텔 e샵 — 무궁화 태백 코스 1인 (호텔 공식 판매)",
+      "url": "https://eshop.lottehotel.com/eshop/product/product_view?product_cd=LH20211035",
+      "checked_on": "2026-11-13"
+    },
+    {
+      "source_id": "S2",
+      "title": "카카오 선물하기 — 무궁화 런치 금강 코스 2인 정상가 320,000 (판매 채널, 시점 불명)",
+      "url": "https://gift.kakao.com/product/6702591",
+      "checked_on": "2026-11-13"
+    }
+  ],
+  "default_source_id": "S1"
+}
