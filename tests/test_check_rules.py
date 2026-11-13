@@ -72,7 +72,8 @@ def messages(problems: list[Problem]) -> str:
 
 
 def test_product_occasion_must_be_in_venue(example_copy):
-    edit_json(example_copy, VENUES / "geumryong.json", lambda d: d["products"][0].update(occasion="dessert", meals=[]))
+    slots = [{"meal": None, "day_type": "all"}]
+    edit_json(example_copy, VENUES / "geumryong.json", lambda d: d["products"][0].update(occasion="dessert", slots=slots))
     problems = check(example_copy)
     assert found(problems, "occasion 이 업장의 occasions 에 없다"), messages(problems)
 
@@ -132,6 +133,67 @@ def test_review_label_must_be_in_vocab(example_copy):
     edit_csv(example_copy, REVIEWS, lambda rows: rows[0].update(reasons_chosen="별실;분위기 좋음"))
     problems = check(example_copy)
     assert found(problems, "reasons_chosen 의 '분위기 좋음' 가 값 목록에 없다"), messages(problems)
+
+
+@pytest.mark.parametrize("column", ["purpose", "party"])
+def test_review_purpose_and_party_must_be_in_vocab_when_written(example_copy, column):
+    edit_csv(example_copy, REVIEWS, lambda rows: rows[0].update({column: "소풍"}))
+    problems = check(example_copy)
+    assert found(problems, f"{column} '소풍' 가 값 목록에 없다"), messages(problems)
+
+
+@pytest.mark.parametrize(
+    "blank",
+    [
+        {"purpose": ""},
+        {"party": ""},
+        {"summary": ""},
+        # 글과 화면에 없는 것은 비운다. 빈 칸만 있는 칸(공백)도 빈 칸이다.
+        {"purpose": " ", "party": "", "summary": ""},
+    ],
+)
+def test_review_label_may_leave_what_the_review_does_not_say(example_copy, blank):
+    edit_csv(example_copy, REVIEWS, lambda rows: rows[0].update(blank))
+    problems = check(example_copy, strict=True)
+    assert not problems, messages(problems)
+
+
+# 근거가 되는 칸과, 그 칸 하나만 남겼을 때 쓸 값 (예시 묶음에 있는 값이다).
+EVIDENCE = {
+    "purpose": "가족 행사",
+    "party": "3대 가족",
+    "ordered": "course-a",
+    "reasons_chosen": "별실",
+    "pain_points": "가격",
+    "compared_with": "examplehotel-chinese",
+    "would_return": "yes",
+}
+NO_EVIDENCE = "근거가 되는 칸이 모두 비어 있다"
+
+
+def test_review_label_without_any_evidence_is_rejected(example_copy):
+    # 고객군, 이용 상황, 요약이 있어도 근거가 되는 칸이 없으면 쓸 수 없는 후기다.
+    edit_csv(example_copy, REVIEWS, lambda rows: rows[0].update(dict.fromkeys(EVIDENCE, "")))
+    problems = check(example_copy)
+    assert [p.path for p in problems if NO_EVIDENCE in p.message] == [REVIEWS.as_posix()], messages(problems)
+    assert found(problems, "2번째 줄"), messages(problems)
+
+
+@pytest.mark.parametrize("column", ["ordered", "compared_with"])
+@pytest.mark.parametrize("value", ["이름:", "이름: ", "course-a;이름:"])
+def test_free_name_needs_a_name(example_copy, column, value):
+    # 이름이 없는 '이름:' 은 아무것도 말하지 않는다. 근거가 있는 후기처럼 지나가지 못하게 한다.
+    edit_csv(example_copy, REVIEWS, lambda rows: rows[0].update({column: value}))
+    problems = check(example_copy)
+    assert found(problems, f"{column} 에 '이름:' 만 있고 이름이 없다"), messages(problems)
+
+
+@pytest.mark.parametrize("column", list(EVIDENCE))
+def test_one_evidence_column_is_enough_for_a_review_label(example_copy, column):
+    only = {**dict.fromkeys(EVIDENCE, ""), column: EVIDENCE[column]}
+    edit_csv(example_copy, REVIEWS, lambda rows: rows[0].update(only))
+    problems = check(example_copy, strict=True)
+    assert not found(problems, NO_EVIDENCE), messages(problems)
 
 
 def test_private_review_id_is_rejected(example_copy):
@@ -274,6 +336,103 @@ def test_summary_must_point_to_existing_product(example_copy):
     edit_csv(example_copy, Path("data/samples/base_summary.csv"), lambda rows: rows[0].update(product_id="course-z"))
     problems = check(example_copy)
     assert found(problems, "상품 'course-z' 가 업장 'geumryong' 에 없다"), messages(problems)
+
+
+SUMMARY = Path("data/samples/base_summary.csv")
+
+
+@pytest.mark.parametrize(
+    ("change", "message"),
+    [
+        # 낸 금액은 세금 포함이고 매출은 세금을 뺀 값이다. 둘을 같은 값으로 적으면 틀린 것이다.
+        ({"paid": "40909091"}, "revenue_net 이 paid ÷ 1.1 과 다르다"),
+        # 금액이 작아도 틀린 줄은 잡는다: 팔린 것이나 낸 금액이 없는데 매출만 있는 줄.
+        ({"quantity": "0", "paid": "0", "revenue_net": "1"}, "quantity 가 0 인데 paid 나 revenue_net 이 있다"),
+        ({"paid": "0", "revenue_net": "1"}, "paid 가 0 인데 revenue_net 이 있다"),
+        ({"month": "13"}, "month — '13' 는 쓸 수 있는 범위를 벗어난다"),
+        ({"month": ""}, "month —"),
+        # 코스 B 는 저녁에만 판다.
+        ({"product_id": "course-b", "meal": "lunch"}, "끼니 'lunch', 요일 'weekday' 은 그 상품을 파는 때(slots)가 아니다"),
+    ],
+)
+def test_summary_row_rules(example_copy, change, message):
+    edit_csv(example_copy, SUMMARY, lambda rows: rows[0].update(change))
+    problems = check(example_copy)
+    assert found(problems, message), messages(problems)
+
+
+def test_summary_has_one_row_per_month(example_copy):
+    # 같은 고객군·상품·조건이라도 달이 다르면 다른 줄이다. 달까지 같으면 겹친 줄이다.
+    def add(rows, month):
+        rows.append({**rows[0], "month": month})
+
+    edit_csv(example_copy, SUMMARY, lambda rows: add(rows, "6"))
+    assert [str(p) for p in check(example_copy, strict=True)] == []
+    edit_csv(example_copy, SUMMARY, lambda rows: add(rows, "5"))
+    problems = check(example_copy)
+    assert found(problems, "같은 고객군·업장·상품·조건의 줄이 또 있다"), messages(problems)
+
+
+def test_summary_month_must_be_a_month_the_product_is_sold(example_copy):
+    edit_json(example_copy, VENUES / "geumryong.json", lambda d: d["products"][0].update(months=[9, 10]))
+    problems = check(example_copy)
+    assert found(problems, "5월은 그 상품을 파는 달이 아니다"), messages(problems)
+
+
+def test_product_sold_at_mixed_times(example_copy):
+    """ "주말 점심과 모든 요일 저녁"에 파는 상품: 평일 점심의 집계 줄은 틀린 것이고, 나머지는 맞다."""
+    mixed = [{"meal": "lunch", "day_type": "weekend"}, {"meal": "dinner", "day_type": "all"}]
+    edit_json(example_copy, VENUES / "geumryong.json", lambda d: d["products"][0].update(slots=mixed))
+
+    def rows_for(*times):
+        def change(rows):
+            first = rows[0]
+            rows[:] = [{**first, "meal": meal, "day_type": day} for meal, day in times]
+
+        return change
+
+    edit_csv(example_copy, SUMMARY, rows_for(("lunch", "weekend"), ("dinner", "weekday"), ("dinner", "weekend"), ("", "weekday")))
+    assert [str(p) for p in check(example_copy, strict=True)] == []
+    edit_csv(example_copy, SUMMARY, rows_for(("lunch", "weekday")))
+    problems = check(example_copy)
+    assert found(problems, "끼니 'lunch', 요일 'weekday' 은 그 상품을 파는 때(slots)가 아니다"), messages(problems)
+
+
+@pytest.mark.parametrize(
+    ("change", "message"),
+    [
+        # 점심·모든 요일과 점심·주말은 주말 점심이 겹친다.
+        (
+            lambda d: d["products"][0].update(slots=[{"meal": "lunch", "day_type": "all"}, {"meal": "lunch", "day_type": "weekend"}]),
+            "slots 에 같은 때가 두 번 들어 있다",
+        ),
+        (lambda d: d["products"][0].update(slots=[]), "products[0].slots — 항목의 수가 맞지 않는다"),
+        (lambda d: d["products"][0].update(slots=[{"meal": None, "day_type": "all"}]), "식사 상품의 slots 에는 meal 을 적는다"),
+        (lambda d: d["products"][0].update(price_basis="excluded"), "products[0].price_basis — 쓸 수 없는 값 'excluded'"),
+        (lambda d: d["hours"][0].update(source_id="S9"), "hours[0] 의 source_id 가 sources 에 없다"),
+        (lambda d: d["reservation"].update(source_id="S9"), "reservation 의 source_id 가 sources 에 없다"),
+        (lambda d: d["hours"][0].pop("source_id"), "hours[0].source_id — 키가 빠졌다"),
+        # 바뀌기 전의 형식으로 적은 파일은 받지 않는다.
+        (lambda d: d["products"][0].update(meals=["lunch"], day_types=["weekday"]), "products[0].meals — 약속에 없는 키다"),
+    ],
+)
+def test_venue_rules_after_format_review(example_copy, change, message):
+    edit_json(example_copy, VENUES / "geumryong.json", change)
+    problems = check(example_copy)
+    assert found(problems, message), messages(problems)
+
+
+@pytest.mark.parametrize(
+    ("change", "message"),
+    [
+        (lambda c: c.update(stay="guest"), "묶음의 조건은 stay 를 null 로 둔다"),
+        (lambda c: c.update(condition_id="meal-breakfast-weekday", meal="breakfast"), "묶음에는 조식 조건을 넣지 않는다"),
+    ],
+)
+def test_bundle_has_no_stay_and_no_breakfast(example_copy, change, message):
+    edit_json(example_copy, Path("engine/conditions.json"), lambda d: change(d["conditions"][0]))
+    problems = check(example_copy)
+    assert found(problems, message), messages(problems)
 
 
 def test_ledger_amounts_must_add_up(example_copy):
@@ -942,8 +1101,9 @@ def test_ledger_cannot_show_a_choice_the_response_did_not_make(example_copy):
 
 def test_ledger_rows_for_added_products_are_matched_too(example_copy):
     """추가 상품(고객이 수량을 정하는 상품)을 고른 방문은 원장에 그 줄이 따로 있어야 한다."""
-    tea = {"product_id": "tea", "name": "차", "occasion": "meal", "meals": ["lunch", "dinner"]}
-    tea |= {"day_types": ["weekday", "weekend"], "months": None, "audience": "all", "unit": "잔", "serves": 1}
+    tea = {"product_id": "tea", "name": "차", "occasion": "meal"}
+    tea |= {"slots": [{"meal": "lunch", "day_type": "all"}, {"meal": "dinner", "day_type": "all"}]}
+    tea |= {"months": None, "audience": "all", "unit": "잔", "serves": 1}
     tea |= {"qty_rule": "choice", "qty_max": 4, "price": 8000, "price_basis": "included"}
     tea |= {"grade": "official", "source_id": None}
     edit_json(example_copy, VENUES / "geumryong.json", lambda d: d["products"].append(tea))

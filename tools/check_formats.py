@@ -445,9 +445,10 @@ class Checker:
             return
         if review.customer_group is not None and review.customer_group not in self.vocab.customer_group:
             bad(f"customer_group '{review.customer_group}' 가 값 목록에 없다")
-        if review.purpose not in self.vocab.purpose:
+        # 방문 목적과 동행은 글과 화면에 없으면 비운다. 적었을 때만 값 목록과 견준다.
+        if review.purpose is not None and review.purpose not in self.vocab.purpose:
             bad(f"purpose '{review.purpose}' 가 값 목록에 없다")
-        if review.party not in self.vocab.party:
+        if review.party is not None and review.party not in self.vocab.party:
             bad(f"party '{review.party}' 가 값 목록에 없다")
         for label in review.reasons_chosen:
             if label not in self.vocab.reasons_chosen:
@@ -622,7 +623,7 @@ class Checker:
             except ValidationError as exc:
                 self._model_errors(path, exc, prefix)
                 continue
-            key = (item.customer_group, item.venue_id, item.product_id, item.occasion, item.meal, item.day_type)
+            key = (item.customer_group, item.venue_id, item.product_id, item.occasion, item.meal, item.day_type, item.month)
             if key in seen:
                 self.error(path, f"{prefix}— 같은 고객군·업장·상품·조건의 줄이 또 있다")
             seen.add(key)
@@ -637,8 +638,17 @@ class Checker:
                     self.error(path, f"{prefix}— occasion 이 상품 정의와 다르다")
                 if item.unit != product.unit:
                     self.error(path, f"{prefix}— unit 이 상품 정의와 다르다")
-                if item.meal is not None and item.meal not in product.meals:
-                    self.error(path, f"{prefix}— meal '{item.meal}' 은 그 상품을 파는 끼니가 아니다")
+                # 끼니를 모르는 식사 상품의 줄(meal 이 빈 칸)은 그 요일에 파는 때가 있는지만 본다.
+                unknown_meal = item.meal is None and product.occasion == "meal"
+                sold = product.sold_on(item.day_type) if unknown_meal else product.sold_at(item.meal, item.day_type)
+                if not sold:
+                    self.error(
+                        path,
+                        f"{prefix}— 끼니 '{item.meal or '모름'}', 요일 '{item.day_type}' 은 그 상품을 파는 때(slots)가 아니다",
+                    )
+                months = product.months or venue.months
+                if months is not None and item.month not in months:
+                    self.error(path, f"{prefix}— {item.month}월은 그 상품을 파는 달이 아니다 (업장 정의의 months)")
             if self.vocab is None:
                 self.error(path, "라벨 값 목록 data/evidence/vocab.json 이 없거나 읽을 수 없다")
             elif item.customer_group not in self.vocab.customer_group:

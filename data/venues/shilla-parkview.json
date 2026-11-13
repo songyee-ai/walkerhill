@@ -18,35 +18,40 @@
       "day_type": "all",
       "open": "06:00",
       "last_order": null,
-      "close": "10:00"
+      "close": "10:00",
+      "source_id": null
     },
     {
       "meal": "lunch",
       "day_type": "weekday",
       "open": "12:00",
       "last_order": null,
-      "close": "14:30"
+      "close": "14:30",
+      "source_id": null
     },
     {
       "meal": "lunch",
       "day_type": "weekend",
       "open": "11:00",
       "last_order": null,
-      "close": "16:00"
+      "close": "16:00",
+      "source_id": null
     },
     {
       "meal": "dinner",
       "day_type": "weekday",
       "open": "18:00",
       "last_order": null,
-      "close": "21:30"
+      "close": "21:30",
+      "source_id": null
     },
     {
       "meal": "dinner",
       "day_type": "weekend",
       "open": "17:00",
       "last_order": null,
-      "close": "21:30"
+      "close": "21:30",
+      "source_id": null
     }
   ],
   "reservation": null,
@@ -55,11 +60,11 @@
       "product_id": "weekday-lunch-adult",
       "name": "평일 점심 성인",
       "occasion": "meal",
-      "meals": [
-        "lunch"
-      ],
-      "day_types": [
-        "weekday"
+      "slots": [
+        {
+          "meal": "lunch",
+          "day_type": "weekday"
+        }
       ],
       "months": null,
       "audience": "adult",
@@ -76,11 +81,11 @@
       "product_id": "weekday-lunch-child",
       "name": "평일 점심 어린이",
       "occasion": "meal",
-      "meals": [
-        "lunch"
-      ],
-      "day_types": [
-        "weekday"
+      "slots": [
+        {
+          "meal": "lunch",
+          "day_type": "weekday"
+        }
       ],
       "months": null,
       "audience": "child",
@@ -97,11 +102,11 @@
       "product_id": "weekend-lunch-adult",
       "name": "토·일·공휴일 점심 성인",
       "occasion": "meal",
-      "meals": [
-        "lunch"
-      ],
-      "day_types": [
-        "weekend"
+      "slots": [
+        {
+          "meal": "lunch",
+          "day_type": "weekend"
+        }
       ],
       "months": null,
       "audience": "adult",
@@ -118,11 +123,11 @@
       "product_id": "weekend-lunch-child",
       "name": "토·일·공휴일 점심 어린이",
       "occasion": "meal",
-      "meals": [
-        "lunch"
-      ],
-      "day_types": [
-        "weekend"
+      "slots": [
+        {
+          "meal": "lunch",
+          "day_type": "weekend"
+        }
       ],
       "months": null,
       "audience": "child",
@@ -139,11 +144,11 @@
       "product_id": "weekday-dinner-adult",
       "name": "월~목 저녁 성인",
       "occasion": "meal",
-      "meals": [
-        "dinner"
-      ],
-      "day_types": [
-        "weekday"
+      "slots": [
+        {
+          "meal": "dinner",
+          "day_type": "weekday"
+        }
       ],
       "months": null,
       "audience": "adult",
@@ -160,11 +165,11 @@
       "product_id": "weekday-dinner-child",
       "name": "월~목 저녁 어린이",
       "occasion": "meal",
-      "meals": [
-        "dinner"
-      ],
-      "day_types": [
-        "weekday"
+      "slots": [
+        {
+          "meal": "dinner",
+          "day_type": "weekday"
+        }
       ],
       "months": null,
       "audience": "child",
@@ -181,11 +186,11 @@
       "product_id": "weekend-dinner-adult",
       "name": "금~일·공휴일 저녁 성인",
       "occasion": "meal",
-      "meals": [
-        "dinner"
-      ],
-      "day_types": [
-        "weekend"
+      "slots": [
+        {
+          "meal": "dinner",
+          "day_type": "weekend"
+        }
       ],
       "months": null,
       "audience": "adult",
@@ -202,11 +207,11 @@
       "product_id": "weekend-dinner-child",
       "name": "금~일·공휴일 저녁 어린이",
       "occasion": "meal",
-      "meals": [
-        "dinner"
-      ],
-      "day_types": [
-        "weekend"
+      "slots": [
+        {
+          "meal": "dinner",
+          "day_type": "weekend"
+        }
       ],
       "months": null,
       "audience": "child",

@@ -30,7 +30,7 @@ from engine.formats.run import (
 )
 from engine.formats.scenario import Scenario
 from engine.formats.summary import SUMMARY_COLUMNS, SummaryRow
-from engine.formats.venue import Product, Promotion, Venue
+from engine.formats.venue import Product, Promotion, Slot, Venue
 
 __all__ = [
     "KO",
@@ -58,6 +58,7 @@ __all__ = [
     "Scenario",
     "SummaryRow",
     "Validation",
+    "Slot",
     "Venue",
     "Vocab",
     "apply_pct",

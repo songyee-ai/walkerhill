@@ -1,25 +1,81 @@
 ﻿review_id,venue_id,source_kind,posted_ym,customer_group,purpose,party,adults,children,occasion,meal,day_type,stay,ordered,paid_total,reasons_chosen,pain_points,compared_with,would_return,summary,labeler,labeled_on
 R-geumryong-0001,geumryong,map,2026-09,가족·친족,가족 행사,부모와 성인 자녀,,,meal,lunch,weekend,,,,,,,yes,어머니의 여든 살 생신 자리로 찾았고 음식과 응대 모두 흡족했으며 걸개 준비에 특히 감동했다는 글.,borigunbbang,2026-11-13
+R-geumryong-0002,geumryong,map,2026-08,가족·친족,,부모와 성인 자녀,,,meal,lunch,weekend,,,,,서비스,,,코스와 직원 응대는 괜찮았으나 요리 설명이 없고 테이블보가 깔리지 않아 최고급 호텔답지 않았다는 아쉬움.,borigunbbang,2026-11-13
 R-geumryong-0003,geumryong,map,2026-08,가족·친족,가족 행사,3대 가족,,,meal,dinner,weekend,,,,분위기·전망,맛 기대 이하,,,"아들의 출간 축하로 어머니와 손주까지 모여 방에서 오래 식사했고, 일부 요리는 입에 안 맞았지만 직원 친절이 가장 좋았다는 후기.",borigunbbang,2026-11-13
 R-geumryong-0004,geumryong,map,2026-06,가족·친족,가족 행사,부모와 성인 자녀,,,meal,lunch,weekend,,,,,,,,임신한 딸을 세심히 챙겨 준 배려에 고마워하며 음식도 고급스럽고 맛있었다는 짧은 평.,borigunbbang,2026-11-13
+R-geumryong-0005,geumryong,map,2026-05,,여행·호캉스,,,,meal,dinner,weekday,,,,,,,,화면에 방문 목적만 여행으로 표시되고 본문은 없는 후기.,borigunbbang,2026-11-13
 R-geumryong-0006,geumryong,map,2026-04,가족·친족,가족 행사,부모와 성인 자녀,,,meal,dinner,weekend,,private-room-course,,,,,,"부모님의 여든 살 기념으로 가족끼리 보양 코스를 먹었고, 직원들의 친절과 세심함 덕에 모든 게 좋게 느껴졌다는 후기.",borigunbbang,2026-11-13
 R-geumryong-0008,geumryong,map,2025-12,가족·친족,가족 행사,부모와 성인 자녀,,,meal,dinner,weekday,,,,,,,,집안 행사 준비로 문의를 많이 하고 오래 머물렀는데도 직원들이 끝까지 편하게 대해 줘 고마웠다는 글.,borigunbbang,2026-11-13
 R-geumryong-0009,geumryong,map,2025-12,친구·모임,모임,친구,,,meal,lunch,weekday,,private-room-course,,,,,,아는 사람들과 낮에 보양 코스를 먹었는데 예전보다 양념이 균형 잡혔고 시간 조정 요청도 잘 들어줬다는 후기.,borigunbbang,2026-11-13
+R-geumryong-0010,geumryong,map,2025-11,,가족 행사,부모와 성인 자녀,,,meal,dinner,weekend,,,,,,,,,borigunbbang,2026-11-13
 R-geumryong-0011,geumryong,map,2025-08,친구·모임,모임,친구,,,meal,lunch,weekday,,,,,맛 기대 이하;서비스,,,"한 직원의 거친 그릇 처리 때문에 불편했고 고기 요리가 짰지만, 따뜻한 그릇과 무료 콜키지는 좋았다는 평.",borigunbbang,2026-11-13
 R-geumryong-0012,geumryong,map,2025-08,커플·기념일,기념일,부부·연인,,,meal,dinner,weekday,,,,,,,yes,좋은 자리를 받아 경치와 맛을 함께 즐겼고 임신 중인 글쓴이를 직원이 잘 챙겨 줬다며 다음에도 오고 싶다는 글.,borigunbbang,2026-11-13
+R-geumryong-0013,geumryong,map,2025-07,커플·기념일,,부부·연인,,,meal,lunch,weekend,,private-room-course,,,,,yes,보양 코스 요리가 정성스럽고 직원이 친절해 감동했으며 다음엔 가족과 오고 싶다는 후기.,borigunbbang,2026-11-13
+R-geumryong-0014,geumryong,map,2025-05,,가족 행사,3대 가족,,,meal,dinner,weekend,,,,,,,,,borigunbbang,2026-11-13
 R-geumryong-0015,geumryong,map,2025-05,가족·친족,가족 행사,부모와 성인 자녀,,,meal,lunch,weekend,,,,,,,,"처음 먹어 본 호텔 코스였는데 맛, 친절, 강 경치, 음식 설명까지 모두 좋았다는 평.",borigunbbang,2026-11-13
 R-geumryong-0016,geumryong,map,2025-04,친구·모임,모임,동료·거래처,,,meal,lunch,weekend,,이름:도코스,,,,,yes,"오랜만에 지인들과 중식 고급 코스를 할인받아 먹었고, 속도에 맞춘 서빙과 설명이 좋았으며 짬뽕 때문에 다시 오겠다는 글.",borigunbbang,2026-11-13
 R-geumryong-0018,geumryong,map,2025-04,가족·친족,가족 행사,3대 가족,,,meal,lunch,weekend,,,,,맛 기대 이하,,,"일흔 살 잔치로 가족이 모였고 맞춤 디저트와 장식에 감동했으나, 고기 요리 하나는 산뜻한 맛이 아쉬웠다는 후기.",borigunbbang,2026-11-13
 R-geumryong-0019,geumryong,map,2025-01,가족·친족,가족 행사,부모와 성인 자녀,,,meal,dinner,weekday,,,,,,,,집안 모임으로 예약했는데 잔치상 차림과 영상 장비가 갖춰져 있어 좋았고 음식과 친절도 만족스러웠다는 글.,borigunbbang,2026-11-13
+R-geumryong-0020,geumryong,map,2024-12,가족·친족,,부모와 성인 자녀,,,meal,lunch,weekend,,,,,,,,부모님과 함께 가서 맛있게 먹었다는 짧은 평.,borigunbbang,2026-11-13
+R-geumryong-0021,geumryong,map,2024-10,친구·모임,,친구,,,meal,lunch,weekday,,,,,맛 기대 이하,,,경치는 훌륭했지만 음식은 호텔 수준으로 보기엔 평범했다는 평.,borigunbbang,2026-11-13
 R-geumryong-0023,geumryong,map,2024-05,가족·친족,가족 행사,부모와 성인 자녀,,,meal,lunch,weekend,,private-room-course,,,,,,가족끼리 보양 코스를 먹었는데 맛과 경치가 좋았고 사진까지 찍어 준 책임 서버의 접객이 돋보였다는 후기.,borigunbbang,2026-11-13
+R-geumryong-0024,geumryong,map,2024-03,,가족 행사,부모와 성인 자녀,,,meal,dinner,weekend,,,,,,,,,borigunbbang,2026-11-13
 R-geumryong-0026,geumryong,map,2023-12,가족·친족,가족 행사,부모와 성인 자녀,,,meal,lunch,weekend,,,,,,,,부모님의 예순 살 생신으로 갔고 친절과 맛 모두 좋았다는 짧은 글.,borigunbbang,2026-11-13
+R-geumryong-0027,geumryong,map,2023-11,,,,,,meal,lunch,weekend,,,,,서비스,,,무난했지만 요리가 늦게 나와 도중에 배가 불렀으니 속도를 높이면 좋겠다는 평.,borigunbbang,2026-11-13
+R-geumryong-0028,geumryong,map,2023-11,,,,,,meal,dinner,weekend,,,,,,,yes,올 때마다 응대가 친절하고 음식도 훌륭하다는 단골의 평.,borigunbbang,2026-11-13
+R-geumryong-0029,geumryong,map,2023-11,친구·모임,,친구,,,meal,dinner,weekday,,,,,,,,아는 사람들과 즐거운 시간을 보냈다는 한 줄 글.,borigunbbang,2026-11-13
+R-geumryong-0030,geumryong,map,2023-04,,,,,,meal,dinner,weekend,,,,,가격,,,역시 맛있지만 값이 매우 비싸 특별한 날에 어울린다는 평.,borigunbbang,2026-11-13
+R-geumryong-0031,geumryong,map,2022-12,,,,,,meal,lunch,weekday,,,,,메뉴 구성,,yes,창밖이 안 보이는 방은 추가 요금이 없지만 원하던 코스가 사라져 더 비싼 코스를 골라야 했다는 글.,borigunbbang,2026-11-13
 R-geumryong-0035,geumryong,map,2022-09,가족·친족,가족 행사,부모와 성인 자녀,,,meal,lunch,weekend,,,,,,,,아버지의 일흔 살 잔치를 앞두고 예약했는데 전화부터 응대가 매우 친절해 가족 모두 행복한 추억을 남겼다는 후기.,borigunbbang,2026-11-13
+R-geumryong-0036,geumryong,map,2022-09,,,,,,meal,dinner,weekday,,이름:새우볶음밥,,,,,,새우 들어간 볶음밥이 맛있다는 한 줄 글.,borigunbbang,2026-11-13
 R-geumryong-0039,geumryong,map,2022-08,가족·친족,가족 행사,부모와 성인 자녀,,,meal,dinner,weekend,,이름:진계도쉐프 스페셜,,,,,,시아버지의 여든 살 생신에 셰프 특별 코스를 먹었는데 양이 넉넉하고 한국인 입맛에 맞아 가족 모두 만족했다는 글.,borigunbbang,2026-11-13
+R-geumryong-0041,geumryong,map,2022-07,,,,,,meal,dinner,weekend,,,,,가격;서비스,,,"식사 중에 그릇을 비웠는지 불쑥 물어 기분이 상했고, 맛은 괜찮지만 값에 비해 만족도가 낮다는 평.",borigunbbang,2026-11-13
+R-geumryong-0042,geumryong,map,2022-07,가족·친족,가족 행사,,,,meal,dinner,weekend,,,,,,,,예순 살 잔치 모임을 치렀는데 음식과 응대가 좋아 뜻깊은 시간을 보냈다는 글.,borigunbbang,2026-11-13
+R-geumryong-0045,geumryong,map,2022-07,,,혼자,,,meal,dinner,weekend,,,130000,,주차·접근,,,행사 참석차 들렀다가 혼자 저녁 코스를 먹었는데 맛은 훌륭했으나 식당 찾기가 어렵고 주차 공간이 좁았다는 상세 후기.,borigunbbang,2026-11-13
+R-geumryong-0050,geumryong,map,2022-02,,,,,,meal,lunch,weekday,,,,,,,yes,친절하고 맛있다는 한 줄 평.,borigunbbang,2026-11-13
 R-geumryong-0052,geumryong,map,2021-12,친구·모임,모임,친구,,,meal,lunch,weekday,,,,,,,yes,창 없는 방에서 친구들과 낮 코스를 먹으며 편히 이야기 나누기 좋았고 음식과 직원 모두 만족스러웠다는 추천 글.,borigunbbang,2026-11-13
+R-geumryong-0054,geumryong,map,2021-10,,,,,,meal,dinner,weekday,,,,,맛 기대 이하,,,맛은 특별하지 않고 분위기 덕에 찾는 곳이라는 솔직한 평.,borigunbbang,2026-11-13
+R-geumryong-0056,geumryong,map,2021-10,,,,,,meal,dinner,weekday,,,,주차·접근,,,,가까이 살아 자주 찾는데 음식이 깔끔하고 때때로 큰 방을 따로 내어 줘 좋다는 평.,borigunbbang,2026-11-13
+R-geumryong-0057,geumryong,map,2021-09,,,,,,meal,lunch,weekday,,이름:짬뽕,,,,,,서비스가 좋고 매운 해물 국수가 늘 맛있다는 짧은 글.,borigunbbang,2026-11-13
+R-geumryong-0058,geumryong,map,2021-08,,,,,,meal,dinner,weekend,,,,,,,yes,중식 같지 않은 그릇 담음과 맛이 좋았고 끝까지 서비스가 완벽해 다른 코스도 맛보고 싶다는 글.,borigunbbang,2026-11-13
+R-geumryong-0060,geumryong,map,2021-08,,,,,,meal,dinner,weekend,,,,,가격,,,음식은 괜찮았지만 값에 비해 만족도는 낮다는 평.,borigunbbang,2026-11-13
 R-geumryong-0063,geumryong,map,2021-06,가족·친족,가족 행사,부모와 성인 자녀,,,meal,dinner,weekend,,,,,,,yes,어머니 일흔 살 잔치로 가족이 큰 방을 썼는데 시간을 넉넉히 줬고 서비스가 훌륭해 쓴 돈이 아쉽지 않았다는 후기.,borigunbbang,2026-11-13
+R-geumryong-0064,geumryong,map,2021-06,,,,,,meal,lunch,weekday,,이름:쉐프 스페셜,,,,,,셰프 특별 코스가 새롭고 좋았다는 짧은 평.,borigunbbang,2026-11-13
+R-geumryong-0069,geumryong,map,2021-03,가족·친족,가족 행사,,,,meal,dinner,weekend,,,,,,,,강 경치를 보며 맛있게 먹었고 직원 친절 덕에 어른 생신 자리가 완벽했다는 글.,borigunbbang,2026-11-13
+R-geumryong-0073,geumryong,map,2021-03,,,,,,meal,lunch,weekday,,,,,맛 기대 이하,,,간이 세지만 맛있다는 한 줄 평.,borigunbbang,2026-11-13
+R-geumryong-0076,geumryong,map,2021-01,,,,,,meal,lunch,weekend,,,,,,,yes,좋다는 한 단어 평.,borigunbbang,2026-11-13
+R-geumryong-0084,geumryong,map,2020-08,,,,,,meal,dinner,weekend,,이름:짜장면;이름:채홍 코스;이름:탕수육,,,,,,코스에 단품 두 가지를 더 시켰더니 양이 많아 끝 무렵 식사 메뉴는 남겼지만 맛있게 먹었다는 글.,borigunbbang,2026-11-13
+R-geumryong-0085,geumryong,map,2020-08,가족·친족,,아이 동반 가족,,,meal,dinner,weekday,,,,,,,,네 살 아이가 즐겨 찾는 곳이며 서비스와 맛 모두 좋다는 멤버십 고객의 짧은 글.,borigunbbang,2026-11-13
 R-geumryong-0086,geumryong,map,2020-07,가족·친족,가족 행사,아이 동반 가족,,,meal,dinner,weekday,,이름:돌잔치 코스,,,,,,평일에 아이 첫 생일 잔치를 가족끼리 조용히 치렀고 이용 방법을 자주 물어도 친절히 답해 줬다는 후기.,borigunbbang,2026-11-13
+R-geumryong-0088,geumryong,map,2020-07,가족·친족,가족 행사,,,,meal,lunch,weekday,,,,,,,yes,"평일 첫 생일 잔치의 분위기와 응대, 음식 모두 흡족했고 방에서 보이는 경치가 특히 좋아 곧 다시 오겠다는 글.",borigunbbang,2026-11-13
+R-geumryong-0091,geumryong,map,2020-06,,,,,,meal,lunch,weekend,,,,,가격,,,맛은 좋았지만 느끼해 시킨 탄산음료 값이 지나치게 비싸 별점을 깎았다는 글.,borigunbbang,2026-11-13
+R-geumryong-0094,geumryong,map,2020-05,가족·친족,가족 행사,,,,meal,lunch,weekday,,,,,,,,첫 생일 잔치를 좋은 음식과 함께 잘 마쳤다는 짧은 글.,borigunbbang,2026-11-13
 R-geumryong-0095,geumryong,map,2020-05,가족·친족,가족 행사,부모와 성인 자녀,,,meal,lunch,weekday,,,,,,,,아버지 일흔 살을 맞아 전망 좋은 자리에서 친절한 서비스와 넉넉한 음식으로 가족이 즐겁게 식사했다는 추천 글.,borigunbbang,2026-11-13
+R-geumryong-0097,geumryong,map,2020-04,가족·친족,가족 행사,,,,meal,lunch,weekday,,,,,주차·접근,,,"가족을 모시고 첫 생일 잔치를 했는데 코스가 알차 모두 배불렀으나, 할인 예약 시 대리 주차가 안 된다는 점을 알려 주는 글.",borigunbbang,2026-11-13
 R-geumryong-0098,geumryong,map,2020-04,가족·친족,가족 행사,아이 동반 가족,,,meal,lunch,weekday,,,,,,,,아기의 첫 생일 잔치가 매우 만족스러웠다는 짧은 글.,borigunbbang,2026-11-13
+R-geumryong-0099,geumryong,map,2020-03,,,,,,meal,dinner,weekday,,,,,,,yes,코스 가짓수가 많고 맛있어 기대보다 좋았으니 다시 가고 싶다는 글.,borigunbbang,2026-11-13
+R-geumryong-0104,geumryong,map,2020-01,,,,,,meal,lunch,weekday,,,,,,,yes,갈 때마다 만족한다는 짧은 평.,borigunbbang,2026-11-13
 R-geumryong-0105,geumryong,map,2020-01,가족·친족,가족 행사,부모와 성인 자녀,,,meal,lunch,weekend,,,,,,,,어머니 예순 살 잔치로 열 명이 갔는데 아늑하고 전망 좋은 자리를 받아 세 시간 동안 음식과 서비스를 즐겼다는 후기.,borigunbbang,2026-11-13
 R-geumryong-0110,geumryong,map,2019-12,가족·친족,가족 행사,부모와 성인 자녀,,,meal,dinner,weekend,,,,,,,yes,아버지 일흔 살 잔치를 방을 잡아 가족끼리 무난히 치렀고 음식도 맛있어 기회가 되면 또 가겠다는 글.,borigunbbang,2026-11-13
+R-geumryong-0111,geumryong,map,2019-12,,,,,,meal,dinner,weekend,,,,,,,yes,온라인 예약과 취소가 쉬워 편했다는 글.,borigunbbang,2026-11-13
+R-geumryong-0113,geumryong,map,2019-11,가족·친족,가족 행사,,,,meal,dinner,weekend,,,,,맛 기대 이하,,,연말 가족 모임 자리로 만족했지만 일부 요리가 조금 짰다는 평.,borigunbbang,2026-11-13
+R-geumryong-0114,geumryong,map,2019-11,가족·친족,,부모와 성인 자녀,,,meal,dinner,weekday,,,,,,,,부모님이 만족하셨다는 한 줄 글.,borigunbbang,2026-11-13
+R-geumryong-0117,geumryong,map,2019-11,가족·친족,,아이 동반 가족,,,meal,lunch,weekday,,,,,,,,아이와 함께라면 호텔 식당이 가장 낫다며 서비스에 만족한다는 짧은 글.,borigunbbang,2026-11-13
+R-geumryong-0121,geumryong,map,2019-10,,,,,,meal,lunch,weekend,,,,,맛 기대 이하,,,강이 보이는 포근한 자리에서 코스를 즐겼고 서비스도 훌륭했지만 싱겁게 먹는 입맛엔 조금 짰다는 평.,borigunbbang,2026-11-13
+R-geumryong-0124,geumryong,map,2019-09,,,,,,meal,lunch,weekend,,,,,,,yes,원하던 창가 자리로 안내받았고 음식과 친절이 모두 좋아 다시 갈 뜻이 확실하다는 글.,borigunbbang,2026-11-13
+R-geumryong-0125,geumryong,map,2019-09,,,,,,meal,dinner,weekday,,,,,맛 기대 이하,,,강 경치와 분위기가 좋았고 짰던 밥 요리를 새로 만들어 준 것 외엔 음식도 깔끔했다는 평.,borigunbbang,2026-11-13
+R-geumryong-0127,geumryong,map,2019-09,,,,,,meal,lunch,weekday,,,,,맛 기대 이하,,,분위기는 좋았지만 요리가 전반적으로 달게 느껴졌다는 평.,borigunbbang,2026-11-13
+R-geumryong-0130,geumryong,map,2019-08,가족·친족,,아이 동반 가족,,,meal,lunch,weekend,,,,,,,,초등학생 아이 입맛에도 맞았고 곁들이 반찬이 맛있으며 서비스가 친절했다는 글.,borigunbbang,2026-11-13
+R-geumryong-0131,geumryong,map,2019-08,,,,,,meal,lunch,weekday,,,,,맛 기대 이하,,,"강이 보이는 자리와 편안한 서빙, 넉넉한 양은 좋았으나 값과 호텔 이름에 비해 몇몇 요리 맛이 아쉬웠다는 평.",borigunbbang,2026-11-13
+R-geumryong-0133,geumryong,map,2019-08,,,,,,meal,dinner,weekend,,,,,맛 기대 이하,,,외국 손님 접대 전에 미리 들러 봤는데 맛이 별로여서 결국 다른 식당을 택했다는 글.,borigunbbang,2026-11-13
+R-geumryong-0134,geumryong,map,2019-08,가족·친족,,부모와 성인 자녀,,,meal,lunch,weekday,,,,,,,yes,경치가 훌륭하고 음식이 여유 있게 나오며 맛과 서비스도 좋아 부모님도 만족해 다시 오겠다는 글.,borigunbbang,2026-11-13
 R-geumryong-0136,geumryong,map,2019-07,가족·친족,가족 행사,부모와 성인 자녀,,,meal,dinner,weekday,,,,,,,,아버지 예순 살 생신에 가져간 케이크를 맡아 두었다가 후식 때 차려 줘 매우 좋았다는 추천 글.,borigunbbang,2026-11-13
+R-geumryong-0139,geumryong,map,2019-07,,,,,,meal,lunch,weekday,,,,,소음,,,직원과 서빙은 좋았고 맛있었지만 주변이 다소 소란스러웠다는 평.,borigunbbang,2026-11-13
+R-geumryong-0145,geumryong,map,2019-04,친구·모임,모임,,,,meal,dinner,weekend,,,,,,,,예전 은사를 모신 식사였는데 음식과 직원 친절에 참석자들이 흐뭇해했고 행사 할인으로 값도 괜찮았다는 글.,borigunbbang,2026-11-13
+R-geumryong-0147,geumryong,map,2019-04,,,,,,meal,dinner,weekday,,,,주차·접근,,,,가까워서 자주 오는데 맛이 더 좋아진 것 같고 서비스도 좋다는 평.,borigunbbang,2026-11-13
+R-geumryong-0149,geumryong,map,2019-04,,,,,,meal,dinner,weekend,,이름:볶음밥;이름:삼선초면,,,,,,볶은 면보다 볶음밥이 더 낫다는 한 줄 비교.,borigunbbang,2026-11-13
+R-geumryong-0150,geumryong,map,2019-04,,,,,,meal,lunch,weekend,,,,,맛 기대 이하,,,서비스는 나무랄 데 없지만 음식 간이 조금 셌다는 평.,borigunbbang,2026-11-13
+R-geumryong-0151,geumryong,map,2019-03,가족·친족,가족 행사,,,,meal,dinner,weekend,,이름:천운코스,,,,,,"작은 가족 모임 장소로 중식을 골라 코스를 먹었는데 맛, 그릇, 서비스 모두 훌륭했다는 글.",borigunbbang,2026-11-13
+R-geumryong-0152,geumryong,map,2019-02,,,,,,meal,dinner,weekend,,이름:깐풍기;이름:탕수육,,,,,,양이 많고 맛있었으며 튀김 요리 두 가지가 특히 훌륭했다는 평.,borigunbbang,2026-11-13
+R-geumryong-0155,geumryong,map,2019-01,가족·친족,,부모와 성인 자녀,,,meal,lunch,weekend,,,,,맛 기대 이하;메뉴 구성,,,어머니는 만족했지만 글쓴이에겐 맛이 강했고 채소가 더 있으면 좋겠으며 실내 장식이 다소 낡아 보였다는 평.,borigunbbang,2026-11-13
+R-geumryong-0163,geumryong,map,2018-03,가족·친족,,부모와 성인 자녀,,,meal,lunch,weekday,,,,,,,,부모님과 함께 갔는데 두 분 다 요리와 분위기를 마음에 들어 하셨고 서비스도 친절해 만족했다는 글.,borigunbbang,2026-11-13

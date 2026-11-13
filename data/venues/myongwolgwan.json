@@ -16,34 +16,39 @@
       "day_type": "all",
       "open": "12:00",
       "last_order": null,
-      "close": "15:00"
+      "close": "15:00",
+      "source_id": null
     },
     {
       "meal": "dinner",
       "day_type": "all",
       "open": "17:30",
       "last_order": null,
-      "close": "21:00"
+      "close": "21:00",
+      "source_id": null
     }
   ],
   "reservation": {
     "required": false,
     "party_min": 1,
     "party_max": null,
-    "note": "예약 필수 여부는 공식 페이지에 없음 (false 로 둠). 본당 예약은 2개월 전 1일 10시부터. 본당 168석 (홀 88석, 별실 9개 80석)"
+    "note": "예약 필수 여부는 공식 페이지에 없음 (false 로 둠). 본당 예약은 2개월 전 1일 10시부터. 본당 168석 (홀 88석, 별실 9개 80석)",
+    "source_id": null
   },
   "products": [
     {
       "product_id": "special-platter-set",
       "name": "명월관 스페셜 모둠 특선 (2인 식사 포함)",
       "occasion": "meal",
-      "meals": [
-        "lunch",
-        "dinner"
-      ],
-      "day_types": [
-        "weekday",
-        "weekend"
+      "slots": [
+        {
+          "meal": "lunch",
+          "day_type": "all"
+        },
+        {
+          "meal": "dinner",
+          "day_type": "all"
+        }
       ],
       "months": null,
       "audience": "all",
@@ -60,11 +65,11 @@
       "product_id": "weekday-lunch",
       "name": "주중 점심 한상 (가을 시즌)",
       "occasion": "meal",
-      "meals": [
-        "lunch"
-      ],
-      "day_types": [
-        "weekday"
+      "slots": [
+        {
+          "meal": "lunch",
+          "day_type": "weekday"
+        }
       ],
       "months": [
         9,

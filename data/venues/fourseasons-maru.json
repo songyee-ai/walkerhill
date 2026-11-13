@@ -9,14 +9,13 @@
   "occasions": ["dessert"],
   "months": null,
   "hours": null,
-  "reservation": {"required": true, "party_min": 2, "party_max": null, "note": "가을 애프터눈 티는 방문 24시간 전까지 사전 예약 필수"},
+  "reservation": {"required": true, "party_min": 2, "party_max": null, "note": "가을 애프터눈 티는 방문 24시간 전까지 사전 예약 필수", "source_id": null},
   "products": [
     {
       "product_id": "autumn-afternoon-tea",
       "name": "가을 애프터눈 티 세트",
       "occasion": "dessert",
-      "meals": [],
-      "day_types": ["weekday", "weekend"],
+      "slots": [{"meal": null, "day_type": "all"}],
       "months": [9, 10, 11],
       "audience": "all",
       "unit": "세트",

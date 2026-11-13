@@ -35,20 +35,27 @@ class Source(FormatModel):
 
 
 class Hours(FormatModel):
-    """영업 시간 한 줄. 식사가 아닌 업장은 `meal` 을 null 로 둔다."""
+    """영업 시간 한 줄. 식사가 아닌 업장은 `meal` 을 null 로 둔다.
+
+    `source_id` 가 null 이면 업장의 `default_source_id` 를 쓴다 (영업 시간은 메뉴판과 출처가 다를 수 있다).
+    """
 
     meal: Meal | None
     day_type: DayTypeOrAll
     open: HHMM
     last_order: HHMM | None
     close: HHMM
+    source_id: str | None
 
 
 class Reservation(FormatModel):
+    """예약 조건. `source_id` 가 null 이면 업장의 `default_source_id` 를 쓴다."""
+
     required: bool
     party_min: int | None = Field(ge=1)
     party_max: int | None = Field(ge=1)
     note: str
+    source_id: str | None
 
     @model_validator(mode="after")
     def _range(self) -> Self:
@@ -57,14 +64,29 @@ class Reservation(FormatModel):
         return self
 
 
+class Slot(FormatModel):
+    """상품을 파는 때 하나: 끼니와 평일·주말의 짝. 식사가 아닌 상품은 `meal` 이 null 이다."""
+
+    meal: Meal | None
+    day_type: DayTypeOrAll
+
+    def covers(self, meal: str | None, day_type: str) -> bool:
+        """그 끼니, 그 요일(weekday 나 weekend)이 이 짝에 드는가."""
+        return self.meal == meal and self.day_type in (day_type, "all")
+
+
+# 짝 하나가 덮는 요일.
+_DAYS_OF = {"weekday": ("weekday",), "weekend": ("weekend",), "all": ("weekday", "weekend")}
+
+
 class Product(FormatModel):
     """상품 한 줄."""
 
     product_id: Id
     name: Text
     occasion: Occasion
-    meals: list[Meal]
-    day_types: list[DayType] = Field(min_length=1)
+    # 파는 때. 끼니 목록과 요일 목록을 따로 적어 곱하면 "주말 점심과 모든 요일 저녁" 같은 상품을 적을 수 없어 짝으로 적는다.
+    slots: list[Slot] = Field(min_length=1)
     months: list[Month] | None
     audience: Audience
     unit: Text
@@ -78,12 +100,13 @@ class Product(FormatModel):
 
     @model_validator(mode="after")
     def _rules(self) -> Self:
-        if self.occasion == "meal" and not self.meals:
-            raise ValueError("식사 상품인데 meals 가 비어 있다")
-        if self.occasion != "meal" and self.meals:
-            raise ValueError("식사가 아닌 상품은 meals 를 빈 목록으로 둔다")
-        if has_duplicates(self.meals) or has_duplicates(self.day_types):
-            raise ValueError("meals 나 day_types 에 같은 값이 두 번 있다")
+        if self.occasion == "meal" and any(slot.meal is None for slot in self.slots):
+            raise ValueError("식사 상품의 slots 에는 meal 을 적는다")
+        if self.occasion != "meal" and any(slot.meal is not None for slot in self.slots):
+            raise ValueError("식사가 아닌 상품의 slots 는 meal 을 null 로 둔다")
+        # 같은 때를 두 번 적지 않는다 (예: 점심·모든 요일과 점심·주말은 주말 점심이 겹친다).
+        if has_duplicates([(slot.meal, day) for slot in self.slots for day in _DAYS_OF[slot.day_type]]):
+            raise ValueError("slots 에 같은 때가 두 번 들어 있다 (all 은 평일과 주말을 모두 덮는다)")
         if self.months is not None and (not self.months or has_duplicates(self.months)):
             raise ValueError("months 는 null 이거나, 겹치지 않는 달이 하나 이상 든 목록이어야 한다")
         if self.qty_rule == "choice" and self.qty_max is None:
@@ -93,6 +116,14 @@ class Product(FormatModel):
         if self.price is None and self.grade != "unknown":
             raise ValueError("price 가 null 이면 grade 는 unknown 이어야 한다")
         return self
+
+    def sold_at(self, meal: str | None, day_type: str) -> bool:
+        """그 끼니(식사가 아니면 None), 그 요일(weekday 나 weekend)에 이 상품을 파는가."""
+        return any(slot.covers(meal, day_type) for slot in self.slots)
+
+    def sold_on(self, day_type: str) -> bool:
+        """끼니와 상관없이, 그 요일에 이 상품을 파는 때가 있는가."""
+        return any(slot.day_type in (day_type, "all") for slot in self.slots)
 
 
 class Benefit(FormatModel):
@@ -197,6 +228,12 @@ class Venue(FormatModel):
             if product.months is not None and self.months is not None:
                 if not set(product.months) <= set(self.months):
                     raise ValueError(f"상품 '{product.product_id}' 의 months 가 업장의 months 를 벗어난다")
+        for index, hours in enumerate(self.hours or []):
+            if hours.source_id is not None and hours.source_id not in source_ids:
+                raise ValueError(f"hours[{index}] 의 source_id 가 sources 에 없다")
+        if self.reservation is not None and self.reservation.source_id is not None:
+            if self.reservation.source_id not in source_ids:
+                raise ValueError("reservation 의 source_id 가 sources 에 없다")
         for promo in self.promotions:
             if promo.source_id is not None and promo.source_id not in source_ids:
                 raise ValueError(f"프로모션 '{promo.promo_id}' 의 source_id 가 sources 에 없다")

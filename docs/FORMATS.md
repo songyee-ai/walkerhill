@@ -56,10 +56,10 @@
 |---|---|---|
 | 이용 상황 | `occasion` | `meal` 식사, `dessert` 디저트·차, `takeout` 포장·구매 |
 | 끼니 | `meal` | `lunch` 점심, `dinner` 저녁, `breakfast` 조식. 식사가 아니면 `null` |
-| 평일·주말 | `day_type` | `weekday` 평일, `weekend` 주말(토·일·공휴일). 업장 정의에서 둘 다 해당하면 `all` |
+| 평일·주말 | `day_type` | `weekday` 평일, `weekend` 주말(토·일·공휴일. 대체공휴일도 든다). 업장 정의에서 둘 다 해당하면 `all` |
 | 투숙 여부 | `stay` | `guest` 투숙객, `visitor` 비투숙 방문객. 구분하지 않으면 `null` |
 | 달 | `month` | 1 ~ 12. 일 년 전체로 보면 `null` |
-| 가격 표기 | `price_basis` | `included` 세금과 봉사료가 든 가격, `excluded` 따로 붙는 가격, `unknown` 모름 |
+| 가격 표기 | `price_basis` | `included` 세금과 봉사료가 든 가격, `excluded_vat` 부가세만 따로 붙는 가격, `excluded_vat_service` 봉사료와 부가세가 모두 따로 붙는 가격, `unknown` 모름 |
 | 근거 등급 | `grade` | `internal` 내부 매출 자료, `official` 공식 사실, `review` 후기에서 관찰, `assumption` 설계 가정, `unknown` 미확인 |
 | 상황의 종류 | `kind` | `baseline` 기준, `our_price` 우리 가격·구성 변경, `our_promo` 우리 프로모션, `competitor` 경쟁 호텔의 변경 |
 | 고른 곳 | `choice_kind` | `walkerhill` 워커힐 업장, `competitor` 경쟁 업장, `none` 이용하지 않음 |
@@ -93,8 +93,8 @@
 | `cuisine` | 음식 종류나 성격 | 한국어. 예: 중식, 뷔페, 라운지 디저트 |
 | `occasions` | 이 업장에 해당하는 이용 상황 | 코드 값 목록 |
 | `months` | 영업하는 달 (1 ~ 12 의 목록) | 일 년 내내면 `null` |
-| `hours` | 영업 시간. 끼니와 평일·주말마다 한 줄: `meal`, `day_type`, `open`, `last_order`, `close` | 식사가 아닌 업장은 `meal` 을 `null` 로 둔다. 마지막 주문 시각이 따로 없으면 `last_order` 를 `null` 로 둔다. 경쟁 업장은 모르면 `hours` 전체를 `null` 로 두고, 그러면 운영 시간 검사를 건너뛴다 |
-| `reservation` | 예약 조건: `required` 필수인지, `party_min`·`party_max` 받을 수 있는 인원, `note` | 모르면 `null` |
+| `hours` | 영업 시간. 끼니와 평일·주말마다 한 줄: `meal`, `day_type`, `open`, `last_order`, `close`, `source_id` | 식사가 아닌 업장은 `meal` 을 `null` 로 둔다. `source_id` 가 `null` 이면 `default_source_id` 를 쓴다 (영업 시간은 메뉴판과 출처가 다를 수 있다). 마지막 주문 시각이 따로 없으면 `last_order` 를 `null` 로 둔다. 경쟁 업장은 모르면 `hours` 전체를 `null` 로 두고, 그러면 운영 시간 검사를 건너뛴다 |
+| `reservation` | 예약 조건: `required` 필수인지, `party_min`·`party_max` 받을 수 있는 인원, `note`, `source_id` | 모르면 `null`. `source_id` 가 `null` 이면 `default_source_id` 를 쓴다 |
 | `products` | 상품 목록 (아래 표) | |
 | `promotions` | 지금 진행 중인 프로모션 (아래 표) | 없으면 빈 목록 |
 | `sources` | 출처 목록: `source_id`, `title`, `url`, `checked_on` | 확인일은 그 값을 마지막으로 확인한 날 |
@@ -106,7 +106,7 @@
 |---|---|---|
 | `product_id`, `name` | 업장 안에서 겹치지 않는 식별자, 상품 이름 | |
 | `occasion` | 이 상품의 이용 상황 | 업장의 `occasions` 안에 있어야 한다 |
-| `meals`, `day_types` | 파는 끼니와 요일 | 식사가 아니면 `meals` 는 빈 목록. 요일 구분이 없으면 `["weekday", "weekend"]` |
+| `slots` | 파는 때. 끼니(`meal`)와 평일·주말(`day_type`)의 짝을 하나 이상 적는다 | 아래 "파는 때를 적는 규칙" |
 | `months` | 파는 달 | 업장과 같으면 `null` |
 | `audience` | 누구의 가격인가 | 성인·어린이 가격이 따로면 상품을 둘로 나눈다 |
 | `unit` | 판매 단위. 한국어로 적는다 | 예: `1인`, `세트`, `판`, `개`, `잔`, `건` |
@@ -114,15 +114,25 @@
 | `qty_rule` | 수량을 정하는 규칙 | 아래 참고 |
 | `qty_max` | `choice` 일 때 고를 수 있는 가장 큰 수량 | 다른 규칙이면 `null` |
 | `price` | 출처에 표시된 가격 | 모르면 `null` 이고 `grade` 는 `unknown` |
-| `price_basis` | 그 가격의 표기 | `excluded` 면 엔진이 1.1 을 곱해 고객이 낼 금액으로 바꾼다. `unknown` 은 `included` 로 보고 화면에 표시한다 |
+| `price_basis` | 그 가격의 표기 | 출처에 적힌 가격을 그대로 옮기고 표기만 고른다. 엔진이 `excluded_vat` 면 1.1, `excluded_vat_service` 면 1.21(1.1 × 1.1)을 곱해 고객이 낼 금액으로 바꾼다 (곱한 뒤 한 번 반올림). `unknown` 은 `included` 로 보고 화면에 표시한다 |
 | `grade`, `source_id` | 근거 등급과 출처 | 공식 사이트나 공식 발표, 그것을 전한 기사에서 온 값이면 `official` 이다. `source_id` 가 `null` 이면 `default_source_id` 를 쓴다 |
 
 **상품의 이름과 가격을 적는 규칙**
 
 - 공개 파일에는 공식 메뉴판이나 공식 발표에 있는 이름과 가격만 적는다. 기본 데이터에 적힌 이름과 단가를 옮겨 적지 않는다.
 - 기본 데이터에는 있는데 공식 자료에서 확인하지 못한 상품은 이름을 일반적인 말로 적고 `price` 를 `null` 로 둔다.
-- **`price` 가 `null` 인 상품**: 기본 데이터로 돌릴 때는 엔진이 집계 파일(8절)의 매출 ÷ 수량으로 단가를 채우고 등급을 `internal` 로 표시한다.
+- **`price` 가 `null` 인 상품**: 기본 데이터로 돌릴 때는 엔진이 집계 파일(8절)의 `paid` ÷ `quantity` 로 단가를 채우고 등급을 `internal` 로 표시한다.
+  `paid` 는 고객이 낸 금액(세금 포함)이라 그대로 고객이 낼 단가가 된다. 세금을 뺀 `revenue_net` 으로 나누면 단가가 세금만큼 낮아지므로 쓰지 않는다.
   가상 예시로 돌릴 때는 가상 예시 값에서 같은 방법으로 채운다. 어느 쪽에도 없으면 그 상품을 후보에서 빼고 실행 기록에 남긴다.
+
+**파는 때를 적는 규칙** (`slots`)
+
+- 한 줄은 `{"meal": 끼니, "day_type": 요일}` 이다. `day_type` 은 `weekday`, `weekend`, 둘 다면 `all` 이다.
+- 끼니 목록과 요일 목록을 따로 적어 곱하지 않고 짝으로 적는다. 그래야 "주말 점심과 모든 요일 저녁"에 같은 값으로 파는 상품을 적을 수 있다:
+  `[{"meal": "lunch", "day_type": "weekend"}, {"meal": "dinner", "day_type": "all"}]`
+- 식사가 아닌 상품(디저트·차, 포장·구매)은 `meal` 을 `null` 로 둔다: `[{"meal": null, "day_type": "all"}]`
+- 같은 때를 두 번 적지 않는다. `all` 은 평일과 주말을 모두 덮으므로, 점심·`all` 과 점심·`weekend` 를 함께 적으면 오류다.
+- 기본 데이터의 상품 하나는 업장 정의의 상품 하나로 잇는다. 파는 때가 섞였다고 상품을 둘로 나누지 않는다.
 
 **수량 규칙** — 금액은 엔진이 이 규칙으로 계산한다. LLM 에 맡기지 않는다.
 
@@ -166,17 +176,16 @@
   "occasions": ["meal"],
   "months": null,
   "hours": [
-    {"meal": "lunch", "day_type": "all", "open": "12:00", "last_order": "14:00", "close": "15:00"},
-    {"meal": "dinner", "day_type": "all", "open": "18:00", "last_order": "20:30", "close": "22:00"}
+    {"meal": "lunch", "day_type": "all", "open": "12:00", "last_order": "14:00", "close": "15:00", "source_id": null},
+    {"meal": "dinner", "day_type": "all", "open": "18:00", "last_order": "20:30", "close": "22:00", "source_id": null}
   ],
-  "reservation": {"required": false, "party_min": 1, "party_max": 12, "note": "별실은 예약 필수"},
+  "reservation": {"required": false, "party_min": 1, "party_max": 12, "note": "별실은 예약 필수", "source_id": null},
   "products": [
     {
       "product_id": "course-a",
       "name": "코스 A",
       "occasion": "meal",
-      "meals": ["lunch", "dinner"],
-      "day_types": ["weekday", "weekend"],
+      "slots": [{"meal": "lunch", "day_type": "all"}, {"meal": "dinner", "day_type": "all"}],
       "months": null,
       "audience": "all",
       "unit": "1인",
@@ -192,8 +201,7 @@
       "product_id": "course-b",
       "name": "코스 B",
       "occasion": "meal",
-      "meals": ["dinner"],
-      "day_types": ["weekday", "weekend"],
+      "slots": [{"meal": "dinner", "day_type": "all"}],
       "months": null,
       "audience": "all",
       "unit": "1인",
@@ -234,8 +242,7 @@
       "product_id": "course",
       "name": "디너 코스",
       "occasion": "meal",
-      "meals": ["lunch", "dinner"],
-      "day_types": ["weekday", "weekend"],
+      "slots": [{"meal": "lunch", "day_type": "all"}, {"meal": "dinner", "day_type": "all"}],
       "months": null,
       "audience": "all",
       "unit": "1인",
@@ -269,8 +276,8 @@
 | `source_kind` | 출처 종류 | 코드 값 |
 | `posted_ym` | 게시 연월 | 모르면 빈 칸 |
 | `customer_group` | 고객군 | 값 목록에서 고른다. 판단할 수 없으면 빈 칸 |
-| `purpose` | 방문 목적 | 값 목록에서 하나 |
-| `party` | 동행 | 값 목록에서 하나 |
+| `purpose` | 방문 목적 | 값 목록에서 하나. 글과 화면에 없으면 빈 칸 |
+| `party` | 동행 | 값 목록에서 하나. 글과 화면에 없으면 빈 칸 |
 | `adults`, `children` | 성인 수, 어린이 수 | 글에 없으면 빈 칸 |
 | `occasion`, `meal`, `day_type`, `stay` | 이용 상황, 끼니, 평일·주말, 투숙 여부 | 코드 값. 글에 없으면 빈 칸 |
 | `ordered` | 주문한 것 | 업장 정의의 `product_id`. 여러 개면 `;` 로 나눈다. 정의에 없는 메뉴면 `이름:` 뒤에 한국어로 적는다 |
@@ -279,8 +286,15 @@
 | `pain_points` | 걸린 점 | 값 목록에서. 여러 개면 `;` |
 | `compared_with` | 견준 곳 | 경쟁 업장의 `venue_id`. 정의에 없는 곳이면 `이름:` 뒤에 한국어로 적는다 |
 | `would_return` | 다시 올 뜻 | `yes`, `no`, 글에 없으면 빈 칸 |
-| `summary` | 한두 문장 요약 | 우리 말로 쓴다. 원문을 따오지 않는다 |
+| `summary` | 한두 문장 요약 | 우리 말로 쓴다. 원문을 따오지 않는다. 본문이 있으면 꼭 쓰고, 본문 없이 화면 값만 있는 후기만 비운다 |
 | `labeler`, `labeled_on` | 라벨을 붙인 사람(깃헙 아이디), 붙인 날 | |
+
+**빈 칸**: 글과 화면에 없는 것은 지어내지 않고 비운다. 빈 칸이 많은 것이 정상이다. 지도 서비스의 방문 목적과 동행은 최근 후기에만 붙어 있다.
+
+- 근거가 되는 칸(`purpose`, `party`, `ordered`, `reasons_chosen`, `pain_points`, `compared_with`, `would_return`)이
+  모두 빈 줄은 올리지 않는다. 근거가 없는 후기다. 형식 검사가 오류로 본다.
+- `summary` 를 비워도 형식 검사는 지나간다. 본문이 있는지는 검사가 알 수 없어서, 본문이 있는 후기에 요약을 쓰는 것은 라벨을 붙이는 사람이 지킨다.
+  (11-13 에 정했다. 처음에는 `purpose`, `party`, `summary` 가 꼭 채우는 칸이었다)
 
 **후기 번호**: `<종류>-<venue_id>-<네 자리 번호>`.
 
@@ -296,12 +310,13 @@
 | 떼어 둔 후기 (`H`) | `private/evidence/holdout/<venue_id>.csv` | 업장 데이터 담당. 페르소나가 다 만들어질 때까지 저장소에 올리지 않고 페르소나 담당에게 주지 않는다 |
 | 받은 참고 소스의 후기 (`P`) | `private/evidence/reference/<venue_id>.csv` | 페르소나 담당. 저장소에 올리지 않는다 |
 
-예시 (지어낸 후기다)
+예시 (지어낸 후기다. 셋째 줄은 방문 목적과 동행이 글에 없는 후기다)
 
 ```csv
 review_id,venue_id,source_kind,posted_ym,customer_group,purpose,party,adults,children,occasion,meal,day_type,stay,ordered,paid_total,reasons_chosen,pain_points,compared_with,would_return,summary,labeler,labeled_on
 R-geumryong-0003,geumryong,blog,2026-05,가족·친족,가족 행사,3대 가족,5,1,meal,dinner,weekend,visitor,course-a,,별실;주차·접근,가격,examplehotel-chinese,yes,어르신 생신이라 별실이 있는 곳을 찾았고 주차가 편해 골랐다. 가격은 부담스러웠다고 적었다.,borigunbbang,2026-11-13
 R-geumryong-0011,geumryong,map,2026-08,가족·친족,가족 행사,3대 가족,,,meal,lunch,weekend,,course-a,,별실;서비스,,,yes,상견례 자리였고 응대가 좋았다고 적었다.,borigunbbang,2026-11-13
+R-geumryong-0027,geumryong,map,2026-03,,,,,,meal,dinner,,,,,,대기,,no,예약하고 갔는데도 오래 기다렸다고 적었다. 누구와 왜 갔는지는 글에 없다.,borigunbbang,2026-11-13
 ```
 
 ### 4.2 라벨 값 목록
@@ -442,7 +457,9 @@ R-geumryong-0011,geumryong,map,2026-08,가족·친족,가족 행사,3대 가족,
 
 - 묶음의 조건에는 인원과 예산을 넣지 않는다. 그러면 페르소나의 값을 쓴다. 화면에서 한 번만 돌릴 때는 인원과 예산을 직접 넣을 수 있다 (9절의 `condition`).
 - 묶음마다의 비율은 고객군마다 다르고 기본 데이터에서 계산하므로 이 파일에 적지 않는다. 실행 기록(10절)에 남는다.
-- 조식을 조건에 넣지 않으면 집계 파일의 조식 매출은 대조에서 뺀다.
+- **조식은 묶음에 넣지 않는다** (11-13 결정). 조식은 고를 업장이 하나뿐이라 페르소나의 선택을 볼 것이 없다. 집계 파일의 조식 매출은 보정의 대조에서 뺀다.
+- **투숙 여부는 묶음에 넣지 않는다** (11-13 결정). 묶음의 조건은 `stay` 를 `null` 로 둔다. 기본 데이터에 투숙 여부가 없어 투숙객과 비투숙 방문객의 비율을 낼 수 없기 때문이다.
+  투숙 여부는 화면에서 조건을 직접 넣어 한 번 돌릴 때와, 투숙객 전용 프로모션을 시험할 때만 쓴다.
 - **달**: 묶음의 조건은 `month` 를 `null` 로 둔다. 일 년 전체로 본다는 뜻이고, 일부 달에만 파는 업장과 상품은 후보에 넣되 몫으로 센다 (10.2절의 `counted_share`).
   화면에서 한 번만 돌리거나 검증 사례를 넣을 때는 `month` 를 적을 수 있다. 그러면 엔진이 파는 달이 아닌 업장과 상품을 후보에서 뺀다.
 - `manual-` 로 시작하는 `condition_id` 는 화면에서 직접 넣은 조건에만 쓴다 (10.2절). 묶음의 조건에는 쓰지 않는다.
@@ -547,7 +564,7 @@ R-geumryong-0011,geumryong,map,2026-08,가족·친족,가족 행사,3대 가족,
 기본 데이터를 실행할 때마다 다시 읽지 않도록, 업장 데이터 담당이 한 번 계산해 `private/base/summary.csv` 에 둔다.
 기본 데이터에서 나온 값이므로 저장소에 올리지 않는다 (PRD 10절).
 
-한 줄은 기준 기간 전체에서 "그 고객군이 그 상품을 그 조건에서 산 것"의 합이다.
+한 줄은 한 달 동안 "그 고객군이 그 상품을 그 조건에서 산 것"의 합이다. 일 년 전체로 볼 때는 엔진이 달을 더한다.
 
 | 열 | 뜻 | 비고 |
 |---|---|---|
@@ -555,10 +572,12 @@ R-geumryong-0011,geumryong,map,2026-08,가족·친족,가족 행사,3대 가족,
 | `venue_id`, `product_id` | 업장, 상품 | 업장 정의(3절)의 식별자로 바꿔 적는다 |
 | `occasion` | 이용 상황 | 코드 값 |
 | `meal` | 끼니 | 상품으로 알 수 없으면 빈 칸. 그러면 6절의 `assumed_splits` 로 나눈다 |
-| `day_type` | 평일·주말 | 기본 데이터의 날짜로 정한다 |
-| `unit` | 판매 단위 | |
+| `day_type` | 평일·주말 | 기본 데이터의 날짜로 정한다. 공휴일은 한국천문연구원 특일 정보(공공데이터포털)를 따르고, 대체공휴일도 주말로 본다 |
+| `month` | 달 (1 ~ 12) | 기본 데이터의 날짜로 정한다. 일부 달에만 파는 상품과 연중에 가격이 바뀌는 상품을 가려 보려고 달마다 따로 적는다 |
+| `unit` | 판매 단위 | 업장 정의(3절)에 적은 단위 이름으로 적는다. 기본 데이터의 단위 이름을 그대로 옮기지 않는다 (예: 기본 데이터의 `인` 은 업장 정의의 `1인`) |
 | `quantity` | 팔린 수량의 합 | |
-| `revenue_net` | 세금을 뺀 매출의 합 | |
+| `paid` | 고객이 낸 금액의 합 (세금 포함) | 가격이 `null` 인 상품의 단가를 `paid` ÷ `quantity` 로 채운다 (3절) |
+| `revenue_net` | 세금을 뺀 매출의 합 | `paid` ÷ 1.1 이다. 줄마다 반올림한 값을 더한 것이라 조금 어긋날 수 있다 |
 | `price_unconfirmed` | 기본 데이터가 가격을 확인하지 못했다고 표시한 줄이면 `Y`, 아니면 `N` | 이 열은 빈 칸을 쓰지 않는다. `Y` 면 화면에서 `unknown` 등급으로 보여 준다 |
 
 - 기본 데이터의 업장 이름·상품 번호를 `venue_id`·`product_id` 로 바꾸는 표는 `private/base/map.json` 에 둔다. 기본 데이터의 이름이 들어 있으므로 저장소에 올리지 않는다.
@@ -571,16 +590,16 @@ R-geumryong-0011,geumryong,map,2026-08,가족·친족,가족 행사,3대 가족,
 |---|---|
 | 고객군마다 업장별 매출 비중 | 보정의 대조 (PRD 6.5절), 페르소나의 `base_profile` |
 | 고객군마다 방문 조건 묶음의 비율 | 가중 합산 (PRD 7.2절) |
-| 고객군의 다이닝 매출 합 | 고객군 배수 (PRD 7.2절) |
+| 고객군의 다이닝 매출 합 | 고객군 배수 (PRD 7.2절). 다이닝의 범위는 기본 데이터에서 사업부문이 호텔 다이닝인 8개 업장이다 |
 | 고객군과 이용 상황마다 매출이 가장 큰 업장 | 검증의 단순 기준 (PRD 6.6절) |
 
 예시 (지어낸 값이다)
 
 ```csv
-customer_group,venue_id,product_id,occasion,meal,day_type,unit,quantity,revenue_net,price_unconfirmed
-가족·친족,geumryong,course-a,meal,,weekday,1인,300,40909091,N
-가족·친족,geumryong,course-a,meal,,weekend,1인,500,68181818,N
-가족·친족,geumryong,course-b,meal,dinner,weekend,1인,120,21818182,N
+customer_group,venue_id,product_id,occasion,meal,day_type,month,unit,quantity,paid,revenue_net,price_unconfirmed
+가족·친족,geumryong,course-a,meal,,weekday,5,1인,300,45000000,40909091,N
+가족·친족,geumryong,course-a,meal,,weekend,5,1인,500,75000000,68181818,N
+가족·친족,geumryong,course-b,meal,dinner,weekend,5,1인,120,24000000,21818182,N
 ```
 
 ## 9. 선택 요청과 응답
@@ -595,7 +614,7 @@ customer_group,venue_id,product_id,occasion,meal,day_type,unit,quantity,revenue_
 | `prompt_version` | 프롬프트의 판 이름. 프롬프트를 고치면 바꾼다 |
 | `scenario_id` | 어느 상황인가 |
 | `persona` | 두 층을 합친 페르소나. 기본 데이터로 돌릴 때는 엔진이 붙인 `base_profile` 과, 비공개 층의 흔적 `overridden_by_private` (5절)가 들어 있다. 가상 예시로 돌릴 때는 둘 다 없거나 비어 있다 |
-| `condition` | 이번 방문 조건. 6절의 조건에 `adults`, `children`, `budget`, `purpose`, `party` 를 더한 것. `purpose` 와 `party` 는 검증할 때 후기의 라벨을 넣고, 다른 때는 `null` 이다 |
+| `condition` | 이번 방문 조건. 6절의 조건에 `adults`, `children`, `budget`, `purpose`, `party` 를 더한 것. `purpose` 와 `party` 는 검증할 때 후기의 라벨을 넣고 (후기에 비어 있으면 `null`), 다른 때는 `null` 이다 |
 | `candidates` | 규칙으로 추린 후보 업장. 업장마다 고를 수 있는 주문(`options`)이 들어 있다 |
 | `allow_none` | "이용하지 않음"을 고를 수 있는가. 늘 `true` |
 | `vocab` | 이유로 쓸 수 있는 라벨: `reasons_chosen`, `pain_points` |
@@ -920,7 +939,7 @@ run_id,scenario_id,visit_id,persona_id,customer_group,condition_id,choice_kind,v
 | 열 | 뜻 |
 |---|---|
 | `review_id`, `venue_id`, `customer_group` | 떼어 둔 후기 |
-| `persona_id` | 돌린 페르소나. 그 고객군에 페르소나가 둘이면 후기의 `purpose`, `party` 가 더 많이 겹치는 쪽, 같으면 몫이 큰 쪽 (PRD 6.6절) |
+| `persona_id` | 돌린 페르소나. 그 고객군에 페르소나가 둘이면 후기의 `purpose`, `party` 가 더 많이 겹치는 쪽, 같으면 몫이 큰 쪽 (PRD 6.6절). 후기에 비어 있는 칸은 겹치지 않는 것으로 센다 |
 | `occasion`, `meal`, `day_type` | 돌린 조건. 후기에 끼니나 요일이 비어 있으면 그 페르소나의 `visit.meals`, `visit.day_types` 의 첫 값을 쓴다 |
 | `chosen_venue_id` | 페르소나가 고른 곳. "이용하지 않음"이면 빈 칸 |
 | `venue_match`, `reason_match` | 업장이 같은가, 이유 라벨이 하나 이상 겹치는가 (`Y`, `N`) |
@@ -947,9 +966,10 @@ uv run python -m tools.check_formats --strict   # 다 만든 뒤의 기준으로
 - 다른 파일을 가리키는 식별자가 실제로 있다: 경쟁 업장의 `competes_with`, 페르소나의 `compares_with`, 상황의 `venue_id`·`product_id`, 후기의 `venue_id`.
 - 상품의 `occasion` 이 업장의 `occasions` 안에 있다. 워커힐 업장마다 경쟁 업장이 하나 이상 있다.
 - 업장 정의의 모든 `source_id` 가 `sources` 에 있고 `checked_on` 이 있다.
-- 라벨(방문 목적, 동행, 고른 이유, 걸린 점, 고객군)이 값 목록에 있다.
+- 라벨(방문 목적, 동행, 고른 이유, 걸린 점, 고객군)이 값 목록에 있다. 후기 라벨의 방문 목적과 동행은 비어 있어도 된다.
+- 후기 라벨의 줄마다 근거가 되는 칸이 하나 이상 있다 (4.1절). `ordered` 와 `compared_with` 의 `이름:` 뒤에는 이름이 있다.
 - 페르소나의 `evidence` 에 묶음 일곱 개가 모두 있고, 한 고객군의 `share_in_group.value` 를 더하면 1 이다.
-- 묶음의 조건은 `month` 가 `null` 이다. 상황의 `our_price`·`our_promo` 는 워커힐 업장만, `competitor` 는 경쟁 업장만 바꾼다.
+- 묶음의 조건은 `month` 와 `stay` 가 `null` 이고 조식 조건이 없다. 상황의 `our_price`·`our_promo` 는 워커힐 업장만, `competitor` 는 경쟁 업장만 바꾼다.
 - `engine/samples/runs/` 의 실행 기록은 모두 `data_mode` 가 `sample` 이다. 가중치가 빠짐없이 있고 등급에 `internal` 이 없다.
   원장의 방문 수가 실행 기록과 맞고, 원장이 저장된 응답과 같다 (10절).
 - 데이터 폴더에 1절의 표에 없는 파일이나 폴더가 없다. 확장자는 소문자다. (빈 폴더를 깃에 남기는 `.gitkeep` 은 둘 수 있다.)
@@ -980,6 +1000,7 @@ uv run python -m tools.check_formats --strict   # 다 만든 뒤의 기준으로
 **이 도구가 보지 못하는 것** — 이것은 사람이 지킨다 (`CLAUDE.md` 의 "비밀값과 공개 저장소").
 
 - 지어낸 값이라고 적은 파일의 값이 정말 지어낸 것인지. 문서에 풀어 쓴 수치. 발표 자료와 그림, 노트북의 출력.
+- 본문이 있는 후기에 요약(`summary`)을 썼는지 (4.1절).
 - 열 이름을 바꾼 표: 다른 이름의 열에 담은 기본 데이터의 금액, 약속과 다른 열 이름의 주소 목록.
 - 번호도 주소도 없이 옮겨 적은 후기의 문장.
 
@@ -1004,9 +1025,9 @@ uv run python -m tools.check_formats --strict   # 다 만든 뒤의 기준으로
 
 **아직 정하지 않은 것**
 
-- [ ] 평일과 주말을 나눌 때 공휴일을 어느 달력으로 정할지 (업장 데이터 담당. PRD 5.2절의 달력 출처)
+- [x] 평일과 주말을 나눌 때 공휴일을 어느 달력으로 정할지 (11-13, 한국천문연구원 특일 정보(공공데이터포털). 주말은 토·일·공휴일이고 대체공휴일도 든다. 업장 데이터 담당의 제안을 팀장이 받아들임)
 - [x] 폴더 이름의 확정 (11-13, 팀장이 제안대로 확정함. `STRUCTURE.md` 의 폴더 표)
-- [ ] 방문 조건 묶음에 조식과 투숙 여부를 넣을지 (엔진 담당)
+- [x] 방문 조건 묶음에 조식과 투숙 여부를 넣을지 (11-13, 둘 다 넣지 않는다. 6절)
 - [ ] `assumed_splits` 의 값 (엔진 담당)
 - [ ] 기본 데이터에서 나온 값을 LLM 에 어떻게 보낼지, 곧 `base_profile_mode` 의 기본값 (PRD 17절, 엔진 담당)
 - [ ] 라벨 값 목록의 첫 판 (11-13, 페르소나 담당)

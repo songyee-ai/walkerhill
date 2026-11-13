@@ -18,21 +18,24 @@
       "day_type": "all",
       "open": "12:00",
       "last_order": "13:30",
-      "close": "14:30"
+      "close": "14:30",
+      "source_id": null
     },
     {
       "meal": "dinner",
       "day_type": "weekday",
       "open": "17:30",
       "last_order": "20:30",
-      "close": "21:30"
+      "close": "21:30",
+      "source_id": null
     },
     {
       "meal": "dinner",
       "day_type": "weekend",
       "open": "17:00",
       "last_order": "20:30",
-      "close": "21:30"
+      "close": "21:30",
+      "source_id": null
     }
   ],
   "reservation": null,
@@ -41,12 +44,11 @@
       "product_id": "lunch-special-set",
       "name": "요리장 추천 런치 특선 세트",
       "occasion": "meal",
-      "meals": [
-        "lunch"
-      ],
-      "day_types": [
-        "weekday",
-        "weekend"
+      "slots": [
+        {
+          "meal": "lunch",
+          "day_type": "all"
+        }
       ],
       "months": null,
       "audience": "all",
@@ -63,12 +65,11 @@
       "product_id": "akine-lunch",
       "name": "아키네 시즌 메뉴 (점심)",
       "occasion": "meal",
-      "meals": [
-        "lunch"
-      ],
-      "day_types": [
-        "weekday",
-        "weekend"
+      "slots": [
+        {
+          "meal": "lunch",
+          "day_type": "all"
+        }
       ],
       "months": null,
       "audience": "all",
@@ -85,12 +86,11 @@
       "product_id": "akine-dinner",
       "name": "아키네 시즌 메뉴 (저녁)",
       "occasion": "meal",
-      "meals": [
-        "dinner"
-      ],
-      "day_types": [
-        "weekday",
-        "weekend"
+      "slots": [
+        {
+          "meal": "dinner",
+          "day_type": "all"
+        }
       ],
       "months": null,
       "audience": "all",
@@ -107,13 +107,15 @@
       "product_id": "sashimi-on-rice",
       "name": "아리아께 회 덮밥",
       "occasion": "meal",
-      "meals": [
-        "lunch",
-        "dinner"
-      ],
-      "day_types": [
-        "weekday",
-        "weekend"
+      "slots": [
+        {
+          "meal": "lunch",
+          "day_type": "all"
+        },
+        {
+          "meal": "dinner",
+          "day_type": "all"
+        }
       ],
       "months": null,
       "audience": "all",
