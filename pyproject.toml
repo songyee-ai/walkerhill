@@ -1,0 +1,52 @@
+# 이 파일과 uv.lock 은 공통 틀이다. 패키지를 더하거나 버전을 바꾸는 것은 엔진 담당(팀장)만 한다.
+# 필요한 패키지가 생기면 docs/PROGRESS.md 의 "알릴 것"에 적는다. (CLAUDE.md 의 "스택" 절)
+
+[project]
+name = "walkerhill-dining-sim"
+version = "0.1.0"
+description = "워커힐 다이닝 페르소나 시뮬레이터"
+readme = "README.md"
+requires-python = ">=3.13,<3.14"
+dependencies = [
+    "anthropic>=1",
+    "pandas>=2.2",
+    "pydantic>=2.9",
+    "python-dotenv>=1",
+    "streamlit>=1.40",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+    "ruff>=0.8",
+]
+
+[tool.uv]
+# 이 날짜 뒤에 올라온 판은 쓰지 않는다.
+# 윈도우의 스마트 앱 컨트롤이 나온 지 얼마 안 된 실행 파일(DLL)을 막기 때문이다.
+# 2026-11-13 스마트 앱 컨트롤이 켜진 윈도우 11 PC 에서 pandas 3.1 과 pyarrow 26.0.1 이 막혔고, 그 앞의 판은 통과했다.
+# 판을 올리고 싶으면 이 날짜를 옮긴 뒤 `uv lock` 을 다시 하고, 스마트 앱 컨트롤이 켜진 PC 에서 테스트를 돌려 본다.
+exclude-newer = "2026-10-15T00:00:00Z"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+# engine 과 tools 를 어디서든 가져다 쓸 수 있게 한다 (화면을 띄울 때도 `import engine` 이 된다).
+[tool.hatch.build.targets.wheel]
+packages = ["engine", "tools"]
+
+[tool.ruff]
+target-version = "py313"
+line-length = 110
+extend-exclude = [".venv", "private"]
+
+[tool.ruff.lint]
+# E, F: 기본 오류. I: import 순서. B: 흔한 실수. UP: 옛 문법.
+select = ["E", "F", "I", "B", "UP"]
+# 한국어 문장이 든 줄은 길어지기 쉬워 줄 길이는 검사하지 않는다.
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

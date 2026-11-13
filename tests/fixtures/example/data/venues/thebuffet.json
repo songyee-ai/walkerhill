@@ -1,0 +1,91 @@
+{
+  "format_version": 1,
+  "venue_id": "thebuffet",
+  "name": "더뷔페",
+  "hotel": "워커힐",
+  "is_competitor": false,
+  "competes_with": [],
+  "cuisine": "뷔페",
+  "occasions": ["meal"],
+  "months": null,
+  "hours": [
+    {"meal": "lunch", "day_type": "all", "open": "11:30", "last_order": null, "close": "14:30"},
+    {"meal": "dinner", "day_type": "all", "open": "17:30", "last_order": null, "close": "21:30"}
+  ],
+  "reservation": {"required": true, "party_min": 1, "party_max": 10, "note": ""},
+  "products": [
+    {
+      "product_id": "lunch-adult",
+      "name": "점심 (성인)",
+      "occasion": "meal",
+      "meals": ["lunch"],
+      "day_types": ["weekday", "weekend"],
+      "months": null,
+      "audience": "adult",
+      "unit": "1인",
+      "serves": 1,
+      "qty_rule": "per_person",
+      "qty_max": null,
+      "price": 160000,
+      "price_basis": "included",
+      "grade": "official",
+      "source_id": null
+    },
+    {
+      "product_id": "lunch-child",
+      "name": "점심 (어린이)",
+      "occasion": "meal",
+      "meals": ["lunch"],
+      "day_types": ["weekday", "weekend"],
+      "months": null,
+      "audience": "child",
+      "unit": "1인",
+      "serves": 1,
+      "qty_rule": "per_person",
+      "qty_max": null,
+      "price": 80000,
+      "price_basis": "included",
+      "grade": "official",
+      "source_id": null
+    },
+    {
+      "product_id": "dinner-adult",
+      "name": "저녁 (성인)",
+      "occasion": "meal",
+      "meals": ["dinner"],
+      "day_types": ["weekday", "weekend"],
+      "months": null,
+      "audience": "adult",
+      "unit": "1인",
+      "serves": 1,
+      "qty_rule": "per_person",
+      "qty_max": null,
+      "price": 180000,
+      "price_basis": "included",
+      "grade": "official",
+      "source_id": null
+    },
+    {
+      "product_id": "dinner-child",
+      "name": "저녁 (어린이)",
+      "occasion": "meal",
+      "meals": ["dinner"],
+      "day_types": ["weekday", "weekend"],
+      "months": null,
+      "audience": "child",
+      "unit": "1인",
+      "serves": 1,
+      "qty_rule": "per_person",
+      "qty_max": null,
+      "price": 90000,
+      "price_basis": "included",
+      "grade": "official",
+      "source_id": null
+    }
+  ],
+  "promotions": [],
+  "sources": [
+    {"source_id": "S1", "title": "업장 요금 안내 (예시)", "url": "https://example.com/buffet", "checked_on": "2026-11-13"}
+  ],
+  "default_source_id": "S1"
+}

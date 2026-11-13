@@ -1,0 +1,273 @@
+{
+  "format_version": 1,
+  "request_hash": "3048cd02fff58366",
+  "provider": "anthropic",
+  "model": "claude-opus-5-5",
+  "created_at": "2026-11-17T10:15:00+09:00",
+  "request": {
+    "prompt_version": "p1",
+    "scenario_id": "baseline",
+    "persona": {
+      "format_version": 1,
+      "persona_id": "family-elders",
+      "name": "어르신을 모신 행사 가족",
+      "customer_group": "가족·친족",
+      "share_in_group": {
+        "value": 0.5,
+        "grade": "assumption",
+        "basis": "후기가 모자라 반반으로 둠"
+      },
+      "visit": {
+        "purposes": [
+          "가족 행사"
+        ],
+        "party": {
+          "label": "3대 가족",
+          "adults": 4,
+          "children": 0
+        },
+        "occasions": [
+          "meal"
+        ],
+        "meals": [
+          "lunch",
+          "dinner"
+        ],
+        "day_types": [
+          "weekend"
+        ]
+      },
+      "budget": {
+        "basis": "per_person",
+        "typical": 150000,
+        "max": 220000
+      },
+      "preferences": {
+        "cuisines_like": [
+          "중식",
+          "한식"
+        ],
+        "cuisines_avoid": [],
+        "dietary": [],
+        "atmosphere": {
+          "조용함": 3,
+          "격식": 3,
+          "전망": 1
+        },
+        "needs": [
+          "별실",
+          "어르신이 움직이기 편함"
+        ]
+      },
+      "buying": {
+        "price_sensitivity": "low",
+        "promo_response": "행사 자리라 혜택보다 자리 조건을 먼저 본다",
+        "reservation": "늘 예약한다",
+        "wait_tolerance": "low"
+      },
+      "revisit": {
+        "returns_for": [
+          "별실",
+          "서비스"
+        ],
+        "leaves_for": [
+          "가격"
+        ]
+      },
+      "compares_with": [
+        "examplehotel-chinese"
+      ],
+      "evidence": {
+        "share_in_group": {
+          "grade": "assumption",
+          "refs": [],
+          "note": "후기 건수가 모자라 비율을 낼 수 없었다"
+        },
+        "visit": {
+          "grade": "review",
+          "refs": [
+            "R-geumryong-0003",
+            "R-geumryong-0011"
+          ],
+          "note": ""
+        },
+        "budget": {
+          "grade": "assumption",
+          "refs": [
+            "geumryong:S1"
+          ],
+          "note": "후기에 금액이 드물어 메뉴 가격대에서 정했다"
+        },
+        "preferences": {
+          "grade": "review",
+          "refs": [
+            "R-geumryong-0003",
+            "R-geumryong-0011"
+          ],
+          "note": ""
+        },
+        "buying": {
+          "grade": "review",
+          "refs": [
+            "R-geumryong-0003"
+          ],
+          "note": ""
+        },
+        "revisit": {
+          "grade": "review",
+          "refs": [
+            "R-geumryong-0003",
+            "R-geumryong-0011"
+          ],
+          "note": ""
+        },
+        "compares_with": {
+          "grade": "review",
+          "refs": [
+            "R-geumryong-0003"
+          ],
+          "note": ""
+        }
+      }
+    },
+    "condition": {
+      "condition_id": "meal-dinner-weekend",
+      "occasion": "meal",
+      "meal": "dinner",
+      "day_type": "weekend",
+      "stay": null,
+      "month": null,
+      "adults": 4,
+      "children": 0,
+      "budget": {
+        "basis": "per_person",
+        "typical": 150000,
+        "max": 220000
+      },
+      "purpose": null,
+      "party": null
+    },
+    "candidates": [
+      {
+        "venue_id": "geumryong",
+        "name": "금룡",
+        "hotel": "워커힐",
+        "is_competitor": false,
+        "cuisine": "중식",
+        "options": [
+          {
+            "option_id": "geumryong-o1",
+            "lines": [
+              {
+                "product_id": "course-a",
+                "name": "코스 A",
+                "unit": "1인",
+                "quantity": 4,
+                "unit_price": 150000,
+                "discount": 0,
+                "line_total": 600000
+              }
+            ],
+            "total": 600000
+          },
+          {
+            "option_id": "geumryong-o2",
+            "lines": [
+              {
+                "product_id": "course-b",
+                "name": "코스 B",
+                "unit": "1인",
+                "quantity": 4,
+                "unit_price": 200000,
+                "discount": 0,
+                "line_total": 800000
+              }
+            ],
+            "total": 800000
+          }
+        ],
+        "addons": [],
+        "promotions": []
+      },
+      {
+        "venue_id": "examplehotel-chinese",
+        "name": "예시호텔 중식당",
+        "hotel": "예시호텔",
+        "is_competitor": true,
+        "cuisine": "중식",
+        "options": [
+          {
+            "option_id": "examplehotel-chinese-o1",
+            "lines": [
+              {
+                "product_id": "course",
+                "name": "디너 코스",
+                "unit": "1인",
+                "quantity": 4,
+                "unit_price": 140000,
+                "discount": 0,
+                "line_total": 560000
+              }
+            ],
+            "total": 560000
+          }
+        ],
+        "addons": [],
+        "promotions": []
+      }
+    ],
+    "allow_none": true,
+    "vocab": {
+      "reasons_chosen": [
+        "맛",
+        "분위기·전망",
+        "별실",
+        "서비스",
+        "주차·접근",
+        "가격 대비 만족",
+        "아이 편의",
+        "시즌 메뉴",
+        "혜택·할인"
+      ],
+      "pain_points": [
+        "가격",
+        "예약이 어려움",
+        "대기",
+        "소음",
+        "양",
+        "서비스",
+        "주차·접근"
+      ]
+    }
+  },
+  "response": {
+    "choice": {
+      "venue_id": "geumryong",
+      "option_id": "geumryong-o1",
+      "addons": []
+    },
+    "reason_labels": [
+      "별실",
+      "주차·접근"
+    ],
+    "reason_text": "어르신을 모시는 자리라 별실이 있고 차로 오기 편한 곳을 골랐다.",
+    "used_attributes": [
+      "visit.purposes",
+      "preferences.needs"
+    ],
+    "rejected": [
+      {
+        "venue_id": "examplehotel-chinese",
+        "pain_labels": [
+          "주차·접근"
+        ],
+        "text": "값은 조금 싸지만 어르신과 움직이기에 불편하다."
+      }
+    ]
+  },
+  "raw_text": "{\"choice\": {\"venue_id\": \"geumryong\", \"option_id\": \"geumryong-o1\", \"addons\": []}, \"reason_labels\": [\"별실\", \"주차·접근\"], \"reason_text\": \"어르신을 모시는 자리라 별실이 있고 차로 오기 편한 곳을 골랐다.\", \"used_attributes\": [\"visit.purposes\", \"preferences.needs\"], \"rejected\": [{\"venue_id\": \"examplehotel-chinese\", \"pain_labels\": [\"주차·접근\"], \"text\": \"값은 조금 싸지만 어르신과 움직이기에 불편하다.\"}]}",
+  "usage": {
+    "input_tokens": 0,
+    "output_tokens": 0
+  }
+}

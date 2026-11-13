@@ -1,0 +1,92 @@
+{
+  "format_version": 1,
+  "venue_id": "geumryong",
+  "name": "금룡",
+  "hotel": "워커힐",
+  "is_competitor": false,
+  "competes_with": [],
+  "cuisine": "중식",
+  "occasions": [
+    "meal"
+  ],
+  "months": null,
+  "hours": [
+    {
+      "meal": "lunch",
+      "day_type": "all",
+      "open": "12:00",
+      "last_order": "14:00",
+      "close": "15:00"
+    },
+    {
+      "meal": "dinner",
+      "day_type": "all",
+      "open": "18:00",
+      "last_order": "20:30",
+      "close": "22:00"
+    }
+  ],
+  "reservation": {
+    "required": false,
+    "party_min": 1,
+    "party_max": 12,
+    "note": "별실은 예약 필수"
+  },
+  "products": [
+    {
+      "product_id": "course-a",
+      "name": "코스 A",
+      "occasion": "meal",
+      "meals": [
+        "lunch",
+        "dinner"
+      ],
+      "day_types": [
+        "weekday",
+        "weekend"
+      ],
+      "months": null,
+      "audience": "all",
+      "unit": "1인",
+      "serves": 1,
+      "qty_rule": "per_person",
+      "qty_max": null,
+      "price": 150000,
+      "price_basis": "included",
+      "grade": "official",
+      "source_id": null
+    },
+    {
+      "product_id": "course-b",
+      "name": "코스 B",
+      "occasion": "meal",
+      "meals": [
+        "dinner"
+      ],
+      "day_types": [
+        "weekday",
+        "weekend"
+      ],
+      "months": null,
+      "audience": "all",
+      "unit": "1인",
+      "serves": 1,
+      "qty_rule": "per_person",
+      "qty_max": null,
+      "price": 200000,
+      "price_basis": "included",
+      "grade": "official",
+      "source_id": null
+    }
+  ],
+  "promotions": [],
+  "sources": [
+    {
+      "source_id": "S1",
+      "title": "업장 메뉴판 (예시)",
+      "url": "https://example.com/menu",
+      "checked_on": "2026-11-13"
+    }
+  ],
+  "default_source_id": "S1"
+}

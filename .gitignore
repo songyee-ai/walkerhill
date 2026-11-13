@@ -18,13 +18,14 @@ desktop.ini
 .omc/
 .claude/settings.local.json
 
-# 흔한 생성물 (스택 확정 후 정리)
-node_modules/
+# 생성물 (Python + uv)
 __pycache__/
 *.pyc
 .venv/
 venv/
 dist/
 build/
-.next/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
 *.log

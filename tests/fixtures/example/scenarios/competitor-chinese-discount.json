@@ -1,0 +1,32 @@
+{
+  "format_version": 1,
+  "scenario_id": "competitor-chinese-discount",
+  "name": "경쟁 중식당의 주말 할인",
+  "kind": "competitor",
+  "description": "경쟁 업장이 주말에 할인을 열었을 때 누가 옮겨 가는지 본다.",
+  "changes": [
+    {
+      "op": "add_promotion",
+      "venue_id": "examplehotel-chinese",
+      "promotion": {
+        "promo_id": "weekend-10",
+        "name": "주말 10% 할인",
+        "benefit": {
+          "type": "discount_pct",
+          "value": 10
+        },
+        "applies_to": null,
+        "conditions": {
+          "day_type": "weekend",
+          "meal": null,
+          "stay": null,
+          "party_min": null
+        },
+        "period": null,
+        "grade": "assumption",
+        "source_id": null
+      }
+    }
+  ],
+  "note": "할인 폭은 가정이다"
+}

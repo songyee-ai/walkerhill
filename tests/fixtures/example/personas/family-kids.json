@@ -1,0 +1,39 @@
+{
+  "format_version": 1,
+  "persona_id": "family-kids",
+  "name": "아이를 데려온 외식 가족",
+  "customer_group": "가족·친족",
+  "share_in_group": {"value": 0.5, "grade": "assumption", "basis": "후기가 모자라 반반으로 둠"},
+  "visit": {
+    "purposes": ["일상 외식"],
+    "party": {"label": "아이 동반 가족", "adults": 2, "children": 2},
+    "occasions": ["meal"],
+    "meals": ["lunch", "dinner"],
+    "day_types": ["weekend"]
+  },
+  "budget": {"basis": "per_person", "typical": 90000, "max": 190000},
+  "preferences": {
+    "cuisines_like": ["뷔페"],
+    "cuisines_avoid": [],
+    "dietary": [],
+    "atmosphere": {"활기": 2, "조용함": 1},
+    "needs": ["아이가 먹을 메뉴", "유아 의자"]
+  },
+  "buying": {
+    "price_sensitivity": "high",
+    "promo_response": "어린이 혜택이나 할인이 있으면 그쪽을 먼저 본다",
+    "reservation": "주말에는 예약한다",
+    "wait_tolerance": "low"
+  },
+  "revisit": {"returns_for": ["아이 편의", "가격 대비 만족"], "leaves_for": ["가격", "대기"]},
+  "compares_with": ["examplehotel-buffet"],
+  "evidence": {
+    "share_in_group": {"grade": "assumption", "refs": [], "note": "후기 건수가 모자라 비율을 낼 수 없었다"},
+    "visit": {"grade": "assumption", "refs": [], "note": "후기 근거가 없는 페르소나의 예시다"},
+    "budget": {"grade": "assumption", "refs": ["thebuffet:S1"], "note": "메뉴 가격대에서 정했다"},
+    "preferences": {"grade": "assumption", "refs": [], "note": "후기 근거가 없는 페르소나의 예시다"},
+    "buying": {"grade": "assumption", "refs": [], "note": "후기 근거가 없는 페르소나의 예시다"},
+    "revisit": {"grade": "assumption", "refs": [], "note": "후기 근거가 없는 페르소나의 예시다"},
+    "compares_with": {"grade": "assumption", "refs": [], "note": "같은 종류의 업장을 견준다고 보았다"}
+  }
+}
