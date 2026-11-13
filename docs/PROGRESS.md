@@ -409,15 +409,15 @@ T03 ~ T24 는 11-13 에 팀장이 낸 제안이다. 팀이 확인하면 이 줄�
 남의 영역을 고쳤거나 남이 알아야 할 변경이 있으면 여기에 적는다. 받은 사람이 확인하고 체크한다.
 형식: `- [ ] 받는 사람 ← 보낸 사람 (날짜): 내용`
 
-- [ ] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-11): 깃헙 초대를 수락하고 `CLAUDE.md` 를 읽어 주세요.
-- [ ] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-12): 내부 자료는 `private/` 폴더에만 두고, 그 내용을 저장소 파일에 옮겨 적지 않습니다. `CLAUDE.md` 의 "비밀값과 공개 저장소" 절을 읽어 주세요.
-- [ ] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-13): PRD 가 확정됐습니다. [PRD.md](PRD.md) 14절에서 내 영역을, 8절에서 기한과 중간 기한을 확인해 주세요.
-- [ ] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-13): 실행하면 생기는 파일(저장된 LLM 응답, 원장, 대조 결과)은 `private/` 아래에만 둡니다. 실측 기록과 PR 본문에는 통과 여부와 잰 방법만 적습니다 (`CLAUDE.md` 의 "비밀값과 공개 저장소" 절에 새로 넣은 규칙, PRD 10절).
-- [ ] hojitea-ui ← songyee-ai (11-13): 업장 데이터 영역에 일이 더해졌습니다. 떼어 둘 후기 20%의 분리·보관·라벨, 기본 데이터 집계 파일, 가상 예시 값, 11-17 부터 후기 라벨링 지원입니다 (PRD 5.2절, 10절, 14절).
+- [ ] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-11): 깃헙 초대를 수락하고 `CLAUDE.md` 를 읽어 주세요. (확인: hojitea-ui 11-13)
+- [ ] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-12): 내부 자료는 `private/` 폴더에만 두고, 그 내용을 저장소 파일에 옮겨 적지 않습니다. `CLAUDE.md` 의 "비밀값과 공개 저장소" 절을 읽어 주세요. (확인: hojitea-ui 11-13)
+- [ ] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-13): PRD 가 확정됐습니다. [PRD.md](PRD.md) 14절에서 내 영역을, 8절에서 기한과 중간 기한을 확인해 주세요. (확인: hojitea-ui 11-13)
+- [ ] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-13): 실행하면 생기는 파일(저장된 LLM 응답, 원장, 대조 결과)은 `private/` 아래에만 둡니다. 실측 기록과 PR 본문에는 통과 여부와 잰 방법만 적습니다 (`CLAUDE.md` 의 "비밀값과 공개 저장소" 절에 새로 넣은 규칙, PRD 10절). (확인: hojitea-ui 11-13)
+- [x] hojitea-ui ← songyee-ai (11-13): 업장 데이터 영역에 일이 더해졌습니다. 떼어 둘 후기 20%의 분리·보관·라벨, 기본 데이터 집계 파일, 가상 예시 값, 11-17 부터 후기 라벨링 지원입니다 (PRD 5.2절, 10절, 14절). (확인: hojitea-ui 11-13, PRD 5.2·10·14절을 읽고 T13·T15 사전 작업을 시작함)
 - [ ] borigunbbang ← songyee-ai (11-13): 후기는 주소 목록으로 먼저 모으고, 그중 20%는 hojitea-ui 가 가져갑니다. 그 후기는 페르소나를 다 만든 뒤에 받습니다. 라벨은 값 목록에서 고릅니다 (PRD 5.2절).
 - [ ] wilstein91 ← songyee-ai (11-13): 시연 시나리오 후보 세 개가 PRD 3절에 있습니다. 11-17 까지 대상 업장과 바꿀 내용을 확정해 주세요.
-- [ ] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-13): 작업 유닛 T03 ~ T24 를 진행 표에 올렸습니다. 내 유닛의 번호, 기한, 기다리는 것, 완료 조건을 읽어 주세요. 나누는 방식이나 기한에 고칠 것이 있으면 이 목록에 적어 주세요. 커밋과 PR 제목 앞에는 이 번호를 붙입니다.
-- [ ] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-13): 데이터 형식 약속의 초안이 [FORMATS.md](FORMATS.md) 에 있습니다. 1절의 표에서 내가 만드는 파일과 쓰는 파일을 찾아 읽어 주세요. 고칠 것이 있으면 이 목록에 적고, 없으면 체크해 주세요. 세 명이 체크하면 확정합니다.
+- [ ] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-13): 작업 유닛 T03 ~ T24 를 진행 표에 올렸습니다. 내 유닛의 번호, 기한, 기다리는 것, 완료 조건을 읽어 주세요. 나누는 방식이나 기한에 고칠 것이 있으면 이 목록에 적어 주세요. 커밋과 PR 제목 앞에는 이 번호를 붙입니다. (확인: hojitea-ui 11-13)
+- [ ] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-13): 데이터 형식 약속의 초안이 [FORMATS.md](FORMATS.md) 에 있습니다. 1절의 표에서 내가 만드는 파일과 쓰는 파일을 찾아 읽어 주세요. 고칠 것이 있으면 이 목록에 적고, 없으면 체크해 주세요. 세 명이 체크하면 확정합니다. (hojitea-ui 11-13: 고칠 것 7건을 아래 "songyee-ai ← hojitea-ui" 항목에 적음. 반영되면 확인)
 - [ ] songyee-ai ← hojitea-ui (11-13): 기본 데이터에는 PRD 2절·5.1절에 적힌 `유형` 열이 없고 `페르소나` 열이 있습니다.
 - [ ] songyee-ai ← hojitea-ui (11-13): FORMATS 3절 `price_basis` 의 `excluded` 는 세금과 봉사료가 따로 붙는 가격인데 엔진은 1.1 만 곱합니다. 봉사료 10% 와 부가세 10% 가 따로면 1.21 입니다. 공개 가격의 표기가 해마다 달라 둘 다 나옵니다. `excluded_vat`(×1.1)·`excluded_vat_service`(×1.21)로 나누기를 제안합니다.
 - [ ] songyee-ai ← hojitea-ui (11-13): FORMATS 3절에서 가격이 `null` 인 상품을 "집계 파일의 매출 ÷ 수량"으로 채우면 `revenue_net` 이 세금을 뺀 값이라 단가가 세금만큼 낮아집니다. 8절 집계 파일에 `paid`(세금 포함 결제액의 합) 열을 더하고 `paid ÷ quantity` 로 채우기를 제안합니다.
@@ -425,7 +425,7 @@ T03 ~ T24 는 11-13 에 팀장이 낸 제안이다. 팀이 확인하면 이 줄�
 - [ ] songyee-ai ← hojitea-ui (11-13): FORMATS 8절 집계 파일에 `month` 열을 더하기를 제안합니다. 기본 데이터가 날짜 단위라 바로 나오고, 한정 기간 상품과 연중 가격 변경이 있습니다. 기본 데이터에는 결제 시각과 투숙 여부 열이 없어, 끼니가 섞인 상품은 `assumed_splits` 로만 나눌 수 있고 방문 조건의 `stay` 는 집계로 뒷받침되지 않습니다.
 - [ ] songyee-ai ← hojitea-ui (11-13): FORMATS 의 단위 이름이 기본 데이터와 다릅니다 (예시는 `1인`, 기본 데이터는 `인`). 집계 파일의 `unit` 을 업장 정의의 단위로 바꿔 적기를 제안합니다. 또 운영 시간과 예약 조건은 메뉴판과 출처가 다를 수 있어 `hours` 줄과 `reservation` 에도 `source_id` 를 둘 수 있게 해 주세요.
 - [ ] songyee-ai ← hojitea-ui (11-13): 업장 데이터 담당 몫인 공휴일 달력의 출처는 한국천문연구원 특일 정보(공공데이터포털)로 하려 합니다. `day_type` 의 `weekend` 는 토·일·공휴일(대체공휴일 포함)입니다. 다이닝 매출 합(T13)의 범위는 사업부문이 호텔 다이닝인 8개 업장으로 봅니다.
-- [ ] hojitea-ui, songyee-ai, wilstein91 ← borigunbbang (11-13): 라벨 값 목록 첫 판이 `data/evidence/vocab.json` 에 있습니다. 후기 라벨과 LLM 응답의 이유는 이 목록에서 고릅니다. 필요한 값이 없으면 이 목록에 적어 주세요. 제가 목록에 더한 뒤 씁니다.
+- [ ] hojitea-ui, songyee-ai, wilstein91 ← borigunbbang (11-13): 라벨 값 목록 첫 판이 `data/evidence/vocab.json` 에 있습니다. 후기 라벨과 LLM 응답의 이유는 이 목록에서 고릅니다. 필요한 값이 없으면 이 목록에 적어 주세요. 제가 목록에 더한 뒤 씁니다. (확인: hojitea-ui 11-13)
 
 ## 실측 기록
 
