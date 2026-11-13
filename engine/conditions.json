@@ -1,0 +1,82 @@
+{
+  "format_version": 1,
+  "conditions": [
+    {
+      "condition_id": "meal-lunch-weekday",
+      "occasion": "meal",
+      "meal": "lunch",
+      "day_type": "weekday",
+      "stay": null,
+      "month": null
+    },
+    {
+      "condition_id": "meal-lunch-weekend",
+      "occasion": "meal",
+      "meal": "lunch",
+      "day_type": "weekend",
+      "stay": null,
+      "month": null
+    },
+    {
+      "condition_id": "meal-dinner-weekday",
+      "occasion": "meal",
+      "meal": "dinner",
+      "day_type": "weekday",
+      "stay": null,
+      "month": null
+    },
+    {
+      "condition_id": "meal-dinner-weekend",
+      "occasion": "meal",
+      "meal": "dinner",
+      "day_type": "weekend",
+      "stay": null,
+      "month": null
+    },
+    {
+      "condition_id": "dessert-weekday",
+      "occasion": "dessert",
+      "meal": null,
+      "day_type": "weekday",
+      "stay": null,
+      "month": null
+    },
+    {
+      "condition_id": "dessert-weekend",
+      "occasion": "dessert",
+      "meal": null,
+      "day_type": "weekend",
+      "stay": null,
+      "month": null
+    },
+    {
+      "condition_id": "takeout-weekday",
+      "occasion": "takeout",
+      "meal": null,
+      "day_type": "weekday",
+      "stay": null,
+      "month": null
+    },
+    {
+      "condition_id": "takeout-weekend",
+      "occasion": "takeout",
+      "meal": null,
+      "day_type": "weekend",
+      "stay": null,
+      "month": null
+    }
+  ],
+  "assumed_splits": [
+    {
+      "split_id": "meal-lunch-dinner",
+      "applies_when": "집계 파일에서 끼니가 비어 있는 식사 매출",
+      "parts": {
+        "lunch": 0.5,
+        "dinner": 0.5
+      },
+      "grade": "assumption",
+      "decided_on": "2026-11-13",
+      "note": "근거가 되는 자료가 없어 반반으로 둔다 (11-13 팀장이 정함). 금룡 후기 라벨 80건은 점심 41건, 저녁 39건이었다"
+    }
+  ]
+}

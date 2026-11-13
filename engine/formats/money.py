@@ -29,6 +29,15 @@ def net_of_tax(paid: int) -> int:
     return round_half_up(Decimal(paid) / TAX_RATE)
 
 
+def weighted_amount(revenue_net: int, represented: float, counted_share: float) -> Decimal:
+    """가중 매출 = 세금을 뺀 매출 × 대표하는 크기 × 몫 (docs/FORMATS.md 10.2절). 반올림하기 전의 값이다.
+
+    소수(float)로 곱하면 꼭 x.5 인 값이 x.4999… 가 되어 반올림이 갈린다. 그래서 십진수로 곱한다.
+    원장을 만드는 쪽과 원장을 검사하는 쪽이 이 함수를 함께 쓴다. 따로 계산하면 그 끝자리에서 서로 어긋난다.
+    """
+    return Decimal(revenue_net) * Decimal(str(represented)) * Decimal(str(counted_share))
+
+
 def to_paid_price(price: int, price_basis: str) -> int:
     """출처에 표시된 가격을 고객이 낼 금액으로 바꾼다.
 

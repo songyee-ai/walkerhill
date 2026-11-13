@@ -71,12 +71,12 @@
       "split_id": "meal-lunch-dinner",
       "applies_when": "집계 파일에서 끼니가 비어 있는 식사 매출",
       "parts": {
-        "lunch": 0.4,
-        "dinner": 0.6
+        "lunch": 0.5,
+        "dinner": 0.5
       },
       "grade": "assumption",
       "decided_on": "2026-11-13",
-      "note": "예시 값이다. 엔진 담당이 정한다"
+      "note": "근거가 되는 자료가 없어 반반으로 둔다 (11-13 팀장이 정함). 금룡 후기 라벨 80건은 점심 41건, 저녁 39건이었다"
     }
   ]
 }
