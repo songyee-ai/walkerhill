@@ -1,0 +1,37 @@
+{
+  "format_version": 1,
+  "venue_id": "fourseasons-maru",
+  "name": "마루",
+  "hotel": "포시즌스 호텔 서울",
+  "is_competitor": true,
+  "competes_with": ["pavilion"],
+  "cuisine": "로비 라운지 디저트",
+  "occasions": ["dessert"],
+  "months": null,
+  "hours": null,
+  "reservation": {"required": true, "party_min": 2, "party_max": null, "note": "가을 애프터눈 티는 방문 24시간 전까지 사전 예약 필수"},
+  "products": [
+    {
+      "product_id": "autumn-afternoon-tea",
+      "name": "가을 애프터눈 티 세트",
+      "occasion": "dessert",
+      "meals": [],
+      "day_types": ["weekday", "weekend"],
+      "months": [9, 10, 11],
+      "audience": "all",
+      "unit": "세트",
+      "serves": 2,
+      "qty_rule": "per_serves",
+      "qty_max": null,
+      "price": 140000,
+      "price_basis": "unknown",
+      "grade": "official",
+      "source_id": null
+    }
+  ],
+  "promotions": [],
+  "sources": [
+    {"source_id": "S1", "title": "포시즌스 호텔 서울 보도자료 — 가을 애프터눈 티 (2026-09-29)", "url": "https://press.fourseasons.com/kr/seoul/hotel-news/2026/autumn-afternoon-tea", "checked_on": "2026-11-13"}
+  ],
+  "default_source_id": "S1"
+}

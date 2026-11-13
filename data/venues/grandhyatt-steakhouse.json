@@ -1,0 +1,98 @@
+{
+  "format_version": 1,
+  "venue_id": "grandhyatt-steakhouse",
+  "name": "스테이크하우스",
+  "hotel": "그랜드 하얏트 서울",
+  "is_competitor": true,
+  "competes_with": [
+    "myongwolgwan"
+  ],
+  "cuisine": "스테이크하우스 (숯불 피라 오븐)",
+  "occasions": [
+    "meal"
+  ],
+  "months": null,
+  "hours": null,
+  "reservation": null,
+  "products": [
+    {
+      "product_id": "hanwoo-tenderloin",
+      "name": "한우 1++ 안심 200g",
+      "occasion": "meal",
+      "meals": [
+        "lunch",
+        "dinner"
+      ],
+      "day_types": [
+        "weekday",
+        "weekend"
+      ],
+      "months": null,
+      "audience": "all",
+      "unit": "1인",
+      "serves": 1,
+      "qty_rule": "per_person",
+      "qty_max": null,
+      "price": 140000,
+      "price_basis": "included",
+      "grade": "official",
+      "source_id": null
+    },
+    {
+      "product_id": "hanwoo-striploin",
+      "name": "한우 1++ 채끝 등심 300g",
+      "occasion": "meal",
+      "meals": [
+        "lunch",
+        "dinner"
+      ],
+      "day_types": [
+        "weekday",
+        "weekend"
+      ],
+      "months": null,
+      "audience": "all",
+      "unit": "1인",
+      "serves": 1,
+      "qty_rule": "per_person",
+      "qty_max": null,
+      "price": 160000,
+      "price_basis": "included",
+      "grade": "official",
+      "source_id": null
+    },
+    {
+      "product_id": "side",
+      "name": "사이드",
+      "occasion": "meal",
+      "meals": [
+        "lunch",
+        "dinner"
+      ],
+      "day_types": [
+        "weekday",
+        "weekend"
+      ],
+      "months": null,
+      "audience": "all",
+      "unit": "접시",
+      "serves": 1,
+      "qty_rule": "choice",
+      "qty_max": 4,
+      "price": 12000,
+      "price_basis": "included",
+      "grade": "official",
+      "source_id": null
+    }
+  ],
+  "promotions": [],
+  "sources": [
+    {
+      "source_id": "S1",
+      "title": "그랜드 하얏트 서울 스테이크하우스 공식 단품 메뉴판 (세금 포함가 표기)",
+      "url": "https://www.hyatt.com/content/dam/hotel/propertysites/assets/grand/selrs/documents/ko_kr/dining/322-sowolro-steak-house/Steak-House-A-La-Carte-Menu-Korean.pdf",
+      "checked_on": "2026-11-13"
+    }
+  ],
+  "default_source_id": "S1"
+}
