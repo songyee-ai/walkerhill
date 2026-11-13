@@ -135,6 +135,67 @@ def test_review_label_must_be_in_vocab(example_copy):
     assert found(problems, "reasons_chosen 의 '분위기 좋음' 가 값 목록에 없다"), messages(problems)
 
 
+@pytest.mark.parametrize("column", ["purpose", "party"])
+def test_review_purpose_and_party_must_be_in_vocab_when_written(example_copy, column):
+    edit_csv(example_copy, REVIEWS, lambda rows: rows[0].update({column: "소풍"}))
+    problems = check(example_copy)
+    assert found(problems, f"{column} '소풍' 가 값 목록에 없다"), messages(problems)
+
+
+@pytest.mark.parametrize(
+    "blank",
+    [
+        {"purpose": ""},
+        {"party": ""},
+        {"summary": ""},
+        # 글과 화면에 없는 것은 비운다. 빈 칸만 있는 칸(공백)도 빈 칸이다.
+        {"purpose": " ", "party": "", "summary": ""},
+    ],
+)
+def test_review_label_may_leave_what_the_review_does_not_say(example_copy, blank):
+    edit_csv(example_copy, REVIEWS, lambda rows: rows[0].update(blank))
+    problems = check(example_copy, strict=True)
+    assert not problems, messages(problems)
+
+
+# 근거가 되는 칸과, 그 칸 하나만 남겼을 때 쓸 값 (예시 묶음에 있는 값이다).
+EVIDENCE = {
+    "purpose": "가족 행사",
+    "party": "3대 가족",
+    "ordered": "course-a",
+    "reasons_chosen": "별실",
+    "pain_points": "가격",
+    "compared_with": "examplehotel-chinese",
+    "would_return": "yes",
+}
+NO_EVIDENCE = "근거가 되는 칸이 모두 비어 있다"
+
+
+def test_review_label_without_any_evidence_is_rejected(example_copy):
+    # 고객군, 이용 상황, 요약이 있어도 근거가 되는 칸이 없으면 쓸 수 없는 후기다.
+    edit_csv(example_copy, REVIEWS, lambda rows: rows[0].update(dict.fromkeys(EVIDENCE, "")))
+    problems = check(example_copy)
+    assert [p.path for p in problems if NO_EVIDENCE in p.message] == [REVIEWS.as_posix()], messages(problems)
+    assert found(problems, "2번째 줄"), messages(problems)
+
+
+@pytest.mark.parametrize("column", ["ordered", "compared_with"])
+@pytest.mark.parametrize("value", ["이름:", "이름: ", "course-a;이름:"])
+def test_free_name_needs_a_name(example_copy, column, value):
+    # 이름이 없는 '이름:' 은 아무것도 말하지 않는다. 근거가 있는 후기처럼 지나가지 못하게 한다.
+    edit_csv(example_copy, REVIEWS, lambda rows: rows[0].update({column: value}))
+    problems = check(example_copy)
+    assert found(problems, f"{column} 에 '이름:' 만 있고 이름이 없다"), messages(problems)
+
+
+@pytest.mark.parametrize("column", list(EVIDENCE))
+def test_one_evidence_column_is_enough_for_a_review_label(example_copy, column):
+    only = {**dict.fromkeys(EVIDENCE, ""), column: EVIDENCE[column]}
+    edit_csv(example_copy, REVIEWS, lambda rows: rows[0].update(only))
+    problems = check(example_copy, strict=True)
+    assert not found(problems, NO_EVIDENCE), messages(problems)
+
+
 def test_private_review_id_is_rejected(example_copy):
     edit_csv(example_copy, REVIEWS, lambda rows: rows[1].update(review_id="P-geumryong-0011"))
     problems = check(example_copy)
