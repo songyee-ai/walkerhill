@@ -1,131 +1,1284 @@
-﻿customer_group,venue_id,product_id,occasion,meal,day_type,unit,quantity,revenue_net,price_unconfirmed
-가족·친족,geumryong,signature-course,meal,,weekday,1인,191,26913636,N
-가족·친족,geumryong,signature-course,meal,,weekend,1인,331,46640909,N
-공항 이동·여행,geumryong,signature-course,meal,,weekday,1인,9,1268182,N
-공항 이동·여행,geumryong,signature-course,meal,,weekend,1인,239,33677273,N
-공항 이동·여행,geumryong,private-room-course,meal,,weekday,1인,53,11322727,N
-공항 이동·여행,geumryong,private-room-course,meal,,weekend,1인,29,6195455,N
-휴식·산책 동행,geumryong,private-room-course,meal,,weekday,1인,205,43795455,N
-휴식·산책 동행,geumryong,private-room-course,meal,,weekend,1인,31,6622727,N
-가족·친족,geumryong,weekday-set,meal,,weekday,1인,260,28363636,N
-골프·스포츠 모임,geumryong,weekday-set,meal,,weekday,1인,12,1309091,N
-공항 이동·여행,geumryong,weekday-set,meal,,weekday,1인,339,36981818,N
-비즈니스·접대,geumryong,weekday-set,meal,,weekday,1인,352,38400000,N
-가족·친족,geumryong,autumn-course,meal,,weekday,1인,254,11545455,Y
-가족·친족,geumryong,autumn-course,meal,,weekend,1인,395,17954545,Y
-공항 이동·여행,geumryong,autumn-course,meal,,weekday,1인,206,9363636,Y
-공항 이동·여행,geumryong,autumn-course,meal,,weekend,1인,175,7954545,Y
-비즈니스·접대,geumryong,autumn-course,meal,,weekday,1인,355,16136364,Y
-비즈니스·접대,geumryong,autumn-course,meal,,weekend,1인,377,17136364,Y
-커플·기념일,geumryong,autumn-course,meal,,weekday,1인,149,6772727,Y
-커플·기념일,geumryong,autumn-course,meal,,weekend,1인,73,3318182,Y
-골프·스포츠 모임,lepassage,gourmet-basket,takeout,,weekday,건,251,11409091,Y
-골프·스포츠 모임,lepassage,gourmet-basket,takeout,,weekend,건,389,17681818,Y
-친구·모임,lepassage,gourmet-basket,takeout,,weekday,건,206,9363636,Y
-친구·모임,lepassage,gourmet-basket,takeout,,weekend,건,143,6500000,Y
-가족·친족,moegi,dinner-course,meal,dinner,weekday,1인,230,43909091,N
-가족·친족,moegi,dinner-course,meal,dinner,weekend,1인,343,65481818,N
-비즈니스·접대,moegi,dinner-course,meal,dinner,weekday,1인,382,72927273,N
-비즈니스·접대,moegi,dinner-course,meal,dinner,weekend,1인,218,41618182,N
-친구·모임,moegi,dinner-course,meal,dinner,weekday,1인,185,35318182,N
-친구·모임,moegi,dinner-course,meal,dinner,weekend,1인,282,53836364,N
-골프·스포츠 모임,moegi,lunch-course,meal,lunch,weekday,1인,145,27681818,N
-골프·스포츠 모임,moegi,lunch-course,meal,lunch,weekend,1인,18,3436364,N
-비즈니스·접대,moegi,lunch-course,meal,lunch,weekday,1인,5,954545,N
-비즈니스·접대,moegi,lunch-course,meal,lunch,weekend,1인,384,73309091,N
-커플·기념일,moegi,lunch-course,meal,lunch,weekday,1인,85,16227273,N
-커플·기념일,moegi,lunch-course,meal,lunch,weekend,1인,363,69300000,N
-골프·스포츠 모임,moegi,sashimi-set,meal,lunch,weekday,1인,247,35927273,N
-골프·스포츠 모임,moegi,sashimi-set,meal,lunch,weekend,1인,195,28363636,N
-공항 이동·여행,moegi,sashimi-set,meal,lunch,weekday,1인,78,11345455,N
-공항 이동·여행,moegi,sashimi-set,meal,lunch,weekend,1인,267,38836364,N
-친구·모임,moegi,autumn-lunch,meal,lunch,weekday,1인,352,16000000,Y
-친구·모임,moegi,autumn-lunch,meal,lunch,weekend,1인,128,5818182,Y
-커플·기념일,moegi,autumn-lunch,meal,lunch,weekday,1인,111,5045455,Y
-커플·기념일,moegi,autumn-lunch,meal,lunch,weekend,1인,219,9954545,Y
-골프·스포츠 모임,myongwolgwan,special-platter-set,meal,,weekday,세트,85,27045455,N
-골프·스포츠 모임,myongwolgwan,special-platter-set,meal,,weekend,세트,315,100227273,N
-비즈니스·접대,myongwolgwan,special-platter-set,meal,,weekday,세트,132,42000000,N
-비즈니스·접대,myongwolgwan,special-platter-set,meal,,weekend,세트,370,117727273,N
-휴식·산책 동행,myongwolgwan,special-platter-set,meal,,weekday,세트,262,83363636,N
-휴식·산책 동행,myongwolgwan,special-platter-set,meal,,weekend,세트,227,72227273,N
-가족·친족,myongwolgwan,weekday-lunch,meal,lunch,weekday,1인,367,16681818,Y
-골프·스포츠 모임,myongwolgwan,weekday-lunch,meal,lunch,weekday,1인,318,14454545,Y
-공항 이동·여행,myongwolgwan,weekday-lunch,meal,lunch,weekday,1인,286,13000000,Y
-커플·기념일,myongwolgwan,weekday-lunch,meal,lunch,weekday,1인,335,15227273,Y
-가족·친족,ondal,royal-table-course,meal,,weekday,1인,346,51900000,N
-가족·친족,ondal,royal-table-course,meal,,weekend,1인,74,11100000,N
-공항 이동·여행,ondal,royal-table-course,meal,,weekday,1인,391,58650000,N
-공항 이동·여행,ondal,royal-table-course,meal,,weekend,1인,276,41400000,N
-미식 방문,ondal,royal-table-course,meal,,weekday,1인,109,16350000,N
-미식 방문,ondal,royal-table-course,meal,,weekend,1인,253,37950000,N
-비즈니스·접대,ondal,royal-table-course,meal,,weekday,1인,164,24600000,N
-비즈니스·접대,ondal,royal-table-course,meal,,weekend,1인,335,50250000,N
-비즈니스·접대,ondal,lunch-table,meal,lunch,weekday,1인,5,568182,N
-휴식·산책 동행,ondal,lunch-table,meal,lunch,weekday,1인,369,41931818,N
-공항 이동·여행,pavilion,fall-dessert-set,dessert,,weekday,세트,195,17372727,N
-공항 이동·여행,pavilion,fall-dessert-set,dessert,,weekend,세트,29,2583636,N
-미식 방문,pavilion,fall-dessert-set,dessert,,weekday,세트,324,28865455,N
-미식 방문,pavilion,fall-dessert-set,dessert,,weekend,세트,396,35280000,N
-비즈니스·접대,pavilion,fall-dessert-set,dessert,,weekday,세트,164,14610909,N
-비즈니스·접대,pavilion,fall-dessert-set,dessert,,weekend,세트,58,5167273,N
-커플·기념일,pavilion,fall-dessert-set,dessert,,weekday,세트,218,19421818,N
-커플·기념일,pavilion,fall-dessert-set,dessert,,weekend,세트,124,11047273,N
-공항 이동·여행,pavilion,bingsu,dessert,,weekday,개,132,6000000,Y
-공항 이동·여행,pavilion,bingsu,dessert,,weekend,개,398,18090909,Y
-친구·모임,pavilion,bingsu,dessert,,weekday,개,28,1272727,Y
-친구·모임,pavilion,bingsu,dessert,,weekend,개,324,14727273,Y
-골프·스포츠 모임,pizzahill,couple-set,meal,,weekday,세트,358,59883636,N
-골프·스포츠 모임,pizzahill,couple-set,meal,,weekend,세트,113,18901818,N
-친구·모임,pizzahill,couple-set,meal,,weekday,세트,291,48676364,N
-친구·모임,pizzahill,couple-set,meal,,weekend,세트,71,11876364,N
-공항 이동·여행,pizzahill,triple-set,meal,,weekday,세트,179,40844545,N
-공항 이동·여행,pizzahill,triple-set,meal,,weekend,세트,43,9811818,N
-비즈니스·접대,pizzahill,triple-set,meal,,weekday,세트,205,46777273,N
-비즈니스·접대,pizzahill,triple-set,meal,,weekend,세트,127,28979091,N
-친구·모임,pizzahill,triple-set,meal,,weekday,세트,15,3422727,N
-친구·모임,pizzahill,triple-set,meal,,weekend,세트,141,32173636,N
-커플·기념일,pizzahill,triple-set,meal,,weekday,세트,39,8899091,N
-커플·기념일,pizzahill,triple-set,meal,,weekend,세트,293,66857273,N
-비즈니스·접대,pizzahill,seis-pizza,meal,,weekday,판,260,33800000,N
-비즈니스·접대,pizzahill,seis-pizza,meal,,weekend,판,159,20670000,N
-친구·모임,pizzahill,seis-pizza,meal,,weekday,판,121,15730000,N
-친구·모임,pizzahill,seis-pizza,meal,,weekend,판,280,36400000,N
-가족·친족,pizzahill,takeout-combination-l,takeout,,weekday,판,287,17324364,N
-가족·친족,pizzahill,takeout-combination-l,takeout,,weekend,판,167,10080727,N
-공항 이동·여행,pizzahill,takeout-combination-l,takeout,,weekday,판,246,14849455,N
-공항 이동·여행,pizzahill,takeout-combination-l,takeout,,weekend,판,296,17867636,N
-친구·모임,pizzahill,takeout-combination-l,takeout,,weekday,판,307,18531636,N
-친구·모임,pizzahill,takeout-combination-l,takeout,,weekend,판,72,4346182,N
-커플·기념일,pizzahill,takeout-combination-l,takeout,,weekday,판,86,5191273,N
-커플·기념일,pizzahill,takeout-combination-l,takeout,,weekend,판,292,17626182,N
-골프·스포츠 모임,pizzahill,set-ade-upgrade,meal,,weekday,잔,224,1629091,N
-골프·스포츠 모임,pizzahill,set-ade-upgrade,meal,,weekend,잔,184,1338182,N
-비즈니스·접대,pizzahill,set-ade-upgrade,meal,,weekday,잔,63,458182,N
-비즈니스·접대,pizzahill,set-ade-upgrade,meal,,weekend,잔,89,647273,N
-가족·친족,thebuffet,breakfast-adult,meal,breakfast,weekday,1인,366,28281818,N
-가족·친족,thebuffet,breakfast-adult,meal,breakfast,weekend,1인,259,20013636,N
-비즈니스·접대,thebuffet,breakfast-adult,meal,breakfast,weekday,1인,35,2704545,N
-비즈니스·접대,thebuffet,breakfast-adult,meal,breakfast,weekend,1인,254,19627273,N
-친구·모임,thebuffet,breakfast-adult,meal,breakfast,weekday,1인,89,6877273,N
-친구·모임,thebuffet,breakfast-adult,meal,breakfast,weekend,1인,312,24109091,N
-혼자 휴식,thebuffet,breakfast-adult,meal,breakfast,weekday,1인,46,3554545,N
-혼자 휴식,thebuffet,breakfast-adult,meal,breakfast,weekend,1인,399,30831818,N
-골프·스포츠 모임,thebuffet,weekday-lunch-adult,meal,lunch,weekday,1인,215,34400000,N
-공항 이동·여행,thebuffet,weekday-lunch-adult,meal,lunch,weekday,1인,68,10880000,N
-비즈니스·접대,thebuffet,weekday-lunch-adult,meal,lunch,weekday,1인,226,36160000,N
-친구·모임,thebuffet,weekday-lunch-adult,meal,lunch,weekday,1인,286,45760000,N
-가족·친족,thebuffet,weekday-lunch-child,meal,lunch,weekday,1인,290,23200000,N
-친구·모임,thebuffet,weekday-lunch-child,meal,lunch,weekday,1인,50,4000000,N
-가족·친족,thebuffet,peak-adult,meal,,weekday,1인,345,62100000,N
-가족·친족,thebuffet,peak-adult,meal,,weekend,1인,150,27000000,N
-골프·스포츠 모임,thebuffet,peak-adult,meal,,weekday,1인,160,28800000,N
-골프·스포츠 모임,thebuffet,peak-adult,meal,,weekend,1인,107,19260000,N
-미식 방문,thebuffet,peak-child,meal,,weekday,1인,72,6414545,N
-미식 방문,thebuffet,peak-child,meal,,weekend,1인,200,17818182,N
-비즈니스·접대,thebuffet,peak-child,meal,,weekday,1인,306,27261818,N
-비즈니스·접대,thebuffet,peak-child,meal,,weekend,1인,139,12383636,N
-친구·모임,thebuffet,peak-child,meal,,weekday,1인,94,8374545,N
-친구·모임,thebuffet,peak-child,meal,,weekend,1인,167,14878182,N
-휴식·산책 동행,thebuffet,peak-child,meal,,weekday,1인,162,14432727,N
-휴식·산책 동행,thebuffet,peak-child,meal,,weekend,1인,288,25658182,N
+﻿customer_group,venue_id,product_id,occasion,meal,day_type,month,unit,quantity,paid,revenue_net,price_unconfirmed
+가족·친족,geumryong,signature-course,meal,,weekday,1,1인,16,2480000,2254545,N
+가족·친족,geumryong,signature-course,meal,,weekday,2,1인,16,2480000,2254545,N
+가족·친족,geumryong,signature-course,meal,,weekday,3,1인,16,2480000,2254545,N
+가족·친족,geumryong,signature-course,meal,,weekday,4,1인,16,2480000,2254545,N
+가족·친족,geumryong,signature-course,meal,,weekday,5,1인,16,2480000,2254545,N
+가족·친족,geumryong,signature-course,meal,,weekday,6,1인,16,2480000,2254545,N
+가족·친족,geumryong,signature-course,meal,,weekday,7,1인,16,2480000,2254545,N
+가족·친족,geumryong,signature-course,meal,,weekday,8,1인,16,2480000,2254545,N
+가족·친족,geumryong,signature-course,meal,,weekday,9,1인,16,2480000,2254545,N
+가족·친족,geumryong,signature-course,meal,,weekday,10,1인,16,2480000,2254545,N
+가족·친족,geumryong,signature-course,meal,,weekday,11,1인,16,2480000,2254545,N
+가족·친족,geumryong,signature-course,meal,,weekday,12,1인,15,2325005,2113641,N
+가족·친족,geumryong,signature-course,meal,,weekend,1,1인,28,4340001,3945455,N
+가족·친족,geumryong,signature-course,meal,,weekend,2,1인,28,4340001,3945455,N
+가족·친족,geumryong,signature-course,meal,,weekend,3,1인,28,4340001,3945455,N
+가족·친족,geumryong,signature-course,meal,,weekend,4,1인,28,4340001,3945455,N
+가족·친족,geumryong,signature-course,meal,,weekend,5,1인,28,4340001,3945455,N
+가족·친족,geumryong,signature-course,meal,,weekend,6,1인,28,4340001,3945455,N
+가족·친족,geumryong,signature-course,meal,,weekend,7,1인,28,4340001,3945455,N
+가족·친족,geumryong,signature-course,meal,,weekend,8,1인,27,4185000,3804545,N
+가족·친족,geumryong,signature-course,meal,,weekend,9,1인,27,4185000,3804545,N
+가족·친족,geumryong,signature-course,meal,,weekend,10,1인,27,4185000,3804545,N
+가족·친족,geumryong,signature-course,meal,,weekend,11,1인,27,4185000,3804545,N
+가족·친족,geumryong,signature-course,meal,,weekend,12,1인,27,4184998,3804544,N
+공항 이동·여행,geumryong,signature-course,meal,,weekday,1,1인,1,155000,140909,N
+공항 이동·여행,geumryong,signature-course,meal,,weekday,2,1인,1,155000,140909,N
+공항 이동·여행,geumryong,signature-course,meal,,weekday,3,1인,1,155000,140909,N
+공항 이동·여행,geumryong,signature-course,meal,,weekday,4,1인,1,155000,140909,N
+공항 이동·여행,geumryong,signature-course,meal,,weekday,5,1인,1,155000,140909,N
+공항 이동·여행,geumryong,signature-course,meal,,weekday,6,1인,1,155000,140909,N
+공항 이동·여행,geumryong,signature-course,meal,,weekday,7,1인,1,155000,140909,N
+공항 이동·여행,geumryong,signature-course,meal,,weekday,8,1인,1,155000,140909,N
+공항 이동·여행,geumryong,signature-course,meal,,weekday,9,1인,1,155001,140910,N
+공항 이동·여행,geumryong,signature-course,meal,,weekend,1,1인,20,3100000,2818182,N
+공항 이동·여행,geumryong,signature-course,meal,,weekend,2,1인,20,3100000,2818182,N
+공항 이동·여행,geumryong,signature-course,meal,,weekend,3,1인,20,3100000,2818182,N
+공항 이동·여행,geumryong,signature-course,meal,,weekend,4,1인,20,3100000,2818182,N
+공항 이동·여행,geumryong,signature-course,meal,,weekend,5,1인,20,3100000,2818182,N
+공항 이동·여행,geumryong,signature-course,meal,,weekend,6,1인,20,3100000,2818182,N
+공항 이동·여행,geumryong,signature-course,meal,,weekend,7,1인,20,3100000,2818182,N
+공항 이동·여행,geumryong,signature-course,meal,,weekend,8,1인,20,3100000,2818182,N
+공항 이동·여행,geumryong,signature-course,meal,,weekend,9,1인,20,3100000,2818182,N
+공항 이동·여행,geumryong,signature-course,meal,,weekend,10,1인,20,3100000,2818182,N
+공항 이동·여행,geumryong,signature-course,meal,,weekend,11,1인,20,3100000,2818182,N
+공항 이동·여행,geumryong,signature-course,meal,,weekend,12,1인,19,2944998,2677271,N
+공항 이동·여행,geumryong,private-room-course,meal,,weekday,1,1인,5,1175000,1068182,N
+공항 이동·여행,geumryong,private-room-course,meal,,weekday,2,1인,5,1175000,1068182,N
+공항 이동·여행,geumryong,private-room-course,meal,,weekday,3,1인,5,1175000,1068182,N
+공항 이동·여행,geumryong,private-room-course,meal,,weekday,4,1인,5,1175000,1068182,N
+공항 이동·여행,geumryong,private-room-course,meal,,weekday,5,1인,5,1175000,1068182,N
+공항 이동·여행,geumryong,private-room-course,meal,,weekday,6,1인,4,940000,854545,N
+공항 이동·여행,geumryong,private-room-course,meal,,weekday,7,1인,4,940000,854545,N
+공항 이동·여행,geumryong,private-room-course,meal,,weekday,8,1인,4,940000,854545,N
+공항 이동·여행,geumryong,private-room-course,meal,,weekday,9,1인,4,940000,854545,N
+공항 이동·여행,geumryong,private-room-course,meal,,weekday,10,1인,4,940000,854545,N
+공항 이동·여행,geumryong,private-room-course,meal,,weekday,11,1인,4,940000,854545,N
+공항 이동·여행,geumryong,private-room-course,meal,,weekday,12,1인,4,940002,854547,N
+공항 이동·여행,geumryong,private-room-course,meal,,weekend,1,1인,3,705000,640909,N
+공항 이동·여행,geumryong,private-room-course,meal,,weekend,2,1인,3,705000,640909,N
+공항 이동·여행,geumryong,private-room-course,meal,,weekend,3,1인,3,705000,640909,N
+공항 이동·여행,geumryong,private-room-course,meal,,weekend,4,1인,3,705000,640909,N
+공항 이동·여행,geumryong,private-room-course,meal,,weekend,5,1인,3,705000,640909,N
+공항 이동·여행,geumryong,private-room-course,meal,,weekend,6,1인,2,470000,427273,N
+공항 이동·여행,geumryong,private-room-course,meal,,weekend,7,1인,2,470000,427273,N
+공항 이동·여행,geumryong,private-room-course,meal,,weekend,8,1인,2,470000,427273,N
+공항 이동·여행,geumryong,private-room-course,meal,,weekend,9,1인,2,470000,427273,N
+공항 이동·여행,geumryong,private-room-course,meal,,weekend,10,1인,2,470000,427273,N
+공항 이동·여행,geumryong,private-room-course,meal,,weekend,11,1인,2,470000,427273,N
+공항 이동·여행,geumryong,private-room-course,meal,,weekend,12,1인,2,469999,427272,N
+휴식·산책 동행,geumryong,private-room-course,meal,,weekday,1,1인,18,4230001,3845455,N
+휴식·산책 동행,geumryong,private-room-course,meal,,weekday,2,1인,17,3995000,3631818,N
+휴식·산책 동행,geumryong,private-room-course,meal,,weekday,3,1인,17,3995000,3631818,N
+휴식·산책 동행,geumryong,private-room-course,meal,,weekday,4,1인,17,3995000,3631818,N
+휴식·산책 동행,geumryong,private-room-course,meal,,weekday,5,1인,17,3995000,3631818,N
+휴식·산책 동행,geumryong,private-room-course,meal,,weekday,6,1인,17,3995000,3631818,N
+휴식·산책 동행,geumryong,private-room-course,meal,,weekday,7,1인,17,3995000,3631818,N
+휴식·산책 동행,geumryong,private-room-course,meal,,weekday,8,1인,17,3995000,3631818,N
+휴식·산책 동행,geumryong,private-room-course,meal,,weekday,9,1인,17,3995000,3631818,N
+휴식·산책 동행,geumryong,private-room-course,meal,,weekday,10,1인,17,3995000,3631818,N
+휴식·산책 동행,geumryong,private-room-course,meal,,weekday,11,1인,17,3995000,3631818,N
+휴식·산책 동행,geumryong,private-room-course,meal,,weekday,12,1인,17,3995002,3631820,N
+휴식·산책 동행,geumryong,private-room-course,meal,,weekend,1,1인,3,705000,640909,N
+휴식·산책 동행,geumryong,private-room-course,meal,,weekend,2,1인,3,705000,640909,N
+휴식·산책 동행,geumryong,private-room-course,meal,,weekend,3,1인,3,705000,640909,N
+휴식·산책 동행,geumryong,private-room-course,meal,,weekend,4,1인,3,705000,640909,N
+휴식·산책 동행,geumryong,private-room-course,meal,,weekend,5,1인,3,705000,640909,N
+휴식·산책 동행,geumryong,private-room-course,meal,,weekend,6,1인,3,705000,640909,N
+휴식·산책 동행,geumryong,private-room-course,meal,,weekend,7,1인,3,705000,640909,N
+휴식·산책 동행,geumryong,private-room-course,meal,,weekend,8,1인,2,470000,427273,N
+휴식·산책 동행,geumryong,private-room-course,meal,,weekend,9,1인,2,470000,427273,N
+휴식·산책 동행,geumryong,private-room-course,meal,,weekend,10,1인,2,470000,427273,N
+휴식·산책 동행,geumryong,private-room-course,meal,,weekend,11,1인,2,470000,427273,N
+휴식·산책 동행,geumryong,private-room-course,meal,,weekend,12,1인,2,469999,427272,N
+가족·친족,geumryong,weekday-set,meal,,weekday,1,1인,22,2640000,2400000,N
+가족·친족,geumryong,weekday-set,meal,,weekday,2,1인,22,2640000,2400000,N
+가족·친족,geumryong,weekday-set,meal,,weekday,3,1인,22,2640000,2400000,N
+가족·친족,geumryong,weekday-set,meal,,weekday,4,1인,22,2640000,2400000,N
+가족·친족,geumryong,weekday-set,meal,,weekday,5,1인,22,2640000,2400000,N
+가족·친족,geumryong,weekday-set,meal,,weekday,6,1인,22,2640000,2400000,N
+가족·친족,geumryong,weekday-set,meal,,weekday,7,1인,22,2640000,2400000,N
+가족·친족,geumryong,weekday-set,meal,,weekday,8,1인,22,2640000,2400000,N
+가족·친족,geumryong,weekday-set,meal,,weekday,9,1인,21,2520000,2290909,N
+가족·친족,geumryong,weekday-set,meal,,weekday,10,1인,21,2520000,2290909,N
+가족·친족,geumryong,weekday-set,meal,,weekday,11,1인,21,2520000,2290909,N
+가족·친족,geumryong,weekday-set,meal,,weekday,12,1인,21,2520000,2290909,N
+골프·스포츠 모임,geumryong,weekday-set,meal,,weekday,1,1인,1,120000,109091,N
+골프·스포츠 모임,geumryong,weekday-set,meal,,weekday,2,1인,1,120000,109091,N
+골프·스포츠 모임,geumryong,weekday-set,meal,,weekday,3,1인,1,120000,109091,N
+골프·스포츠 모임,geumryong,weekday-set,meal,,weekday,4,1인,1,120000,109091,N
+골프·스포츠 모임,geumryong,weekday-set,meal,,weekday,5,1인,1,120000,109091,N
+골프·스포츠 모임,geumryong,weekday-set,meal,,weekday,6,1인,1,120000,109091,N
+골프·스포츠 모임,geumryong,weekday-set,meal,,weekday,7,1인,1,120000,109091,N
+골프·스포츠 모임,geumryong,weekday-set,meal,,weekday,8,1인,1,120000,109091,N
+골프·스포츠 모임,geumryong,weekday-set,meal,,weekday,9,1인,1,120000,109091,N
+골프·스포츠 모임,geumryong,weekday-set,meal,,weekday,10,1인,1,120000,109091,N
+골프·스포츠 모임,geumryong,weekday-set,meal,,weekday,11,1인,1,120000,109091,N
+골프·스포츠 모임,geumryong,weekday-set,meal,,weekday,12,1인,1,119999,109090,N
+공항 이동·여행,geumryong,weekday-set,meal,,weekday,1,1인,29,3480000,3163636,N
+공항 이동·여행,geumryong,weekday-set,meal,,weekday,2,1인,29,3480000,3163636,N
+공항 이동·여행,geumryong,weekday-set,meal,,weekday,3,1인,29,3480000,3163636,N
+공항 이동·여행,geumryong,weekday-set,meal,,weekday,4,1인,28,3360000,3054545,N
+공항 이동·여행,geumryong,weekday-set,meal,,weekday,5,1인,28,3360000,3054545,N
+공항 이동·여행,geumryong,weekday-set,meal,,weekday,6,1인,28,3360000,3054545,N
+공항 이동·여행,geumryong,weekday-set,meal,,weekday,7,1인,28,3360000,3054545,N
+공항 이동·여행,geumryong,weekday-set,meal,,weekday,8,1인,28,3360000,3054545,N
+공항 이동·여행,geumryong,weekday-set,meal,,weekday,9,1인,28,3360000,3054545,N
+공항 이동·여행,geumryong,weekday-set,meal,,weekday,10,1인,28,3360000,3054545,N
+공항 이동·여행,geumryong,weekday-set,meal,,weekday,11,1인,28,3360000,3054545,N
+공항 이동·여행,geumryong,weekday-set,meal,,weekday,12,1인,28,3360005,3054550,N
+비즈니스·접대,geumryong,weekday-set,meal,,weekday,1,1인,30,3600000,3272727,N
+비즈니스·접대,geumryong,weekday-set,meal,,weekday,2,1인,30,3600000,3272727,N
+비즈니스·접대,geumryong,weekday-set,meal,,weekday,3,1인,30,3600000,3272727,N
+비즈니스·접대,geumryong,weekday-set,meal,,weekday,4,1인,30,3600000,3272727,N
+비즈니스·접대,geumryong,weekday-set,meal,,weekday,5,1인,29,3480000,3163636,N
+비즈니스·접대,geumryong,weekday-set,meal,,weekday,6,1인,29,3480000,3163636,N
+비즈니스·접대,geumryong,weekday-set,meal,,weekday,7,1인,29,3480000,3163636,N
+비즈니스·접대,geumryong,weekday-set,meal,,weekday,8,1인,29,3480000,3163636,N
+비즈니스·접대,geumryong,weekday-set,meal,,weekday,9,1인,29,3480000,3163636,N
+비즈니스·접대,geumryong,weekday-set,meal,,weekday,10,1인,29,3480000,3163636,N
+비즈니스·접대,geumryong,weekday-set,meal,,weekday,11,1인,29,3480000,3163636,N
+비즈니스·접대,geumryong,weekday-set,meal,,weekday,12,1인,29,3480004,3163640,N
+가족·친족,geumryong,autumn-course,meal,,weekday,9,1인,127,6350001,5772728,Y
+가족·친족,geumryong,autumn-course,meal,,weekday,10,1인,127,6350000,5772727,Y
+가족·친족,geumryong,autumn-course,meal,,weekend,9,1인,198,9900000,9000000,Y
+가족·친족,geumryong,autumn-course,meal,,weekend,10,1인,197,9850000,8954545,Y
+공항 이동·여행,geumryong,autumn-course,meal,,weekday,9,1인,103,5150000,4681818,Y
+공항 이동·여행,geumryong,autumn-course,meal,,weekday,10,1인,103,5150000,4681818,Y
+공항 이동·여행,geumryong,autumn-course,meal,,weekend,9,1인,88,4400000,4000000,Y
+공항 이동·여행,geumryong,autumn-course,meal,,weekend,10,1인,87,4350000,3954545,Y
+비즈니스·접대,geumryong,autumn-course,meal,,weekday,9,1인,178,8900000,8090909,Y
+비즈니스·접대,geumryong,autumn-course,meal,,weekday,10,1인,177,8850001,8045455,Y
+비즈니스·접대,geumryong,autumn-course,meal,,weekend,9,1인,189,9450000,8590909,Y
+비즈니스·접대,geumryong,autumn-course,meal,,weekend,10,1인,188,9400001,8545455,Y
+커플·기념일,geumryong,autumn-course,meal,,weekday,9,1인,75,3750000,3409091,Y
+커플·기념일,geumryong,autumn-course,meal,,weekday,10,1인,74,3700000,3363636,Y
+커플·기념일,geumryong,autumn-course,meal,,weekend,9,1인,37,1850000,1681818,Y
+커플·기념일,geumryong,autumn-course,meal,,weekend,10,1인,36,1800000,1636364,Y
+골프·스포츠 모임,lepassage,gourmet-basket,takeout,,weekday,1,건,21,1050000,954545,Y
+골프·스포츠 모임,lepassage,gourmet-basket,takeout,,weekday,2,건,21,1050000,954545,Y
+골프·스포츠 모임,lepassage,gourmet-basket,takeout,,weekday,3,건,21,1050000,954545,Y
+골프·스포츠 모임,lepassage,gourmet-basket,takeout,,weekday,4,건,21,1050000,954545,Y
+골프·스포츠 모임,lepassage,gourmet-basket,takeout,,weekday,5,건,21,1050000,954545,Y
+골프·스포츠 모임,lepassage,gourmet-basket,takeout,,weekday,6,건,21,1050000,954545,Y
+골프·스포츠 모임,lepassage,gourmet-basket,takeout,,weekday,7,건,21,1050000,954545,Y
+골프·스포츠 모임,lepassage,gourmet-basket,takeout,,weekday,8,건,21,1050000,954545,Y
+골프·스포츠 모임,lepassage,gourmet-basket,takeout,,weekday,9,건,21,1050000,954545,Y
+골프·스포츠 모임,lepassage,gourmet-basket,takeout,,weekday,10,건,21,1050000,954545,Y
+골프·스포츠 모임,lepassage,gourmet-basket,takeout,,weekday,11,건,21,1050000,954545,Y
+골프·스포츠 모임,lepassage,gourmet-basket,takeout,,weekday,12,건,20,1000006,909096,Y
+골프·스포츠 모임,lepassage,gourmet-basket,takeout,,weekend,1,건,33,1650000,1500000,Y
+골프·스포츠 모임,lepassage,gourmet-basket,takeout,,weekend,2,건,33,1650000,1500000,Y
+골프·스포츠 모임,lepassage,gourmet-basket,takeout,,weekend,3,건,33,1650000,1500000,Y
+골프·스포츠 모임,lepassage,gourmet-basket,takeout,,weekend,4,건,33,1650000,1500000,Y
+골프·스포츠 모임,lepassage,gourmet-basket,takeout,,weekend,5,건,33,1650000,1500000,Y
+골프·스포츠 모임,lepassage,gourmet-basket,takeout,,weekend,6,건,32,1600000,1454545,Y
+골프·스포츠 모임,lepassage,gourmet-basket,takeout,,weekend,7,건,32,1600000,1454545,Y
+골프·스포츠 모임,lepassage,gourmet-basket,takeout,,weekend,8,건,32,1600000,1454545,Y
+골프·스포츠 모임,lepassage,gourmet-basket,takeout,,weekend,9,건,32,1600000,1454545,Y
+골프·스포츠 모임,lepassage,gourmet-basket,takeout,,weekend,10,건,32,1600000,1454545,Y
+골프·스포츠 모임,lepassage,gourmet-basket,takeout,,weekend,11,건,32,1600000,1454545,Y
+골프·스포츠 모임,lepassage,gourmet-basket,takeout,,weekend,12,건,32,1600003,1454548,Y
+친구·모임,lepassage,gourmet-basket,takeout,,weekday,1,건,18,900000,818182,Y
+친구·모임,lepassage,gourmet-basket,takeout,,weekday,2,건,18,900000,818182,Y
+친구·모임,lepassage,gourmet-basket,takeout,,weekday,3,건,17,850000,772727,Y
+친구·모임,lepassage,gourmet-basket,takeout,,weekday,4,건,17,850000,772727,Y
+친구·모임,lepassage,gourmet-basket,takeout,,weekday,5,건,17,850000,772727,Y
+친구·모임,lepassage,gourmet-basket,takeout,,weekday,6,건,17,850000,772727,Y
+친구·모임,lepassage,gourmet-basket,takeout,,weekday,7,건,17,850000,772727,Y
+친구·모임,lepassage,gourmet-basket,takeout,,weekday,8,건,17,850000,772727,Y
+친구·모임,lepassage,gourmet-basket,takeout,,weekday,9,건,17,850000,772727,Y
+친구·모임,lepassage,gourmet-basket,takeout,,weekday,10,건,17,850000,772727,Y
+친구·모임,lepassage,gourmet-basket,takeout,,weekday,11,건,17,850000,772727,Y
+친구·모임,lepassage,gourmet-basket,takeout,,weekday,12,건,17,850002,772729,Y
+친구·모임,lepassage,gourmet-basket,takeout,,weekend,1,건,12,600001,545455,Y
+친구·모임,lepassage,gourmet-basket,takeout,,weekend,2,건,12,600001,545455,Y
+친구·모임,lepassage,gourmet-basket,takeout,,weekend,3,건,12,600001,545455,Y
+친구·모임,lepassage,gourmet-basket,takeout,,weekend,4,건,12,600001,545455,Y
+친구·모임,lepassage,gourmet-basket,takeout,,weekend,5,건,12,600001,545455,Y
+친구·모임,lepassage,gourmet-basket,takeout,,weekend,6,건,12,600001,545455,Y
+친구·모임,lepassage,gourmet-basket,takeout,,weekend,7,건,12,600001,545455,Y
+친구·모임,lepassage,gourmet-basket,takeout,,weekend,8,건,12,600001,545455,Y
+친구·모임,lepassage,gourmet-basket,takeout,,weekend,9,건,12,600001,545455,Y
+친구·모임,lepassage,gourmet-basket,takeout,,weekend,10,건,12,600001,545455,Y
+친구·모임,lepassage,gourmet-basket,takeout,,weekend,11,건,12,600001,545455,Y
+친구·모임,lepassage,gourmet-basket,takeout,,weekend,12,건,11,549995,499995,Y
+가족·친족,moegi,dinner-course,meal,dinner,weekday,1,1인,20,4200000,3818182,N
+가족·친족,moegi,dinner-course,meal,dinner,weekday,2,1인,20,4200000,3818182,N
+가족·친족,moegi,dinner-course,meal,dinner,weekday,3,1인,19,3990000,3627273,N
+가족·친족,moegi,dinner-course,meal,dinner,weekday,4,1인,19,3990000,3627273,N
+가족·친족,moegi,dinner-course,meal,dinner,weekday,5,1인,19,3990000,3627273,N
+가족·친족,moegi,dinner-course,meal,dinner,weekday,6,1인,19,3990000,3627273,N
+가족·친족,moegi,dinner-course,meal,dinner,weekday,7,1인,19,3990000,3627273,N
+가족·친족,moegi,dinner-course,meal,dinner,weekday,8,1인,19,3990000,3627273,N
+가족·친족,moegi,dinner-course,meal,dinner,weekday,9,1인,19,3990000,3627273,N
+가족·친족,moegi,dinner-course,meal,dinner,weekday,10,1인,19,3990000,3627273,N
+가족·친족,moegi,dinner-course,meal,dinner,weekday,11,1인,19,3990000,3627273,N
+가족·친족,moegi,dinner-course,meal,dinner,weekday,12,1인,19,3989997,3627270,N
+가족·친족,moegi,dinner-course,meal,dinner,weekend,1,1인,29,6090000,5536364,N
+가족·친족,moegi,dinner-course,meal,dinner,weekend,2,1인,29,6090000,5536364,N
+가족·친족,moegi,dinner-course,meal,dinner,weekend,3,1인,29,6090000,5536364,N
+가족·친족,moegi,dinner-course,meal,dinner,weekend,4,1인,29,6090000,5536364,N
+가족·친족,moegi,dinner-course,meal,dinner,weekend,5,1인,29,6090000,5536364,N
+가족·친족,moegi,dinner-course,meal,dinner,weekend,6,1인,29,6090000,5536364,N
+가족·친족,moegi,dinner-course,meal,dinner,weekend,7,1인,29,6090000,5536364,N
+가족·친족,moegi,dinner-course,meal,dinner,weekend,8,1인,28,5880001,5345455,N
+가족·친족,moegi,dinner-course,meal,dinner,weekend,9,1인,28,5880001,5345455,N
+가족·친족,moegi,dinner-course,meal,dinner,weekend,10,1인,28,5880001,5345455,N
+가족·친족,moegi,dinner-course,meal,dinner,weekend,11,1인,28,5880001,5345455,N
+가족·친족,moegi,dinner-course,meal,dinner,weekend,12,1인,28,5879995,5345450,N
+비즈니스·접대,moegi,dinner-course,meal,dinner,weekday,1,1인,32,6720000,6109091,N
+비즈니스·접대,moegi,dinner-course,meal,dinner,weekday,2,1인,32,6720000,6109091,N
+비즈니스·접대,moegi,dinner-course,meal,dinner,weekday,3,1인,32,6720000,6109091,N
+비즈니스·접대,moegi,dinner-course,meal,dinner,weekday,4,1인,32,6720000,6109091,N
+비즈니스·접대,moegi,dinner-course,meal,dinner,weekday,5,1인,32,6720000,6109091,N
+비즈니스·접대,moegi,dinner-course,meal,dinner,weekday,6,1인,32,6720000,6109091,N
+비즈니스·접대,moegi,dinner-course,meal,dinner,weekday,7,1인,32,6720000,6109091,N
+비즈니스·접대,moegi,dinner-course,meal,dinner,weekday,8,1인,32,6720000,6109091,N
+비즈니스·접대,moegi,dinner-course,meal,dinner,weekday,9,1인,32,6720000,6109091,N
+비즈니스·접대,moegi,dinner-course,meal,dinner,weekday,10,1인,32,6720000,6109091,N
+비즈니스·접대,moegi,dinner-course,meal,dinner,weekday,11,1인,31,6510000,5918182,N
+비즈니스·접대,moegi,dinner-course,meal,dinner,weekday,12,1인,31,6509999,5918181,N
+비즈니스·접대,moegi,dinner-course,meal,dinner,weekend,1,1인,19,3990000,3627273,N
+비즈니스·접대,moegi,dinner-course,meal,dinner,weekend,2,1인,19,3990000,3627273,N
+비즈니스·접대,moegi,dinner-course,meal,dinner,weekend,3,1인,18,3780000,3436364,N
+비즈니스·접대,moegi,dinner-course,meal,dinner,weekend,4,1인,18,3780000,3436364,N
+비즈니스·접대,moegi,dinner-course,meal,dinner,weekend,5,1인,18,3780000,3436364,N
+비즈니스·접대,moegi,dinner-course,meal,dinner,weekend,6,1인,18,3780000,3436364,N
+비즈니스·접대,moegi,dinner-course,meal,dinner,weekend,7,1인,18,3780000,3436364,N
+비즈니스·접대,moegi,dinner-course,meal,dinner,weekend,8,1인,18,3780000,3436364,N
+비즈니스·접대,moegi,dinner-course,meal,dinner,weekend,9,1인,18,3780000,3436364,N
+비즈니스·접대,moegi,dinner-course,meal,dinner,weekend,10,1인,18,3780000,3436364,N
+비즈니스·접대,moegi,dinner-course,meal,dinner,weekend,11,1인,18,3780000,3436364,N
+비즈니스·접대,moegi,dinner-course,meal,dinner,weekend,12,1인,18,3779996,3436360,N
+친구·모임,moegi,dinner-course,meal,dinner,weekday,1,1인,16,3360000,3054545,N
+친구·모임,moegi,dinner-course,meal,dinner,weekday,2,1인,16,3360000,3054545,N
+친구·모임,moegi,dinner-course,meal,dinner,weekday,3,1인,16,3360000,3054545,N
+친구·모임,moegi,dinner-course,meal,dinner,weekday,4,1인,16,3360000,3054545,N
+친구·모임,moegi,dinner-course,meal,dinner,weekday,5,1인,16,3360000,3054545,N
+친구·모임,moegi,dinner-course,meal,dinner,weekday,6,1인,15,3150000,2863636,N
+친구·모임,moegi,dinner-course,meal,dinner,weekday,7,1인,15,3150000,2863636,N
+친구·모임,moegi,dinner-course,meal,dinner,weekday,8,1인,15,3150000,2863636,N
+친구·모임,moegi,dinner-course,meal,dinner,weekday,9,1인,15,3150000,2863636,N
+친구·모임,moegi,dinner-course,meal,dinner,weekday,10,1인,15,3150000,2863636,N
+친구·모임,moegi,dinner-course,meal,dinner,weekday,11,1인,15,3150000,2863636,N
+친구·모임,moegi,dinner-course,meal,dinner,weekday,12,1인,15,3150005,2863641,N
+친구·모임,moegi,dinner-course,meal,dinner,weekend,1,1인,24,5040000,4581818,N
+친구·모임,moegi,dinner-course,meal,dinner,weekend,2,1인,24,5040000,4581818,N
+친구·모임,moegi,dinner-course,meal,dinner,weekend,3,1인,24,5040000,4581818,N
+친구·모임,moegi,dinner-course,meal,dinner,weekend,4,1인,24,5040000,4581818,N
+친구·모임,moegi,dinner-course,meal,dinner,weekend,5,1인,24,5040000,4581818,N
+친구·모임,moegi,dinner-course,meal,dinner,weekend,6,1인,24,5040000,4581818,N
+친구·모임,moegi,dinner-course,meal,dinner,weekend,7,1인,23,4830000,4390909,N
+친구·모임,moegi,dinner-course,meal,dinner,weekend,8,1인,23,4830000,4390909,N
+친구·모임,moegi,dinner-course,meal,dinner,weekend,9,1인,23,4830000,4390909,N
+친구·모임,moegi,dinner-course,meal,dinner,weekend,10,1인,23,4830000,4390909,N
+친구·모임,moegi,dinner-course,meal,dinner,weekend,11,1인,23,4830000,4390909,N
+친구·모임,moegi,dinner-course,meal,dinner,weekend,12,1인,23,4830002,4390911,N
+골프·스포츠 모임,moegi,lunch-course,meal,lunch,weekday,1,1인,13,2730000,2481818,N
+골프·스포츠 모임,moegi,lunch-course,meal,lunch,weekday,2,1인,12,2520000,2290909,N
+골프·스포츠 모임,moegi,lunch-course,meal,lunch,weekday,3,1인,12,2520000,2290909,N
+골프·스포츠 모임,moegi,lunch-course,meal,lunch,weekday,4,1인,12,2520000,2290909,N
+골프·스포츠 모임,moegi,lunch-course,meal,lunch,weekday,5,1인,12,2520000,2290909,N
+골프·스포츠 모임,moegi,lunch-course,meal,lunch,weekday,6,1인,12,2520000,2290909,N
+골프·스포츠 모임,moegi,lunch-course,meal,lunch,weekday,7,1인,12,2520000,2290909,N
+골프·스포츠 모임,moegi,lunch-course,meal,lunch,weekday,8,1인,12,2520000,2290909,N
+골프·스포츠 모임,moegi,lunch-course,meal,lunch,weekday,9,1인,12,2520000,2290909,N
+골프·스포츠 모임,moegi,lunch-course,meal,lunch,weekday,10,1인,12,2520000,2290909,N
+골프·스포츠 모임,moegi,lunch-course,meal,lunch,weekday,11,1인,12,2520000,2290909,N
+골프·스포츠 모임,moegi,lunch-course,meal,lunch,weekday,12,1인,12,2520001,2290910,N
+골프·스포츠 모임,moegi,lunch-course,meal,lunch,weekend,1,1인,2,420000,381818,N
+골프·스포츠 모임,moegi,lunch-course,meal,lunch,weekend,2,1인,2,420000,381818,N
+골프·스포츠 모임,moegi,lunch-course,meal,lunch,weekend,3,1인,2,420000,381818,N
+골프·스포츠 모임,moegi,lunch-course,meal,lunch,weekend,4,1인,2,420000,381818,N
+골프·스포츠 모임,moegi,lunch-course,meal,lunch,weekend,5,1인,2,420000,381818,N
+골프·스포츠 모임,moegi,lunch-course,meal,lunch,weekend,6,1인,2,420000,381818,N
+골프·스포츠 모임,moegi,lunch-course,meal,lunch,weekend,7,1인,1,210000,190909,N
+골프·스포츠 모임,moegi,lunch-course,meal,lunch,weekend,8,1인,1,210000,190909,N
+골프·스포츠 모임,moegi,lunch-course,meal,lunch,weekend,9,1인,1,210000,190909,N
+골프·스포츠 모임,moegi,lunch-course,meal,lunch,weekend,10,1인,1,210000,190909,N
+골프·스포츠 모임,moegi,lunch-course,meal,lunch,weekend,11,1인,1,210000,190909,N
+골프·스포츠 모임,moegi,lunch-course,meal,lunch,weekend,12,1인,1,210002,190911,N
+비즈니스·접대,moegi,lunch-course,meal,lunch,weekday,1,1인,1,210000,190909,N
+비즈니스·접대,moegi,lunch-course,meal,lunch,weekday,2,1인,1,210000,190909,N
+비즈니스·접대,moegi,lunch-course,meal,lunch,weekday,3,1인,1,210000,190909,N
+비즈니스·접대,moegi,lunch-course,meal,lunch,weekday,4,1인,1,210000,190909,N
+비즈니스·접대,moegi,lunch-course,meal,lunch,weekday,5,1인,1,210000,190909,N
+비즈니스·접대,moegi,lunch-course,meal,lunch,weekend,1,1인,32,6720000,6109091,N
+비즈니스·접대,moegi,lunch-course,meal,lunch,weekend,2,1인,32,6720000,6109091,N
+비즈니스·접대,moegi,lunch-course,meal,lunch,weekend,3,1인,32,6720000,6109091,N
+비즈니스·접대,moegi,lunch-course,meal,lunch,weekend,4,1인,32,6720000,6109091,N
+비즈니스·접대,moegi,lunch-course,meal,lunch,weekend,5,1인,32,6720000,6109091,N
+비즈니스·접대,moegi,lunch-course,meal,lunch,weekend,6,1인,32,6720000,6109091,N
+비즈니스·접대,moegi,lunch-course,meal,lunch,weekend,7,1인,32,6720000,6109091,N
+비즈니스·접대,moegi,lunch-course,meal,lunch,weekend,8,1인,32,6720000,6109091,N
+비즈니스·접대,moegi,lunch-course,meal,lunch,weekend,9,1인,32,6720000,6109091,N
+비즈니스·접대,moegi,lunch-course,meal,lunch,weekend,10,1인,32,6720000,6109091,N
+비즈니스·접대,moegi,lunch-course,meal,lunch,weekend,11,1인,32,6720000,6109091,N
+비즈니스·접대,moegi,lunch-course,meal,lunch,weekend,12,1인,32,6719999,6109090,N
+커플·기념일,moegi,lunch-course,meal,lunch,weekday,1,1인,8,1680000,1527273,N
+커플·기념일,moegi,lunch-course,meal,lunch,weekday,2,1인,7,1470000,1336364,N
+커플·기념일,moegi,lunch-course,meal,lunch,weekday,3,1인,7,1470000,1336364,N
+커플·기념일,moegi,lunch-course,meal,lunch,weekday,4,1인,7,1470000,1336364,N
+커플·기념일,moegi,lunch-course,meal,lunch,weekday,5,1인,7,1470000,1336364,N
+커플·기념일,moegi,lunch-course,meal,lunch,weekday,6,1인,7,1470000,1336364,N
+커플·기념일,moegi,lunch-course,meal,lunch,weekday,7,1인,7,1470000,1336364,N
+커플·기념일,moegi,lunch-course,meal,lunch,weekday,8,1인,7,1470000,1336364,N
+커플·기념일,moegi,lunch-course,meal,lunch,weekday,9,1인,7,1470000,1336364,N
+커플·기념일,moegi,lunch-course,meal,lunch,weekday,10,1인,7,1470000,1336364,N
+커플·기념일,moegi,lunch-course,meal,lunch,weekday,11,1인,7,1470000,1336364,N
+커플·기념일,moegi,lunch-course,meal,lunch,weekday,12,1인,7,1469996,1336360,N
+커플·기념일,moegi,lunch-course,meal,lunch,weekend,1,1인,31,6510000,5918182,N
+커플·기념일,moegi,lunch-course,meal,lunch,weekend,2,1인,31,6510000,5918182,N
+커플·기념일,moegi,lunch-course,meal,lunch,weekend,3,1인,31,6510000,5918182,N
+커플·기념일,moegi,lunch-course,meal,lunch,weekend,4,1인,30,6300000,5727273,N
+커플·기념일,moegi,lunch-course,meal,lunch,weekend,5,1인,30,6300000,5727273,N
+커플·기념일,moegi,lunch-course,meal,lunch,weekend,6,1인,30,6300000,5727273,N
+커플·기념일,moegi,lunch-course,meal,lunch,weekend,7,1인,30,6300000,5727273,N
+커플·기념일,moegi,lunch-course,meal,lunch,weekend,8,1인,30,6300000,5727273,N
+커플·기념일,moegi,lunch-course,meal,lunch,weekend,9,1인,30,6300000,5727273,N
+커플·기념일,moegi,lunch-course,meal,lunch,weekend,10,1인,30,6300000,5727273,N
+커플·기념일,moegi,lunch-course,meal,lunch,weekend,11,1인,30,6300000,5727273,N
+커플·기념일,moegi,lunch-course,meal,lunch,weekend,12,1인,30,6299997,5727270,N
+골프·스포츠 모임,moegi,sashimi-set,meal,lunch,weekday,1,1인,21,3360000,3054545,N
+골프·스포츠 모임,moegi,sashimi-set,meal,lunch,weekday,2,1인,21,3360000,3054545,N
+골프·스포츠 모임,moegi,sashimi-set,meal,lunch,weekday,3,1인,21,3360000,3054545,N
+골프·스포츠 모임,moegi,sashimi-set,meal,lunch,weekday,4,1인,21,3360000,3054545,N
+골프·스포츠 모임,moegi,sashimi-set,meal,lunch,weekday,5,1인,21,3360000,3054545,N
+골프·스포츠 모임,moegi,sashimi-set,meal,lunch,weekday,6,1인,21,3360000,3054545,N
+골프·스포츠 모임,moegi,sashimi-set,meal,lunch,weekday,7,1인,21,3360000,3054545,N
+골프·스포츠 모임,moegi,sashimi-set,meal,lunch,weekday,8,1인,20,3200000,2909091,N
+골프·스포츠 모임,moegi,sashimi-set,meal,lunch,weekday,9,1인,20,3200000,2909091,N
+골프·스포츠 모임,moegi,sashimi-set,meal,lunch,weekday,10,1인,20,3200000,2909091,N
+골프·스포츠 모임,moegi,sashimi-set,meal,lunch,weekday,11,1인,20,3200000,2909091,N
+골프·스포츠 모임,moegi,sashimi-set,meal,lunch,weekday,12,1인,20,3200003,2909094,N
+골프·스포츠 모임,moegi,sashimi-set,meal,lunch,weekend,1,1인,17,2720000,2472727,N
+골프·스포츠 모임,moegi,sashimi-set,meal,lunch,weekend,2,1인,17,2720000,2472727,N
+골프·스포츠 모임,moegi,sashimi-set,meal,lunch,weekend,3,1인,17,2720000,2472727,N
+골프·스포츠 모임,moegi,sashimi-set,meal,lunch,weekend,4,1인,16,2560000,2327273,N
+골프·스포츠 모임,moegi,sashimi-set,meal,lunch,weekend,5,1인,16,2560000,2327273,N
+골프·스포츠 모임,moegi,sashimi-set,meal,lunch,weekend,6,1인,16,2560000,2327273,N
+골프·스포츠 모임,moegi,sashimi-set,meal,lunch,weekend,7,1인,16,2560000,2327273,N
+골프·스포츠 모임,moegi,sashimi-set,meal,lunch,weekend,8,1인,16,2560000,2327273,N
+골프·스포츠 모임,moegi,sashimi-set,meal,lunch,weekend,9,1인,16,2560000,2327273,N
+골프·스포츠 모임,moegi,sashimi-set,meal,lunch,weekend,10,1인,16,2560000,2327273,N
+골프·스포츠 모임,moegi,sashimi-set,meal,lunch,weekend,11,1인,16,2560000,2327273,N
+골프·스포츠 모임,moegi,sashimi-set,meal,lunch,weekend,12,1인,16,2559998,2327271,N
+공항 이동·여행,moegi,sashimi-set,meal,lunch,weekday,1,1인,7,1120000,1018182,N
+공항 이동·여행,moegi,sashimi-set,meal,lunch,weekday,2,1인,7,1120000,1018182,N
+공항 이동·여행,moegi,sashimi-set,meal,lunch,weekday,3,1인,7,1120000,1018182,N
+공항 이동·여행,moegi,sashimi-set,meal,lunch,weekday,4,1인,7,1120000,1018182,N
+공항 이동·여행,moegi,sashimi-set,meal,lunch,weekday,5,1인,7,1120000,1018182,N
+공항 이동·여행,moegi,sashimi-set,meal,lunch,weekday,6,1인,7,1120000,1018182,N
+공항 이동·여행,moegi,sashimi-set,meal,lunch,weekday,7,1인,6,960000,872727,N
+공항 이동·여행,moegi,sashimi-set,meal,lunch,weekday,8,1인,6,960000,872727,N
+공항 이동·여행,moegi,sashimi-set,meal,lunch,weekday,9,1인,6,960000,872727,N
+공항 이동·여행,moegi,sashimi-set,meal,lunch,weekday,10,1인,6,960000,872727,N
+공항 이동·여행,moegi,sashimi-set,meal,lunch,weekday,11,1인,6,960000,872727,N
+공항 이동·여행,moegi,sashimi-set,meal,lunch,weekday,12,1인,6,960001,872728,N
+공항 이동·여행,moegi,sashimi-set,meal,lunch,weekend,1,1인,23,3680001,3345455,N
+공항 이동·여행,moegi,sashimi-set,meal,lunch,weekend,2,1인,23,3680001,3345455,N
+공항 이동·여행,moegi,sashimi-set,meal,lunch,weekend,3,1인,23,3680001,3345455,N
+공항 이동·여행,moegi,sashimi-set,meal,lunch,weekend,4,1인,22,3520000,3200000,N
+공항 이동·여행,moegi,sashimi-set,meal,lunch,weekend,5,1인,22,3520000,3200000,N
+공항 이동·여행,moegi,sashimi-set,meal,lunch,weekend,6,1인,22,3520000,3200000,N
+공항 이동·여행,moegi,sashimi-set,meal,lunch,weekend,7,1인,22,3520000,3200000,N
+공항 이동·여행,moegi,sashimi-set,meal,lunch,weekend,8,1인,22,3520000,3200000,N
+공항 이동·여행,moegi,sashimi-set,meal,lunch,weekend,9,1인,22,3520000,3200000,N
+공항 이동·여행,moegi,sashimi-set,meal,lunch,weekend,10,1인,22,3520000,3200000,N
+공항 이동·여행,moegi,sashimi-set,meal,lunch,weekend,11,1인,22,3520000,3200000,N
+공항 이동·여행,moegi,sashimi-set,meal,lunch,weekend,12,1인,22,3519999,3199999,N
+친구·모임,moegi,autumn-lunch,meal,lunch,weekday,9,1인,176,8800000,8000000,Y
+친구·모임,moegi,autumn-lunch,meal,lunch,weekday,10,1인,176,8800000,8000000,Y
+친구·모임,moegi,autumn-lunch,meal,lunch,weekend,9,1인,64,3200000,2909091,Y
+친구·모임,moegi,autumn-lunch,meal,lunch,weekend,10,1인,64,3200000,2909091,Y
+커플·기념일,moegi,autumn-lunch,meal,lunch,weekday,9,1인,56,2800001,2545455,Y
+커플·기념일,moegi,autumn-lunch,meal,lunch,weekday,10,1인,55,2750000,2500000,Y
+커플·기념일,moegi,autumn-lunch,meal,lunch,weekend,9,1인,110,5500000,5000000,Y
+커플·기념일,moegi,autumn-lunch,meal,lunch,weekend,10,1인,109,5450000,4954545,Y
+골프·스포츠 모임,myongwolgwan,special-platter-set,meal,,weekday,1,세트,8,2800001,2545455,N
+골프·스포츠 모임,myongwolgwan,special-platter-set,meal,,weekday,2,세트,7,2450000,2227273,N
+골프·스포츠 모임,myongwolgwan,special-platter-set,meal,,weekday,3,세트,7,2450000,2227273,N
+골프·스포츠 모임,myongwolgwan,special-platter-set,meal,,weekday,4,세트,7,2450000,2227273,N
+골프·스포츠 모임,myongwolgwan,special-platter-set,meal,,weekday,5,세트,7,2450000,2227273,N
+골프·스포츠 모임,myongwolgwan,special-platter-set,meal,,weekday,6,세트,7,2450000,2227273,N
+골프·스포츠 모임,myongwolgwan,special-platter-set,meal,,weekday,7,세트,7,2450000,2227273,N
+골프·스포츠 모임,myongwolgwan,special-platter-set,meal,,weekday,8,세트,7,2450000,2227273,N
+골프·스포츠 모임,myongwolgwan,special-platter-set,meal,,weekday,9,세트,7,2450000,2227273,N
+골프·스포츠 모임,myongwolgwan,special-platter-set,meal,,weekday,10,세트,7,2450000,2227273,N
+골프·스포츠 모임,myongwolgwan,special-platter-set,meal,,weekday,11,세트,7,2450000,2227273,N
+골프·스포츠 모임,myongwolgwan,special-platter-set,meal,,weekday,12,세트,7,2449997,2227270,N
+골프·스포츠 모임,myongwolgwan,special-platter-set,meal,,weekend,1,세트,27,9450000,8590909,N
+골프·스포츠 모임,myongwolgwan,special-platter-set,meal,,weekend,2,세트,27,9450000,8590909,N
+골프·스포츠 모임,myongwolgwan,special-platter-set,meal,,weekend,3,세트,27,9450000,8590909,N
+골프·스포츠 모임,myongwolgwan,special-platter-set,meal,,weekend,4,세트,26,9100000,8272727,N
+골프·스포츠 모임,myongwolgwan,special-platter-set,meal,,weekend,5,세트,26,9100000,8272727,N
+골프·스포츠 모임,myongwolgwan,special-platter-set,meal,,weekend,6,세트,26,9100000,8272727,N
+골프·스포츠 모임,myongwolgwan,special-platter-set,meal,,weekend,7,세트,26,9100000,8272727,N
+골프·스포츠 모임,myongwolgwan,special-platter-set,meal,,weekend,8,세트,26,9100000,8272727,N
+골프·스포츠 모임,myongwolgwan,special-platter-set,meal,,weekend,9,세트,26,9100000,8272727,N
+골프·스포츠 모임,myongwolgwan,special-platter-set,meal,,weekend,10,세트,26,9100000,8272727,N
+골프·스포츠 모임,myongwolgwan,special-platter-set,meal,,weekend,11,세트,26,9100000,8272727,N
+골프·스포츠 모임,myongwolgwan,special-platter-set,meal,,weekend,12,세트,26,9100003,8272730,N
+비즈니스·접대,myongwolgwan,special-platter-set,meal,,weekday,1,세트,11,3850000,3500000,N
+비즈니스·접대,myongwolgwan,special-platter-set,meal,,weekday,2,세트,11,3850000,3500000,N
+비즈니스·접대,myongwolgwan,special-platter-set,meal,,weekday,3,세트,11,3850000,3500000,N
+비즈니스·접대,myongwolgwan,special-platter-set,meal,,weekday,4,세트,11,3850000,3500000,N
+비즈니스·접대,myongwolgwan,special-platter-set,meal,,weekday,5,세트,11,3850000,3500000,N
+비즈니스·접대,myongwolgwan,special-platter-set,meal,,weekday,6,세트,11,3850000,3500000,N
+비즈니스·접대,myongwolgwan,special-platter-set,meal,,weekday,7,세트,11,3850000,3500000,N
+비즈니스·접대,myongwolgwan,special-platter-set,meal,,weekday,8,세트,11,3850000,3500000,N
+비즈니스·접대,myongwolgwan,special-platter-set,meal,,weekday,9,세트,11,3850000,3500000,N
+비즈니스·접대,myongwolgwan,special-platter-set,meal,,weekday,10,세트,11,3850000,3500000,N
+비즈니스·접대,myongwolgwan,special-platter-set,meal,,weekday,11,세트,11,3850000,3500000,N
+비즈니스·접대,myongwolgwan,special-platter-set,meal,,weekday,12,세트,11,3850000,3500000,N
+비즈니스·접대,myongwolgwan,special-platter-set,meal,,weekend,1,세트,31,10850000,9863636,N
+비즈니스·접대,myongwolgwan,special-platter-set,meal,,weekend,2,세트,31,10850000,9863636,N
+비즈니스·접대,myongwolgwan,special-platter-set,meal,,weekend,3,세트,31,10850000,9863636,N
+비즈니스·접대,myongwolgwan,special-platter-set,meal,,weekend,4,세트,31,10850000,9863636,N
+비즈니스·접대,myongwolgwan,special-platter-set,meal,,weekend,5,세트,31,10850000,9863636,N
+비즈니스·접대,myongwolgwan,special-platter-set,meal,,weekend,6,세트,31,10850000,9863636,N
+비즈니스·접대,myongwolgwan,special-platter-set,meal,,weekend,7,세트,31,10850000,9863636,N
+비즈니스·접대,myongwolgwan,special-platter-set,meal,,weekend,8,세트,31,10850000,9863636,N
+비즈니스·접대,myongwolgwan,special-platter-set,meal,,weekend,9,세트,31,10850000,9863636,N
+비즈니스·접대,myongwolgwan,special-platter-set,meal,,weekend,10,세트,31,10850000,9863636,N
+비즈니스·접대,myongwolgwan,special-platter-set,meal,,weekend,11,세트,30,10500001,9545455,N
+비즈니스·접대,myongwolgwan,special-platter-set,meal,,weekend,12,세트,30,10500004,9545458,N
+휴식·산책 동행,myongwolgwan,special-platter-set,meal,,weekday,1,세트,22,7700000,7000000,N
+휴식·산책 동행,myongwolgwan,special-platter-set,meal,,weekday,2,세트,22,7700000,7000000,N
+휴식·산책 동행,myongwolgwan,special-platter-set,meal,,weekday,3,세트,22,7700000,7000000,N
+휴식·산책 동행,myongwolgwan,special-platter-set,meal,,weekday,4,세트,22,7700000,7000000,N
+휴식·산책 동행,myongwolgwan,special-platter-set,meal,,weekday,5,세트,22,7700000,7000000,N
+휴식·산책 동행,myongwolgwan,special-platter-set,meal,,weekday,6,세트,22,7700000,7000000,N
+휴식·산책 동행,myongwolgwan,special-platter-set,meal,,weekday,7,세트,22,7700000,7000000,N
+휴식·산책 동행,myongwolgwan,special-platter-set,meal,,weekday,8,세트,22,7700000,7000000,N
+휴식·산책 동행,myongwolgwan,special-platter-set,meal,,weekday,9,세트,22,7700000,7000000,N
+휴식·산책 동행,myongwolgwan,special-platter-set,meal,,weekday,10,세트,22,7700000,7000000,N
+휴식·산책 동행,myongwolgwan,special-platter-set,meal,,weekday,11,세트,21,7350000,6681818,N
+휴식·산책 동행,myongwolgwan,special-platter-set,meal,,weekday,12,세트,21,7350000,6681818,N
+휴식·산책 동행,myongwolgwan,special-platter-set,meal,,weekend,1,세트,19,6650001,6045455,N
+휴식·산책 동행,myongwolgwan,special-platter-set,meal,,weekend,2,세트,19,6650001,6045455,N
+휴식·산책 동행,myongwolgwan,special-platter-set,meal,,weekend,3,세트,19,6650001,6045455,N
+휴식·산책 동행,myongwolgwan,special-platter-set,meal,,weekend,4,세트,19,6650001,6045455,N
+휴식·산책 동행,myongwolgwan,special-platter-set,meal,,weekend,5,세트,19,6650001,6045455,N
+휴식·산책 동행,myongwolgwan,special-platter-set,meal,,weekend,6,세트,19,6650001,6045455,N
+휴식·산책 동행,myongwolgwan,special-platter-set,meal,,weekend,7,세트,19,6650001,6045455,N
+휴식·산책 동행,myongwolgwan,special-platter-set,meal,,weekend,8,세트,19,6650001,6045455,N
+휴식·산책 동행,myongwolgwan,special-platter-set,meal,,weekend,9,세트,19,6650001,6045455,N
+휴식·산책 동행,myongwolgwan,special-platter-set,meal,,weekend,10,세트,19,6650001,6045455,N
+휴식·산책 동행,myongwolgwan,special-platter-set,meal,,weekend,11,세트,19,6650001,6045455,N
+휴식·산책 동행,myongwolgwan,special-platter-set,meal,,weekend,12,세트,18,6299995,5727268,N
+가족·친족,myongwolgwan,weekday-lunch,meal,lunch,weekday,9,1인,184,9200000,8363636,Y
+가족·친족,myongwolgwan,weekday-lunch,meal,lunch,weekday,10,1인,183,9150000,8318182,Y
+골프·스포츠 모임,myongwolgwan,weekday-lunch,meal,lunch,weekday,9,1인,159,7950000,7227273,Y
+골프·스포츠 모임,myongwolgwan,weekday-lunch,meal,lunch,weekday,10,1인,159,7949999,7227272,Y
+공항 이동·여행,myongwolgwan,weekday-lunch,meal,lunch,weekday,9,1인,143,7150000,6500000,Y
+공항 이동·여행,myongwolgwan,weekday-lunch,meal,lunch,weekday,10,1인,143,7150000,6500000,Y
+커플·기념일,myongwolgwan,weekday-lunch,meal,lunch,weekday,9,1인,168,8400000,7636364,Y
+커플·기념일,myongwolgwan,weekday-lunch,meal,lunch,weekday,10,1인,167,8350000,7590909,Y
+가족·친족,ondal,royal-table-course,meal,,weekday,1,1인,29,4785000,4350000,N
+가족·친족,ondal,royal-table-course,meal,,weekday,2,1인,29,4785000,4350000,N
+가족·친족,ondal,royal-table-course,meal,,weekday,3,1인,29,4785000,4350000,N
+가족·친족,ondal,royal-table-course,meal,,weekday,4,1인,29,4785000,4350000,N
+가족·친족,ondal,royal-table-course,meal,,weekday,5,1인,29,4785000,4350000,N
+가족·친족,ondal,royal-table-course,meal,,weekday,6,1인,29,4785000,4350000,N
+가족·친족,ondal,royal-table-course,meal,,weekday,7,1인,29,4785000,4350000,N
+가족·친족,ondal,royal-table-course,meal,,weekday,8,1인,29,4785000,4350000,N
+가족·친족,ondal,royal-table-course,meal,,weekday,9,1인,29,4785000,4350000,N
+가족·친족,ondal,royal-table-course,meal,,weekday,10,1인,29,4785000,4350000,N
+가족·친족,ondal,royal-table-course,meal,,weekday,11,1인,28,4620000,4200000,N
+가족·친족,ondal,royal-table-course,meal,,weekday,12,1인,28,4620000,4200000,N
+가족·친족,ondal,royal-table-course,meal,,weekend,1,1인,7,1155000,1050000,N
+가족·친족,ondal,royal-table-course,meal,,weekend,2,1인,7,1155000,1050000,N
+가족·친족,ondal,royal-table-course,meal,,weekend,3,1인,6,990000,900000,N
+가족·친족,ondal,royal-table-course,meal,,weekend,4,1인,6,990000,900000,N
+가족·친족,ondal,royal-table-course,meal,,weekend,5,1인,6,990000,900000,N
+가족·친족,ondal,royal-table-course,meal,,weekend,6,1인,6,990000,900000,N
+가족·친족,ondal,royal-table-course,meal,,weekend,7,1인,6,990000,900000,N
+가족·친족,ondal,royal-table-course,meal,,weekend,8,1인,6,990000,900000,N
+가족·친족,ondal,royal-table-course,meal,,weekend,9,1인,6,990000,900000,N
+가족·친족,ondal,royal-table-course,meal,,weekend,10,1인,6,990000,900000,N
+가족·친족,ondal,royal-table-course,meal,,weekend,11,1인,6,990000,900000,N
+가족·친족,ondal,royal-table-course,meal,,weekend,12,1인,6,990000,900000,N
+공항 이동·여행,ondal,royal-table-course,meal,,weekday,1,1인,33,5445000,4950000,N
+공항 이동·여행,ondal,royal-table-course,meal,,weekday,2,1인,33,5445000,4950000,N
+공항 이동·여행,ondal,royal-table-course,meal,,weekday,3,1인,33,5445000,4950000,N
+공항 이동·여행,ondal,royal-table-course,meal,,weekday,4,1인,33,5445000,4950000,N
+공항 이동·여행,ondal,royal-table-course,meal,,weekday,5,1인,33,5445000,4950000,N
+공항 이동·여행,ondal,royal-table-course,meal,,weekday,6,1인,33,5445000,4950000,N
+공항 이동·여행,ondal,royal-table-course,meal,,weekday,7,1인,33,5445000,4950000,N
+공항 이동·여행,ondal,royal-table-course,meal,,weekday,8,1인,32,5280000,4800000,N
+공항 이동·여행,ondal,royal-table-course,meal,,weekday,9,1인,32,5280000,4800000,N
+공항 이동·여행,ondal,royal-table-course,meal,,weekday,10,1인,32,5280000,4800000,N
+공항 이동·여행,ondal,royal-table-course,meal,,weekday,11,1인,32,5280000,4800000,N
+공항 이동·여행,ondal,royal-table-course,meal,,weekday,12,1인,32,5280000,4800000,N
+공항 이동·여행,ondal,royal-table-course,meal,,weekend,1,1인,23,3795000,3450000,N
+공항 이동·여행,ondal,royal-table-course,meal,,weekend,2,1인,23,3795000,3450000,N
+공항 이동·여행,ondal,royal-table-course,meal,,weekend,3,1인,23,3795000,3450000,N
+공항 이동·여행,ondal,royal-table-course,meal,,weekend,4,1인,23,3795000,3450000,N
+공항 이동·여행,ondal,royal-table-course,meal,,weekend,5,1인,23,3795000,3450000,N
+공항 이동·여행,ondal,royal-table-course,meal,,weekend,6,1인,23,3795000,3450000,N
+공항 이동·여행,ondal,royal-table-course,meal,,weekend,7,1인,23,3795000,3450000,N
+공항 이동·여행,ondal,royal-table-course,meal,,weekend,8,1인,23,3795000,3450000,N
+공항 이동·여행,ondal,royal-table-course,meal,,weekend,9,1인,23,3795000,3450000,N
+공항 이동·여행,ondal,royal-table-course,meal,,weekend,10,1인,23,3795000,3450000,N
+공항 이동·여행,ondal,royal-table-course,meal,,weekend,11,1인,23,3795000,3450000,N
+공항 이동·여행,ondal,royal-table-course,meal,,weekend,12,1인,23,3795000,3450000,N
+미식 방문,ondal,royal-table-course,meal,,weekday,1,1인,10,1650000,1500000,N
+미식 방문,ondal,royal-table-course,meal,,weekday,2,1인,9,1485000,1350000,N
+미식 방문,ondal,royal-table-course,meal,,weekday,3,1인,9,1485000,1350000,N
+미식 방문,ondal,royal-table-course,meal,,weekday,4,1인,9,1485000,1350000,N
+미식 방문,ondal,royal-table-course,meal,,weekday,5,1인,9,1485000,1350000,N
+미식 방문,ondal,royal-table-course,meal,,weekday,6,1인,9,1485000,1350000,N
+미식 방문,ondal,royal-table-course,meal,,weekday,7,1인,9,1485000,1350000,N
+미식 방문,ondal,royal-table-course,meal,,weekday,8,1인,9,1485000,1350000,N
+미식 방문,ondal,royal-table-course,meal,,weekday,9,1인,9,1485000,1350000,N
+미식 방문,ondal,royal-table-course,meal,,weekday,10,1인,9,1485000,1350000,N
+미식 방문,ondal,royal-table-course,meal,,weekday,11,1인,9,1485000,1350000,N
+미식 방문,ondal,royal-table-course,meal,,weekday,12,1인,9,1485000,1350000,N
+미식 방문,ondal,royal-table-course,meal,,weekend,1,1인,22,3630000,3300000,N
+미식 방문,ondal,royal-table-course,meal,,weekend,2,1인,21,3465000,3150000,N
+미식 방문,ondal,royal-table-course,meal,,weekend,3,1인,21,3465000,3150000,N
+미식 방문,ondal,royal-table-course,meal,,weekend,4,1인,21,3465000,3150000,N
+미식 방문,ondal,royal-table-course,meal,,weekend,5,1인,21,3465000,3150000,N
+미식 방문,ondal,royal-table-course,meal,,weekend,6,1인,21,3465000,3150000,N
+미식 방문,ondal,royal-table-course,meal,,weekend,7,1인,21,3465000,3150000,N
+미식 방문,ondal,royal-table-course,meal,,weekend,8,1인,21,3465000,3150000,N
+미식 방문,ondal,royal-table-course,meal,,weekend,9,1인,21,3465000,3150000,N
+미식 방문,ondal,royal-table-course,meal,,weekend,10,1인,21,3465000,3150000,N
+미식 방문,ondal,royal-table-course,meal,,weekend,11,1인,21,3465000,3150000,N
+미식 방문,ondal,royal-table-course,meal,,weekend,12,1인,21,3465000,3150000,N
+비즈니스·접대,ondal,royal-table-course,meal,,weekday,1,1인,14,2310000,2100000,N
+비즈니스·접대,ondal,royal-table-course,meal,,weekday,2,1인,14,2310000,2100000,N
+비즈니스·접대,ondal,royal-table-course,meal,,weekday,3,1인,14,2310000,2100000,N
+비즈니스·접대,ondal,royal-table-course,meal,,weekday,4,1인,14,2310000,2100000,N
+비즈니스·접대,ondal,royal-table-course,meal,,weekday,5,1인,14,2310000,2100000,N
+비즈니스·접대,ondal,royal-table-course,meal,,weekday,6,1인,14,2310000,2100000,N
+비즈니스·접대,ondal,royal-table-course,meal,,weekday,7,1인,14,2310000,2100000,N
+비즈니스·접대,ondal,royal-table-course,meal,,weekday,8,1인,14,2310000,2100000,N
+비즈니스·접대,ondal,royal-table-course,meal,,weekday,9,1인,13,2145000,1950000,N
+비즈니스·접대,ondal,royal-table-course,meal,,weekday,10,1인,13,2145000,1950000,N
+비즈니스·접대,ondal,royal-table-course,meal,,weekday,11,1인,13,2145000,1950000,N
+비즈니스·접대,ondal,royal-table-course,meal,,weekday,12,1인,13,2145000,1950000,N
+비즈니스·접대,ondal,royal-table-course,meal,,weekend,1,1인,28,4620000,4200000,N
+비즈니스·접대,ondal,royal-table-course,meal,,weekend,2,1인,28,4620000,4200000,N
+비즈니스·접대,ondal,royal-table-course,meal,,weekend,3,1인,28,4620000,4200000,N
+비즈니스·접대,ondal,royal-table-course,meal,,weekend,4,1인,28,4620000,4200000,N
+비즈니스·접대,ondal,royal-table-course,meal,,weekend,5,1인,28,4620000,4200000,N
+비즈니스·접대,ondal,royal-table-course,meal,,weekend,6,1인,28,4620000,4200000,N
+비즈니스·접대,ondal,royal-table-course,meal,,weekend,7,1인,28,4620000,4200000,N
+비즈니스·접대,ondal,royal-table-course,meal,,weekend,8,1인,28,4620000,4200000,N
+비즈니스·접대,ondal,royal-table-course,meal,,weekend,9,1인,28,4620000,4200000,N
+비즈니스·접대,ondal,royal-table-course,meal,,weekend,10,1인,28,4620000,4200000,N
+비즈니스·접대,ondal,royal-table-course,meal,,weekend,11,1인,28,4620000,4200000,N
+비즈니스·접대,ondal,royal-table-course,meal,,weekend,12,1인,27,4455000,4050000,N
+비즈니스·접대,ondal,lunch-table,meal,lunch,weekday,1,1인,1,125000,113636,N
+비즈니스·접대,ondal,lunch-table,meal,lunch,weekday,2,1인,1,125000,113636,N
+비즈니스·접대,ondal,lunch-table,meal,lunch,weekday,3,1인,1,125000,113636,N
+비즈니스·접대,ondal,lunch-table,meal,lunch,weekday,4,1인,1,125000,113636,N
+비즈니스·접대,ondal,lunch-table,meal,lunch,weekday,5,1인,1,125002,113638,N
+휴식·산책 동행,ondal,lunch-table,meal,lunch,weekday,1,1인,31,3875000,3522727,N
+휴식·산책 동행,ondal,lunch-table,meal,lunch,weekday,2,1인,31,3875000,3522727,N
+휴식·산책 동행,ondal,lunch-table,meal,lunch,weekday,3,1인,31,3875000,3522727,N
+휴식·산책 동행,ondal,lunch-table,meal,lunch,weekday,4,1인,31,3875000,3522727,N
+휴식·산책 동행,ondal,lunch-table,meal,lunch,weekday,5,1인,31,3875000,3522727,N
+휴식·산책 동행,ondal,lunch-table,meal,lunch,weekday,6,1인,31,3875000,3522727,N
+휴식·산책 동행,ondal,lunch-table,meal,lunch,weekday,7,1인,31,3875000,3522727,N
+휴식·산책 동행,ondal,lunch-table,meal,lunch,weekday,8,1인,31,3875000,3522727,N
+휴식·산책 동행,ondal,lunch-table,meal,lunch,weekday,9,1인,31,3875000,3522727,N
+휴식·산책 동행,ondal,lunch-table,meal,lunch,weekday,10,1인,30,3750000,3409091,N
+휴식·산책 동행,ondal,lunch-table,meal,lunch,weekday,11,1인,30,3750000,3409091,N
+휴식·산책 동행,ondal,lunch-table,meal,lunch,weekday,12,1인,30,3750002,3409093,N
+공항 이동·여행,pavilion,fall-dessert-set,dessert,,weekday,9,세트,65,6370000,5790909,N
+공항 이동·여행,pavilion,fall-dessert-set,dessert,,weekday,10,세트,65,6370000,5790909,N
+공항 이동·여행,pavilion,fall-dessert-set,dessert,,weekday,11,세트,65,6370000,5790909,N
+공항 이동·여행,pavilion,fall-dessert-set,dessert,,weekend,9,세트,10,980000,890909,N
+공항 이동·여행,pavilion,fall-dessert-set,dessert,,weekend,10,세트,10,980000,890909,N
+공항 이동·여행,pavilion,fall-dessert-set,dessert,,weekend,11,세트,9,882000,801818,N
+미식 방문,pavilion,fall-dessert-set,dessert,,weekday,9,세트,108,10584000,9621818,N
+미식 방문,pavilion,fall-dessert-set,dessert,,weekday,10,세트,108,10584000,9621818,N
+미식 방문,pavilion,fall-dessert-set,dessert,,weekday,11,세트,108,10584001,9621819,N
+미식 방문,pavilion,fall-dessert-set,dessert,,weekend,9,세트,132,12936000,11760000,N
+미식 방문,pavilion,fall-dessert-set,dessert,,weekend,10,세트,132,12936000,11760000,N
+미식 방문,pavilion,fall-dessert-set,dessert,,weekend,11,세트,132,12936000,11760000,N
+비즈니스·접대,pavilion,fall-dessert-set,dessert,,weekday,9,세트,55,5390000,4900000,N
+비즈니스·접대,pavilion,fall-dessert-set,dessert,,weekday,10,세트,55,5390000,4900000,N
+비즈니스·접대,pavilion,fall-dessert-set,dessert,,weekday,11,세트,54,5292000,4810909,N
+비즈니스·접대,pavilion,fall-dessert-set,dessert,,weekend,9,세트,20,1960000,1781818,N
+비즈니스·접대,pavilion,fall-dessert-set,dessert,,weekend,10,세트,19,1862000,1692727,N
+비즈니스·접대,pavilion,fall-dessert-set,dessert,,weekend,11,세트,19,1862001,1692728,N
+커플·기념일,pavilion,fall-dessert-set,dessert,,weekday,9,세트,73,7154000,6503636,N
+커플·기념일,pavilion,fall-dessert-set,dessert,,weekday,10,세트,73,7154000,6503636,N
+커플·기념일,pavilion,fall-dessert-set,dessert,,weekday,11,세트,72,7056001,6414546,N
+커플·기념일,pavilion,fall-dessert-set,dessert,,weekend,9,세트,42,4116000,3741818,N
+커플·기념일,pavilion,fall-dessert-set,dessert,,weekend,10,세트,41,4018000,3652727,N
+커플·기념일,pavilion,fall-dessert-set,dessert,,weekend,11,세트,41,4018001,3652728,N
+공항 이동·여행,pavilion,bingsu,dessert,,weekday,5,개,27,1350000,1227273,Y
+공항 이동·여행,pavilion,bingsu,dessert,,weekday,6,개,27,1350000,1227273,Y
+공항 이동·여행,pavilion,bingsu,dessert,,weekday,7,개,26,1300000,1181818,Y
+공항 이동·여행,pavilion,bingsu,dessert,,weekday,8,개,26,1300000,1181818,Y
+공항 이동·여행,pavilion,bingsu,dessert,,weekday,9,개,26,1300000,1181818,Y
+공항 이동·여행,pavilion,bingsu,dessert,,weekend,5,개,80,4000000,3636364,Y
+공항 이동·여행,pavilion,bingsu,dessert,,weekend,6,개,80,4000000,3636364,Y
+공항 이동·여행,pavilion,bingsu,dessert,,weekend,7,개,80,4000000,3636364,Y
+공항 이동·여행,pavilion,bingsu,dessert,,weekend,8,개,79,3950000,3590909,Y
+공항 이동·여행,pavilion,bingsu,dessert,,weekend,9,개,79,3949999,3590908,Y
+친구·모임,pavilion,bingsu,dessert,,weekday,5,개,6,300000,272727,Y
+친구·모임,pavilion,bingsu,dessert,,weekday,6,개,6,300000,272727,Y
+친구·모임,pavilion,bingsu,dessert,,weekday,7,개,6,300000,272727,Y
+친구·모임,pavilion,bingsu,dessert,,weekday,8,개,5,250000,227273,Y
+친구·모임,pavilion,bingsu,dessert,,weekday,9,개,5,250000,227273,Y
+친구·모임,pavilion,bingsu,dessert,,weekend,5,개,65,3250001,2954546,Y
+친구·모임,pavilion,bingsu,dessert,,weekend,6,개,65,3250001,2954546,Y
+친구·모임,pavilion,bingsu,dessert,,weekend,7,개,65,3250001,2954546,Y
+친구·모임,pavilion,bingsu,dessert,,weekend,8,개,65,3250001,2954546,Y
+친구·모임,pavilion,bingsu,dessert,,weekend,9,개,64,3199998,2909089,Y
+골프·스포츠 모임,pizzahill,couple-set,meal,,weekday,1,세트,30,5520000,5018182,N
+골프·스포츠 모임,pizzahill,couple-set,meal,,weekday,2,세트,30,5520000,5018182,N
+골프·스포츠 모임,pizzahill,couple-set,meal,,weekday,3,세트,30,5520000,5018182,N
+골프·스포츠 모임,pizzahill,couple-set,meal,,weekday,4,세트,30,5520000,5018182,N
+골프·스포츠 모임,pizzahill,couple-set,meal,,weekday,5,세트,30,5520000,5018182,N
+골프·스포츠 모임,pizzahill,couple-set,meal,,weekday,6,세트,30,5520000,5018182,N
+골프·스포츠 모임,pizzahill,couple-set,meal,,weekday,7,세트,30,5520000,5018182,N
+골프·스포츠 모임,pizzahill,couple-set,meal,,weekday,8,세트,30,5520000,5018182,N
+골프·스포츠 모임,pizzahill,couple-set,meal,,weekday,9,세트,30,5520000,5018182,N
+골프·스포츠 모임,pizzahill,couple-set,meal,,weekday,10,세트,30,5520000,5018182,N
+골프·스포츠 모임,pizzahill,couple-set,meal,,weekday,11,세트,29,5336000,4850909,N
+골프·스포츠 모임,pizzahill,couple-set,meal,,weekday,12,세트,29,5335998,4850907,N
+골프·스포츠 모임,pizzahill,couple-set,meal,,weekend,1,세트,10,1840000,1672727,N
+골프·스포츠 모임,pizzahill,couple-set,meal,,weekend,2,세트,10,1840000,1672727,N
+골프·스포츠 모임,pizzahill,couple-set,meal,,weekend,3,세트,10,1840000,1672727,N
+골프·스포츠 모임,pizzahill,couple-set,meal,,weekend,4,세트,10,1840000,1672727,N
+골프·스포츠 모임,pizzahill,couple-set,meal,,weekend,5,세트,10,1840000,1672727,N
+골프·스포츠 모임,pizzahill,couple-set,meal,,weekend,6,세트,9,1656001,1505455,N
+골프·스포츠 모임,pizzahill,couple-set,meal,,weekend,7,세트,9,1656001,1505455,N
+골프·스포츠 모임,pizzahill,couple-set,meal,,weekend,8,세트,9,1656001,1505455,N
+골프·스포츠 모임,pizzahill,couple-set,meal,,weekend,9,세트,9,1656001,1505455,N
+골프·스포츠 모임,pizzahill,couple-set,meal,,weekend,10,세트,9,1656001,1505455,N
+골프·스포츠 모임,pizzahill,couple-set,meal,,weekend,11,세트,9,1656001,1505455,N
+골프·스포츠 모임,pizzahill,couple-set,meal,,weekend,12,세트,9,1655998,1505453,N
+친구·모임,pizzahill,couple-set,meal,,weekday,1,세트,25,4600000,4181818,N
+친구·모임,pizzahill,couple-set,meal,,weekday,2,세트,25,4600000,4181818,N
+친구·모임,pizzahill,couple-set,meal,,weekday,3,세트,25,4600000,4181818,N
+친구·모임,pizzahill,couple-set,meal,,weekday,4,세트,24,4416000,4014545,N
+친구·모임,pizzahill,couple-set,meal,,weekday,5,세트,24,4416000,4014545,N
+친구·모임,pizzahill,couple-set,meal,,weekday,6,세트,24,4416000,4014545,N
+친구·모임,pizzahill,couple-set,meal,,weekday,7,세트,24,4416000,4014545,N
+친구·모임,pizzahill,couple-set,meal,,weekday,8,세트,24,4416000,4014545,N
+친구·모임,pizzahill,couple-set,meal,,weekday,9,세트,24,4416000,4014545,N
+친구·모임,pizzahill,couple-set,meal,,weekday,10,세트,24,4416000,4014545,N
+친구·모임,pizzahill,couple-set,meal,,weekday,11,세트,24,4416000,4014545,N
+친구·모임,pizzahill,couple-set,meal,,weekday,12,세트,24,4416005,4014550,N
+친구·모임,pizzahill,couple-set,meal,,weekend,1,세트,6,1104000,1003636,N
+친구·모임,pizzahill,couple-set,meal,,weekend,2,세트,6,1104000,1003636,N
+친구·모임,pizzahill,couple-set,meal,,weekend,3,세트,6,1104000,1003636,N
+친구·모임,pizzahill,couple-set,meal,,weekend,4,세트,6,1104000,1003636,N
+친구·모임,pizzahill,couple-set,meal,,weekend,5,세트,6,1104000,1003636,N
+친구·모임,pizzahill,couple-set,meal,,weekend,6,세트,6,1104000,1003636,N
+친구·모임,pizzahill,couple-set,meal,,weekend,7,세트,6,1104000,1003636,N
+친구·모임,pizzahill,couple-set,meal,,weekend,8,세트,6,1104000,1003636,N
+친구·모임,pizzahill,couple-set,meal,,weekend,9,세트,6,1104000,1003636,N
+친구·모임,pizzahill,couple-set,meal,,weekend,10,세트,6,1104000,1003636,N
+친구·모임,pizzahill,couple-set,meal,,weekend,11,세트,6,1104000,1003636,N
+친구·모임,pizzahill,couple-set,meal,,weekend,12,세트,5,920005,836368,N
+공항 이동·여행,pizzahill,triple-set,meal,,weekday,1,세트,15,3765000,3422727,N
+공항 이동·여행,pizzahill,triple-set,meal,,weekday,2,세트,15,3765000,3422727,N
+공항 이동·여행,pizzahill,triple-set,meal,,weekday,3,세트,15,3765000,3422727,N
+공항 이동·여행,pizzahill,triple-set,meal,,weekday,4,세트,15,3765000,3422727,N
+공항 이동·여행,pizzahill,triple-set,meal,,weekday,5,세트,15,3765000,3422727,N
+공항 이동·여행,pizzahill,triple-set,meal,,weekday,6,세트,15,3765000,3422727,N
+공항 이동·여행,pizzahill,triple-set,meal,,weekday,7,세트,15,3765000,3422727,N
+공항 이동·여행,pizzahill,triple-set,meal,,weekday,8,세트,15,3765000,3422727,N
+공항 이동·여행,pizzahill,triple-set,meal,,weekday,9,세트,15,3765000,3422727,N
+공항 이동·여행,pizzahill,triple-set,meal,,weekday,10,세트,15,3765000,3422727,N
+공항 이동·여행,pizzahill,triple-set,meal,,weekday,11,세트,15,3765000,3422727,N
+공항 이동·여행,pizzahill,triple-set,meal,,weekday,12,세트,14,3514003,3194548,N
+공항 이동·여행,pizzahill,triple-set,meal,,weekend,1,세트,4,1004000,912727,N
+공항 이동·여행,pizzahill,triple-set,meal,,weekend,2,세트,4,1004000,912727,N
+공항 이동·여행,pizzahill,triple-set,meal,,weekend,3,세트,4,1004000,912727,N
+공항 이동·여행,pizzahill,triple-set,meal,,weekend,4,세트,4,1004000,912727,N
+공항 이동·여행,pizzahill,triple-set,meal,,weekend,5,세트,4,1004000,912727,N
+공항 이동·여행,pizzahill,triple-set,meal,,weekend,6,세트,4,1004000,912727,N
+공항 이동·여행,pizzahill,triple-set,meal,,weekend,7,세트,4,1004000,912727,N
+공항 이동·여행,pizzahill,triple-set,meal,,weekend,8,세트,3,753000,684545,N
+공항 이동·여행,pizzahill,triple-set,meal,,weekend,9,세트,3,753000,684545,N
+공항 이동·여행,pizzahill,triple-set,meal,,weekend,10,세트,3,753000,684545,N
+공항 이동·여행,pizzahill,triple-set,meal,,weekend,11,세트,3,753000,684545,N
+공항 이동·여행,pizzahill,triple-set,meal,,weekend,12,세트,3,753004,684549,N
+비즈니스·접대,pizzahill,triple-set,meal,,weekday,1,세트,18,4518000,4107273,N
+비즈니스·접대,pizzahill,triple-set,meal,,weekday,2,세트,17,4267000,3879091,N
+비즈니스·접대,pizzahill,triple-set,meal,,weekday,3,세트,17,4267000,3879091,N
+비즈니스·접대,pizzahill,triple-set,meal,,weekday,4,세트,17,4267000,3879091,N
+비즈니스·접대,pizzahill,triple-set,meal,,weekday,5,세트,17,4267000,3879091,N
+비즈니스·접대,pizzahill,triple-set,meal,,weekday,6,세트,17,4267000,3879091,N
+비즈니스·접대,pizzahill,triple-set,meal,,weekday,7,세트,17,4267000,3879091,N
+비즈니스·접대,pizzahill,triple-set,meal,,weekday,8,세트,17,4267000,3879091,N
+비즈니스·접대,pizzahill,triple-set,meal,,weekday,9,세트,17,4267000,3879091,N
+비즈니스·접대,pizzahill,triple-set,meal,,weekday,10,세트,17,4267000,3879091,N
+비즈니스·접대,pizzahill,triple-set,meal,,weekday,11,세트,17,4267000,3879091,N
+비즈니스·접대,pizzahill,triple-set,meal,,weekday,12,세트,17,4266999,3879090,N
+비즈니스·접대,pizzahill,triple-set,meal,,weekend,1,세트,11,2761000,2510000,N
+비즈니스·접대,pizzahill,triple-set,meal,,weekend,2,세트,11,2761000,2510000,N
+비즈니스·접대,pizzahill,triple-set,meal,,weekend,3,세트,11,2761000,2510000,N
+비즈니스·접대,pizzahill,triple-set,meal,,weekend,4,세트,11,2761000,2510000,N
+비즈니스·접대,pizzahill,triple-set,meal,,weekend,5,세트,11,2761000,2510000,N
+비즈니스·접대,pizzahill,triple-set,meal,,weekend,6,세트,11,2761000,2510000,N
+비즈니스·접대,pizzahill,triple-set,meal,,weekend,7,세트,11,2761000,2510000,N
+비즈니스·접대,pizzahill,triple-set,meal,,weekend,8,세트,10,2510000,2281818,N
+비즈니스·접대,pizzahill,triple-set,meal,,weekend,9,세트,10,2510000,2281818,N
+비즈니스·접대,pizzahill,triple-set,meal,,weekend,10,세트,10,2510000,2281818,N
+비즈니스·접대,pizzahill,triple-set,meal,,weekend,11,세트,10,2510000,2281818,N
+비즈니스·접대,pizzahill,triple-set,meal,,weekend,12,세트,10,2510001,2281819,N
+친구·모임,pizzahill,triple-set,meal,,weekday,1,세트,2,502000,456364,N
+친구·모임,pizzahill,triple-set,meal,,weekday,2,세트,2,502000,456364,N
+친구·모임,pizzahill,triple-set,meal,,weekday,3,세트,2,502000,456364,N
+친구·모임,pizzahill,triple-set,meal,,weekday,4,세트,1,251000,228182,N
+친구·모임,pizzahill,triple-set,meal,,weekday,5,세트,1,251000,228182,N
+친구·모임,pizzahill,triple-set,meal,,weekday,6,세트,1,251000,228182,N
+친구·모임,pizzahill,triple-set,meal,,weekday,7,세트,1,251000,228182,N
+친구·모임,pizzahill,triple-set,meal,,weekday,8,세트,1,251000,228182,N
+친구·모임,pizzahill,triple-set,meal,,weekday,9,세트,1,251000,228182,N
+친구·모임,pizzahill,triple-set,meal,,weekday,10,세트,1,251000,228182,N
+친구·모임,pizzahill,triple-set,meal,,weekday,11,세트,1,251000,228182,N
+친구·모임,pizzahill,triple-set,meal,,weekday,12,세트,1,250997,228179,N
+친구·모임,pizzahill,triple-set,meal,,weekend,1,세트,12,3012000,2738182,N
+친구·모임,pizzahill,triple-set,meal,,weekend,2,세트,12,3012000,2738182,N
+친구·모임,pizzahill,triple-set,meal,,weekend,3,세트,12,3012000,2738182,N
+친구·모임,pizzahill,triple-set,meal,,weekend,4,세트,12,3012000,2738182,N
+친구·모임,pizzahill,triple-set,meal,,weekend,5,세트,12,3012000,2738182,N
+친구·모임,pizzahill,triple-set,meal,,weekend,6,세트,12,3012000,2738182,N
+친구·모임,pizzahill,triple-set,meal,,weekend,7,세트,12,3012000,2738182,N
+친구·모임,pizzahill,triple-set,meal,,weekend,8,세트,12,3012000,2738182,N
+친구·모임,pizzahill,triple-set,meal,,weekend,9,세트,12,3012000,2738182,N
+친구·모임,pizzahill,triple-set,meal,,weekend,10,세트,11,2761000,2510000,N
+친구·모임,pizzahill,triple-set,meal,,weekend,11,세트,11,2761000,2510000,N
+친구·모임,pizzahill,triple-set,meal,,weekend,12,세트,11,2760998,2509998,N
+커플·기념일,pizzahill,triple-set,meal,,weekday,1,세트,4,1004000,912727,N
+커플·기념일,pizzahill,triple-set,meal,,weekday,2,세트,4,1004000,912727,N
+커플·기념일,pizzahill,triple-set,meal,,weekday,3,세트,4,1004000,912727,N
+커플·기념일,pizzahill,triple-set,meal,,weekday,4,세트,3,753000,684545,N
+커플·기념일,pizzahill,triple-set,meal,,weekday,5,세트,3,753000,684545,N
+커플·기념일,pizzahill,triple-set,meal,,weekday,6,세트,3,753000,684545,N
+커플·기념일,pizzahill,triple-set,meal,,weekday,7,세트,3,753000,684545,N
+커플·기념일,pizzahill,triple-set,meal,,weekday,8,세트,3,753000,684545,N
+커플·기념일,pizzahill,triple-set,meal,,weekday,9,세트,3,753000,684545,N
+커플·기념일,pizzahill,triple-set,meal,,weekday,10,세트,3,753000,684545,N
+커플·기념일,pizzahill,triple-set,meal,,weekday,11,세트,3,753000,684545,N
+커플·기념일,pizzahill,triple-set,meal,,weekday,12,세트,3,753005,684550,N
+커플·기념일,pizzahill,triple-set,meal,,weekend,1,세트,25,6275000,5704545,N
+커플·기념일,pizzahill,triple-set,meal,,weekend,2,세트,25,6275000,5704545,N
+커플·기념일,pizzahill,triple-set,meal,,weekend,3,세트,25,6275000,5704545,N
+커플·기념일,pizzahill,triple-set,meal,,weekend,4,세트,25,6275000,5704545,N
+커플·기념일,pizzahill,triple-set,meal,,weekend,5,세트,25,6275000,5704545,N
+커플·기념일,pizzahill,triple-set,meal,,weekend,6,세트,24,6024000,5476364,N
+커플·기념일,pizzahill,triple-set,meal,,weekend,7,세트,24,6024000,5476364,N
+커플·기념일,pizzahill,triple-set,meal,,weekend,8,세트,24,6024000,5476364,N
+커플·기념일,pizzahill,triple-set,meal,,weekend,9,세트,24,6024000,5476364,N
+커플·기념일,pizzahill,triple-set,meal,,weekend,10,세트,24,6024000,5476364,N
+커플·기념일,pizzahill,triple-set,meal,,weekend,11,세트,24,6024000,5476364,N
+커플·기념일,pizzahill,triple-set,meal,,weekend,12,세트,24,6024000,5476364,N
+비즈니스·접대,pizzahill,seis-pizza,meal,,weekday,1,판,22,3146000,2860000,N
+비즈니스·접대,pizzahill,seis-pizza,meal,,weekday,2,판,22,3146000,2860000,N
+비즈니스·접대,pizzahill,seis-pizza,meal,,weekday,3,판,22,3146000,2860000,N
+비즈니스·접대,pizzahill,seis-pizza,meal,,weekday,4,판,22,3146000,2860000,N
+비즈니스·접대,pizzahill,seis-pizza,meal,,weekday,5,판,22,3146000,2860000,N
+비즈니스·접대,pizzahill,seis-pizza,meal,,weekday,6,판,22,3146000,2860000,N
+비즈니스·접대,pizzahill,seis-pizza,meal,,weekday,7,판,22,3146000,2860000,N
+비즈니스·접대,pizzahill,seis-pizza,meal,,weekday,8,판,22,3146000,2860000,N
+비즈니스·접대,pizzahill,seis-pizza,meal,,weekday,9,판,21,3003000,2730000,N
+비즈니스·접대,pizzahill,seis-pizza,meal,,weekday,10,판,21,3003000,2730000,N
+비즈니스·접대,pizzahill,seis-pizza,meal,,weekday,11,판,21,3003000,2730000,N
+비즈니스·접대,pizzahill,seis-pizza,meal,,weekday,12,판,21,3003000,2730000,N
+비즈니스·접대,pizzahill,seis-pizza,meal,,weekend,1,판,14,2002000,1820000,N
+비즈니스·접대,pizzahill,seis-pizza,meal,,weekend,2,판,14,2002000,1820000,N
+비즈니스·접대,pizzahill,seis-pizza,meal,,weekend,3,판,14,2002000,1820000,N
+비즈니스·접대,pizzahill,seis-pizza,meal,,weekend,4,판,13,1859000,1690000,N
+비즈니스·접대,pizzahill,seis-pizza,meal,,weekend,5,판,13,1859000,1690000,N
+비즈니스·접대,pizzahill,seis-pizza,meal,,weekend,6,판,13,1859000,1690000,N
+비즈니스·접대,pizzahill,seis-pizza,meal,,weekend,7,판,13,1859000,1690000,N
+비즈니스·접대,pizzahill,seis-pizza,meal,,weekend,8,판,13,1859000,1690000,N
+비즈니스·접대,pizzahill,seis-pizza,meal,,weekend,9,판,13,1859000,1690000,N
+비즈니스·접대,pizzahill,seis-pizza,meal,,weekend,10,판,13,1859000,1690000,N
+비즈니스·접대,pizzahill,seis-pizza,meal,,weekend,11,판,13,1859000,1690000,N
+비즈니스·접대,pizzahill,seis-pizza,meal,,weekend,12,판,13,1859000,1690000,N
+친구·모임,pizzahill,seis-pizza,meal,,weekday,1,판,11,1573000,1430000,N
+친구·모임,pizzahill,seis-pizza,meal,,weekday,2,판,10,1430000,1300000,N
+친구·모임,pizzahill,seis-pizza,meal,,weekday,3,판,10,1430000,1300000,N
+친구·모임,pizzahill,seis-pizza,meal,,weekday,4,판,10,1430000,1300000,N
+친구·모임,pizzahill,seis-pizza,meal,,weekday,5,판,10,1430000,1300000,N
+친구·모임,pizzahill,seis-pizza,meal,,weekday,6,판,10,1430000,1300000,N
+친구·모임,pizzahill,seis-pizza,meal,,weekday,7,판,10,1430000,1300000,N
+친구·모임,pizzahill,seis-pizza,meal,,weekday,8,판,10,1430000,1300000,N
+친구·모임,pizzahill,seis-pizza,meal,,weekday,9,판,10,1430000,1300000,N
+친구·모임,pizzahill,seis-pizza,meal,,weekday,10,판,10,1430000,1300000,N
+친구·모임,pizzahill,seis-pizza,meal,,weekday,11,판,10,1430000,1300000,N
+친구·모임,pizzahill,seis-pizza,meal,,weekday,12,판,10,1430000,1300000,N
+친구·모임,pizzahill,seis-pizza,meal,,weekend,1,판,24,3432000,3120000,N
+친구·모임,pizzahill,seis-pizza,meal,,weekend,2,판,24,3432000,3120000,N
+친구·모임,pizzahill,seis-pizza,meal,,weekend,3,판,24,3432000,3120000,N
+친구·모임,pizzahill,seis-pizza,meal,,weekend,4,판,24,3432000,3120000,N
+친구·모임,pizzahill,seis-pizza,meal,,weekend,5,판,23,3289000,2990000,N
+친구·모임,pizzahill,seis-pizza,meal,,weekend,6,판,23,3289000,2990000,N
+친구·모임,pizzahill,seis-pizza,meal,,weekend,7,판,23,3289000,2990000,N
+친구·모임,pizzahill,seis-pizza,meal,,weekend,8,판,23,3289000,2990000,N
+친구·모임,pizzahill,seis-pizza,meal,,weekend,9,판,23,3289000,2990000,N
+친구·모임,pizzahill,seis-pizza,meal,,weekend,10,판,23,3289000,2990000,N
+친구·모임,pizzahill,seis-pizza,meal,,weekend,11,판,23,3289000,2990000,N
+친구·모임,pizzahill,seis-pizza,meal,,weekend,12,판,23,3289000,2990000,N
+가족·친족,pizzahill,takeout-combination-l,takeout,,weekday,1,판,24,1593600,1448727,N
+가족·친족,pizzahill,takeout-combination-l,takeout,,weekday,2,판,24,1593600,1448727,N
+가족·친족,pizzahill,takeout-combination-l,takeout,,weekday,3,판,24,1593600,1448727,N
+가족·친족,pizzahill,takeout-combination-l,takeout,,weekday,4,판,24,1593600,1448727,N
+가족·친족,pizzahill,takeout-combination-l,takeout,,weekday,5,판,24,1593600,1448727,N
+가족·친족,pizzahill,takeout-combination-l,takeout,,weekday,6,판,24,1593600,1448727,N
+가족·친족,pizzahill,takeout-combination-l,takeout,,weekday,7,판,24,1593600,1448727,N
+가족·친족,pizzahill,takeout-combination-l,takeout,,weekday,8,판,24,1593600,1448727,N
+가족·친족,pizzahill,takeout-combination-l,takeout,,weekday,9,판,24,1593600,1448727,N
+가족·친족,pizzahill,takeout-combination-l,takeout,,weekday,10,판,24,1593600,1448727,N
+가족·친족,pizzahill,takeout-combination-l,takeout,,weekday,11,판,24,1593600,1448727,N
+가족·친족,pizzahill,takeout-combination-l,takeout,,weekday,12,판,23,1527204,1388367,N
+가족·친족,pizzahill,takeout-combination-l,takeout,,weekend,1,판,14,929600,845091,N
+가족·친족,pizzahill,takeout-combination-l,takeout,,weekend,2,판,14,929600,845091,N
+가족·친족,pizzahill,takeout-combination-l,takeout,,weekend,3,판,14,929600,845091,N
+가족·친족,pizzahill,takeout-combination-l,takeout,,weekend,4,판,14,929600,845091,N
+가족·친족,pizzahill,takeout-combination-l,takeout,,weekend,5,판,14,929600,845091,N
+가족·친족,pizzahill,takeout-combination-l,takeout,,weekend,6,판,14,929600,845091,N
+가족·친족,pizzahill,takeout-combination-l,takeout,,weekend,7,판,14,929600,845091,N
+가족·친족,pizzahill,takeout-combination-l,takeout,,weekend,8,판,14,929600,845091,N
+가족·친족,pizzahill,takeout-combination-l,takeout,,weekend,9,판,14,929600,845091,N
+가족·친족,pizzahill,takeout-combination-l,takeout,,weekend,10,판,14,929600,845091,N
+가족·친족,pizzahill,takeout-combination-l,takeout,,weekend,11,판,14,929600,845091,N
+가족·친족,pizzahill,takeout-combination-l,takeout,,weekend,12,판,13,863199,784726,N
+공항 이동·여행,pizzahill,takeout-combination-l,takeout,,weekday,1,판,21,1394400,1267636,N
+공항 이동·여행,pizzahill,takeout-combination-l,takeout,,weekday,2,판,21,1394400,1267636,N
+공항 이동·여행,pizzahill,takeout-combination-l,takeout,,weekday,3,판,21,1394400,1267636,N
+공항 이동·여행,pizzahill,takeout-combination-l,takeout,,weekday,4,판,21,1394400,1267636,N
+공항 이동·여행,pizzahill,takeout-combination-l,takeout,,weekday,5,판,21,1394400,1267636,N
+공항 이동·여행,pizzahill,takeout-combination-l,takeout,,weekday,6,판,21,1394400,1267636,N
+공항 이동·여행,pizzahill,takeout-combination-l,takeout,,weekday,7,판,20,1328000,1207273,N
+공항 이동·여행,pizzahill,takeout-combination-l,takeout,,weekday,8,판,20,1328000,1207273,N
+공항 이동·여행,pizzahill,takeout-combination-l,takeout,,weekday,9,판,20,1328000,1207273,N
+공항 이동·여행,pizzahill,takeout-combination-l,takeout,,weekday,10,판,20,1328000,1207273,N
+공항 이동·여행,pizzahill,takeout-combination-l,takeout,,weekday,11,판,20,1328000,1207273,N
+공항 이동·여행,pizzahill,takeout-combination-l,takeout,,weekday,12,판,20,1328001,1207274,N
+공항 이동·여행,pizzahill,takeout-combination-l,takeout,,weekend,1,판,25,1660000,1509091,N
+공항 이동·여행,pizzahill,takeout-combination-l,takeout,,weekend,2,판,25,1660000,1509091,N
+공항 이동·여행,pizzahill,takeout-combination-l,takeout,,weekend,3,판,25,1660000,1509091,N
+공항 이동·여행,pizzahill,takeout-combination-l,takeout,,weekend,4,판,25,1660000,1509091,N
+공항 이동·여행,pizzahill,takeout-combination-l,takeout,,weekend,5,판,25,1660000,1509091,N
+공항 이동·여행,pizzahill,takeout-combination-l,takeout,,weekend,6,판,25,1660000,1509091,N
+공항 이동·여행,pizzahill,takeout-combination-l,takeout,,weekend,7,판,25,1660000,1509091,N
+공항 이동·여행,pizzahill,takeout-combination-l,takeout,,weekend,8,판,25,1660000,1509091,N
+공항 이동·여행,pizzahill,takeout-combination-l,takeout,,weekend,9,판,24,1593600,1448727,N
+공항 이동·여행,pizzahill,takeout-combination-l,takeout,,weekend,10,판,24,1593600,1448727,N
+공항 이동·여행,pizzahill,takeout-combination-l,takeout,,weekend,11,판,24,1593600,1448727,N
+공항 이동·여행,pizzahill,takeout-combination-l,takeout,,weekend,12,판,24,1593600,1448727,N
+친구·모임,pizzahill,takeout-combination-l,takeout,,weekday,1,판,26,1726401,1569455,N
+친구·모임,pizzahill,takeout-combination-l,takeout,,weekday,2,판,26,1726401,1569455,N
+친구·모임,pizzahill,takeout-combination-l,takeout,,weekday,3,판,26,1726401,1569455,N
+친구·모임,pizzahill,takeout-combination-l,takeout,,weekday,4,판,26,1726401,1569455,N
+친구·모임,pizzahill,takeout-combination-l,takeout,,weekday,5,판,26,1726401,1569455,N
+친구·모임,pizzahill,takeout-combination-l,takeout,,weekday,6,판,26,1726401,1569455,N
+친구·모임,pizzahill,takeout-combination-l,takeout,,weekday,7,판,26,1726401,1569455,N
+친구·모임,pizzahill,takeout-combination-l,takeout,,weekday,8,판,25,1660000,1509091,N
+친구·모임,pizzahill,takeout-combination-l,takeout,,weekday,9,판,25,1660000,1509091,N
+친구·모임,pizzahill,takeout-combination-l,takeout,,weekday,10,판,25,1660000,1509091,N
+친구·모임,pizzahill,takeout-combination-l,takeout,,weekday,11,판,25,1660000,1509091,N
+친구·모임,pizzahill,takeout-combination-l,takeout,,weekday,12,판,25,1659996,1509087,N
+친구·모임,pizzahill,takeout-combination-l,takeout,,weekend,1,판,6,398400,362182,N
+친구·모임,pizzahill,takeout-combination-l,takeout,,weekend,2,판,6,398400,362182,N
+친구·모임,pizzahill,takeout-combination-l,takeout,,weekend,3,판,6,398400,362182,N
+친구·모임,pizzahill,takeout-combination-l,takeout,,weekend,4,판,6,398400,362182,N
+친구·모임,pizzahill,takeout-combination-l,takeout,,weekend,5,판,6,398400,362182,N
+친구·모임,pizzahill,takeout-combination-l,takeout,,weekend,6,판,6,398400,362182,N
+친구·모임,pizzahill,takeout-combination-l,takeout,,weekend,7,판,6,398400,362182,N
+친구·모임,pizzahill,takeout-combination-l,takeout,,weekend,8,판,6,398400,362182,N
+친구·모임,pizzahill,takeout-combination-l,takeout,,weekend,9,판,6,398400,362182,N
+친구·모임,pizzahill,takeout-combination-l,takeout,,weekend,10,판,6,398400,362182,N
+친구·모임,pizzahill,takeout-combination-l,takeout,,weekend,11,판,6,398400,362182,N
+친구·모임,pizzahill,takeout-combination-l,takeout,,weekend,12,판,6,398398,362180,N
+커플·기념일,pizzahill,takeout-combination-l,takeout,,weekday,1,판,8,531200,482909,N
+커플·기념일,pizzahill,takeout-combination-l,takeout,,weekday,2,판,8,531200,482909,N
+커플·기념일,pizzahill,takeout-combination-l,takeout,,weekday,3,판,7,464800,422545,N
+커플·기념일,pizzahill,takeout-combination-l,takeout,,weekday,4,판,7,464800,422545,N
+커플·기념일,pizzahill,takeout-combination-l,takeout,,weekday,5,판,7,464800,422545,N
+커플·기념일,pizzahill,takeout-combination-l,takeout,,weekday,6,판,7,464800,422545,N
+커플·기념일,pizzahill,takeout-combination-l,takeout,,weekday,7,판,7,464800,422545,N
+커플·기념일,pizzahill,takeout-combination-l,takeout,,weekday,8,판,7,464800,422545,N
+커플·기념일,pizzahill,takeout-combination-l,takeout,,weekday,9,판,7,464800,422545,N
+커플·기념일,pizzahill,takeout-combination-l,takeout,,weekday,10,판,7,464800,422545,N
+커플·기념일,pizzahill,takeout-combination-l,takeout,,weekday,11,판,7,464800,422545,N
+커플·기념일,pizzahill,takeout-combination-l,takeout,,weekday,12,판,7,464805,422550,N
+커플·기념일,pizzahill,takeout-combination-l,takeout,,weekend,1,판,25,1660000,1509091,N
+커플·기념일,pizzahill,takeout-combination-l,takeout,,weekend,2,판,25,1660000,1509091,N
+커플·기념일,pizzahill,takeout-combination-l,takeout,,weekend,3,판,25,1660000,1509091,N
+커플·기념일,pizzahill,takeout-combination-l,takeout,,weekend,4,판,25,1660000,1509091,N
+커플·기념일,pizzahill,takeout-combination-l,takeout,,weekend,5,판,24,1593600,1448727,N
+커플·기념일,pizzahill,takeout-combination-l,takeout,,weekend,6,판,24,1593600,1448727,N
+커플·기념일,pizzahill,takeout-combination-l,takeout,,weekend,7,판,24,1593600,1448727,N
+커플·기념일,pizzahill,takeout-combination-l,takeout,,weekend,8,판,24,1593600,1448727,N
+커플·기념일,pizzahill,takeout-combination-l,takeout,,weekend,9,판,24,1593600,1448727,N
+커플·기념일,pizzahill,takeout-combination-l,takeout,,weekend,10,판,24,1593600,1448727,N
+커플·기념일,pizzahill,takeout-combination-l,takeout,,weekend,11,판,24,1593600,1448727,N
+커플·기념일,pizzahill,takeout-combination-l,takeout,,weekend,12,판,24,1593602,1448729,N
+골프·스포츠 모임,pizzahill,set-ade-upgrade,meal,,weekday,1,잔,19,152000,138182,N
+골프·스포츠 모임,pizzahill,set-ade-upgrade,meal,,weekday,2,잔,19,152000,138182,N
+골프·스포츠 모임,pizzahill,set-ade-upgrade,meal,,weekday,3,잔,19,152000,138182,N
+골프·스포츠 모임,pizzahill,set-ade-upgrade,meal,,weekday,4,잔,19,152000,138182,N
+골프·스포츠 모임,pizzahill,set-ade-upgrade,meal,,weekday,5,잔,19,152000,138182,N
+골프·스포츠 모임,pizzahill,set-ade-upgrade,meal,,weekday,6,잔,19,152000,138182,N
+골프·스포츠 모임,pizzahill,set-ade-upgrade,meal,,weekday,7,잔,19,152000,138182,N
+골프·스포츠 모임,pizzahill,set-ade-upgrade,meal,,weekday,8,잔,19,152000,138182,N
+골프·스포츠 모임,pizzahill,set-ade-upgrade,meal,,weekday,9,잔,18,144000,130909,N
+골프·스포츠 모임,pizzahill,set-ade-upgrade,meal,,weekday,10,잔,18,144000,130909,N
+골프·스포츠 모임,pizzahill,set-ade-upgrade,meal,,weekday,11,잔,18,144000,130909,N
+골프·스포츠 모임,pizzahill,set-ade-upgrade,meal,,weekday,12,잔,18,143999,130908,N
+골프·스포츠 모임,pizzahill,set-ade-upgrade,meal,,weekend,1,잔,16,128000,116364,N
+골프·스포츠 모임,pizzahill,set-ade-upgrade,meal,,weekend,2,잔,16,128000,116364,N
+골프·스포츠 모임,pizzahill,set-ade-upgrade,meal,,weekend,3,잔,16,128000,116364,N
+골프·스포츠 모임,pizzahill,set-ade-upgrade,meal,,weekend,4,잔,16,128000,116364,N
+골프·스포츠 모임,pizzahill,set-ade-upgrade,meal,,weekend,5,잔,15,120000,109091,N
+골프·스포츠 모임,pizzahill,set-ade-upgrade,meal,,weekend,6,잔,15,120000,109091,N
+골프·스포츠 모임,pizzahill,set-ade-upgrade,meal,,weekend,7,잔,15,120000,109091,N
+골프·스포츠 모임,pizzahill,set-ade-upgrade,meal,,weekend,8,잔,15,120000,109091,N
+골프·스포츠 모임,pizzahill,set-ade-upgrade,meal,,weekend,9,잔,15,120000,109091,N
+골프·스포츠 모임,pizzahill,set-ade-upgrade,meal,,weekend,10,잔,15,120000,109091,N
+골프·스포츠 모임,pizzahill,set-ade-upgrade,meal,,weekend,11,잔,15,120000,109091,N
+골프·스포츠 모임,pizzahill,set-ade-upgrade,meal,,weekend,12,잔,15,119998,109089,N
+비즈니스·접대,pizzahill,set-ade-upgrade,meal,,weekday,1,잔,6,48000,43636,N
+비즈니스·접대,pizzahill,set-ade-upgrade,meal,,weekday,2,잔,6,48000,43636,N
+비즈니스·접대,pizzahill,set-ade-upgrade,meal,,weekday,3,잔,6,48000,43636,N
+비즈니스·접대,pizzahill,set-ade-upgrade,meal,,weekday,4,잔,5,40000,36364,N
+비즈니스·접대,pizzahill,set-ade-upgrade,meal,,weekday,5,잔,5,40000,36364,N
+비즈니스·접대,pizzahill,set-ade-upgrade,meal,,weekday,6,잔,5,40000,36364,N
+비즈니스·접대,pizzahill,set-ade-upgrade,meal,,weekday,7,잔,5,40000,36364,N
+비즈니스·접대,pizzahill,set-ade-upgrade,meal,,weekday,8,잔,5,40000,36364,N
+비즈니스·접대,pizzahill,set-ade-upgrade,meal,,weekday,9,잔,5,40000,36364,N
+비즈니스·접대,pizzahill,set-ade-upgrade,meal,,weekday,10,잔,5,40000,36364,N
+비즈니스·접대,pizzahill,set-ade-upgrade,meal,,weekday,11,잔,5,40000,36364,N
+비즈니스·접대,pizzahill,set-ade-upgrade,meal,,weekday,12,잔,5,39998,36362,N
+비즈니스·접대,pizzahill,set-ade-upgrade,meal,,weekend,1,잔,8,64000,58182,N
+비즈니스·접대,pizzahill,set-ade-upgrade,meal,,weekend,2,잔,8,64000,58182,N
+비즈니스·접대,pizzahill,set-ade-upgrade,meal,,weekend,3,잔,8,64000,58182,N
+비즈니스·접대,pizzahill,set-ade-upgrade,meal,,weekend,4,잔,8,64000,58182,N
+비즈니스·접대,pizzahill,set-ade-upgrade,meal,,weekend,5,잔,8,64000,58182,N
+비즈니스·접대,pizzahill,set-ade-upgrade,meal,,weekend,6,잔,7,56000,50909,N
+비즈니스·접대,pizzahill,set-ade-upgrade,meal,,weekend,7,잔,7,56000,50909,N
+비즈니스·접대,pizzahill,set-ade-upgrade,meal,,weekend,8,잔,7,56000,50909,N
+비즈니스·접대,pizzahill,set-ade-upgrade,meal,,weekend,9,잔,7,56000,50909,N
+비즈니스·접대,pizzahill,set-ade-upgrade,meal,,weekend,10,잔,7,56000,50909,N
+비즈니스·접대,pizzahill,set-ade-upgrade,meal,,weekend,11,잔,7,56000,50909,N
+비즈니스·접대,pizzahill,set-ade-upgrade,meal,,weekend,12,잔,7,56000,50909,N
+가족·친족,thebuffet,breakfast-adult,meal,breakfast,weekday,1,1인,31,2635001,2395455,N
+가족·친족,thebuffet,breakfast-adult,meal,breakfast,weekday,2,1인,31,2635001,2395455,N
+가족·친족,thebuffet,breakfast-adult,meal,breakfast,weekday,3,1인,31,2635001,2395455,N
+가족·친족,thebuffet,breakfast-adult,meal,breakfast,weekday,4,1인,31,2635001,2395455,N
+가족·친족,thebuffet,breakfast-adult,meal,breakfast,weekday,5,1인,31,2635001,2395455,N
+가족·친족,thebuffet,breakfast-adult,meal,breakfast,weekday,6,1인,31,2635001,2395455,N
+가족·친족,thebuffet,breakfast-adult,meal,breakfast,weekday,7,1인,30,2550000,2318182,N
+가족·친족,thebuffet,breakfast-adult,meal,breakfast,weekday,8,1인,30,2550000,2318182,N
+가족·친족,thebuffet,breakfast-adult,meal,breakfast,weekday,9,1인,30,2550000,2318182,N
+가족·친족,thebuffet,breakfast-adult,meal,breakfast,weekday,10,1인,30,2550000,2318182,N
+가족·친족,thebuffet,breakfast-adult,meal,breakfast,weekday,11,1인,30,2550000,2318182,N
+가족·친족,thebuffet,breakfast-adult,meal,breakfast,weekday,12,1인,30,2549996,2318178,N
+가족·친족,thebuffet,breakfast-adult,meal,breakfast,weekend,1,1인,22,1870000,1700000,N
+가족·친족,thebuffet,breakfast-adult,meal,breakfast,weekend,2,1인,22,1870000,1700000,N
+가족·친족,thebuffet,breakfast-adult,meal,breakfast,weekend,3,1인,22,1870000,1700000,N
+가족·친족,thebuffet,breakfast-adult,meal,breakfast,weekend,4,1인,22,1870000,1700000,N
+가족·친족,thebuffet,breakfast-adult,meal,breakfast,weekend,5,1인,22,1870000,1700000,N
+가족·친족,thebuffet,breakfast-adult,meal,breakfast,weekend,6,1인,22,1870000,1700000,N
+가족·친족,thebuffet,breakfast-adult,meal,breakfast,weekend,7,1인,22,1870000,1700000,N
+가족·친족,thebuffet,breakfast-adult,meal,breakfast,weekend,8,1인,21,1785000,1622727,N
+가족·친족,thebuffet,breakfast-adult,meal,breakfast,weekend,9,1인,21,1785000,1622727,N
+가족·친족,thebuffet,breakfast-adult,meal,breakfast,weekend,10,1인,21,1785000,1622727,N
+가족·친족,thebuffet,breakfast-adult,meal,breakfast,weekend,11,1인,21,1785000,1622727,N
+가족·친족,thebuffet,breakfast-adult,meal,breakfast,weekend,12,1인,21,1785001,1622728,N
+비즈니스·접대,thebuffet,breakfast-adult,meal,breakfast,weekday,1,1인,3,255000,231818,N
+비즈니스·접대,thebuffet,breakfast-adult,meal,breakfast,weekday,2,1인,3,255000,231818,N
+비즈니스·접대,thebuffet,breakfast-adult,meal,breakfast,weekday,3,1인,3,255000,231818,N
+비즈니스·접대,thebuffet,breakfast-adult,meal,breakfast,weekday,4,1인,3,255000,231818,N
+비즈니스·접대,thebuffet,breakfast-adult,meal,breakfast,weekday,5,1인,3,255000,231818,N
+비즈니스·접대,thebuffet,breakfast-adult,meal,breakfast,weekday,6,1인,3,255000,231818,N
+비즈니스·접대,thebuffet,breakfast-adult,meal,breakfast,weekday,7,1인,3,255000,231818,N
+비즈니스·접대,thebuffet,breakfast-adult,meal,breakfast,weekday,8,1인,3,255000,231818,N
+비즈니스·접대,thebuffet,breakfast-adult,meal,breakfast,weekday,9,1인,3,255000,231818,N
+비즈니스·접대,thebuffet,breakfast-adult,meal,breakfast,weekday,10,1인,3,255000,231818,N
+비즈니스·접대,thebuffet,breakfast-adult,meal,breakfast,weekday,11,1인,3,255000,231818,N
+비즈니스·접대,thebuffet,breakfast-adult,meal,breakfast,weekday,12,1인,2,170002,154547,N
+비즈니스·접대,thebuffet,breakfast-adult,meal,breakfast,weekend,1,1인,22,1870000,1700000,N
+비즈니스·접대,thebuffet,breakfast-adult,meal,breakfast,weekend,2,1인,22,1870000,1700000,N
+비즈니스·접대,thebuffet,breakfast-adult,meal,breakfast,weekend,3,1인,21,1785000,1622727,N
+비즈니스·접대,thebuffet,breakfast-adult,meal,breakfast,weekend,4,1인,21,1785000,1622727,N
+비즈니스·접대,thebuffet,breakfast-adult,meal,breakfast,weekend,5,1인,21,1785000,1622727,N
+비즈니스·접대,thebuffet,breakfast-adult,meal,breakfast,weekend,6,1인,21,1785000,1622727,N
+비즈니스·접대,thebuffet,breakfast-adult,meal,breakfast,weekend,7,1인,21,1785000,1622727,N
+비즈니스·접대,thebuffet,breakfast-adult,meal,breakfast,weekend,8,1인,21,1785000,1622727,N
+비즈니스·접대,thebuffet,breakfast-adult,meal,breakfast,weekend,9,1인,21,1785000,1622727,N
+비즈니스·접대,thebuffet,breakfast-adult,meal,breakfast,weekend,10,1인,21,1785000,1622727,N
+비즈니스·접대,thebuffet,breakfast-adult,meal,breakfast,weekend,11,1인,21,1785000,1622727,N
+비즈니스·접대,thebuffet,breakfast-adult,meal,breakfast,weekend,12,1인,21,1785003,1622730,N
+친구·모임,thebuffet,breakfast-adult,meal,breakfast,weekday,1,1인,8,680000,618182,N
+친구·모임,thebuffet,breakfast-adult,meal,breakfast,weekday,2,1인,8,680000,618182,N
+친구·모임,thebuffet,breakfast-adult,meal,breakfast,weekday,3,1인,8,680000,618182,N
+친구·모임,thebuffet,breakfast-adult,meal,breakfast,weekday,4,1인,8,680000,618182,N
+친구·모임,thebuffet,breakfast-adult,meal,breakfast,weekday,5,1인,8,680000,618182,N
+친구·모임,thebuffet,breakfast-adult,meal,breakfast,weekday,6,1인,7,595000,540909,N
+친구·모임,thebuffet,breakfast-adult,meal,breakfast,weekday,7,1인,7,595000,540909,N
+친구·모임,thebuffet,breakfast-adult,meal,breakfast,weekday,8,1인,7,595000,540909,N
+친구·모임,thebuffet,breakfast-adult,meal,breakfast,weekday,9,1인,7,595000,540909,N
+친구·모임,thebuffet,breakfast-adult,meal,breakfast,weekday,10,1인,7,595000,540909,N
+친구·모임,thebuffet,breakfast-adult,meal,breakfast,weekday,11,1인,7,595000,540909,N
+친구·모임,thebuffet,breakfast-adult,meal,breakfast,weekday,12,1인,7,595000,540909,N
+친구·모임,thebuffet,breakfast-adult,meal,breakfast,weekend,1,1인,26,2210000,2009091,N
+친구·모임,thebuffet,breakfast-adult,meal,breakfast,weekend,2,1인,26,2210000,2009091,N
+친구·모임,thebuffet,breakfast-adult,meal,breakfast,weekend,3,1인,26,2210000,2009091,N
+친구·모임,thebuffet,breakfast-adult,meal,breakfast,weekend,4,1인,26,2210000,2009091,N
+친구·모임,thebuffet,breakfast-adult,meal,breakfast,weekend,5,1인,26,2210000,2009091,N
+친구·모임,thebuffet,breakfast-adult,meal,breakfast,weekend,6,1인,26,2210000,2009091,N
+친구·모임,thebuffet,breakfast-adult,meal,breakfast,weekend,7,1인,26,2210000,2009091,N
+친구·모임,thebuffet,breakfast-adult,meal,breakfast,weekend,8,1인,26,2210000,2009091,N
+친구·모임,thebuffet,breakfast-adult,meal,breakfast,weekend,9,1인,26,2210000,2009091,N
+친구·모임,thebuffet,breakfast-adult,meal,breakfast,weekend,10,1인,26,2210000,2009091,N
+친구·모임,thebuffet,breakfast-adult,meal,breakfast,weekend,11,1인,26,2210000,2009091,N
+친구·모임,thebuffet,breakfast-adult,meal,breakfast,weekend,12,1인,26,2209999,2009090,N
+혼자 휴식,thebuffet,breakfast-adult,meal,breakfast,weekday,1,1인,4,340000,309091,N
+혼자 휴식,thebuffet,breakfast-adult,meal,breakfast,weekday,2,1인,4,340000,309091,N
+혼자 휴식,thebuffet,breakfast-adult,meal,breakfast,weekday,3,1인,4,340000,309091,N
+혼자 휴식,thebuffet,breakfast-adult,meal,breakfast,weekday,4,1인,4,340000,309091,N
+혼자 휴식,thebuffet,breakfast-adult,meal,breakfast,weekday,5,1인,4,340000,309091,N
+혼자 휴식,thebuffet,breakfast-adult,meal,breakfast,weekday,6,1인,4,340000,309091,N
+혼자 휴식,thebuffet,breakfast-adult,meal,breakfast,weekday,7,1인,4,340000,309091,N
+혼자 휴식,thebuffet,breakfast-adult,meal,breakfast,weekday,8,1인,4,340000,309091,N
+혼자 휴식,thebuffet,breakfast-adult,meal,breakfast,weekday,9,1인,4,340000,309091,N
+혼자 휴식,thebuffet,breakfast-adult,meal,breakfast,weekday,10,1인,4,340000,309091,N
+혼자 휴식,thebuffet,breakfast-adult,meal,breakfast,weekday,11,1인,3,255000,231818,N
+혼자 휴식,thebuffet,breakfast-adult,meal,breakfast,weekday,12,1인,3,254999,231817,N
+혼자 휴식,thebuffet,breakfast-adult,meal,breakfast,weekend,1,1인,34,2890000,2627273,N
+혼자 휴식,thebuffet,breakfast-adult,meal,breakfast,weekend,2,1인,34,2890000,2627273,N
+혼자 휴식,thebuffet,breakfast-adult,meal,breakfast,weekend,3,1인,34,2890000,2627273,N
+혼자 휴식,thebuffet,breakfast-adult,meal,breakfast,weekend,4,1인,33,2805000,2550000,N
+혼자 휴식,thebuffet,breakfast-adult,meal,breakfast,weekend,5,1인,33,2805000,2550000,N
+혼자 휴식,thebuffet,breakfast-adult,meal,breakfast,weekend,6,1인,33,2805000,2550000,N
+혼자 휴식,thebuffet,breakfast-adult,meal,breakfast,weekend,7,1인,33,2805000,2550000,N
+혼자 휴식,thebuffet,breakfast-adult,meal,breakfast,weekend,8,1인,33,2805000,2550000,N
+혼자 휴식,thebuffet,breakfast-adult,meal,breakfast,weekend,9,1인,33,2805000,2550000,N
+혼자 휴식,thebuffet,breakfast-adult,meal,breakfast,weekend,10,1인,33,2805000,2550000,N
+혼자 휴식,thebuffet,breakfast-adult,meal,breakfast,weekend,11,1인,33,2805000,2550000,N
+혼자 휴식,thebuffet,breakfast-adult,meal,breakfast,weekend,12,1인,33,2804999,2549999,N
+골프·스포츠 모임,thebuffet,weekday-lunch-adult,meal,lunch,weekday,1,1인,18,3168000,2880000,N
+골프·스포츠 모임,thebuffet,weekday-lunch-adult,meal,lunch,weekday,2,1인,18,3168000,2880000,N
+골프·스포츠 모임,thebuffet,weekday-lunch-adult,meal,lunch,weekday,3,1인,18,3168000,2880000,N
+골프·스포츠 모임,thebuffet,weekday-lunch-adult,meal,lunch,weekday,4,1인,18,3168000,2880000,N
+골프·스포츠 모임,thebuffet,weekday-lunch-adult,meal,lunch,weekday,5,1인,18,3168000,2880000,N
+골프·스포츠 모임,thebuffet,weekday-lunch-adult,meal,lunch,weekday,6,1인,18,3168000,2880000,N
+골프·스포츠 모임,thebuffet,weekday-lunch-adult,meal,lunch,weekday,7,1인,18,3168000,2880000,N
+골프·스포츠 모임,thebuffet,weekday-lunch-adult,meal,lunch,weekday,8,1인,18,3168000,2880000,N
+골프·스포츠 모임,thebuffet,weekday-lunch-adult,meal,lunch,weekday,9,1인,18,3168000,2880000,N
+골프·스포츠 모임,thebuffet,weekday-lunch-adult,meal,lunch,weekday,10,1인,18,3168000,2880000,N
+골프·스포츠 모임,thebuffet,weekday-lunch-adult,meal,lunch,weekday,11,1인,18,3168000,2880000,N
+골프·스포츠 모임,thebuffet,weekday-lunch-adult,meal,lunch,weekday,12,1인,17,2992000,2720000,N
+공항 이동·여행,thebuffet,weekday-lunch-adult,meal,lunch,weekday,1,1인,6,1056000,960000,N
+공항 이동·여행,thebuffet,weekday-lunch-adult,meal,lunch,weekday,2,1인,6,1056000,960000,N
+공항 이동·여행,thebuffet,weekday-lunch-adult,meal,lunch,weekday,3,1인,6,1056000,960000,N
+공항 이동·여행,thebuffet,weekday-lunch-adult,meal,lunch,weekday,4,1인,6,1056000,960000,N
+공항 이동·여행,thebuffet,weekday-lunch-adult,meal,lunch,weekday,5,1인,6,1056000,960000,N
+공항 이동·여행,thebuffet,weekday-lunch-adult,meal,lunch,weekday,6,1인,6,1056000,960000,N
+공항 이동·여행,thebuffet,weekday-lunch-adult,meal,lunch,weekday,7,1인,6,1056000,960000,N
+공항 이동·여행,thebuffet,weekday-lunch-adult,meal,lunch,weekday,8,1인,6,1056000,960000,N
+공항 이동·여행,thebuffet,weekday-lunch-adult,meal,lunch,weekday,9,1인,5,880000,800000,N
+공항 이동·여행,thebuffet,weekday-lunch-adult,meal,lunch,weekday,10,1인,5,880000,800000,N
+공항 이동·여행,thebuffet,weekday-lunch-adult,meal,lunch,weekday,11,1인,5,880000,800000,N
+공항 이동·여행,thebuffet,weekday-lunch-adult,meal,lunch,weekday,12,1인,5,880000,800000,N
+비즈니스·접대,thebuffet,weekday-lunch-adult,meal,lunch,weekday,1,1인,19,3344000,3040000,N
+비즈니스·접대,thebuffet,weekday-lunch-adult,meal,lunch,weekday,2,1인,19,3344000,3040000,N
+비즈니스·접대,thebuffet,weekday-lunch-adult,meal,lunch,weekday,3,1인,19,3344000,3040000,N
+비즈니스·접대,thebuffet,weekday-lunch-adult,meal,lunch,weekday,4,1인,19,3344000,3040000,N
+비즈니스·접대,thebuffet,weekday-lunch-adult,meal,lunch,weekday,5,1인,19,3344000,3040000,N
+비즈니스·접대,thebuffet,weekday-lunch-adult,meal,lunch,weekday,6,1인,19,3344000,3040000,N
+비즈니스·접대,thebuffet,weekday-lunch-adult,meal,lunch,weekday,7,1인,19,3344000,3040000,N
+비즈니스·접대,thebuffet,weekday-lunch-adult,meal,lunch,weekday,8,1인,19,3344000,3040000,N
+비즈니스·접대,thebuffet,weekday-lunch-adult,meal,lunch,weekday,9,1인,19,3344000,3040000,N
+비즈니스·접대,thebuffet,weekday-lunch-adult,meal,lunch,weekday,10,1인,19,3344000,3040000,N
+비즈니스·접대,thebuffet,weekday-lunch-adult,meal,lunch,weekday,11,1인,18,3168000,2880000,N
+비즈니스·접대,thebuffet,weekday-lunch-adult,meal,lunch,weekday,12,1인,18,3168000,2880000,N
+친구·모임,thebuffet,weekday-lunch-adult,meal,lunch,weekday,1,1인,24,4224000,3840000,N
+친구·모임,thebuffet,weekday-lunch-adult,meal,lunch,weekday,2,1인,24,4224000,3840000,N
+친구·모임,thebuffet,weekday-lunch-adult,meal,lunch,weekday,3,1인,24,4224000,3840000,N
+친구·모임,thebuffet,weekday-lunch-adult,meal,lunch,weekday,4,1인,24,4224000,3840000,N
+친구·모임,thebuffet,weekday-lunch-adult,meal,lunch,weekday,5,1인,24,4224000,3840000,N
+친구·모임,thebuffet,weekday-lunch-adult,meal,lunch,weekday,6,1인,24,4224000,3840000,N
+친구·모임,thebuffet,weekday-lunch-adult,meal,lunch,weekday,7,1인,24,4224000,3840000,N
+친구·모임,thebuffet,weekday-lunch-adult,meal,lunch,weekday,8,1인,24,4224000,3840000,N
+친구·모임,thebuffet,weekday-lunch-adult,meal,lunch,weekday,9,1인,24,4224000,3840000,N
+친구·모임,thebuffet,weekday-lunch-adult,meal,lunch,weekday,10,1인,24,4224000,3840000,N
+친구·모임,thebuffet,weekday-lunch-adult,meal,lunch,weekday,11,1인,23,4048000,3680000,N
+친구·모임,thebuffet,weekday-lunch-adult,meal,lunch,weekday,12,1인,23,4048000,3680000,N
+가족·친족,thebuffet,weekday-lunch-child,meal,lunch,weekday,1,1인,25,2200000,2000000,N
+가족·친족,thebuffet,weekday-lunch-child,meal,lunch,weekday,2,1인,25,2200000,2000000,N
+가족·친족,thebuffet,weekday-lunch-child,meal,lunch,weekday,3,1인,24,2112000,1920000,N
+가족·친족,thebuffet,weekday-lunch-child,meal,lunch,weekday,4,1인,24,2112000,1920000,N
+가족·친족,thebuffet,weekday-lunch-child,meal,lunch,weekday,5,1인,24,2112000,1920000,N
+가족·친족,thebuffet,weekday-lunch-child,meal,lunch,weekday,6,1인,24,2112000,1920000,N
+가족·친족,thebuffet,weekday-lunch-child,meal,lunch,weekday,7,1인,24,2112000,1920000,N
+가족·친족,thebuffet,weekday-lunch-child,meal,lunch,weekday,8,1인,24,2112000,1920000,N
+가족·친족,thebuffet,weekday-lunch-child,meal,lunch,weekday,9,1인,24,2112000,1920000,N
+가족·친족,thebuffet,weekday-lunch-child,meal,lunch,weekday,10,1인,24,2112000,1920000,N
+가족·친족,thebuffet,weekday-lunch-child,meal,lunch,weekday,11,1인,24,2112000,1920000,N
+가족·친족,thebuffet,weekday-lunch-child,meal,lunch,weekday,12,1인,24,2112000,1920000,N
+친구·모임,thebuffet,weekday-lunch-child,meal,lunch,weekday,1,1인,5,440000,400000,N
+친구·모임,thebuffet,weekday-lunch-child,meal,lunch,weekday,2,1인,5,440000,400000,N
+친구·모임,thebuffet,weekday-lunch-child,meal,lunch,weekday,3,1인,4,352000,320000,N
+친구·모임,thebuffet,weekday-lunch-child,meal,lunch,weekday,4,1인,4,352000,320000,N
+친구·모임,thebuffet,weekday-lunch-child,meal,lunch,weekday,5,1인,4,352000,320000,N
+친구·모임,thebuffet,weekday-lunch-child,meal,lunch,weekday,6,1인,4,352000,320000,N
+친구·모임,thebuffet,weekday-lunch-child,meal,lunch,weekday,7,1인,4,352000,320000,N
+친구·모임,thebuffet,weekday-lunch-child,meal,lunch,weekday,8,1인,4,352000,320000,N
+친구·모임,thebuffet,weekday-lunch-child,meal,lunch,weekday,9,1인,4,352000,320000,N
+친구·모임,thebuffet,weekday-lunch-child,meal,lunch,weekday,10,1인,4,352000,320000,N
+친구·모임,thebuffet,weekday-lunch-child,meal,lunch,weekday,11,1인,4,352000,320000,N
+친구·모임,thebuffet,weekday-lunch-child,meal,lunch,weekday,12,1인,4,352000,320000,N
+가족·친족,thebuffet,peak-adult,meal,,weekday,1,1인,29,5742000,5220000,N
+가족·친족,thebuffet,peak-adult,meal,,weekday,2,1인,29,5742000,5220000,N
+가족·친족,thebuffet,peak-adult,meal,,weekday,3,1인,29,5742000,5220000,N
+가족·친족,thebuffet,peak-adult,meal,,weekday,4,1인,29,5742000,5220000,N
+가족·친족,thebuffet,peak-adult,meal,,weekday,5,1인,29,5742000,5220000,N
+가족·친족,thebuffet,peak-adult,meal,,weekday,6,1인,29,5742000,5220000,N
+가족·친족,thebuffet,peak-adult,meal,,weekday,7,1인,29,5742000,5220000,N
+가족·친족,thebuffet,peak-adult,meal,,weekday,8,1인,29,5742000,5220000,N
+가족·친족,thebuffet,peak-adult,meal,,weekday,9,1인,29,5742000,5220000,N
+가족·친족,thebuffet,peak-adult,meal,,weekday,10,1인,28,5544000,5040000,N
+가족·친족,thebuffet,peak-adult,meal,,weekday,11,1인,28,5544000,5040000,N
+가족·친족,thebuffet,peak-adult,meal,,weekday,12,1인,28,5544000,5040000,N
+가족·친족,thebuffet,peak-adult,meal,,weekend,1,1인,13,2574000,2340000,N
+가족·친족,thebuffet,peak-adult,meal,,weekend,2,1인,13,2574000,2340000,N
+가족·친족,thebuffet,peak-adult,meal,,weekend,3,1인,13,2574000,2340000,N
+가족·친족,thebuffet,peak-adult,meal,,weekend,4,1인,13,2574000,2340000,N
+가족·친족,thebuffet,peak-adult,meal,,weekend,5,1인,13,2574000,2340000,N
+가족·친족,thebuffet,peak-adult,meal,,weekend,6,1인,13,2574000,2340000,N
+가족·친족,thebuffet,peak-adult,meal,,weekend,7,1인,12,2376000,2160000,N
+가족·친족,thebuffet,peak-adult,meal,,weekend,8,1인,12,2376000,2160000,N
+가족·친족,thebuffet,peak-adult,meal,,weekend,9,1인,12,2376000,2160000,N
+가족·친족,thebuffet,peak-adult,meal,,weekend,10,1인,12,2376000,2160000,N
+가족·친족,thebuffet,peak-adult,meal,,weekend,11,1인,12,2376000,2160000,N
+가족·친족,thebuffet,peak-adult,meal,,weekend,12,1인,12,2376000,2160000,N
+골프·스포츠 모임,thebuffet,peak-adult,meal,,weekday,1,1인,14,2772000,2520000,N
+골프·스포츠 모임,thebuffet,peak-adult,meal,,weekday,2,1인,14,2772000,2520000,N
+골프·스포츠 모임,thebuffet,peak-adult,meal,,weekday,3,1인,14,2772000,2520000,N
+골프·스포츠 모임,thebuffet,peak-adult,meal,,weekday,4,1인,14,2772000,2520000,N
+골프·스포츠 모임,thebuffet,peak-adult,meal,,weekday,5,1인,13,2574000,2340000,N
+골프·스포츠 모임,thebuffet,peak-adult,meal,,weekday,6,1인,13,2574000,2340000,N
+골프·스포츠 모임,thebuffet,peak-adult,meal,,weekday,7,1인,13,2574000,2340000,N
+골프·스포츠 모임,thebuffet,peak-adult,meal,,weekday,8,1인,13,2574000,2340000,N
+골프·스포츠 모임,thebuffet,peak-adult,meal,,weekday,9,1인,13,2574000,2340000,N
+골프·스포츠 모임,thebuffet,peak-adult,meal,,weekday,10,1인,13,2574000,2340000,N
+골프·스포츠 모임,thebuffet,peak-adult,meal,,weekday,11,1인,13,2574000,2340000,N
+골프·스포츠 모임,thebuffet,peak-adult,meal,,weekday,12,1인,13,2574000,2340000,N
+골프·스포츠 모임,thebuffet,peak-adult,meal,,weekend,1,1인,9,1782000,1620000,N
+골프·스포츠 모임,thebuffet,peak-adult,meal,,weekend,2,1인,9,1782000,1620000,N
+골프·스포츠 모임,thebuffet,peak-adult,meal,,weekend,3,1인,9,1782000,1620000,N
+골프·스포츠 모임,thebuffet,peak-adult,meal,,weekend,4,1인,9,1782000,1620000,N
+골프·스포츠 모임,thebuffet,peak-adult,meal,,weekend,5,1인,9,1782000,1620000,N
+골프·스포츠 모임,thebuffet,peak-adult,meal,,weekend,6,1인,9,1782000,1620000,N
+골프·스포츠 모임,thebuffet,peak-adult,meal,,weekend,7,1인,9,1782000,1620000,N
+골프·스포츠 모임,thebuffet,peak-adult,meal,,weekend,8,1인,9,1782000,1620000,N
+골프·스포츠 모임,thebuffet,peak-adult,meal,,weekend,9,1인,9,1782000,1620000,N
+골프·스포츠 모임,thebuffet,peak-adult,meal,,weekend,10,1인,9,1782000,1620000,N
+골프·스포츠 모임,thebuffet,peak-adult,meal,,weekend,11,1인,9,1782000,1620000,N
+골프·스포츠 모임,thebuffet,peak-adult,meal,,weekend,12,1인,8,1584000,1440000,N
+미식 방문,thebuffet,peak-child,meal,,weekday,1,1인,6,588000,534545,N
+미식 방문,thebuffet,peak-child,meal,,weekday,2,1인,6,588000,534545,N
+미식 방문,thebuffet,peak-child,meal,,weekday,3,1인,6,588000,534545,N
+미식 방문,thebuffet,peak-child,meal,,weekday,4,1인,6,588000,534545,N
+미식 방문,thebuffet,peak-child,meal,,weekday,5,1인,6,588000,534545,N
+미식 방문,thebuffet,peak-child,meal,,weekday,6,1인,6,588000,534545,N
+미식 방문,thebuffet,peak-child,meal,,weekday,7,1인,6,588000,534545,N
+미식 방문,thebuffet,peak-child,meal,,weekday,8,1인,6,588000,534545,N
+미식 방문,thebuffet,peak-child,meal,,weekday,9,1인,6,588000,534545,N
+미식 방문,thebuffet,peak-child,meal,,weekday,10,1인,6,588000,534545,N
+미식 방문,thebuffet,peak-child,meal,,weekday,11,1인,6,588000,534545,N
+미식 방문,thebuffet,peak-child,meal,,weekday,12,1인,6,588005,534550,N
+미식 방문,thebuffet,peak-child,meal,,weekend,1,1인,17,1666000,1514545,N
+미식 방문,thebuffet,peak-child,meal,,weekend,2,1인,17,1666000,1514545,N
+미식 방문,thebuffet,peak-child,meal,,weekend,3,1인,17,1666000,1514545,N
+미식 방문,thebuffet,peak-child,meal,,weekend,4,1인,17,1666000,1514545,N
+미식 방문,thebuffet,peak-child,meal,,weekend,5,1인,17,1666000,1514545,N
+미식 방문,thebuffet,peak-child,meal,,weekend,6,1인,17,1666000,1514545,N
+미식 방문,thebuffet,peak-child,meal,,weekend,7,1인,17,1666000,1514545,N
+미식 방문,thebuffet,peak-child,meal,,weekend,8,1인,17,1666000,1514545,N
+미식 방문,thebuffet,peak-child,meal,,weekend,9,1인,16,1568001,1425455,N
+미식 방문,thebuffet,peak-child,meal,,weekend,10,1인,16,1568001,1425455,N
+미식 방문,thebuffet,peak-child,meal,,weekend,11,1인,16,1568001,1425455,N
+미식 방문,thebuffet,peak-child,meal,,weekend,12,1인,16,1568003,1425457,N
+비즈니스·접대,thebuffet,peak-child,meal,,weekday,1,1인,26,2548000,2316364,N
+비즈니스·접대,thebuffet,peak-child,meal,,weekday,2,1인,26,2548000,2316364,N
+비즈니스·접대,thebuffet,peak-child,meal,,weekday,3,1인,26,2548000,2316364,N
+비즈니스·접대,thebuffet,peak-child,meal,,weekday,4,1인,26,2548000,2316364,N
+비즈니스·접대,thebuffet,peak-child,meal,,weekday,5,1인,26,2548000,2316364,N
+비즈니스·접대,thebuffet,peak-child,meal,,weekday,6,1인,26,2548000,2316364,N
+비즈니스·접대,thebuffet,peak-child,meal,,weekday,7,1인,25,2450000,2227273,N
+비즈니스·접대,thebuffet,peak-child,meal,,weekday,8,1인,25,2450000,2227273,N
+비즈니스·접대,thebuffet,peak-child,meal,,weekday,9,1인,25,2450000,2227273,N
+비즈니스·접대,thebuffet,peak-child,meal,,weekday,10,1인,25,2450000,2227273,N
+비즈니스·접대,thebuffet,peak-child,meal,,weekday,11,1인,25,2450000,2227273,N
+비즈니스·접대,thebuffet,peak-child,meal,,weekday,12,1인,25,2449996,2227269,N
+비즈니스·접대,thebuffet,peak-child,meal,,weekend,1,1인,12,1176000,1069091,N
+비즈니스·접대,thebuffet,peak-child,meal,,weekend,2,1인,12,1176000,1069091,N
+비즈니스·접대,thebuffet,peak-child,meal,,weekend,3,1인,12,1176000,1069091,N
+비즈니스·접대,thebuffet,peak-child,meal,,weekend,4,1인,12,1176000,1069091,N
+비즈니스·접대,thebuffet,peak-child,meal,,weekend,5,1인,12,1176000,1069091,N
+비즈니스·접대,thebuffet,peak-child,meal,,weekend,6,1인,12,1176000,1069091,N
+비즈니스·접대,thebuffet,peak-child,meal,,weekend,7,1인,12,1176000,1069091,N
+비즈니스·접대,thebuffet,peak-child,meal,,weekend,8,1인,11,1078000,980000,N
+비즈니스·접대,thebuffet,peak-child,meal,,weekend,9,1인,11,1078000,980000,N
+비즈니스·접대,thebuffet,peak-child,meal,,weekend,10,1인,11,1078000,980000,N
+비즈니스·접대,thebuffet,peak-child,meal,,weekend,11,1인,11,1078000,980000,N
+비즈니스·접대,thebuffet,peak-child,meal,,weekend,12,1인,11,1077999,979999,N
+친구·모임,thebuffet,peak-child,meal,,weekday,1,1인,8,784000,712727,N
+친구·모임,thebuffet,peak-child,meal,,weekday,2,1인,8,784000,712727,N
+친구·모임,thebuffet,peak-child,meal,,weekday,3,1인,8,784000,712727,N
+친구·모임,thebuffet,peak-child,meal,,weekday,4,1인,8,784000,712727,N
+친구·모임,thebuffet,peak-child,meal,,weekday,5,1인,8,784000,712727,N
+친구·모임,thebuffet,peak-child,meal,,weekday,6,1인,8,784000,712727,N
+친구·모임,thebuffet,peak-child,meal,,weekday,7,1인,8,784000,712727,N
+친구·모임,thebuffet,peak-child,meal,,weekday,8,1인,8,784000,712727,N
+친구·모임,thebuffet,peak-child,meal,,weekday,9,1인,8,784000,712727,N
+친구·모임,thebuffet,peak-child,meal,,weekday,10,1인,8,784000,712727,N
+친구·모임,thebuffet,peak-child,meal,,weekday,11,1인,7,686000,623636,N
+친구·모임,thebuffet,peak-child,meal,,weekday,12,1인,7,686003,623639,N
+친구·모임,thebuffet,peak-child,meal,,weekend,1,1인,14,1372000,1247273,N
+친구·모임,thebuffet,peak-child,meal,,weekend,2,1인,14,1372000,1247273,N
+친구·모임,thebuffet,peak-child,meal,,weekend,3,1인,14,1372000,1247273,N
+친구·모임,thebuffet,peak-child,meal,,weekend,4,1인,14,1372000,1247273,N
+친구·모임,thebuffet,peak-child,meal,,weekend,5,1인,14,1372000,1247273,N
+친구·모임,thebuffet,peak-child,meal,,weekend,6,1인,14,1372000,1247273,N
+친구·모임,thebuffet,peak-child,meal,,weekend,7,1인,14,1372000,1247273,N
+친구·모임,thebuffet,peak-child,meal,,weekend,8,1인,14,1372000,1247273,N
+친구·모임,thebuffet,peak-child,meal,,weekend,9,1인,14,1372000,1247273,N
+친구·모임,thebuffet,peak-child,meal,,weekend,10,1인,14,1372000,1247273,N
+친구·모임,thebuffet,peak-child,meal,,weekend,11,1인,14,1372000,1247273,N
+친구·모임,thebuffet,peak-child,meal,,weekend,12,1인,13,1273997,1158179,N
+휴식·산책 동행,thebuffet,peak-child,meal,,weekday,1,1인,14,1372000,1247273,N
+휴식·산책 동행,thebuffet,peak-child,meal,,weekday,2,1인,14,1372000,1247273,N
+휴식·산책 동행,thebuffet,peak-child,meal,,weekday,3,1인,14,1372000,1247273,N
+휴식·산책 동행,thebuffet,peak-child,meal,,weekday,4,1인,14,1372000,1247273,N
+휴식·산책 동행,thebuffet,peak-child,meal,,weekday,5,1인,14,1372000,1247273,N
+휴식·산책 동행,thebuffet,peak-child,meal,,weekday,6,1인,14,1372000,1247273,N
+휴식·산책 동행,thebuffet,peak-child,meal,,weekday,7,1인,13,1274000,1158182,N
+휴식·산책 동행,thebuffet,peak-child,meal,,weekday,8,1인,13,1274000,1158182,N
+휴식·산책 동행,thebuffet,peak-child,meal,,weekday,9,1인,13,1274000,1158182,N
+휴식·산책 동행,thebuffet,peak-child,meal,,weekday,10,1인,13,1274000,1158182,N
+휴식·산책 동행,thebuffet,peak-child,meal,,weekday,11,1인,13,1274000,1158182,N
+휴식·산책 동행,thebuffet,peak-child,meal,,weekday,12,1인,13,1273997,1158179,N
+휴식·산책 동행,thebuffet,peak-child,meal,,weekend,1,1인,24,2352000,2138182,N
+휴식·산책 동행,thebuffet,peak-child,meal,,weekend,2,1인,24,2352000,2138182,N
+휴식·산책 동행,thebuffet,peak-child,meal,,weekend,3,1인,24,2352000,2138182,N
+휴식·산책 동행,thebuffet,peak-child,meal,,weekend,4,1인,24,2352000,2138182,N
+휴식·산책 동행,thebuffet,peak-child,meal,,weekend,5,1인,24,2352000,2138182,N
+휴식·산책 동행,thebuffet,peak-child,meal,,weekend,6,1인,24,2352000,2138182,N
+휴식·산책 동행,thebuffet,peak-child,meal,,weekend,7,1인,24,2352000,2138182,N
+휴식·산책 동행,thebuffet,peak-child,meal,,weekend,8,1인,24,2352000,2138182,N
+휴식·산책 동행,thebuffet,peak-child,meal,,weekend,9,1인,24,2352000,2138182,N
+휴식·산책 동행,thebuffet,peak-child,meal,,weekend,10,1인,24,2352000,2138182,N
+휴식·산책 동행,thebuffet,peak-child,meal,,weekend,11,1인,24,2352000,2138182,N
+휴식·산책 동행,thebuffet,peak-child,meal,,weekend,12,1인,24,2351998,2138180,N

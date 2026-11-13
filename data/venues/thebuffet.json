@@ -16,61 +16,67 @@
       "day_type": "weekday",
       "open": "07:00",
       "last_order": null,
-      "close": "10:00"
+      "close": "10:00",
+      "source_id": null
     },
     {
       "meal": "breakfast",
       "day_type": "weekend",
       "open": "06:30",
       "last_order": null,
-      "close": "10:00"
+      "close": "10:00",
+      "source_id": null
     },
     {
       "meal": "lunch",
       "day_type": "weekday",
       "open": "12:00",
       "last_order": null,
-      "close": "14:30"
+      "close": "14:30",
+      "source_id": null
     },
     {
       "meal": "lunch",
       "day_type": "weekend",
       "open": "11:00",
       "last_order": null,
-      "close": "15:30"
+      "close": "15:30",
+      "source_id": null
     },
     {
       "meal": "dinner",
       "day_type": "weekday",
       "open": "18:00",
       "last_order": null,
-      "close": "21:00"
+      "close": "21:00",
+      "source_id": null
     },
     {
       "meal": "dinner",
       "day_type": "weekend",
       "open": "17:30",
       "last_order": null,
-      "close": "22:00"
+      "close": "22:00",
+      "source_id": null
     }
   ],
   "reservation": {
     "required": false,
     "party_min": 1,
     "party_max": null,
-    "note": "예약 필수 여부는 공식 페이지에 없음 (false 로 둠). 예약은 2개월 전 1일 10시부터. 홀 288석, 테라스 50석, 별실 2개 (10~24석). 어린이는 36개월 이상 ~ 초등학생"
+    "note": "예약 필수 여부는 공식 페이지에 없음 (false 로 둠). 예약은 2개월 전 1일 10시부터. 홀 288석, 테라스 50석, 별실 2개 (10~24석). 어린이는 36개월 이상 ~ 초등학생",
+    "source_id": null
   },
   "products": [
     {
       "product_id": "breakfast-adult",
       "name": "추가 결제 조식 성인",
       "occasion": "meal",
-      "meals": [
-        "breakfast"
-      ],
-      "day_types": [
-        "weekday",
-        "weekend"
+      "slots": [
+        {
+          "meal": "breakfast",
+          "day_type": "all"
+        }
       ],
       "months": null,
       "audience": "adult",
@@ -87,11 +93,11 @@
       "product_id": "weekday-lunch-adult",
       "name": "주중 점심 성인",
       "occasion": "meal",
-      "meals": [
-        "lunch"
-      ],
-      "day_types": [
-        "weekday"
+      "slots": [
+        {
+          "meal": "lunch",
+          "day_type": "weekday"
+        }
       ],
       "months": null,
       "audience": "adult",
@@ -108,11 +114,11 @@
       "product_id": "weekday-lunch-child",
       "name": "주중 점심 어린이",
       "occasion": "meal",
-      "meals": [
-        "lunch"
-      ],
-      "day_types": [
-        "weekday"
+      "slots": [
+        {
+          "meal": "lunch",
+          "day_type": "weekday"
+        }
       ],
       "months": null,
       "audience": "child",
@@ -129,13 +135,15 @@
       "product_id": "peak-adult",
       "name": "주말 점심·모든 요일 저녁 성인",
       "occasion": "meal",
-      "meals": [
-        "lunch",
-        "dinner"
-      ],
-      "day_types": [
-        "weekday",
-        "weekend"
+      "slots": [
+        {
+          "meal": "lunch",
+          "day_type": "weekend"
+        },
+        {
+          "meal": "dinner",
+          "day_type": "all"
+        }
       ],
       "months": null,
       "audience": "adult",
@@ -152,13 +160,15 @@
       "product_id": "peak-child",
       "name": "주말 점심·모든 요일 저녁 어린이",
       "occasion": "meal",
-      "meals": [
-        "lunch",
-        "dinner"
-      ],
-      "day_types": [
-        "weekday",
-        "weekend"
+      "slots": [
+        {
+          "meal": "lunch",
+          "day_type": "weekend"
+        },
+        {
+          "meal": "dinner",
+          "day_type": "all"
+        }
       ],
       "months": null,
       "audience": "child",

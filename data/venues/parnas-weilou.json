@@ -18,14 +18,16 @@
       "day_type": "all",
       "open": "11:30",
       "last_order": "14:00",
-      "close": "14:30"
+      "close": "14:30",
+      "source_id": null
     },
     {
       "meal": "dinner",
       "day_type": "all",
       "open": "18:00",
       "last_order": "21:30",
-      "close": "22:00"
+      "close": "22:00",
+      "source_id": null
     }
   ],
   "reservation": null,
@@ -34,11 +36,11 @@
       "product_id": "weekend-choice",
       "name": "위켄드 초이스 (주말 점심)",
       "occasion": "meal",
-      "meals": [
-        "lunch"
-      ],
-      "day_types": [
-        "weekend"
+      "slots": [
+        {
+          "meal": "lunch",
+          "day_type": "weekend"
+        }
       ],
       "months": null,
       "audience": "all",
@@ -55,13 +57,15 @@
       "product_id": "chef-signature",
       "name": "셰프 시그니처 코스",
       "occasion": "meal",
-      "meals": [
-        "lunch",
-        "dinner"
-      ],
-      "day_types": [
-        "weekday",
-        "weekend"
+      "slots": [
+        {
+          "meal": "lunch",
+          "day_type": "all"
+        },
+        {
+          "meal": "dinner",
+          "day_type": "all"
+        }
       ],
       "months": null,
       "audience": "all",

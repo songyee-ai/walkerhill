@@ -16,34 +16,39 @@
       "day_type": "all",
       "open": "12:00",
       "last_order": null,
-      "close": "15:00"
+      "close": "15:00",
+      "source_id": null
     },
     {
       "meal": "dinner",
       "day_type": "all",
       "open": "18:00",
       "last_order": null,
-      "close": "21:00"
+      "close": "21:00",
+      "source_id": null
     }
   ],
   "reservation": {
     "required": true,
     "party_min": 1,
     "party_max": null,
-    "note": "사전 예약제. 코스와 주중 특선 SET 는 2인 이상. 주말·공휴일 저녁은 코스만. 홀 30석, 별실 12개 99석"
+    "note": "사전 예약제. 코스와 주중 특선 SET 는 2인 이상. 주말·공휴일 저녁은 코스만. 홀 30석, 별실 12개 99석",
+    "source_id": null
   },
   "products": [
     {
       "product_id": "signature-course",
       "name": "화룡 코스",
       "occasion": "meal",
-      "meals": [
-        "lunch",
-        "dinner"
-      ],
-      "day_types": [
-        "weekday",
-        "weekend"
+      "slots": [
+        {
+          "meal": "lunch",
+          "day_type": "all"
+        },
+        {
+          "meal": "dinner",
+          "day_type": "all"
+        }
       ],
       "months": null,
       "audience": "all",
@@ -60,13 +65,15 @@
       "product_id": "private-room-course",
       "name": "만수무강 (보양 특선 코스)",
       "occasion": "meal",
-      "meals": [
-        "lunch",
-        "dinner"
-      ],
-      "day_types": [
-        "weekday",
-        "weekend"
+      "slots": [
+        {
+          "meal": "lunch",
+          "day_type": "all"
+        },
+        {
+          "meal": "dinner",
+          "day_type": "all"
+        }
       ],
       "months": null,
       "audience": "all",
@@ -83,12 +90,15 @@
       "product_id": "weekday-set",
       "name": "금룡 주중 특선 SET (요리 택3)",
       "occasion": "meal",
-      "meals": [
-        "lunch",
-        "dinner"
-      ],
-      "day_types": [
-        "weekday"
+      "slots": [
+        {
+          "meal": "lunch",
+          "day_type": "weekday"
+        },
+        {
+          "meal": "dinner",
+          "day_type": "weekday"
+        }
       ],
       "months": null,
       "audience": "all",
@@ -105,13 +115,15 @@
       "product_id": "autumn-course",
       "name": "추미진향 (가을 한정 코스)",
       "occasion": "meal",
-      "meals": [
-        "lunch",
-        "dinner"
-      ],
-      "day_types": [
-        "weekday",
-        "weekend"
+      "slots": [
+        {
+          "meal": "lunch",
+          "day_type": "all"
+        },
+        {
+          "meal": "dinner",
+          "day_type": "all"
+        }
       ],
       "months": [
         9,
