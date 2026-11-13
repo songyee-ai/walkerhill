@@ -1,0 +1,73 @@
+{
+  "format_version": 1,
+  "venue_id": "josunpalace-eatanicgarden",
+  "name": "이타닉 가든",
+  "hotel": "조선 팰리스 서울 강남",
+  "is_competitor": true,
+  "competes_with": [
+    "ondal"
+  ],
+  "cuisine": "한식 파인 다이닝",
+  "occasions": [
+    "meal"
+  ],
+  "months": null,
+  "hours": null,
+  "reservation": null,
+  "products": [
+    {
+      "product_id": "lunch-course",
+      "name": "런치 코스",
+      "occasion": "meal",
+      "meals": [
+        "lunch"
+      ],
+      "day_types": [
+        "weekday",
+        "weekend"
+      ],
+      "months": null,
+      "audience": "all",
+      "unit": "1인",
+      "serves": 1,
+      "qty_rule": "per_person",
+      "qty_max": null,
+      "price": 190000,
+      "price_basis": "unknown",
+      "grade": "official",
+      "source_id": null
+    },
+    {
+      "product_id": "dinner-course",
+      "name": "디너 코스",
+      "occasion": "meal",
+      "meals": [
+        "dinner"
+      ],
+      "day_types": [
+        "weekday",
+        "weekend"
+      ],
+      "months": null,
+      "audience": "all",
+      "unit": "1인",
+      "serves": 1,
+      "qty_rule": "per_person",
+      "qty_max": null,
+      "price": 320000,
+      "price_basis": "unknown",
+      "grade": "official",
+      "source_id": null
+    }
+  ],
+  "promotions": [],
+  "sources": [
+    {
+      "source_id": "S1",
+      "title": "텐아시아 — 조선호텔앤리조트가 공개한 이타닉 가든 정상가",
+      "url": "https://www.tenasia.co.kr/article/2026092557314",
+      "checked_on": "2026-11-13"
+    }
+  ],
+  "default_source_id": "S1"
+}
