@@ -1,0 +1,56 @@
+{
+  "format_version": 1,
+  "venue_id": "pavilion",
+  "name": "더파빌리온",
+  "hotel": "워커힐",
+  "is_competitor": false,
+  "competes_with": [],
+  "cuisine": "로비 라운지 디저트",
+  "occasions": ["dessert"],
+  "months": null,
+  "hours": [
+    {"meal": null, "day_type": "all", "open": "09:00", "last_order": "20:00", "close": "21:00"}
+  ],
+  "reservation": null,
+  "products": [
+    {
+      "product_id": "fall-dessert-set",
+      "name": "FALL IN PAVILION 가을 디저트 세트",
+      "occasion": "dessert",
+      "meals": [],
+      "day_types": ["weekday", "weekend"],
+      "months": [9, 10, 11],
+      "audience": "all",
+      "unit": "세트",
+      "serves": 2,
+      "qty_rule": "per_serves",
+      "qty_max": null,
+      "price": 98000,
+      "price_basis": "unknown",
+      "grade": "official",
+      "source_id": "S2"
+    },
+    {
+      "product_id": "bingsu",
+      "name": "빙수",
+      "occasion": "dessert",
+      "meals": [],
+      "day_types": ["weekday", "weekend"],
+      "months": [5, 6, 7, 8, 9],
+      "audience": "all",
+      "unit": "개",
+      "serves": 2,
+      "qty_rule": "per_serves",
+      "qty_max": null,
+      "price": null,
+      "price_basis": "unknown",
+      "grade": "unknown",
+      "source_id": null
+    }
+  ],
+  "promotions": [],
+  "sources": [
+    {"source_id": "S1", "title": "더파빌리온 공식 소개 (그랜드 워커힐 서울 다이닝)", "url": "https://www.walkerhill.com/grandwalkerhillseoul/dining/ThePavilion", "checked_on": "2026-11-13"},
+    {"source_id": "S2", "title": "더파빌리온 공식 메뉴판 (2026 가을 판)", "url": "https://www.walkerhill.com/FileDownload.wh?guid=399F668C-C039-577D-BD94-5EC79640848B", "checked_on": "2026-11-13"}  ],
+  "default_source_id": "S1"
+}

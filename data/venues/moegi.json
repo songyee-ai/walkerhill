@@ -1,0 +1,144 @@
+{
+  "format_version": 1,
+  "venue_id": "moegi",
+  "name": "모에기",
+  "hotel": "워커힐",
+  "is_competitor": false,
+  "competes_with": [],
+  "cuisine": "일식",
+  "occasions": [
+    "meal"
+  ],
+  "months": null,
+  "hours": [
+    {
+      "meal": "lunch",
+      "day_type": "all",
+      "open": "12:00",
+      "last_order": null,
+      "close": "15:00"
+    },
+    {
+      "meal": "dinner",
+      "day_type": "all",
+      "open": "18:00",
+      "last_order": null,
+      "close": "21:00"
+    }
+  ],
+  "reservation": {
+    "required": false,
+    "party_min": 1,
+    "party_max": 30,
+    "note": "예약 필수 여부는 공식 페이지에 없음 (false 로 둠). 예약은 2개월 전 1일 10시부터, 4~30석. 103석 (스시바 12, 홀 40, 데판야끼 13, 별실 5개 38석)"
+  },
+  "products": [
+    {
+      "product_id": "dinner-course",
+      "name": "마코토 코스",
+      "occasion": "meal",
+      "meals": [
+        "dinner"
+      ],
+      "day_types": [
+        "weekday",
+        "weekend"
+      ],
+      "months": null,
+      "audience": "all",
+      "unit": "1인",
+      "serves": 1,
+      "qty_rule": "per_person",
+      "qty_max": null,
+      "price": 210000,
+      "price_basis": "unknown",
+      "grade": "official",
+      "source_id": null
+    },
+    {
+      "product_id": "lunch-course",
+      "name": "런치 모에기 코스",
+      "occasion": "meal",
+      "meals": [
+        "lunch"
+      ],
+      "day_types": [
+        "weekday",
+        "weekend"
+      ],
+      "months": null,
+      "audience": "all",
+      "unit": "1인",
+      "serves": 1,
+      "qty_rule": "per_person",
+      "qty_max": null,
+      "price": 210000,
+      "price_basis": "unknown",
+      "grade": "official",
+      "source_id": null
+    },
+    {
+      "product_id": "sashimi-set",
+      "name": "생선회 정식",
+      "occasion": "meal",
+      "meals": [
+        "lunch"
+      ],
+      "day_types": [
+        "weekday",
+        "weekend"
+      ],
+      "months": null,
+      "audience": "all",
+      "unit": "1인",
+      "serves": 1,
+      "qty_rule": "per_person",
+      "qty_max": null,
+      "price": 160000,
+      "price_basis": "unknown",
+      "grade": "official",
+      "source_id": null
+    },
+    {
+      "product_id": "autumn-lunch",
+      "name": "가을 한정 점심",
+      "occasion": "meal",
+      "meals": [
+        "lunch"
+      ],
+      "day_types": [
+        "weekday",
+        "weekend"
+      ],
+      "months": [
+        9,
+        10
+      ],
+      "audience": "all",
+      "unit": "1인",
+      "serves": 1,
+      "qty_rule": "per_person",
+      "qty_max": null,
+      "price": null,
+      "price_basis": "unknown",
+      "grade": "unknown",
+      "source_id": "S2"
+    }
+  ],
+  "promotions": [],
+  "sources": [
+    {
+      "source_id": "S1",
+      "title": "모에기 공식 소개",
+      "url": "https://www.walkerhill.com/vistawalkerhillseoul/dining/Moegi",
+      "checked_on": "2026-11-13"
+    },
+    {
+      "source_id": "S2",
+      "title": "모에기 공식 메뉴판",
+      "url": "https://www.walkerhill.com/FileDownload.wh?guid=90357B9F-89EF-B5BC-38BB-014863B6A7FB",
+      "checked_on": "2026-11-13"
+    }
+  ],
+  "default_source_id": "S2"
+}
