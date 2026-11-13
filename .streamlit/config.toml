@@ -1,0 +1,10 @@
+# 화면(Streamlit)의 설정. 공통 틀이다 (docs/STRUCTURE.md).
+
+[server]
+# 이 PC 에서만 접속되게 한다. 기본값으로 두면 같은 네트워크의 다른 기기에서도 화면이 열리는데,
+# 화면에는 내부 자료에서 계산한 값이 나올 수 있다 (2026-11-13).
+address = "localhost"
+
+[browser]
+# 사용 통계를 밖으로 보내지 않는다 (2026-11-13).
+gatherUsageStats = false

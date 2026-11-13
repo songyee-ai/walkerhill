@@ -1,0 +1,29 @@
+{
+  "format_version": 1,
+  "run_id": "20261117-101500-baseline",
+  "criteria": {
+    "top_venue_must_match": true,
+    "max_diff_pp": 15
+  },
+  "groups": {
+    "가족·친족": {
+      "venues": {
+        "geumryong": {
+          "sim_share": 0.3,
+          "base_share": 0.25,
+          "diff_pp": 5.0
+        },
+        "thebuffet": {
+          "sim_share": 0.7,
+          "base_share": 0.75,
+          "diff_pp": -5.0
+        }
+      },
+      "top_sim": "thebuffet",
+      "top_base": "thebuffet",
+      "pass": true
+    }
+  },
+  "uncovered_groups": [],
+  "pass": true
+}

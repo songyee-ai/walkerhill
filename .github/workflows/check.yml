@@ -50,4 +50,24 @@ jobs:
           fi
           echo "문서 동반 확인"
 
-      # 스택 확정 후 추가: 타입 검사, 빌드
+      # ── 여기부터는 코드와 데이터 파일의 검사다 (CLAUDE.md 의 "스택" 절) ──
+
+      # 판 번호를 끝까지 적는다. 이 액션은 v10 처럼 앞 번호만 적은 태그를 두지 않는다 (11-13 확인).
+      - name: uv 설치
+        uses: astral-sh/setup-uv@v10.3.3
+        with:
+          enable-cache: true
+
+      - name: 패키지 설치 (잠금 파일 그대로)
+        run: uv sync --locked
+
+      - name: 린트
+        run: uv run ruff check .
+
+      - name: 형식 검사
+        run: |
+          uv run python -m tools.check_formats
+          uv run python -m tools.check_formats --root tests/fixtures/example --strict
+
+      - name: 테스트
+        run: uv run python -m pytest

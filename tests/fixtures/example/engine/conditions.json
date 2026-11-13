@@ -1,0 +1,82 @@
+{
+  "format_version": 1,
+  "conditions": [
+    {
+      "condition_id": "meal-lunch-weekday",
+      "occasion": "meal",
+      "meal": "lunch",
+      "day_type": "weekday",
+      "stay": null,
+      "month": null
+    },
+    {
+      "condition_id": "meal-lunch-weekend",
+      "occasion": "meal",
+      "meal": "lunch",
+      "day_type": "weekend",
+      "stay": null,
+      "month": null
+    },
+    {
+      "condition_id": "meal-dinner-weekday",
+      "occasion": "meal",
+      "meal": "dinner",
+      "day_type": "weekday",
+      "stay": null,
+      "month": null
+    },
+    {
+      "condition_id": "meal-dinner-weekend",
+      "occasion": "meal",
+      "meal": "dinner",
+      "day_type": "weekend",
+      "stay": null,
+      "month": null
+    },
+    {
+      "condition_id": "dessert-weekday",
+      "occasion": "dessert",
+      "meal": null,
+      "day_type": "weekday",
+      "stay": null,
+      "month": null
+    },
+    {
+      "condition_id": "dessert-weekend",
+      "occasion": "dessert",
+      "meal": null,
+      "day_type": "weekend",
+      "stay": null,
+      "month": null
+    },
+    {
+      "condition_id": "takeout-weekday",
+      "occasion": "takeout",
+      "meal": null,
+      "day_type": "weekday",
+      "stay": null,
+      "month": null
+    },
+    {
+      "condition_id": "takeout-weekend",
+      "occasion": "takeout",
+      "meal": null,
+      "day_type": "weekend",
+      "stay": null,
+      "month": null
+    }
+  ],
+  "assumed_splits": [
+    {
+      "split_id": "meal-lunch-dinner",
+      "applies_when": "집계 파일에서 끼니가 비어 있는 식사 매출",
+      "parts": {
+        "lunch": 0.4,
+        "dinner": 0.6
+      },
+      "grade": "assumption",
+      "decided_on": "2026-11-13",
+      "note": "예시 값이다. 엔진 담당이 정한다"
+    }
+  ]
+}

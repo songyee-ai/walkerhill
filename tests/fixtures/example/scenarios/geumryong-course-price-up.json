@@ -1,0 +1,16 @@
+{
+  "format_version": 1,
+  "scenario_id": "geumryong-course-price-up",
+  "name": "금룡 코스 가격 인상",
+  "kind": "our_price",
+  "description": "코스 A 의 가격을 올렸을 때 누가 남고 누가 다른 곳으로 옮기는지 본다.",
+  "changes": [
+    {
+      "op": "change_price_pct",
+      "venue_id": "geumryong",
+      "product_id": "course-a",
+      "pct": 10
+    }
+  ],
+  "note": "올리는 폭은 가정이다"
+}

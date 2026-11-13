@@ -1,0 +1,123 @@
+{
+  "format_version": 1,
+  "persona_id": "family-elders",
+  "name": "어르신을 모신 행사 가족",
+  "customer_group": "가족·친족",
+  "share_in_group": {
+    "value": 0.5,
+    "grade": "assumption",
+    "basis": "후기가 모자라 반반으로 둠"
+  },
+  "visit": {
+    "purposes": [
+      "가족 행사"
+    ],
+    "party": {
+      "label": "3대 가족",
+      "adults": 4,
+      "children": 0
+    },
+    "occasions": [
+      "meal"
+    ],
+    "meals": [
+      "lunch",
+      "dinner"
+    ],
+    "day_types": [
+      "weekend"
+    ]
+  },
+  "budget": {
+    "basis": "per_person",
+    "typical": 150000,
+    "max": 220000
+  },
+  "preferences": {
+    "cuisines_like": [
+      "중식",
+      "한식"
+    ],
+    "cuisines_avoid": [],
+    "dietary": [],
+    "atmosphere": {
+      "조용함": 3,
+      "격식": 3,
+      "전망": 1
+    },
+    "needs": [
+      "별실",
+      "어르신이 움직이기 편함"
+    ]
+  },
+  "buying": {
+    "price_sensitivity": "low",
+    "promo_response": "행사 자리라 혜택보다 자리 조건을 먼저 본다",
+    "reservation": "늘 예약한다",
+    "wait_tolerance": "low"
+  },
+  "revisit": {
+    "returns_for": [
+      "별실",
+      "서비스"
+    ],
+    "leaves_for": [
+      "가격"
+    ]
+  },
+  "compares_with": [
+    "examplehotel-chinese"
+  ],
+  "evidence": {
+    "share_in_group": {
+      "grade": "assumption",
+      "refs": [],
+      "note": "후기 건수가 모자라 비율을 낼 수 없었다"
+    },
+    "visit": {
+      "grade": "review",
+      "refs": [
+        "R-geumryong-0003",
+        "R-geumryong-0011"
+      ],
+      "note": ""
+    },
+    "budget": {
+      "grade": "assumption",
+      "refs": [
+        "geumryong:S1"
+      ],
+      "note": "후기에 금액이 드물어 메뉴 가격대에서 정했다"
+    },
+    "preferences": {
+      "grade": "review",
+      "refs": [
+        "R-geumryong-0003",
+        "R-geumryong-0011"
+      ],
+      "note": ""
+    },
+    "buying": {
+      "grade": "review",
+      "refs": [
+        "R-geumryong-0003"
+      ],
+      "note": ""
+    },
+    "revisit": {
+      "grade": "review",
+      "refs": [
+        "R-geumryong-0003",
+        "R-geumryong-0011"
+      ],
+      "note": ""
+    },
+    "compares_with": {
+      "grade": "review",
+      "refs": [
+        "R-geumryong-0003"
+      ],
+      "note": ""
+    }
+  }
+}

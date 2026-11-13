@@ -4,7 +4,10 @@
 - 무엇을 만드는지는 [PRD.md](PRD.md), 폴더 주인은 [STRUCTURE.md](STRUCTURE.md) 가 기준이다. 이 문서는 영역끼리 주고받는 파일의 모양만 정한다.
 - 확정한 뒤 형식을 바꿀 때는 "알릴 것"에 적고, 그 형식을 쓰는 사람이 모두 체크한 뒤 바꾼다. 바꾸면 그 형식의 `format_version` 을 올린다.
 - 이 문서의 예시에 든 가격, 비율, 금액, 업장 이름 "예시호텔"은 모두 **지어낸 값**이다. 실제 가격도 기본 데이터의 값도 아니다.
-- 폴더 이름은 `STRUCTURE.md` 의 제안을 따랐다. 공통 틀을 만들 때 폴더 이름이 바뀌면 여기도 함께 고친다.
+- 폴더 이름은 11-13 에 확정했다 (`STRUCTURE.md`).
+- **코드와 예시 파일**: 이 문서를 코드로 옮긴 모델이 `engine/formats/` 에 있고, 이 문서의 예시를 그대로 파일로 만든 한 벌이 `tests/fixtures/example/` 에 있다.
+  자기 파일을 만들 때 그 예시 파일을 베껴서 시작한다. 형식을 바꿀 때는 이 문서, 모델, 예시 파일을 함께 고친다 (셋이 어긋나면 테스트가 실패한다).
+- **검사**: 파일을 올리기 전에 `uv run python -m tools.check_formats` 를 돌린다 (11절).
 
 ## 1. 한눈에 보기
 
@@ -23,6 +26,10 @@
 
 파일 하나는 한 사람이 쓴다. 남이 만든 파일은 읽기만 하고, 고칠 것은 주인에게 요청한다.
 
+**데이터 폴더에는 이 표의 파일만 둔다.** `data/`, `personas/`, `scenarios/`, `engine/samples/` 에는 위 표의 파일과
+안내 파일(`README.md`)만 둘 수 있다. 예외는 프롬프트의 문장을 두는 `personas/prompts/` 하나다.
+그 밖의 파일과 폴더는 형식 검사가 오류로 본다 (11절). 검사가 읽지 않는 파일에는 틀린 데이터나 올리면 안 되는 것이 섞여도 알 수 없기 때문이다.
+
 ## 2. 공통 규칙
 
 - **글자와 줄바꿈**: 모든 파일은 UTF-8, 줄바꿈은 LF 다. CSV 는 엑셀에서 한글이 깨지지 않도록 맨 앞에 BOM 을 붙인다.
@@ -30,11 +37,15 @@
 - **키 이름**: 영어 소문자와 밑줄을 쓴다 (`venue_id`). 사람이 읽는 이름, 설명, 라벨 값은 한국어로 쓴다.
 - **식별자** (`venue_id`, `product_id`, `persona_id`, `scenario_id`, `condition_id`): 영어 소문자, 숫자, 하이픈만 쓴다.
   한번 정하면 바꾸지 않는다. 다른 파일이 이 값으로 서로를 가리키기 때문이다.
+  `venue_id` 는 영어 글자로 시작하고 세 글자 이상이다. 형식 검사가 저장소에서 후기 번호(4.1절)를 찾을 때 이 모양에 기댄다.
 - **금액**: 원 단위 정수다. 쉼표와 "원"을 붙이지 않는다.
 - **세금**: 고객이 낸 금액은 세금을 포함한 값이다. 세금을 뺀 매출은 낸 금액 ÷ 1.1 을 반올림한 정수다 (0.5 는 올린다).
   기본 데이터의 매출도 같은 방식으로 계산돼 있다 (11-13, 기본 데이터에 딸린 안내에서 확인). 출처의 가격이 세금을 따로 붙이는 표기면 3절의 `price_basis` 로 표시한다.
 - **반올림**: 금액을 계산하다 소수가 나오면 언제나 원 단위로 반올림한다 (0.5 는 올린다).
 - **날짜와 시각**: 날짜는 `2026-11-13`, 연월은 `2026-11`, 시각은 `18:30` (24시간), 날짜와 시각을 함께 적을 때는 `2026-11-17T10:15:00+09:00`.
+  함께 적을 때는 시간대(`+09:00`)를 빼지 않는다. 빼면 PC 마다 다른 시각으로 읽힌다.
+- **JSON 의 값**: 숫자와 참·거짓은 따옴표 없이 적는다 (`150000`, `true`). 정수인 값에는 소수점을 붙이지 않는다 (`1.0` 이 아니라 `1`).
+  검사 도구와 엔진은 JSON 을 적힌 그대로 엄격하게 읽는다. 코드에서 읽을 때는 `engine.formats.read_model` 을 쓴다.
 - **빈 값**: JSON 은 `null`, CSV 는 빈 칸이다. "확인했는데 모른다"를 따로 적어야 하면 코드 값 `unknown` 을 쓴다.
 - **여러 값**: CSV 의 한 칸에 값을 여러 개 넣을 때는 세미콜론(`;`)으로 나눈다.
 - **`format_version`**: JSON 파일의 맨 위에 둔다. 지금은 모두 `1` 이다.
@@ -82,7 +93,7 @@
 | `cuisine` | 음식 종류나 성격 | 한국어. 예: 중식, 뷔페, 라운지 디저트 |
 | `occasions` | 이 업장에 해당하는 이용 상황 | 코드 값 목록 |
 | `months` | 영업하는 달 (1 ~ 12 의 목록) | 일 년 내내면 `null` |
-| `hours` | 영업 시간. 끼니와 평일·주말마다 한 줄: `meal`, `day_type`, `open`, `last_order`, `close` | 식사가 아닌 업장은 `meal` 을 `null` 로 둔다. 경쟁 업장은 모르면 `hours` 전체를 `null` 로 두고, 그러면 운영 시간 검사를 건너뛴다 |
+| `hours` | 영업 시간. 끼니와 평일·주말마다 한 줄: `meal`, `day_type`, `open`, `last_order`, `close` | 식사가 아닌 업장은 `meal` 을 `null` 로 둔다. 마지막 주문 시각이 따로 없으면 `last_order` 를 `null` 로 둔다. 경쟁 업장은 모르면 `hours` 전체를 `null` 로 두고, 그러면 운영 시간 검사를 건너뛴다 |
 | `reservation` | 예약 조건: `required` 필수인지, `party_min`·`party_max` 받을 수 있는 인원, `note` | 모르면 `null` |
 | `products` | 상품 목록 (아래 표) | |
 | `promotions` | 지금 진행 중인 프로모션 (아래 표) | 없으면 빈 목록 |
@@ -337,9 +348,16 @@ R-geumryong-0011,geumryong,map,2026-08,가족·친족,가족 행사,3대 가족,
 - 비공개 층에는 받은 참고 소스의 후기에서 온 근거와 값을 적는다. 필요한 키만 적으면 된다. 비공개 층이 없어도 된다.
 - **합치는 규칙**: 기본 데이터로 돌릴 때만 두 층을 합친다. 가상 예시로 돌릴 때는 공개 층만 쓴다 (10절).
   - 묶음 안에 묶음이 있으면 몇 겹이든 끝까지 내려가 키마다 따로 합친다. 그래서 비공개 층에 `refs` 만 적어도 공개 층의 `grade` 는 남는다.
-  - 값이 하나인 키는 비공개 층의 값을 쓴다. 엔진은 그렇게 바뀐 키를 합친 결과의 `overridden_by_private` 목록에 적는다.
+  - 값이 하나인 키는 비공개 층의 값을 쓴다.
   - 값이 목록인 키는 두 목록을 합치고 겹치는 값은 하나만 남긴다. 비공개 층으로 목록의 값을 지울 수는 없다.
+  - 비공개 층으로 값을 지우거나(`null`) 값의 종류를 바꿀 수는 없다 (숫자를 글자로, 목록을 값 하나로 바꾸는 것). 그런 층은 합치지 않고 오류로 본다.
+  - 비공개 층에도 `format_version` 과 `persona_id` 를 적는다. `persona_id` 가 없거나 공개 층과 다르면 오류다.
+  - **흔적**: 엔진은 비공개 층 때문에 달라진 키를 합친 결과의 `overridden_by_private` 목록에 모두 적는다.
+    값이 바뀐 키, 새로 생긴 키, 값이 더해진 목록이 여기에 든다 (예: `budget.max`, `evidence.preferences.refs`).
+    이 목록이 비어 있으면 합친 결과는 공개 층과 같다. 비공개 층이 없으면 빈 목록이다.
+    기본 데이터로 돌릴 때는 요청(9절)의 `persona` 에서 이 목록을 빼지 않는다. 저장된 응답이 어느 자료로 돌린 것인지 알아보는 표시다.
   - 근거가 어느 층에서 왔는지는 후기 번호의 머리글자(`R`, `P`)로 안다.
+  - 코드에서는 `engine.formats.merged_persona` 로 합친다. 합친 결과가 이 절의 형식에 맞는지도 함께 본다.
 - **"이유 근거 부족"**: 합친 뒤에도 `evidence` 의 `visit`, `preferences`, `buying` 에 후기 번호가 하나도 없으면 화면이 그 페르소나를 "이유 근거 부족"으로 보여 준다.
 - 기본 데이터에서 계산하는 값(업장별 매출 비중, 사는 상품, 방문 시기, 유형, 성별·연령 구성)은 **파일에 적지 않는다.**
   엔진이 실행할 때 집계 파일(8절)에서 계산해 `base_profile` 로 붙인다.
@@ -427,6 +445,7 @@ R-geumryong-0011,geumryong,map,2026-08,가족·친족,가족 행사,3대 가족,
 - 조식을 조건에 넣지 않으면 집계 파일의 조식 매출은 대조에서 뺀다.
 - **달**: 묶음의 조건은 `month` 를 `null` 로 둔다. 일 년 전체로 본다는 뜻이고, 일부 달에만 파는 업장과 상품은 후보에 넣되 몫으로 센다 (10.2절의 `counted_share`).
   화면에서 한 번만 돌리거나 검증 사례를 넣을 때는 `month` 를 적을 수 있다. 그러면 엔진이 파는 달이 아닌 업장과 상품을 후보에서 뺀다.
+- `manual-` 로 시작하는 `condition_id` 는 화면에서 직접 넣은 조건에만 쓴다 (10.2절). 묶음의 조건에는 쓰지 않는다.
 - 페르소나의 `visit.occasions` 에 없는 이용 상황의 조건도 돌린다. 그 페르소나는 "이용하지 않음"을 고를 수 있다. 빼고 돌리면 그 고객군의 그 매출이 집계에서 사라지기 때문이다.
 
 ```json
@@ -479,6 +498,8 @@ R-geumryong-0011,geumryong,map,2026-08,가족·친족,가족 행사,3대 가족,
 
 - `our_price` 와 `our_promo` 는 워커힐 업장만, `competitor` 는 경쟁 업장만 바꾼다.
 - 상황은 업장 정의 파일을 고치지 않는다. 엔진이 실행할 때 업장 정의의 사본에 `changes` 를 순서대로 적용한다.
+- `change_price_pct` 의 바뀐 가격은 가격 × (100 + `pct`) ÷ 100 을 원 단위로 반올림한 값이다. 바뀐 폭을 먼저 반올림해서 더하거나 빼지 않는다.
+  그렇게 하면 내릴 때 1원 어긋난다 (15원을 10% 내리면 14원이다). 코드에서는 `engine.formats.change_price` 를 쓴다.
 
 ```json
 {
@@ -565,7 +586,7 @@ customer_group,venue_id,product_id,occasion,meal,day_type,unit,quantity,revenue_
 ## 9. 선택 요청과 응답
 
 엔진은 이 한 가지 형식으로만 LLM 을 부른다 (PRD 7.3절). 공급자마다 다른 부분은 엔진 안쪽에서 감춘다.
-프롬프트의 문장은 페르소나 담당이 쓰고, 요청과 응답의 모양은 여기서 정한다.
+프롬프트의 문장은 페르소나 담당이 쓰고(`personas/prompts/` 에 둔다), 요청과 응답의 모양은 여기서 정한다.
 
 **요청** — 엔진이 만든다.
 
@@ -573,7 +594,7 @@ customer_group,venue_id,product_id,occasion,meal,day_type,unit,quantity,revenue_
 |---|---|
 | `prompt_version` | 프롬프트의 판 이름. 프롬프트를 고치면 바꾼다 |
 | `scenario_id` | 어느 상황인가 |
-| `persona` | 두 층을 합친 페르소나. 엔진이 붙인 `base_profile` 이 들어갈 수 있다 |
+| `persona` | 두 층을 합친 페르소나. 기본 데이터로 돌릴 때는 엔진이 붙인 `base_profile` 과, 비공개 층의 흔적 `overridden_by_private` (5절)가 들어 있다. 가상 예시로 돌릴 때는 둘 다 없거나 비어 있다 |
 | `condition` | 이번 방문 조건. 6절의 조건에 `adults`, `children`, `budget`, `purpose`, `party` 를 더한 것. `purpose` 와 `party` 는 검증할 때 후기의 라벨을 넣고, 다른 때는 `null` 이다 |
 | `candidates` | 규칙으로 추린 후보 업장. 업장마다 고를 수 있는 주문(`options`)이 들어 있다 |
 | `allow_none` | "이용하지 않음"을 고를 수 있는가. 늘 `true` |
@@ -587,6 +608,7 @@ customer_group,venue_id,product_id,occasion,meal,day_type,unit,quantity,revenue_
   `applied` 가 `true` 면 그 할인이 이미 `discount` 에 들어 있다는 뜻이다.
 - **예산으로 거르기**: 1인 기준이면 주문의 `total` ÷ (성인 수 + 어린이 수), 일행 기준이면 `total` 을 예산의 `max` 와 견준다. `max` 를 넘는 주문은 후보에서 뺀다.
   주문이 하나도 남지 않은 업장은 후보에서 빠진다. `max` 아래에서 비싼지 싼지는 LLM 이 `typical` 을 보고 판단한다.
+  그래서 `max` 를 넘는 주문이 든 요청은 형식에 어긋난 요청이다.
 
 ```json
 {
@@ -681,10 +703,14 @@ customer_group,venue_id,product_id,occasion,meal,day_type,unit,quantity,revenue_
 
 - `choice.venue_id` 가 후보에 있거나 `null` 이다.
 - `choice.option_id` 가 그 업장의 주문에 있다.
-- `addons` 의 상품이 그 업장의 `addons` 에 있고 수량이 0 ~ `qty_max` 다.
+- `addons` 의 상품이 그 업장의 `addons` 에 있고 수량이 0 ~ `qty_max` 다. 같은 상품을 두 번 적지 않는다.
 - 라벨이 모두 `vocab` 에 있다.
+- `rejected` 에 고르지 않은 후보가 빠짐없이 한 번씩 있다. 고른 업장과 후보에 없는 업장은 `rejected` 에 없다.
+  "이용하지 않음"을 골랐으면 후보 모두가 `rejected` 에 있다.
 - `used_attributes` 가 페르소나에 실제로 있는 속성이다.
 - 원장에 적을 금액을 업장 정의의 가격과 프로모션 규칙으로 다시 계산했을 때, 고른 주문의 `total` 과 같다. 추가 상품은 따로 계산해 더한다.
+
+마지막 항목을 뺀 나머지는 `engine.formats.problems_in_response` 가 본다. 마지막 항목은 업장 정의가 있어야 해서 엔진이 따로 본다.
 
 ## 10. 실행 결과
 
@@ -709,6 +735,9 @@ customer_group,venue_id,product_id,occasion,meal,day_type,unit,quantity,revenue_
 | `calibration.json` | 보정의 대조 결과 (기준 상황만) |
 | `validation.json`, `validation_reviews.csv` | 떼어 둔 후기로 잰 검증 결과와, 후기 한 건마다의 결과 |
 
+- 실행 하나의 폴더에는 위의 파일만 둔다. 검증 결과는 떼어 둔 후기로 잰 것이라 `private/runs/` 의 실행에만 있고, `engine/samples/runs/` 에는 두지 않는다.
+- 이 파일들은 이름을 바꾸거나 다른 폴더로 옮겨도 실행 결과다. 형식 검사는 내용으로 알아보고, 위 표의 자리 밖에 있으면 오류로 본다 (11절).
+
 ### 10.1 실행 기록 `run.json`
 
 | 키 | 뜻 |
@@ -725,6 +754,13 @@ customer_group,venue_id,product_id,occasion,meal,day_type,unit,quantity,revenue_
 | `counts` | `visits` 돌린 수, `failed` 실패한 수 |
 | `status` | `ok`, `stopped_by_limit`, `failed` |
 
+- 묶음의 조건으로 돌린 실행은 `weights` 에 페르소나마다의 가중치와, 고객군과 조건마다의 비율이 빠짐없이 있어야 한다. 없으면 원장의 `represented` 를 확인할 수 없다.
+  화면에서 조건을 직접 넣어 돌린 방문(`manual-`)에는 가중치가 없다.
+- 기준이 아닌 상황의 `weights` 는 `weights_from` 에 적은 기준 상황의 값과 같다. 가중치는 기준 상황에서 한 번 정하고 그대로 쓴다 (PRD 7.2절).
+- 가상 예시로 돌린 실행(`data_mode` 가 `sample`)의 `grades` 에는 `internal` 을 쓰지 않는다. 지어낸 값에서 낸 가중치의 등급은 `assumption` 이다.
+- `counts` 는 원장과 맞아야 한다: `visits` 는 원장의 방문 수, `failed` 는 그중 실패한 방문 수다.
+  끝까지 돌린 실행(`status` 가 `ok`)의 원장에는 `persona_ids` × `condition_ids` 마다 방문이 하나씩 있다.
+
 ```json
 {
   "format_version": 1,
@@ -737,7 +773,7 @@ customer_group,venue_id,product_id,occasion,meal,day_type,unit,quantity,revenue_
   "condition_ids": ["meal-dinner-weekend"],
   "llm": {
     "provider": "anthropic",
-    "model": "정한 모델 이름",
+    "model": "claude-opus-5-5",
     "prompt_version": "p1",
     "calls_new": 1,
     "calls_replayed": 0,
@@ -745,13 +781,19 @@ customer_group,venue_id,product_id,occasion,meal,day_type,unit,quantity,revenue_
     "stopped_by_limit": false
   },
   "base_profile_mode": "none",
-  "inputs": {"venues": "해시", "personas": "해시", "conditions": "해시", "scenario": "해시", "summary": "해시"},
+  "inputs": {
+    "venues": "0000000000000000",
+    "personas": "0000000000000000",
+    "conditions": "0000000000000000",
+    "scenario": "0000000000000000",
+    "summary": "0000000000000000"
+  },
   "weights": {
     "group_multiplier": {"가족·친족": 240.0},
     "persona_weight": {"family-elders": 120.0},
     "condition_ratio": {"가족·친족": {"meal-dinner-weekend": 1.0}},
     "grades": {
-      "group_multiplier": "internal",
+      "group_multiplier": "assumption",
       "persona_weight": "assumption",
       "condition_ratio": {"가족·친족": {"meal-dinner-weekend": "assumption"}}
     }
@@ -788,25 +830,40 @@ customer_group,venue_id,product_id,occasion,meal,day_type,unit,quantity,revenue_
 
 - 일부 달에만 파는 업장·상품을 고르면 줄을 하나 더 만든다: `choice_kind` 는 `none`, `counted_share` 는 1 에서 위의 몫을 뺀 값,
   `reason_text` 는 "파는 달이 아님". 나머지 몫을 "이용하지 않음"으로 세기 위해서다 (PRD 7.2절).
-- 모든 합계는 이 원장에서 낸다. 업장별 가상 매출은 `weighted_revenue` 를 업장별로 더한 값이다.
+- **방문 하나의 몫은 더해서 1 이다.** 한 방문에서 고른 줄들은 `counted_share` 가 같다. 그 값이 1 이면 "이용하지 않음" 줄이 없고,
+  1 보다 작으면 위의 줄이 꼭 하나 있다. "이용하지 않음"을 고른 방문은 `counted_share` 가 1 인 줄 하나다.
+  몫은 방문이 어디로 갔는지를 세는 값이라 방문에 하나다. 그래서 엔진은 주문 하나에 파는 달이 서로 다른 상품을 함께 넣지 않고,
+  추가 상품의 줄에도 고른 주문과 같은 몫을 적는다.
+- 모든 합계는 이 원장에서 낸다. 업장별 가상 매출은 `weighted_revenue` 를 업장별로 더한 값이다. 합계에는 `status` 가 `ok` 인 줄만 넣는다.
+- **실패한 방문은 줄 하나로만 남긴다.** `status` 는 `failed`, `fail_reason` 에 이유, `choice_kind` 는 `none`, 업장·상품은 빈 칸, 수량과 금액은 모두 0 이다.
+  한 방문에 `ok` 인 줄과 `failed` 인 줄을 섞지 않는다. `fail_reason` 은 실패한 줄에만 적는다.
+- **원장은 저장된 응답에서 나온 것이어야 한다.**
+  - 업장을 고른 줄에는 `request_hash` 가 반드시 있다. 업장을 고르는 것은 LLM 의 응답뿐이기 때문이다.
+    후보가 하나도 없어 엔진이 응답 없이 "이용하지 않음"으로 정한 방문만 `llm_call` 과 `request_hash` 를 함께 비운다 (둘은 늘 함께 있거나 함께 비어 있다).
+  - 한 방문의 줄들은 `request_hash` 가 가리키는 저장된 응답(10.3절)과 같아야 한다:
+    요청의 페르소나와 조건, 응답이 고른 업장, 고른 주문의 줄(상품, 수량, 단위, 단가, 할인, 금액), 고른 추가 상품(상품, 수량, 단위, 단가), 이유.
+    손으로 고친 원장을 걸러 내려는 것이다. 위의 "파는 달이 아님" 줄은 이유가 따로라 이유를 견주지 않는다.
 - 아래 예시의 두 줄은 서로 다른 실행의 원장에서 한 줄씩 가져온 것이다. 원장 파일 하나에는 실행 하나의 줄만 들어간다.
 
 ```csv
 run_id,scenario_id,visit_id,persona_id,customer_group,condition_id,choice_kind,venue_id,product_id,quantity,unit,list_price,discount,paid,revenue_net,represented,counted_share,weighted_revenue,reason_labels,reason_text,used_attributes,llm_call,request_hash,status,fail_reason
-20261117-101500-baseline,baseline,family-elders__meal-dinner-weekend,family-elders,가족·친족,meal-dinner-weekend,walkerhill,geumryong,course-a,4,1인,150000,0,600000,545455,120.0,1.0,65454600,별실;주차·접근,어르신을 모시는 자리라 별실이 있고 차로 오기 편한 곳을 골랐다.,visit.purposes;preferences.needs,new,a1b2c3d4,ok,
-20261117-103000-competitor-chinese-discount,competitor-chinese-discount,family-elders__meal-dinner-weekend,family-elders,가족·친족,meal-dinner-weekend,competitor,examplehotel-chinese,course,4,1인,140000,56000,504000,0,120.0,1.0,0,혜택·할인,할인 폭이 커서 이번에는 다른 호텔로 갔다.,buying.price_sensitivity,new,e5f6a7b8,ok,
+20261117-101500-baseline,baseline,family-elders__meal-dinner-weekend,family-elders,가족·친족,meal-dinner-weekend,walkerhill,geumryong,course-a,4,1인,150000,0,600000,545455,120.0,1.0,65454600,별실;주차·접근,어르신을 모시는 자리라 별실이 있고 차로 오기 편한 곳을 골랐다.,visit.purposes;preferences.needs,new,3048cd02fff58366,ok,
+20261117-103000-competitor-chinese-discount,competitor-chinese-discount,family-elders__meal-dinner-weekend,family-elders,가족·친족,meal-dinner-weekend,competitor,examplehotel-chinese,course,4,1인,140000,56000,504000,0,120.0,1.0,0,혜택·할인,할인 폭이 커서 이번에는 다른 호텔로 갔다.,buying.price_sensitivity,new,ee5893fa9739d0ca,ok,
 ```
 
 ### 10.3 저장된 LLM 응답 `llm/<request_hash>.json`
 
 | 키 | 뜻 |
 |---|---|
+| `format_version` | 지금은 `1` |
 | `request_hash` | 공급자, 모델, 9절의 요청 전체를 한데 묶어 낸 해시. 하나라도 다르면 다른 파일이다 |
 | `provider`, `model`, `created_at` | 누가 언제 답했나 |
 | `request`, `response` | 9절의 요청과 응답 그대로 |
 | `raw_text` | LLM 이 돌려준 글 그대로 |
 | `usage` | `input_tokens`, `output_tokens` |
 
+- **해시를 내는 법**: `{"provider": …, "model": …, "request": …}` 를 키를 정렬하고 공백 없이 적은 JSON 으로 바꾼 뒤, 그 글의 SHA-256 에서 앞 16글자를 쓴다.
+  직접 계산하지 말고 `engine.formats.compute_request_hash` 를 쓴다. PC 가 달라도 같은 요청이면 같은 값이 나온다.
 - 같은 `request_hash` 의 파일이 있으면 LLM 을 부르지 않고 그 응답을 쓴다. 그러면 원장이 똑같이 나온다 (PRD 7.3절).
 - 팀원끼리 이 폴더를 저장소 밖의 경로로 주고받으면 키가 없는 사람도 같은 결과를 재생할 수 있다.
 
@@ -851,7 +908,7 @@ run_id,scenario_id,visit_id,persona_id,customer_group,condition_id,choice_kind,v
       "reason_match": 9,
       "reason_match_baseline": 6
     },
-    "pavilion": {"n": 3, "enough": false, "venue_match": null, "venue_match_baseline": null, "reason_match": null, "reason_match_baseline": null}
+    "thebuffet": {"n": 3, "enough": false, "venue_match": null, "venue_match_baseline": null, "reason_match": null, "reason_match_baseline": null}
   }
 }
 ```
@@ -872,19 +929,63 @@ run_id,scenario_id,visit_id,persona_id,customer_group,condition_id,choice_kind,v
 
 ## 11. 형식이 맞는지 볼 것
 
-공통 틀을 만들 때 아래를 검사하는 도구를 넣는다. 그 전에는 파일을 올리기 전에 각자 본다.
+아래를 검사하는 도구가 `tools/check_formats.py` 에 있다. 자동 검사도 PR 마다 이 도구를 돌린다.
 
-- JSON 파일이 읽히고 `format_version` 이 있다.
+```powershell
+uv run python -m tools.check_formats            # 저장소의 데이터 파일을 검사한다
+uv run python -m tools.check_formats --strict   # 다 만든 뒤의 기준으로 검사한다
+```
+
+- 결과는 "오류"와 "주의" 두 가지다. 오류가 있으면 자동 검사가 실패한다.
+- "주의"는 아직 덜 만든 것일 수 있는 항목이다. 한 고객군의 몫을 더한 값이 1 보다 작을 때, 워커힐 업장에 경쟁 업장이 아직 없을 때,
+  워커힐 업장의 `hours` 가 `null` 일 때, CSV 에 BOM 이 없을 때 나온다. `--strict` 를 주면 주의도 오류로 본다. 통합 검증(T23) 때는 `--strict` 로 통과해야 한다.
+
+**파일의 모양** — 데이터 폴더의 파일을 형식마다 본다.
+
+- JSON 파일이 읽히고 `format_version` 이 있다. 값의 종류가 맞다 (2절의 "JSON 의 값". 따옴표로 감싼 숫자는 오류다).
 - 코드 값이 2절의 표에 있는 값이다.
 - 다른 파일을 가리키는 식별자가 실제로 있다: 경쟁 업장의 `competes_with`, 페르소나의 `compares_with`, 상황의 `venue_id`·`product_id`, 후기의 `venue_id`.
 - 상품의 `occasion` 이 업장의 `occasions` 안에 있다. 워커힐 업장마다 경쟁 업장이 하나 이상 있다.
 - 업장 정의의 모든 `source_id` 가 `sources` 에 있고 `checked_on` 이 있다.
 - 라벨(방문 목적, 동행, 고른 이유, 걸린 점, 고객군)이 값 목록에 있다.
 - 페르소나의 `evidence` 에 묶음 일곱 개가 모두 있고, 한 고객군의 `share_in_group.value` 를 더하면 1 이다.
-- 저장소 안의 어느 파일에도 `P-` 나 `H-` 로 시작하는 후기 번호가 없다. `engine/samples/runs/` 의 저장 응답과 원장도 본다.
-- `engine/samples/runs/` 의 실행 기록은 모두 `data_mode` 가 `sample` 이다.
-- 상황의 `our_price`·`our_promo` 는 워커힐 업장만, `competitor` 는 경쟁 업장만 바꾼다.
-- 저장소 안의 CSV 와 JSON 에 주소 목록, 떼어 둔 후기, `private/` 에 둘 실행 결과가 없다.
+- 묶음의 조건은 `month` 가 `null` 이다. 상황의 `our_price`·`our_promo` 는 워커힐 업장만, `competitor` 는 경쟁 업장만 바꾼다.
+- `engine/samples/runs/` 의 실행 기록은 모두 `data_mode` 가 `sample` 이다. 가중치가 빠짐없이 있고 등급에 `internal` 이 없다.
+  원장의 방문 수가 실행 기록과 맞고, 원장이 저장된 응답과 같다 (10절).
+- 데이터 폴더에 1절의 표에 없는 파일이나 폴더가 없다. 확장자는 소문자다. (빈 폴더를 깃에 남기는 `.gitkeep` 은 둘 수 있다.)
+
+**올리면 안 되는 것** — 깃에 올라갈 수 있는 **모든 파일**을 훑는다. 확장자, 크기, 글자 인코딩, 폴더의 깊이를 가리지 않는다.
+깃이 무시하는 것(맨 위의 `private/`, `.env`, `.venv/` 같은 것)만 건너뛴다.
+
+- 어느 파일에도 `P-` 나 `H-` 로 시작하는 후기 번호가 없다. 예시를 적어도 되는 곳은 이 문서와 테스트 코드(`tests/` 의 `.py`)뿐이다.
+- 기본 데이터로 돌린 실행 기록(`data_mode` 가 `private`)이 없다. JSON 안에 든 것도, 문서에 글로 붙여 넣은 것도 본다.
+  코드나 안내 문서가 이 값을 설명하는 것은 막지 않는다 (실행 기록의 다른 키가 함께 있을 때만 실행 기록으로 본다).
+  글로 붙여 넣은 것을 찾는 검사는 후기 번호와 같이 이 문서와 테스트 코드를 예외로 둔다.
+- JSON 어디에도 `base_profile` 과 `overridden_by_private` 에 값이 없다 (키가 없거나 비어 있다). 둘 다 기본 데이터로 돌린 결과에만 값이 있다.
+- 자리가 정해진 파일이 그 자리 밖에 없다. 파일의 이름이 아니라 **내용으로** 알아본다:
+  후기 라벨, 가상 예시 값과 같은 열의 파일, 소비 원장, 실행 기록, 저장된 응답, 보정의 대조 결과.
+  - 표는 열 이름으로 알아본다: CSV·TSV 의 첫 줄, 글 파일(`.txt`)의 첫 줄이 여러 칸으로 나뉠 때 그 칸들, 마크다운 표의 머리글.
+  - JSON 은 키로 알아본다: 맨 위뿐 아니라 안쪽의 묶음을 모두 본다. 응답 여럿을 목록 하나에 모은 파일, 한 줄에 하나씩 적은 `.jsonl`, 표를 JSON 으로 바꾼 파일도 같다.
+- 저장소 어디에도 둘 수 없는 것이 없다.
+  - 후기 주소 목록: 주소를 담는 열(`url`, `link`, `주소`, `링크`)과 후기를 가리키는 열(`review_id`, `source_kind`, `dropped`)이 함께 있는 표나 JSON.
+    4.3절의 세 파일 이름도 쓸 수 없다. 주소 열만 있는 출처 목록은 막지 않는다.
+  - 검증 결과.
+  - 기본 데이터와 그 일부: 금액을 담는 열 이름(`순매출`, `총결제액`) 가운데 하나라도 든 표나 JSON, 기본 데이터의 파일 이름이 든 파일.
+    집계해서 열 이름 뒤에 말이 붙은 것도 본다 (마크다운 표는 문서가 그 열을 설명할 수 있어, 머리글이 그 이름과 똑같을 때만 본다).
+    지어낸 값의 표라면 열 이름을 이 문서의 영어 이름(`revenue_net`)으로 적는다.
+- 후기 라벨에 주소가 적혀 있지 않다. `holdout` 이라는 폴더에 데이터 파일이 없다.
+- 맨 위가 아닌 곳에 `private` 라는 폴더가 없다. 깃이 무시하는 것은 맨 위의 `private/` 뿐이라, 다른 곳의 것은 그대로 올라간다. 이름은 소문자로 쓴다.
+- 안을 볼 수 없는 데이터 파일(엑셀, parquet, 묶은 파일)이 없다. 5MB 를 넘는 CSV·JSON 이 없다. CSV·JSON 은 UTF-8 이다.
+
+**이 도구가 보지 못하는 것** — 이것은 사람이 지킨다 (`CLAUDE.md` 의 "비밀값과 공개 저장소").
+
+- 지어낸 값이라고 적은 파일의 값이 정말 지어낸 것인지. 문서에 풀어 쓴 수치. 발표 자료와 그림, 노트북의 출력.
+- 열 이름을 바꾼 표: 다른 이름의 열에 담은 기본 데이터의 금액, 약속과 다른 열 이름의 주소 목록.
+- 번호도 주소도 없이 옮겨 적은 후기의 문장.
+
+**테스트의 예시 묶음** — 테스트에 쓸 예시 파일을 더할 때는 `tests/fixtures/<이름>/` 아래에 저장소와 같은 폴더 모양으로 둔다.
+그 안에서는 위의 자리 규칙을 그 묶음 안의 경로로 본다. 대신 그 묶음도 저장소와 같은 형식 검사를 받는다
+(실행 결과에는 실행 기록이 있어야 하고, 가상 예시로 돌린 것이어야 한다). `tests/fixtures/example/` 을 베껴서 고치면 된다.
 
 ## 12. 언제까지 필요한가, 아직 정하지 않은 것
 
@@ -904,10 +1005,12 @@ run_id,scenario_id,visit_id,persona_id,customer_group,condition_id,choice_kind,v
 **아직 정하지 않은 것**
 
 - [ ] 평일과 주말을 나눌 때 공휴일을 어느 달력으로 정할지 (업장 데이터 담당. PRD 5.2절의 달력 출처)
-- [ ] 폴더 이름의 확정 (공통 틀을 만들 때, 엔진 담당)
+- [x] 폴더 이름의 확정 (11-13, 팀장이 제안대로 확정함. `STRUCTURE.md` 의 폴더 표)
 - [ ] 방문 조건 묶음에 조식과 투숙 여부를 넣을지 (엔진 담당)
 - [ ] `assumed_splits` 의 값 (엔진 담당)
 - [ ] 기본 데이터에서 나온 값을 LLM 에 어떻게 보낼지, 곧 `base_profile_mode` 의 기본값 (PRD 17절, 엔진 담당)
 - [ ] 라벨 값 목록의 첫 판 (11-13, 페르소나 담당)
 - [ ] 경쟁 업장의 `venue_id` (업장 데이터 담당)
-- [ ] 형식을 검사하는 도구 (공통 틀을 만들 때, 엔진 담당)
+- [ ] 추가 상품(`addons`)에 프로모션 할인을 적용할지 (엔진 담당, T04). 요청의 추가 상품에는 할인이 적혀 있지 않아,
+  지금은 형식 검사가 추가 상품 줄의 할인을 저장된 응답과 견주지 못한다. 정하면 9절과 10.2절에 적고 검사에 넣는다.
+- [x] 형식을 검사하는 도구 (11-13, `tools/check_formats.py` 를 만들어 예시 파일 한 벌이 `--strict` 로 통과하는 것을 확인함)
