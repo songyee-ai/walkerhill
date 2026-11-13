@@ -937,8 +937,11 @@ class Checker:
         else:
             candidate = request.candidate(choice.venue_id)
             option = candidate.option(choice.option_id) if candidate else None
-            if candidate is None or option is None:
+            # 주문이 없는 후보에서는 추가 상품만 고른다 (option_id 가 null). 그때는 주문의 줄이 없다.
+            addons_only = candidate is not None and not candidate.options and choice.option_id is None
+            if candidate is None or (option is None and not addons_only):
                 return  # 응답이 후보 밖을 골랐다. 저장된 응답의 검사에서 이미 적었다.
+            lines = option.lines if option else []
             if not picked:
                 bad("저장된 응답은 업장을 골랐는데 원장에는 업장을 고른 줄이 없다")
                 return
@@ -946,7 +949,7 @@ class Checker:
                 bad("원장의 업장이 저장된 응답에서 고른 업장과 다르다")
             # 고른 주문의 줄은 금액까지 견준다. 추가 상품은 요청에 할인이 없어 상품, 수량, 단위, 표시가만 견준다
             # (추가 상품에 프로모션 할인을 적용할지는 아직 정하지 않았다. docs/FORMATS.md 12절).
-            line_ids = {ordered.product_id for ordered in option.lines}
+            line_ids = {ordered.product_id for ordered in lines}
             addons = {addon.product_id: addon for addon in candidate.addons}
             extra = {
                 p.product_id: p.quantity
@@ -954,7 +957,7 @@ class Checker:
                 if p.quantity > 0 and p.product_id in addons and p.product_id not in line_ids
             }
             want_lines = sorted(
-                (o.product_id, o.quantity, o.unit, o.unit_price, o.discount, o.line_total) for o in option.lines
+                (o.product_id, o.quantity, o.unit, o.unit_price, o.discount, o.line_total) for o in lines
             )
             want_extra = sorted((pid, qty, addons[pid].unit, addons[pid].unit_price) for pid, qty in extra.items())
             have_lines = sorted(

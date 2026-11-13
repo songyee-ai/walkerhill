@@ -482,10 +482,10 @@ R-geumryong-0027,geumryong,map,2026-03,,,,,,meal,dinner,,,,,,대기,,no,예약�
     {
       "split_id": "meal-lunch-dinner",
       "applies_when": "집계 파일에서 끼니가 비어 있는 식사 매출",
-      "parts": {"lunch": 0.4, "dinner": 0.6},
+      "parts": {"lunch": 0.5, "dinner": 0.5},
       "grade": "assumption",
       "decided_on": "2026-11-13",
-      "note": "예시 값이다. 엔진 담당이 정한다"
+      "note": "근거가 되는 자료가 없어 반반으로 둔다 (11-13 팀장이 정함). 금룡 후기 라벨 80건은 점심 41건, 저녁 39건이었다"
     }
   ]
 }
@@ -615,7 +615,7 @@ customer_group,venue_id,product_id,occasion,meal,day_type,month,unit,quantity,pa
 | `scenario_id` | 어느 상황인가 |
 | `persona` | 두 층을 합친 페르소나. 기본 데이터로 돌릴 때는 엔진이 붙인 `base_profile` 과, 비공개 층의 흔적 `overridden_by_private` (5절)가 들어 있다. 가상 예시로 돌릴 때는 둘 다 없거나 비어 있다 |
 | `condition` | 이번 방문 조건. 6절의 조건에 `adults`, `children`, `budget`, `purpose`, `party` 를 더한 것. `purpose` 와 `party` 는 검증할 때 후기의 라벨을 넣고 (후기에 비어 있으면 `null`), 다른 때는 `null` 이다 |
-| `candidates` | 규칙으로 추린 후보 업장. 업장마다 고를 수 있는 주문(`options`)이 들어 있다 |
+| `candidates` | 규칙으로 추린 후보 업장. 업장마다 고를 수 있는 주문(`options`)이 들어 있다. 주문 없이 추가 상품(`addons`)만 있는 후보도 있다 (아래 "주문이 없는 후보") |
 | `allow_none` | "이용하지 않음"을 고를 수 있는가. 늘 `true` |
 | `vocab` | 이유로 쓸 수 있는 라벨: `reasons_chosen`, `pain_points` |
 
@@ -623,11 +623,37 @@ customer_group,venue_id,product_id,occasion,meal,day_type,month,unit,quantity,pa
 - 성인 가격과 어린이 가격처럼 함께 사야 하는 상품은 주문 하나의 `lines` 에 여러 줄로 넣는다.
 - `qty_rule` 이 `choice` 인 상품은 후보의 `addons` 에 넣고, LLM 이 수량을 고른다.
   `addons` 의 한 줄은 `product_id`, `name`, `unit`, `unit_price`, `qty_max` 다. 고른 추가 상품의 금액은 주문의 `total` 에 들어 있지 않고, 엔진이 원장에 따로 적는다.
+  추가 상품 줄의 할인은 지금 0 이다. 프로모션 할인을 적용할지는 아직 정하지 않았다 (12절).
+- **주문이 없는 후보** (11-13 에 더함): 이번 조건에 살 수 있는 상품이 모두 `choice` 인 업장은 `options` 가 빈 목록이고 `addons` 만 있다.
+  포장·구매 업장이 그렇다 (상품마다 고객이 수량을 정한다). 이런 업장을 고를 때는 `option_id` 를 `null` 로 두고 추가 상품을 하나 이상 산다.
+  주문이 있는 업장에서는 주문을 꼭 하나 고른다. 추가 상품만 고를 수 없다. 후보에는 주문이나 추가 상품이 하나 이상 있어야 한다.
 - 후보의 `promotions` 는 그 업장에서 이번 조건에 해당하는 프로모션이다. 한 줄은 `promo_id`, `name`, `benefit`, `applied` 다.
   `applied` 가 `true` 면 그 할인이 이미 `discount` 에 들어 있다는 뜻이다.
 - **예산으로 거르기**: 1인 기준이면 주문의 `total` ÷ (성인 수 + 어린이 수), 일행 기준이면 `total` 을 예산의 `max` 와 견준다. `max` 를 넘는 주문은 후보에서 뺀다.
   주문이 하나도 남지 않은 업장은 후보에서 빠진다. `max` 아래에서 비싼지 싼지는 LLM 이 `typical` 을 보고 판단한다.
   그래서 `max` 를 넘는 주문이 든 요청은 형식에 어긋난 요청이다.
+  수량 규칙이 있는 상품을 파는 업장은 주문이 남지 않으면 추가 상품이 있어도 후보에서 빠진다 (음료만 사러 가는 곳이 아니다).
+- **예산의 `max` 는 산 것 전부와 견준다** (11-13 에 정함): 고른 주문의 `total` 에 고른 추가 상품의 금액을 더한 값이 `max` 를 넘는 답은 실패로 기록한다.
+  그래서 가장 싼 주문에 하나만 더해도 `max` 를 넘는 추가 상품은 후보에 넣지 않는다. 주문이 없는 후보는 추가 상품의 값만 보고, 남는 추가 상품이 없으면 후보에서 뺀다.
+  (주문의 `total` 만 견주면 주문에 추가 상품을 더해 `max` 를 넘겨도 통과한다. 독립 검토에서 나온 것이다.)
+
+**후보와 주문을 만드는 규칙** — 엔진(`engine/candidates.py`)이 이렇게 만든다.
+
+- **업장**: 이번 조건의 이용 상황이 있는 워커힐 업장과, 그 업장들과 견주는(`competes_with`) 경쟁 업장을 본다.
+  영업 시간에 그 끼니·요일의 줄이 없는 업장, 일행의 수가 예약 조건의 인원 범위(`party_min` ~ `party_max`) 밖인 업장은 뺀다.
+  `hours` 나 `reservation` 이 `null` 인 업장은 그 검사를 건너뛴다. 조건에 `month` 가 있으면 그 달에 영업하지 않는 업장과 팔지 않는 상품도 뺀다.
+- **상품**: 이용 상황이 같고 그 끼니·요일에 파는(`slots`) 상품만 쓴다. 가격이 비어 있는 상품은 빼고 실행 기록의 `skipped_products` 에 남긴다.
+- **주문**: 구분 없는 가격(`audience` 가 `all`)의 상품은 그 상품 하나가 주문 하나다. 성인 가격과 어린이 가격이 따로면 한 주문에 두 줄로 넣는다.
+  어린이가 없으면 성인 줄만 넣는다. 어린이가 있는데 어린이 가격이 없는 성인 상품은 주문이 되지 못한다.
+  조건에 `month` 가 없으면 파는 달이 같은 것끼리만 짝짓는다 (방문의 몫은 하나다. 10.2절). `month` 가 있으면 그 달에 파는 것끼리 짝짓는다.
+  어린이 가격이 둘 이상이면 가격마다 주문이 따로 생긴다 (어린이 모두가 그 가격인 주문이다. 지금 업장 정의에는 이런 곳이 없다).
+- **추가 상품과 파는 달**: 조건에 `month` 가 없을 때, 후보의 주문을 파는 달 가운데 팔지 않는 달이 있는 추가 상품은 넣지 않는다.
+  추가 상품은 주문마다가 아니라 후보에 하나의 목록으로 들어가므로, 그 후보의 어느 주문과도 함께 낼 수 있는 것만 넣는다
+  (일 년 내내 파는 주문이 하나라도 있으면 일부 달에만 파는 추가 상품은 빠진다).
+  추가 상품의 줄에는 고른 주문의 몫을 적으므로(10.2절), 넣으면 일부 달에만 파는 추가 상품이 주문만큼 팔린 것으로 부풀려진다.
+- **순서와 번호**: 후보는 워커힐 업장 먼저, 그 안에서는 `venue_id` 순이다. `option_id` 는 이번 조건에 만들 수 있는 주문을 업장 정의의 상품 순서대로 세어
+  `<venue_id>-o1`, `-o2` … 로 붙인다. 번호는 예산으로 거르기 전에 매기므로, 예산을 넘어 빠진 주문의 번호는 비어 있을 수 있다.
+- 프로모션은 아직 금액에 넣지 않는다 (T10). 그때까지 후보의 `promotions` 는 비어 있고 할인은 0 이다.
 
 ```json
 {
@@ -700,7 +726,7 @@ customer_group,venue_id,product_id,occasion,meal,day_type,month,unit,quantity,pa
 
 | 키 | 뜻 |
 |---|---|
-| `choice` | 고른 것: `venue_id`, `option_id`, `addons` (`product_id` 와 `quantity` 의 목록). "이용하지 않음"이면 `venue_id` 와 `option_id` 가 `null` |
+| `choice` | 고른 것: `venue_id`, `option_id`, `addons` (`product_id` 와 `quantity` 의 목록). "이용하지 않음"이면 `venue_id` 와 `option_id` 가 `null`. 주문이 없는 후보를 골랐으면 `option_id` 만 `null` |
 | `reason_labels` | 고른 이유. `vocab.reasons_chosen` 에서 하나 이상. "이용하지 않음"이면 `vocab.pain_points` 에서 고른다 |
 | `reason_text` | 이유를 한 문장으로 |
 | `used_attributes` | 판단에 쓴 페르소나의 속성. `budget`, `preferences.needs` 처럼 점으로 이어 적는다 |
@@ -721,7 +747,8 @@ customer_group,venue_id,product_id,occasion,meal,day_type,month,unit,quantity,pa
 **엔진이 답을 다시 검사하는 것** — 하나라도 어긋나면 그 실행을 실패로 기록한다.
 
 - `choice.venue_id` 가 후보에 있거나 `null` 이다.
-- `choice.option_id` 가 그 업장의 주문에 있다.
+- `choice.option_id` 가 그 업장의 주문에 있다. 주문이 없는 후보를 골랐으면 `option_id` 가 `null` 이고, 산 추가 상품이 하나 이상이다.
+- 고른 주문의 `total` 에 고른 추가 상품의 금액을 더한 값이 예산의 `max` 를 넘지 않는다.
 - `addons` 의 상품이 그 업장의 `addons` 에 있고 수량이 0 ~ `qty_max` 다. 같은 상품을 두 번 적지 않는다.
 - 라벨이 모두 `vocab` 에 있다.
 - `rejected` 에 고르지 않은 후보가 빠짐없이 한 번씩 있다. 고른 업장과 후보에 없는 업장은 `rejected` 에 없다.
@@ -729,7 +756,8 @@ customer_group,venue_id,product_id,occasion,meal,day_type,month,unit,quantity,pa
 - `used_attributes` 가 페르소나에 실제로 있는 속성이다.
 - 원장에 적을 금액을 업장 정의의 가격과 프로모션 규칙으로 다시 계산했을 때, 고른 주문의 `total` 과 같다. 추가 상품은 따로 계산해 더한다.
 
-마지막 항목을 뺀 나머지는 `engine.formats.problems_in_response` 가 본다. 마지막 항목은 업장 정의가 있어야 해서 엔진이 따로 본다.
+마지막 항목을 뺀 나머지는 `engine.formats.problems_in_response` 가 본다. 마지막 항목은 업장 정의가 있어야 해서 엔진이 따로 본다 (`engine.ledger.amount_problems`).
+저장된 응답을 재생할 때도 같은 검사를 다시 한다.
 
 ## 10. 실행 결과
 
@@ -761,14 +789,14 @@ customer_group,venue_id,product_id,occasion,meal,day_type,month,unit,quantity,pa
 
 | 키 | 뜻 |
 |---|---|
-| `run_id`, `created_at`, `engine_commit` | 실행 번호, 만든 때, 엔진 코드의 커밋 |
+| `run_id`, `created_at`, `engine_commit` | 실행 번호, 만든 때, 엔진 코드의 커밋. 엔진 코드(`engine/` 에서 `samples/` 와 `conditions.json` 을 뺀 것)에 커밋하지 않은 변경이 있으면 끝에 `+dirty` 가 붙는다 |
 | `data_mode` | `private` 기본 데이터로 돌림, `sample` 가상 예시 값으로 돌림 |
 | `scenario_id`, `persona_ids`, `condition_ids` | 무엇을 돌렸나 |
 | `llm` | `provider`, `model`, `prompt_version`, `calls_new` (새로 부른 수), `calls_replayed` (저장된 응답을 재생한 수), `call_limit`, `stopped_by_limit` |
-| `base_profile_mode` | 기본 데이터에서 나온 값을 LLM 에 어떻게 보냈나: `none` 보내지 않음, `bucketed` 범주로 바꿔 보냄, `raw` 그대로 보냄 |
-| `inputs` | 입력 파일들의 해시. 같은 입력인지 견줄 때 쓴다 |
+| `base_profile_mode` | 기본 데이터에서 나온 값을 LLM 에 어떻게 보냈나: `none` 보내지 않음, `bucketed` 범주로 바꿔 보냄, `raw` 그대로 보냄. 기본 데이터로 돌릴 때의 기본값은 `bucketed` 다 (11-13 결정). 가상 예시로 돌릴 때는 늘 `none` 이다. 값을 붙이는 코드는 T11 에서 만들고, 그 전에 돌린 실행에는 실제로 보낸 대로 `none` 이 남는다 |
+| `inputs` | 입력 파일들의 해시. 같은 입력인지 견줄 때 쓴다. 읽은 것만 적는다: `venues`, `personas`, `conditions`, `scenario`, `vocab`, 집계 파일을 읽었으면 `summary` |
 | `weights` | `group_multiplier` 고객군 배수, `persona_weight` 페르소나의 가중치, `condition_ratio` 고객군마다 묶음의 비율, `grades` 각 값의 근거 등급. 묶음의 비율은 조건마다 등급을 적는다. `assumed_splits` 로 나눈 조건은 `assumption` 이다 |
-| `skipped_products` | 가격을 채우지 못해 후보에서 뺀 상품의 목록 |
+| `skipped_products` | 가격을 채우지 못해 후보에서 뺀 상품의 목록. `<venue_id>:<product_id>` 로 적는다 |
 | `weights_from` | 가중치를 정한 기준 상황의 `run_id`. 기준 상황 자신이면 `null` |
 | `counts` | `visits` 돌린 수, `failed` 실패한 수 |
 | `status` | `ok`, `stopped_by_limit`, `failed` |
@@ -840,8 +868,8 @@ customer_group,venue_id,product_id,occasion,meal,day_type,month,unit,quantity,pa
 | `paid` | 고객이 낸 금액 (세금 포함). 경쟁 업장이면 그곳에 낸 금액이다 |
 | `revenue_net` | **워커힐의** 세금을 뺀 매출. 경쟁 업장과 "이용하지 않음"은 0 |
 | `represented` | 이 방문이 대표하는 크기 = 페르소나의 가중치 × 묶음의 비율 |
-| `counted_share` | 그 업장·상품의 것으로 세는 몫. 일 년 내내 팔면 1, 일부 달만 팔면 파는 달 수 ÷ 12 |
-| `weighted_revenue` | `revenue_net` × `represented` × `counted_share` |
+| `counted_share` | 그 업장·상품의 것으로 세는 몫. 일 년 내내 팔면 1, 일부 달만 팔면 파는 달 수 ÷ 12. 조건에 `month` 가 있으면 그 달의 방문이라 1 이다 |
+| `weighted_revenue` | `revenue_net` × `represented` × `counted_share`. 원 단위로 반올림해 적는다 |
 | `reason_labels`, `reason_text`, `used_attributes` | 응답에서 온 이유. 라벨과 속성이 여럿이면 `;` |
 | `llm_call` | `new` 새로 부름, `replay` 저장된 응답을 재생 |
 | `request_hash` | 저장된 응답의 파일 이름 |
@@ -853,12 +881,19 @@ customer_group,venue_id,product_id,occasion,meal,day_type,month,unit,quantity,pa
   1 보다 작으면 위의 줄이 꼭 하나 있다. "이용하지 않음"을 고른 방문은 `counted_share` 가 1 인 줄 하나다.
   몫은 방문이 어디로 갔는지를 세는 값이라 방문에 하나다. 그래서 엔진은 주문 하나에 파는 달이 서로 다른 상품을 함께 넣지 않고,
   추가 상품의 줄에도 고른 주문과 같은 몫을 적는다.
+  주문 없이 추가 상품만 고른 방문(9절)의 몫은 고른 상품을 모두 함께 파는 달 수 ÷ 12 다. 함께 파는 달이 없으면 그 답은 실패다.
+  주문에 더한 추가 상품은 그 주문을 파는 달에 모두 파는 것이어야 한다. 아니면 그 답은 실패다 (9절의 "추가 상품과 파는 달").
 - 모든 합계는 이 원장에서 낸다. 업장별 가상 매출은 `weighted_revenue` 를 업장별로 더한 값이다. 합계에는 `status` 가 `ok` 인 줄만 넣는다.
 - **실패한 방문은 줄 하나로만 남긴다.** `status` 는 `failed`, `fail_reason` 에 이유, `choice_kind` 는 `none`, 업장·상품은 빈 칸, 수량과 금액은 모두 0 이다.
   한 방문에 `ok` 인 줄과 `failed` 인 줄을 섞지 않는다. `fail_reason` 은 실패한 줄에만 적는다.
+  저장된 응답의 파일을 찾았는데 쓰지 못해 실패한 방문은 `llm_call` 과 `request_hash` 를 적고 실행 기록의 `calls_replayed` 에 센다.
+  응답이 검사에서 어긋난 경우, 파일을 읽을 수 없는 경우, 파일의 요청이 해시와 맞지 않는 경우가 그렇다.
+  그 파일은 실행 폴더의 `llm/` 에 베껴 두지 않으므로, 실패한 줄의 `request_hash` 가 가리키는 파일은 `llm/` 에 없을 수 있다
+  (형식 검사가 `llm/` 의 어긋난 응답을 오류로 본다). 어긋난 응답을 어디에 남길지는 T05 에서 정한다.
 - **원장은 저장된 응답에서 나온 것이어야 한다.**
   - 업장을 고른 줄에는 `request_hash` 가 반드시 있다. 업장을 고르는 것은 LLM 의 응답뿐이기 때문이다.
     후보가 하나도 없어 엔진이 응답 없이 "이용하지 않음"으로 정한 방문만 `llm_call` 과 `request_hash` 를 함께 비운다 (둘은 늘 함께 있거나 함께 비어 있다).
+    그 줄의 `reason_text` 는 "후보가 없음"이다.
   - 한 방문의 줄들은 `request_hash` 가 가리키는 저장된 응답(10.3절)과 같아야 한다:
     요청의 페르소나와 조건, 응답이 고른 업장, 고른 주문의 줄(상품, 수량, 단위, 단가, 할인, 금액), 고른 추가 상품(상품, 수량, 단위, 단가), 이유.
     손으로 고친 원장을 걸러 내려는 것이다. 위의 "파는 달이 아님" 줄은 이유가 따로라 이유를 견주지 않는다.
@@ -1020,7 +1055,7 @@ uv run python -m tools.check_formats --strict   # 다 만든 뒤의 기준으로
 | 6절의 조건 하나 | 조건 여덟 개, `assumed_splits`, `month` |
 | 7절의 기준 상황 | `set_price` 를 뺀 나머지 바꾸는 종류 |
 | 8절 가상 예시 값 | 기본 데이터 집계 파일, 가격이 `null` 인 상품을 채우는 규칙 |
-| 9절 선택 요청과 응답 | `addons`, 후보의 `promotions` |
+| 9절 선택 요청과 응답 | `addons`, 주문이 없는 후보, 후보의 `promotions` |
 | 10.1절 실행 기록, 10.2절 소비 원장, 10.3절 저장된 응답 | `counted_share`, 10.4절 보정, 10.5절 검증 |
 
 **아직 정하지 않은 것**
@@ -1028,10 +1063,11 @@ uv run python -m tools.check_formats --strict   # 다 만든 뒤의 기준으로
 - [x] 평일과 주말을 나눌 때 공휴일을 어느 달력으로 정할지 (11-13, 한국천문연구원 특일 정보(공공데이터포털). 주말은 토·일·공휴일이고 대체공휴일도 든다. 업장 데이터 담당의 제안을 팀장이 받아들임)
 - [x] 폴더 이름의 확정 (11-13, 팀장이 제안대로 확정함. `STRUCTURE.md` 의 폴더 표)
 - [x] 방문 조건 묶음에 조식과 투숙 여부를 넣을지 (11-13, 둘 다 넣지 않는다. 6절)
-- [ ] `assumed_splits` 의 값 (엔진 담당)
-- [ ] 기본 데이터에서 나온 값을 LLM 에 어떻게 보낼지, 곧 `base_profile_mode` 의 기본값 (PRD 17절, 엔진 담당)
+- [x] `assumed_splits` 의 값 (11-13, 팀장이 정함. 끼니를 알 수 없는 식사 매출은 점심 0.5, 저녁 0.5 로 나눈다. 뒷받침하는 자료가 없어 반반으로 두었고 등급은 `assumption` 이다. `engine/conditions.json`)
+- [x] 기본 데이터에서 나온 값을 LLM 에 어떻게 보낼지, 곧 `base_profile_mode` 의 기본값 (11-13, 팀장이 정함. 범주로 바꿔 보내는 `bucketed`. 내부 수치가 외부 LLM 과 저장된 응답에 그대로 남지 않게 한다. 10.1절. 붙이는 코드는 T11)
 - [ ] 라벨 값 목록의 첫 판 (11-13, 페르소나 담당)
 - [ ] 경쟁 업장의 `venue_id` (업장 데이터 담당)
-- [ ] 추가 상품(`addons`)에 프로모션 할인을 적용할지 (엔진 담당, T04). 요청의 추가 상품에는 할인이 적혀 있지 않아,
+- [ ] 추가 상품(`addons`)에 프로모션 할인을 적용할지 (11-16 팀 회의에서 정하고 T10 에서 넣는다). 요청의 추가 상품에는 할인이 적혀 있지 않아,
   지금은 형식 검사가 추가 상품 줄의 할인을 저장된 응답과 견주지 못한다. 정하면 9절과 10.2절에 적고 검사에 넣는다.
+  그때까지 엔진은 추가 상품 줄의 할인을 0 으로 적는다 (업장 정의에 프로모션이 아직 없어 금액은 달라지지 않는다).
 - [x] 형식을 검사하는 도구 (11-13, `tools/check_formats.py` 를 만들어 예시 파일 한 벌이 `--strict` 로 통과하는 것을 확인함)

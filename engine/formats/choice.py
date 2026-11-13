@@ -39,6 +39,11 @@ class RunCondition(FormatModel):
     purpose: str | None
     party: str | None
 
+    def budget_limit(self) -> int:
+        """이 방문에서 쓸 수 있는 가장 큰 금액. 1인 기준이면 max × 사람 수, 일행 기준이면 max 다."""
+        people = self.adults + self.children
+        return self.budget.max * people if self.budget.basis == "per_person" else self.budget.max
+
 
 class Line(FormatModel):
     """주문의 한 줄. `line_total` 은 수량 × 단가에서 할인을 뺀 값이다."""
@@ -92,16 +97,26 @@ class CandidatePromotion(FormatModel):
 
 
 class Candidate(FormatModel):
-    """규칙으로 추린 후보 업장."""
+    """규칙으로 추린 후보 업장.
+
+    `options` 가 비어 있으면 추가 상품만으로 사는 업장이다 (포장·구매처럼 고객이 수량을 정하는 상품만 있는 곳).
+    그때는 `addons` 가 하나 이상 있어야 한다.
+    """
 
     venue_id: Id
     name: Text
     hotel: Text
     is_competitor: bool
     cuisine: Text
-    options: list[Option] = Field(min_length=1)
+    options: list[Option]
     addons: list[Addon]
     promotions: list[CandidatePromotion]
+
+    @model_validator(mode="after")
+    def _something_to_buy(self) -> Self:
+        if not self.options and not self.addons:
+            raise ValueError(f"업장 '{self.venue_id}' 에 고를 주문도 추가 상품도 없다")
+        return self
 
     def option(self, option_id: str | None) -> Option | None:
         return next((o for o in self.options if o.option_id == option_id), None)
@@ -134,12 +149,18 @@ class ChoiceRequest(FormatModel):
         if has_duplicates(option_ids):
             raise ValueError("option_id 가 겹친다")
         # 예산으로 거르기: 1인 기준이면 total ÷ 사람 수, 일행 기준이면 total 을 max 와 견준다.
-        budget = self.condition.budget
-        people = self.condition.adults + self.condition.children
-        limit = budget.max * people if budget.basis == "per_person" else budget.max
+        limit = self.condition.budget_limit()
         for candidate in self.candidates:
             if has_duplicates([a.product_id for a in candidate.addons]):
                 raise ValueError(f"업장 '{candidate.venue_id}' 의 addons 에 같은 상품이 두 번 있다")
+            # 예산은 산 것 전부(주문 + 추가 상품)와 견준다. 가장 싼 주문에 하나만 더해도 넘는 추가 상품은 넣지 않는다.
+            # 주문이 없는 후보는 추가 상품만으로 사므로 그 상품의 값만 본다.
+            cheapest = min((option.total for option in candidate.options), default=0)
+            for addon in candidate.addons:
+                if cheapest + addon.unit_price > limit:
+                    raise ValueError(
+                        f"업장 '{candidate.venue_id}' 의 추가 상품 '{addon.product_id}' 는 하나만 사도 예산의 max 를 넘는다"
+                    )
             for option in candidate.options:
                 if option.total > limit:
                     raise ValueError(
@@ -157,7 +178,11 @@ class AddonChoice(FormatModel):
 
 
 class Choice(FormatModel):
-    """고른 것. "이용하지 않음"이면 `venue_id` 와 `option_id` 가 null 이다."""
+    """고른 것. "이용하지 않음"이면 `venue_id` 와 `option_id` 가 null 이다.
+
+    업장은 골랐는데 `option_id` 가 null 이면 추가 상품만 고른 것이다. 주문이 없는 후보에서만 그렇게 고를 수 있다
+    (그 후보인지는 요청이 있어야 알 수 있어 `problems_in_response` 가 본다).
+    """
 
     venue_id: Id | None
     option_id: str | None
@@ -165,8 +190,8 @@ class Choice(FormatModel):
 
     @model_validator(mode="after")
     def _both(self) -> Self:
-        if (self.venue_id is None) != (self.option_id is None):
-            raise ValueError("venue_id 와 option_id 는 둘 다 있거나 둘 다 null 이다")
+        if self.venue_id is None and self.option_id is not None:
+            raise ValueError("venue_id 가 null 인데 option_id 가 있다")
         if self.venue_id is None and self.addons:
             raise ValueError("이용하지 않음을 골랐는데 addons 가 있다")
         return self
@@ -202,9 +227,18 @@ def problems_in_response(request: ChoiceRequest, response: ChoiceResponse) -> li
         if candidate is None:
             problems.append(f"고른 업장 '{choice.venue_id}' 가 후보에 없다")
         else:
-            if choice.option_id not in {o.option_id for o in candidate.options}:
-                problems.append(f"고른 주문 '{choice.option_id}' 가 업장 '{choice.venue_id}' 의 주문에 없다")
             addons = {a.product_id: a for a in candidate.addons}
+            if candidate.options:
+                if choice.option_id is None:
+                    problems.append(f"업장 '{choice.venue_id}' 는 주문을 하나 골라야 한다 (추가 상품만 고를 수 없다)")
+                elif choice.option_id not in {o.option_id for o in candidate.options}:
+                    problems.append(f"고른 주문 '{choice.option_id}' 가 업장 '{choice.venue_id}' 의 주문에 없다")
+            else:
+                # 주문이 없는 후보: 추가 상품만 고른다. 하나도 안 사면 "이용하지 않음"과 구분되지 않는다.
+                if choice.option_id is not None:
+                    problems.append(f"업장 '{choice.venue_id}' 에는 주문이 없는데 option_id 가 있다")
+                if not any(picked.quantity > 0 for picked in choice.addons):
+                    problems.append(f"업장 '{choice.venue_id}' 를 골랐는데 산 추가 상품이 없다")
             if has_duplicates([picked.product_id for picked in choice.addons]):
                 problems.append("choice.addons 에 같은 추가 상품이 두 번 있다")
             for picked in choice.addons:
@@ -213,6 +247,13 @@ def problems_in_response(request: ChoiceRequest, response: ChoiceResponse) -> li
                     problems.append(f"추가 상품 '{picked.product_id}' 가 업장 '{choice.venue_id}' 의 addons 에 없다")
                 elif picked.quantity > addon.qty_max:
                     problems.append(f"추가 상품 '{picked.product_id}' 의 수량이 qty_max 를 넘는다")
+            # 예산의 max 는 산 것 전부와 견준다: 고른 주문의 total 에 추가 상품의 금액을 더한 값이다.
+            option = candidate.option(choice.option_id)
+            spent = (option.total if option else 0) + sum(
+                p.quantity * addons[p.product_id].unit_price for p in choice.addons if p.product_id in addons
+            )
+            if spent > request.condition.budget_limit():
+                problems.append("고른 주문과 추가 상품의 금액을 더한 값이 예산의 max 를 넘는다")
 
     allowed = request.vocab.pain_points if chose_none else request.vocab.reasons_chosen
     for label in response.reason_labels:

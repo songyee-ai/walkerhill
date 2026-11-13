@@ -7,6 +7,7 @@
 import hashlib
 import json
 import re
+from decimal import Decimal
 from typing import Any, Literal, Self
 
 from pydantic import AwareDatetime, Field, model_validator
@@ -14,7 +15,7 @@ from pydantic import AwareDatetime, Field, model_validator
 from engine.formats.choice import ChoiceRequest, ChoiceResponse
 from engine.formats.codes import BaseProfileMode, ChoiceKind, DataMode, FormatModel, Grade, Id, Text, Won
 from engine.formats.io import blank_to_none, split_list
-from engine.formats.money import net_of_tax
+from engine.formats.money import net_of_tax, weighted_amount
 
 # run_id: <날짜>-<시각>-<scenario_id>  (예: 20261117-101500-baseline)
 RUN_ID_RE = re.compile(r"^(?P<date>\d{8})-(?P<time>\d{6})-(?P<scenario_id>[a-z0-9]+(?:-[a-z0-9]+)*)$")
@@ -206,8 +207,9 @@ class LedgerRow(FormatModel):
             raise ValueError("revenue_net 이 낸 금액 ÷ 1.1 을 반올림한 값과 다르다")
         if self.choice_kind != "walkerhill" and self.revenue_net != 0:
             raise ValueError("경쟁 업장과 이용하지 않음의 revenue_net 은 0 이다")
-        expected = self.revenue_net * self.represented * self.counted_share
-        if abs(expected - self.weighted_revenue) > 0.5:
+        # 원장에는 원 단위로 반올림한 값을 적는다. 그래서 반올림 폭(0.5)까지는 같은 것으로 본다.
+        expected = weighted_amount(self.revenue_net, self.represented, self.counted_share)
+        if abs(expected - Decimal(str(self.weighted_revenue))) > Decimal("0.5"):
             raise ValueError("weighted_revenue 가 revenue_net × represented × counted_share 와 다르다")
         return self
 

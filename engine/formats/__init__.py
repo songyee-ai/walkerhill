@@ -17,7 +17,14 @@ from engine.formats.codes import KO, WALKERHILL_VENUE_IDS
 from engine.formats.conditions import AssumedSplit, Condition, ConditionBundle
 from engine.formats.evidence import REVIEW_COLUMNS, ReviewLabel, Vocab
 from engine.formats.io import read_model
-from engine.formats.money import apply_pct, change_price, net_of_tax, round_half_up, to_paid_price
+from engine.formats.money import (
+    apply_pct,
+    change_price,
+    net_of_tax,
+    round_half_up,
+    to_paid_price,
+    weighted_amount,
+)
 from engine.formats.persona import Persona, merge_persona_layers, merged_persona
 from engine.formats.run import (
     LEDGER_COLUMNS,
@@ -71,4 +78,5 @@ __all__ = [
     "read_model",
     "round_half_up",
     "to_paid_price",
+    "weighted_amount",
 ]
