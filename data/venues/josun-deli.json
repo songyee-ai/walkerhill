@@ -19,10 +19,11 @@
       "product_id": "cookie-gift-set",
       "name": "쿠키 선물세트 448g",
       "occasion": "takeout",
-      "meals": [],
-      "day_types": [
-        "weekday",
-        "weekend"
+      "slots": [
+        {
+          "meal": null,
+          "day_type": "all"
+        }
       ],
       "months": null,
       "audience": "all",
@@ -39,10 +40,11 @@
       "product_id": "macaron-gift-set",
       "name": "마카롱 기프트 세트 200g",
       "occasion": "takeout",
-      "meals": [],
-      "day_types": [
-        "weekday",
-        "weekend"
+      "slots": [
+        {
+          "meal": null,
+          "day_type": "all"
+        }
       ],
       "months": null,
       "audience": "all",

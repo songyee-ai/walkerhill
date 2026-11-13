@@ -1,4 +1,4 @@
-﻿customer_group,venue_id,product_id,occasion,meal,day_type,unit,quantity,revenue_net,price_unconfirmed
-가족·친족,geumryong,course-a,meal,,weekday,1인,300,40909091,N
-가족·친족,geumryong,course-a,meal,,weekend,1인,500,68181818,N
-가족·친족,geumryong,course-b,meal,dinner,weekend,1인,120,21818182,N
+﻿customer_group,venue_id,product_id,occasion,meal,day_type,month,unit,quantity,paid,revenue_net,price_unconfirmed
+가족·친족,geumryong,course-a,meal,,weekday,5,1인,300,45000000,40909091,N
+가족·친족,geumryong,course-a,meal,,weekend,5,1인,500,75000000,68181818,N
+가족·친족,geumryong,course-b,meal,dinner,weekend,5,1인,120,24000000,21818182,N

@@ -16,24 +16,27 @@
       "day_type": "all",
       "open": "09:00",
       "last_order": null,
-      "close": "21:00"
+      "close": "21:00",
+      "source_id": null
     }
   ],
   "reservation": {
     "required": false,
     "party_min": 1,
     "party_max": null,
-    "note": "그랜드 호텔 로비. 테이크아웃 피자 주문 11:00~19:30, 와인 스토어 10:00~20:30. 예약 조건 없음"
+    "note": "그랜드 호텔 로비. 테이크아웃 피자 주문 11:00~19:30, 와인 스토어 10:00~20:30. 예약 조건 없음",
+    "source_id": null
   },
   "products": [
     {
       "product_id": "gourmet-basket",
       "name": "고메 스토어 상품 구매",
       "occasion": "takeout",
-      "meals": [],
-      "day_types": [
-        "weekday",
-        "weekend"
+      "slots": [
+        {
+          "meal": null,
+          "day_type": "all"
+        }
       ],
       "months": null,
       "audience": "all",

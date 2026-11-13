@@ -16,48 +16,55 @@
       "day_type": "weekday",
       "open": "12:00",
       "last_order": "14:30",
-      "close": "15:00"
+      "close": "15:00",
+      "source_id": null
     },
     {
       "meal": "lunch",
       "day_type": "weekend",
       "open": "12:00",
       "last_order": "14:00",
-      "close": "15:00"
+      "close": "15:00",
+      "source_id": null
     },
     {
       "meal": "dinner",
       "day_type": "weekday",
       "open": "18:00",
       "last_order": "20:30",
-      "close": "21:00"
+      "close": "21:00",
+      "source_id": null
     },
     {
       "meal": "dinner",
       "day_type": "weekend",
       "open": "18:00",
       "last_order": "20:00",
-      "close": "21:00"
+      "close": "21:00",
+      "source_id": null
     }
   ],
   "reservation": {
     "required": false,
     "party_min": 1,
     "party_max": null,
-    "note": "예약 필수 여부는 공식 페이지에 없음 (false 로 둠). 주말·공휴일은 코스만, 2인 이상. 예약은 2개월 전 1일 10시부터. 96석, 별실 5개"
+    "note": "예약 필수 여부는 공식 페이지에 없음 (false 로 둠). 주말·공휴일은 코스만, 2인 이상. 예약은 2개월 전 1일 10시부터. 96석, 별실 5개",
+    "source_id": null
   },
   "products": [
     {
       "product_id": "royal-table-course",
       "name": "궁중상 코스",
       "occasion": "meal",
-      "meals": [
-        "lunch",
-        "dinner"
-      ],
-      "day_types": [
-        "weekday",
-        "weekend"
+      "slots": [
+        {
+          "meal": "lunch",
+          "day_type": "all"
+        },
+        {
+          "meal": "dinner",
+          "day_type": "all"
+        }
       ],
       "months": null,
       "audience": "all",
@@ -74,11 +81,11 @@
       "product_id": "lunch-table",
       "name": "낮것상",
       "occasion": "meal",
-      "meals": [
-        "lunch"
-      ],
-      "day_types": [
-        "weekday"
+      "slots": [
+        {
+          "meal": "lunch",
+          "day_type": "weekday"
+        }
       ],
       "months": null,
       "audience": "all",
