@@ -12,18 +12,59 @@
     "meal"
   ],
   "months": null,
-  "hours": null,
+  "hours": [
+    {
+      "meal": "breakfast",
+      "day_type": "all",
+      "open": "06:00",
+      "last_order": null,
+      "close": "10:00",
+      "source_id": null
+    },
+    {
+      "meal": "lunch",
+      "day_type": "weekday",
+      "open": "12:00",
+      "last_order": null,
+      "close": "14:30",
+      "source_id": null
+    },
+    {
+      "meal": "lunch",
+      "day_type": "weekend",
+      "open": "11:00",
+      "last_order": null,
+      "close": "16:00",
+      "source_id": null
+    },
+    {
+      "meal": "dinner",
+      "day_type": "weekday",
+      "open": "18:00",
+      "last_order": null,
+      "close": "21:30",
+      "source_id": null
+    },
+    {
+      "meal": "dinner",
+      "day_type": "weekend",
+      "open": "17:00",
+      "last_order": null,
+      "close": "21:30",
+      "source_id": null
+    }
+  ],
   "reservation": null,
   "products": [
     {
       "product_id": "weekday-lunch-adult",
       "name": "평일 점심 성인",
       "occasion": "meal",
-      "meals": [
-        "lunch"
-      ],
-      "day_types": [
-        "weekday"
+      "slots": [
+        {
+          "meal": "lunch",
+          "day_type": "weekday"
+        }
       ],
       "months": null,
       "audience": "adult",
@@ -33,18 +74,81 @@
       "qty_max": null,
       "price": 178000,
       "price_basis": "unknown",
-      "grade": "assumption",
-      "source_id": "S2"
+      "grade": "official",
+      "source_id": null
+    },
+    {
+      "product_id": "weekday-lunch-child",
+      "name": "평일 점심 어린이",
+      "occasion": "meal",
+      "slots": [
+        {
+          "meal": "lunch",
+          "day_type": "weekday"
+        }
+      ],
+      "months": null,
+      "audience": "child",
+      "unit": "1인",
+      "serves": 1,
+      "qty_rule": "per_person",
+      "qty_max": null,
+      "price": 90000,
+      "price_basis": "unknown",
+      "grade": "official",
+      "source_id": null
+    },
+    {
+      "product_id": "weekend-lunch-adult",
+      "name": "토·일·공휴일 점심 성인",
+      "occasion": "meal",
+      "slots": [
+        {
+          "meal": "lunch",
+          "day_type": "weekend"
+        }
+      ],
+      "months": null,
+      "audience": "adult",
+      "unit": "1인",
+      "serves": 1,
+      "qty_rule": "per_person",
+      "qty_max": null,
+      "price": 204000,
+      "price_basis": "unknown",
+      "grade": "official",
+      "source_id": null
+    },
+    {
+      "product_id": "weekend-lunch-child",
+      "name": "토·일·공휴일 점심 어린이",
+      "occasion": "meal",
+      "slots": [
+        {
+          "meal": "lunch",
+          "day_type": "weekend"
+        }
+      ],
+      "months": null,
+      "audience": "child",
+      "unit": "1인",
+      "serves": 1,
+      "qty_rule": "per_person",
+      "qty_max": null,
+      "price": 100000,
+      "price_basis": "unknown",
+      "grade": "official",
+      "source_id": null
     },
     {
       "product_id": "weekday-dinner-adult",
-      "name": "평일 저녁 성인",
+      "name": "월~목 저녁 성인",
       "occasion": "meal",
-      "meals": [
-        "dinner"
-      ],
-      "day_types": [
-        "weekday"
+      "slots": [
+        {
+          "meal": "dinner",
+          "day_type": "weekday"
+        }
       ],
       "months": null,
       "audience": "adult",
@@ -54,18 +158,39 @@
       "qty_max": null,
       "price": 198000,
       "price_basis": "unknown",
-      "grade": "assumption",
-      "source_id": "S2"
+      "grade": "official",
+      "source_id": null
+    },
+    {
+      "product_id": "weekday-dinner-child",
+      "name": "월~목 저녁 어린이",
+      "occasion": "meal",
+      "slots": [
+        {
+          "meal": "dinner",
+          "day_type": "weekday"
+        }
+      ],
+      "months": null,
+      "audience": "child",
+      "unit": "1인",
+      "serves": 1,
+      "qty_rule": "per_person",
+      "qty_max": null,
+      "price": 99000,
+      "price_basis": "unknown",
+      "grade": "official",
+      "source_id": null
     },
     {
       "product_id": "weekend-dinner-adult",
-      "name": "주말·공휴일 저녁 성인",
+      "name": "금~일·공휴일 저녁 성인",
       "occasion": "meal",
-      "meals": [
-        "dinner"
-      ],
-      "day_types": [
-        "weekend"
+      "slots": [
+        {
+          "meal": "dinner",
+          "day_type": "weekend"
+        }
       ],
       "months": null,
       "audience": "adult",
@@ -77,20 +202,35 @@
       "price_basis": "unknown",
       "grade": "official",
       "source_id": null
+    },
+    {
+      "product_id": "weekend-dinner-child",
+      "name": "금~일·공휴일 저녁 어린이",
+      "occasion": "meal",
+      "slots": [
+        {
+          "meal": "dinner",
+          "day_type": "weekend"
+        }
+      ],
+      "months": null,
+      "audience": "child",
+      "unit": "1인",
+      "serves": 1,
+      "qty_rule": "per_person",
+      "qty_max": null,
+      "price": 100000,
+      "price_basis": "unknown",
+      "grade": "official",
+      "source_id": null
     }
   ],
   "promotions": [],
   "sources": [
     {
       "source_id": "S1",
-      "title": "SBS Biz — 신라 더 파크뷰 주말 저녁 208,000 과 12월 인상 (2026-10-20)",
-      "url": "https://biz.sbs.co.kr/amp/article/20000341003",
-      "checked_on": "2026-11-13"
-    },
-    {
-      "source_id": "S2",
-      "title": "23expo — 서울 호텔 뷔페 가격 비교 (2026-08 기준, 블로그)",
-      "url": "https://23expo.com/hotel-buffet-price/",
+      "title": "서울신라호텔 더 파크뷰 공식 페이지 (11월 요금표, 어린이 37개월~만 12세)",
+      "url": "https://www.shillahotels.com/ko/theshilla/seoul/dining/restaurant/theParkview.do",
       "checked_on": "2026-11-13"
     }
   ],

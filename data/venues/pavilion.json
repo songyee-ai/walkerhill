@@ -9,7 +9,7 @@
   "occasions": ["dessert"],
   "months": null,
   "hours": [
-    {"meal": null, "day_type": "all", "open": "09:00", "last_order": "20:00", "close": "21:00"}
+    {"meal": null, "day_type": "all", "open": "09:00", "last_order": "20:00", "close": "21:00", "source_id": null}
   ],
   "reservation": null,
   "products": [
@@ -17,8 +17,7 @@
       "product_id": "fall-dessert-set",
       "name": "FALL IN PAVILION 가을 디저트 세트",
       "occasion": "dessert",
-      "meals": [],
-      "day_types": ["weekday", "weekend"],
+      "slots": [{"meal": null, "day_type": "all"}],
       "months": [9, 10, 11],
       "audience": "all",
       "unit": "세트",
@@ -34,8 +33,7 @@
       "product_id": "bingsu",
       "name": "빙수",
       "occasion": "dessert",
-      "meals": [],
-      "day_types": ["weekday", "weekend"],
+      "slots": [{"meal": null, "day_type": "all"}],
       "months": [5, 6, 7, 8, 9],
       "audience": "all",
       "unit": "개",

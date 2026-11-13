@@ -12,20 +12,39 @@
     "meal"
   ],
   "months": null,
-  "hours": null,
+  "hours": [
+    {
+      "meal": "lunch",
+      "day_type": "all",
+      "open": "11:30",
+      "last_order": "13:30",
+      "close": "14:30",
+      "source_id": null
+    },
+    {
+      "meal": "dinner",
+      "day_type": "all",
+      "open": "17:30",
+      "last_order": "20:00",
+      "close": "21:30",
+      "source_id": null
+    }
+  ],
   "reservation": null,
   "products": [
     {
       "product_id": "taebaek-course",
       "name": "태백 코스",
       "occasion": "meal",
-      "meals": [
-        "lunch",
-        "dinner"
-      ],
-      "day_types": [
-        "weekday",
-        "weekend"
+      "slots": [
+        {
+          "meal": "lunch",
+          "day_type": "all"
+        },
+        {
+          "meal": "dinner",
+          "day_type": "all"
+        }
       ],
       "months": null,
       "audience": "all",
@@ -34,20 +53,23 @@
       "qty_rule": "per_person",
       "qty_max": null,
       "price": 210000,
-      "price_basis": "unknown",
+      "price_basis": "included",
       "grade": "official",
       "source_id": null
     },
     {
-      "product_id": "geumgang-lunch-course",
-      "name": "금강 코스 (런치)",
+      "product_id": "baengnok-course",
+      "name": "백록 코스",
       "occasion": "meal",
-      "meals": [
-        "lunch"
-      ],
-      "day_types": [
-        "weekday",
-        "weekend"
+      "slots": [
+        {
+          "meal": "lunch",
+          "day_type": "all"
+        },
+        {
+          "meal": "dinner",
+          "day_type": "all"
+        }
       ],
       "months": null,
       "audience": "all",
@@ -55,24 +77,24 @@
       "serves": 1,
       "qty_rule": "per_person",
       "qty_max": null,
-      "price": 160000,
-      "price_basis": "unknown",
-      "grade": "assumption",
-      "source_id": "S2"
+      "price": 260000,
+      "price_basis": "included",
+      "grade": "official",
+      "source_id": null
     }
   ],
   "promotions": [],
   "sources": [
     {
       "source_id": "S1",
-      "title": "롯데호텔 e샵 — 무궁화 태백 코스 1인 (호텔 공식 판매)",
-      "url": "https://eshop.lottehotel.com/eshop/product/product_view?product_cd=LH20211035",
+      "title": "더그랜드롯데 서울 무궁화 공식 홀 메뉴판 (2026-10 판, 봉사료·세금 포함)",
+      "url": "https://www.lottehotel.com/cms/asset/2026/10/27/48667/202610_Hall.pdf",
       "checked_on": "2026-11-13"
     },
     {
       "source_id": "S2",
-      "title": "카카오 선물하기 — 무궁화 런치 금강 코스 2인 정상가 320,000 (판매 채널, 시점 불명)",
-      "url": "https://gift.kakao.com/product/6702591",
+      "title": "더그랜드롯데 서울 무궁화 공식 페이지",
+      "url": "https://www.lottehotel.com/seoul-grand/ko/dining/restaurant-mugunghwa",
       "checked_on": "2026-11-13"
     }
   ],

@@ -16,34 +16,39 @@
       "day_type": "all",
       "open": "12:00",
       "last_order": "14:00",
-      "close": "15:00"
+      "close": "15:00",
+      "source_id": null
     },
     {
       "meal": "dinner",
       "day_type": "all",
       "open": "18:00",
       "last_order": "20:30",
-      "close": "22:00"
+      "close": "22:00",
+      "source_id": null
     }
   ],
   "reservation": {
     "required": false,
     "party_min": 1,
     "party_max": 12,
-    "note": "별실은 예약 필수"
+    "note": "별실은 예약 필수",
+    "source_id": null
   },
   "products": [
     {
       "product_id": "course-a",
       "name": "코스 A",
       "occasion": "meal",
-      "meals": [
-        "lunch",
-        "dinner"
-      ],
-      "day_types": [
-        "weekday",
-        "weekend"
+      "slots": [
+        {
+          "meal": "lunch",
+          "day_type": "all"
+        },
+        {
+          "meal": "dinner",
+          "day_type": "all"
+        }
       ],
       "months": null,
       "audience": "all",
@@ -60,12 +65,11 @@
       "product_id": "course-b",
       "name": "코스 B",
       "occasion": "meal",
-      "meals": [
-        "dinner"
-      ],
-      "day_types": [
-        "weekday",
-        "weekend"
+      "slots": [
+        {
+          "meal": "dinner",
+          "day_type": "all"
+        }
       ],
       "months": null,
       "audience": "all",

@@ -80,6 +80,14 @@ class ConditionBundle(FormatModel):
         fixed = [c.condition_id for c in self.conditions if c.month is not None]
         if fixed:
             raise ValueError(f"묶음의 조건은 month 를 null 로 둔다 (일 년 전체로 본다): {fixed}")
+        # 2026-11-13 결정: 기본 데이터에 투숙 여부가 없어 비율을 낼 수 없으므로 묶음에 넣지 않는다.
+        staying = [c.condition_id for c in self.conditions if c.stay is not None]
+        if staying:
+            raise ValueError(f"묶음의 조건은 stay 를 null 로 둔다 (기본 데이터로 투숙 여부의 비율을 낼 수 없다): {staying}")
+        # 2026-11-13 결정: 조식은 고를 업장이 하나뿐이라 묶음에 넣지 않는다. 조식 매출은 대조에서 뺀다.
+        breakfast = [c.condition_id for c in self.conditions if c.meal == "breakfast"]
+        if breakfast:
+            raise ValueError(f"묶음에는 조식 조건을 넣지 않는다 (조식 매출은 대조에서 뺀다): {breakfast}")
         manual = [c.condition_id for c in self.conditions if c.condition_id.startswith(MANUAL_CONDITION_PREFIX)]
         if manual:
             raise ValueError(

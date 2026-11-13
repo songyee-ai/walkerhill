@@ -17,41 +17,47 @@
       "day_type": "all",
       "open": "11:30",
       "last_order": "14:30",
-      "close": "16:00"
+      "close": "16:00",
+      "source_id": null
     },
     {
       "meal": "dinner",
       "day_type": "all",
       "open": "16:00",
       "last_order": "21:00",
-      "close": "22:00"
+      "close": "22:00",
+      "source_id": null
     },
     {
       "meal": null,
       "day_type": "all",
       "open": "11:30",
       "last_order": "21:00",
-      "close": "22:00"
+      "close": "22:00",
+      "source_id": null
     }
   ],
   "reservation": {
     "required": false,
     "party_min": 1,
     "party_max": null,
-    "note": "예약 필수 여부는 공식 페이지에 없음 (false 로 둠). 홈페이지 예약은 2개월 전 1일 10시부터. 실내 96석. 90분 단위 7부제"
+    "note": "예약 필수 여부는 공식 페이지에 없음 (false 로 둠). 홈페이지 예약은 2개월 전 1일 10시부터. 실내 96석. 90분 단위 7부제",
+    "source_id": null
   },
   "products": [
     {
       "product_id": "couple-set",
       "name": "커플 세트",
       "occasion": "meal",
-      "meals": [
-        "lunch",
-        "dinner"
-      ],
-      "day_types": [
-        "weekday",
-        "weekend"
+      "slots": [
+        {
+          "meal": "lunch",
+          "day_type": "all"
+        },
+        {
+          "meal": "dinner",
+          "day_type": "all"
+        }
       ],
       "months": null,
       "audience": "all",
@@ -68,13 +74,15 @@
       "product_id": "triple-set",
       "name": "트리플 세트",
       "occasion": "meal",
-      "meals": [
-        "lunch",
-        "dinner"
-      ],
-      "day_types": [
-        "weekday",
-        "weekend"
+      "slots": [
+        {
+          "meal": "lunch",
+          "day_type": "all"
+        },
+        {
+          "meal": "dinner",
+          "day_type": "all"
+        }
       ],
       "months": null,
       "audience": "all",
@@ -91,13 +99,15 @@
       "product_id": "seis-pizza",
       "name": "세이스 피자",
       "occasion": "meal",
-      "meals": [
-        "lunch",
-        "dinner"
-      ],
-      "day_types": [
-        "weekday",
-        "weekend"
+      "slots": [
+        {
+          "meal": "lunch",
+          "day_type": "all"
+        },
+        {
+          "meal": "dinner",
+          "day_type": "all"
+        }
       ],
       "months": null,
       "audience": "all",
@@ -114,10 +124,11 @@
       "product_id": "takeout-combination-l",
       "name": "콤비네이션 피자 L 포장",
       "occasion": "takeout",
-      "meals": [],
-      "day_types": [
-        "weekday",
-        "weekend"
+      "slots": [
+        {
+          "meal": null,
+          "day_type": "all"
+        }
       ],
       "months": null,
       "audience": "all",
@@ -134,13 +145,15 @@
       "product_id": "set-ade-upgrade",
       "name": "세트 음료 에이드 변경",
       "occasion": "meal",
-      "meals": [
-        "lunch",
-        "dinner"
-      ],
-      "day_types": [
-        "weekday",
-        "weekend"
+      "slots": [
+        {
+          "meal": "lunch",
+          "day_type": "all"
+        },
+        {
+          "meal": "dinner",
+          "day_type": "all"
+        }
       ],
       "months": null,
       "audience": "all",

@@ -13,6 +13,8 @@ from engine.formats import (
     ConditionBundle,
     LedgerRow,
     Persona,
+    Slot,
+    SummaryRow,
     Venue,
     apply_pct,
     change_price,
@@ -40,9 +42,35 @@ def test_net_of_tax_divides_by_one_point_one():
 
 
 def test_price_shown_without_tax_is_multiplied():
-    assert to_paid_price(100000, "excluded") == 110000
+    # 부가세만 따로면 1.1, 봉사료와 부가세가 모두 따로면 1.1 × 1.1 = 1.21 을 곱한다.
+    assert to_paid_price(100000, "excluded_vat") == 110000
+    assert to_paid_price(100000, "excluded_vat_service") == 121000
     assert to_paid_price(100000, "included") == 100000
     assert to_paid_price(100000, "unknown") == 100000
+    # 곱한 뒤 한 번만 반올림한다: 12,345 × 1.21 = 14,937.45
+    assert to_paid_price(12345, "excluded_vat_service") == 14937
+    assert to_paid_price(5, "excluded_vat") == 6
+    # 바뀌기 전의 코드 값이나 모르는 값은 조용히 넘기지 않는다.
+    with pytest.raises(ValueError, match="모르는 가격 표기"):
+        to_paid_price(100000, "excluded")
+
+
+def test_slot_says_when_a_product_is_sold():
+    product = Venue.model_validate(load_json(EXAMPLE_ROOT / "data" / "venues" / "geumryong.json")).products[0]
+    mixed = product.model_copy(update={"slots": [Slot(meal="lunch", day_type="weekend"), Slot(meal="dinner", day_type="all")]})
+    assert mixed.sold_at("lunch", "weekend") and mixed.sold_at("dinner", "weekday") and mixed.sold_at("dinner", "weekend")
+    assert not mixed.sold_at("lunch", "weekday")
+    assert not mixed.sold_at(None, "weekend")
+    assert mixed.sold_on("weekday") and mixed.sold_on("weekend")
+    lunch_only = product.model_copy(update={"slots": [Slot(meal="lunch", day_type="weekday")]})
+    assert lunch_only.sold_on("weekday") and not lunch_only.sold_on("weekend")
+
+
+def test_summary_unit_price_is_what_the_customer_paid():
+    row = SummaryRow.from_row(load_csv(EXAMPLE_ROOT / "data" / "samples" / "base_summary.csv")[0])
+    # 낸 금액 ÷ 수량이 단가다 (세금 포함). 세금을 뺀 매출로 나누면 10% 낮아진다.
+    assert row.unit_price() == 150000
+    assert row.revenue_net / row.quantity < 140000
 
 
 def test_percent_discount_matches_doc_example():

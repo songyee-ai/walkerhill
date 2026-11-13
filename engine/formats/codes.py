@@ -13,7 +13,7 @@ Meal = Literal["lunch", "dinner", "breakfast"]
 DayType = Literal["weekday", "weekend"]
 DayTypeOrAll = Literal["weekday", "weekend", "all"]
 Stay = Literal["guest", "visitor"]
-PriceBasis = Literal["included", "excluded", "unknown"]
+PriceBasis = Literal["included", "excluded_vat", "excluded_vat_service", "unknown"]
 Grade = Literal["internal", "official", "review", "assumption", "unknown"]
 ScenarioKind = Literal["baseline", "our_price", "our_promo", "competitor"]
 ChoiceKind = Literal["walkerhill", "competitor", "none"]
@@ -55,7 +55,12 @@ KO: dict[str, dict[str, str]] = {
     "meal": {"lunch": "점심", "dinner": "저녁", "breakfast": "조식"},
     "day_type": {"weekday": "평일", "weekend": "주말", "all": "평일·주말"},
     "stay": {"guest": "투숙객", "visitor": "비투숙 방문객"},
-    "price_basis": {"included": "세금·봉사료 포함", "excluded": "세금·봉사료 별도", "unknown": "표기 모름"},
+    "price_basis": {
+        "included": "세금·봉사료 포함",
+        "excluded_vat": "부가세 별도",
+        "excluded_vat_service": "봉사료·부가세 별도",
+        "unknown": "표기 모름",
+    },
     "grade": {
         "internal": "내부 매출 자료",
         "official": "공식 사실",

@@ -10,6 +10,7 @@ import math
 from decimal import ROUND_HALF_UP, Decimal
 
 TAX_RATE = Decimal("1.1")
+SERVICE_RATE = Decimal("1.1")
 
 
 def round_half_up(value: Decimal | int | float | str) -> int:
@@ -31,12 +32,19 @@ def net_of_tax(paid: int) -> int:
 def to_paid_price(price: int, price_basis: str) -> int:
     """출처에 표시된 가격을 고객이 낼 금액으로 바꾼다.
 
-    `excluded` 는 세금과 봉사료가 따로 붙는 표기라 1.1 을 곱한다.
-    `included` 와 `unknown` 은 그대로 쓴다 (`unknown` 은 화면에 표시해 알린다).
+    - `excluded_vat`: 부가세 10% 만 따로 붙는 표기라 1.1 을 곱한다.
+    - `excluded_vat_service`: 봉사료 10% 와 부가세 10% 가 모두 따로 붙는 표기라 1.21 을 곱한다 (1.1 × 1.1).
+    - `included` 와 `unknown` 은 그대로 쓴다 (`unknown` 은 화면에 표시해 알린다).
+
+    곱한 뒤 한 번만 원 단위로 반올림한다.
     """
-    if price_basis == "excluded":
+    if price_basis == "excluded_vat":
         return round_half_up(Decimal(price) * TAX_RATE)
-    return price
+    if price_basis == "excluded_vat_service":
+        return round_half_up(Decimal(price) * SERVICE_RATE * TAX_RATE)
+    if price_basis in ("included", "unknown"):
+        return price
+    raise ValueError(f"모르는 가격 표기다: {price_basis!r}")
 
 
 def apply_pct(amount: int, pct: float | int) -> int:
