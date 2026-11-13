@@ -1,0 +1,60 @@
+{
+  "format_version": 1,
+  "venue_id": "lepassage",
+  "name": "르파사쥬",
+  "hotel": "워커힐",
+  "is_competitor": false,
+  "competes_with": [],
+  "cuisine": "고메 스토어 (델리·와인·치즈·피자·육가공품)",
+  "occasions": [
+    "takeout"
+  ],
+  "months": null,
+  "hours": [
+    {
+      "meal": null,
+      "day_type": "all",
+      "open": "09:00",
+      "last_order": null,
+      "close": "21:00"
+    }
+  ],
+  "reservation": {
+    "required": false,
+    "party_min": 1,
+    "party_max": null,
+    "note": "그랜드 호텔 로비. 테이크아웃 피자 주문 11:00~19:30, 와인 스토어 10:00~20:30. 예약 조건 없음"
+  },
+  "products": [
+    {
+      "product_id": "gourmet-basket",
+      "name": "고메 스토어 상품 구매",
+      "occasion": "takeout",
+      "meals": [],
+      "day_types": [
+        "weekday",
+        "weekend"
+      ],
+      "months": null,
+      "audience": "all",
+      "unit": "건",
+      "serves": 1,
+      "qty_rule": "choice",
+      "qty_max": 1,
+      "price": null,
+      "price_basis": "unknown",
+      "grade": "unknown",
+      "source_id": null
+    }
+  ],
+  "promotions": [],
+  "sources": [
+    {
+      "source_id": "S1",
+      "title": "르파사쥬 공식 소개 (그랜드 워커힐 서울)",
+      "url": "https://www.walkerhill.com/grandwalkerhillseoul/dining/LePassage",
+      "checked_on": "2026-11-13"
+    }
+  ],
+  "default_source_id": "S1"
+}

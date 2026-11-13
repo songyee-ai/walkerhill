@@ -1,0 +1,153 @@
+{
+  "format_version": 1,
+  "venue_id": "geumryong",
+  "name": "금룡",
+  "hotel": "워커힐",
+  "is_competitor": false,
+  "competes_with": [],
+  "cuisine": "중식 (광동식 모던 컨템포러리)",
+  "occasions": [
+    "meal"
+  ],
+  "months": null,
+  "hours": [
+    {
+      "meal": "lunch",
+      "day_type": "all",
+      "open": "12:00",
+      "last_order": null,
+      "close": "15:00"
+    },
+    {
+      "meal": "dinner",
+      "day_type": "all",
+      "open": "18:00",
+      "last_order": null,
+      "close": "21:00"
+    }
+  ],
+  "reservation": {
+    "required": true,
+    "party_min": 1,
+    "party_max": null,
+    "note": "사전 예약제. 코스와 주중 특선 SET 는 2인 이상. 주말·공휴일 저녁은 코스만. 홀 30석, 별실 12개 99석"
+  },
+  "products": [
+    {
+      "product_id": "signature-course",
+      "name": "화룡 코스",
+      "occasion": "meal",
+      "meals": [
+        "lunch",
+        "dinner"
+      ],
+      "day_types": [
+        "weekday",
+        "weekend"
+      ],
+      "months": null,
+      "audience": "all",
+      "unit": "1인",
+      "serves": 1,
+      "qty_rule": "per_person",
+      "qty_max": null,
+      "price": 155000,
+      "price_basis": "unknown",
+      "grade": "official",
+      "source_id": null
+    },
+    {
+      "product_id": "private-room-course",
+      "name": "만수무강 (보양 특선 코스)",
+      "occasion": "meal",
+      "meals": [
+        "lunch",
+        "dinner"
+      ],
+      "day_types": [
+        "weekday",
+        "weekend"
+      ],
+      "months": null,
+      "audience": "all",
+      "unit": "1인",
+      "serves": 1,
+      "qty_rule": "per_person",
+      "qty_max": null,
+      "price": 235000,
+      "price_basis": "unknown",
+      "grade": "official",
+      "source_id": null
+    },
+    {
+      "product_id": "weekday-set",
+      "name": "금룡 주중 특선 SET (요리 택3)",
+      "occasion": "meal",
+      "meals": [
+        "lunch",
+        "dinner"
+      ],
+      "day_types": [
+        "weekday"
+      ],
+      "months": null,
+      "audience": "all",
+      "unit": "1인",
+      "serves": 1,
+      "qty_rule": "per_person",
+      "qty_max": null,
+      "price": 120000,
+      "price_basis": "unknown",
+      "grade": "official",
+      "source_id": null
+    },
+    {
+      "product_id": "autumn-course",
+      "name": "추미진향 (가을 한정 코스)",
+      "occasion": "meal",
+      "meals": [
+        "lunch",
+        "dinner"
+      ],
+      "day_types": [
+        "weekday",
+        "weekend"
+      ],
+      "months": [
+        9,
+        10
+      ],
+      "audience": "all",
+      "unit": "1인",
+      "serves": 1,
+      "qty_rule": "per_person",
+      "qty_max": null,
+      "price": null,
+      "price_basis": "unknown",
+      "grade": "unknown",
+      "source_id": "S3"
+    }
+  ],
+  "promotions": [],
+  "sources": [
+    {
+      "source_id": "S1",
+      "title": "금룡 공식 소개",
+      "url": "https://www.walkerhill.com/grandwalkerhillseoul/dining/Geumryong",
+      "checked_on": "2026-11-13"
+    },
+    {
+      "source_id": "S2",
+      "title": "금룡 공식 메뉴판 (2026-01 개정)",
+      "url": "https://www.walkerhill.com/FileDownload.wh?guid=E12F1A99-5F2C-43D7-4C2B-99CE12002419",
+      "checked_on": "2026-11-13"
+    },
+    {
+      "source_id": "S3",
+      "title": "세계일보 — 금룡 가을 한정 코스 추미진향 10-30 까지 (2026-10-16)",
+      "url": "https://www.segye.com/newsView/20261016506491",
+      "checked_on": "2026-11-13"
+    }
+  ],
+  "default_source_id": "S2"
+}
