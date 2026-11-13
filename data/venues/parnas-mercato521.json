@@ -1,0 +1,93 @@
+{
+  "format_version": 1,
+  "venue_id": "parnas-mercato521",
+  "name": "메르카토521",
+  "hotel": "그랜드 인터컨티넨탈 서울 파르나스",
+  "is_competitor": true,
+  "competes_with": ["pizzahill"],
+  "cuisine": "올데이 캐주얼 (화덕 피자·파스타)",
+  "occasions": ["meal"],
+  "months": null,
+  "hours": [
+    {"meal": "breakfast", "day_type": "all", "open": "07:00", "last_order": "10:00", "close": "10:30"},
+    {"meal": "lunch", "day_type": "all", "open": "11:00", "last_order": "15:00", "close": "15:30"},
+    {"meal": "dinner", "day_type": "all", "open": "17:30", "last_order": "21:30", "close": "22:00"}
+  ],
+  "reservation": null,
+  "products": [
+    {
+      "product_id": "senso-set",
+      "name": "SENSO 세트",
+      "occasion": "meal",
+      "meals": ["dinner"],
+      "day_types": ["weekday", "weekend"],
+      "months": null,
+      "audience": "all",
+      "unit": "세트",
+      "serves": 2,
+      "qty_rule": "per_serves",
+      "qty_max": null,
+      "price": 120000,
+      "price_basis": "included",
+      "grade": "official",
+      "source_id": "S2"
+    },
+    {
+      "product_id": "gioia-set",
+      "name": "GIOIA 세트",
+      "occasion": "meal",
+      "meals": ["dinner"],
+      "day_types": ["weekday", "weekend"],
+      "months": null,
+      "audience": "all",
+      "unit": "세트",
+      "serves": 4,
+      "qty_rule": "per_serves",
+      "qty_max": null,
+      "price": 240000,
+      "price_basis": "included",
+      "grade": "official",
+      "source_id": "S2"
+    },
+    {
+      "product_id": "margherita",
+      "name": "마르게리타 피자",
+      "occasion": "meal",
+      "meals": ["lunch"],
+      "day_types": ["weekday", "weekend"],
+      "months": null,
+      "audience": "all",
+      "unit": "판",
+      "serves": 2,
+      "qty_rule": "per_serves",
+      "qty_max": null,
+      "price": 37000,
+      "price_basis": "included",
+      "grade": "official",
+      "source_id": "S1"
+    },
+    {
+      "product_id": "bolognese",
+      "name": "볼로네제 파스타",
+      "occasion": "meal",
+      "meals": ["lunch"],
+      "day_types": ["weekday", "weekend"],
+      "months": null,
+      "audience": "all",
+      "unit": "접시",
+      "serves": 1,
+      "qty_rule": "choice",
+      "qty_max": 4,
+      "price": 40000,
+      "price_basis": "included",
+      "grade": "official",
+      "source_id": "S1"
+    }
+  ],
+  "promotions": [],
+  "sources": [
+    {"source_id": "S1", "title": "메르카토521 조식·점심 메뉴판 (공식, 2026-04 판)", "url": "https://seoul.intercontinental.com/resources/1778208341924-a666cdc6ee58452dac80df8bbfc61a09.pdf", "checked_on": "2026-11-13"},
+    {"source_id": "S2", "title": "메르카토521 저녁 메뉴판 (공식, 2026-04 판)", "url": "https://seoul.intercontinental.com/resources/1778208346184-2eb179e9ea0c45acad6073ed29f7b645.pdf", "checked_on": "2026-11-13"}
+  ],
+  "default_source_id": "S2"
+}
