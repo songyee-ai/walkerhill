@@ -19,7 +19,7 @@
       "open": "11:30",
       "last_order": "13:30",
       "close": "14:30",
-      "source_id": null
+      "source_id": "S2"
     },
     {
       "meal": "dinner",
@@ -27,7 +27,7 @@
       "open": "17:30",
       "last_order": "20:00",
       "close": "21:30",
-      "source_id": null
+      "source_id": "S2"
     }
   ],
   "reservation": null,

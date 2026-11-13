@@ -9,8 +9,8 @@
   "occasions": ["meal"],
   "months": null,
   "hours": [
-    {"meal": "breakfast", "day_type": "all", "open": "07:00", "last_order": "10:00", "close": "10:30", "source_id": null},
-    {"meal": "lunch", "day_type": "all", "open": "11:00", "last_order": "15:00", "close": "15:30", "source_id": null},
+    {"meal": "breakfast", "day_type": "all", "open": "07:00", "last_order": "10:00", "close": "10:30", "source_id": "S1"},
+    {"meal": "lunch", "day_type": "all", "open": "11:00", "last_order": "15:00", "close": "15:30", "source_id": "S1"},
     {"meal": "dinner", "day_type": "all", "open": "17:30", "last_order": "21:30", "close": "22:00", "source_id": null}
   ],
   "reservation": null,
