@@ -18,7 +18,7 @@
       "open": "11:30",
       "last_order": "14:30",
       "close": "16:00",
-      "source_id": null
+      "source_id": "S1"
     },
     {
       "meal": "dinner",
@@ -26,7 +26,7 @@
       "open": "16:00",
       "last_order": "21:00",
       "close": "22:00",
-      "source_id": null
+      "source_id": "S1"
     },
     {
       "meal": null,
@@ -34,7 +34,7 @@
       "open": "11:30",
       "last_order": "21:00",
       "close": "22:00",
-      "source_id": null
+      "source_id": "S1"
     }
   ],
   "reservation": {
@@ -42,7 +42,7 @@
     "party_min": 1,
     "party_max": null,
     "note": "예약 필수 여부는 공식 페이지에 없음 (false 로 둠). 홈페이지 예약은 2개월 전 1일 10시부터. 실내 96석. 90분 단위 7부제",
-    "source_id": null
+    "source_id": "S1"
   },
   "products": [
     {
