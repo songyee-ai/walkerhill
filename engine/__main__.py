@@ -3,6 +3,7 @@
     uv run python -m engine --data sample
 
 상황 하나를 돌려 실행 폴더를 쓴다. 방문마다 앞선 실행의 저장된 응답을 먼저 찾아 재생하고, 없는 것만 LLM 을 부른다.
+기준이 아닌 상황(`--scenario`)은 끝까지 돈 가장 새 기준 실행의 페르소나, 방문 조건, 가중치로 돌린다.
 공급자, 모델, 호출 상한, 키는 `.env` 에서 읽는다 (`.env.example`).
 """
 
@@ -15,8 +16,9 @@ from dotenv import load_dotenv
 
 from engine.formats.io import read_csv, read_model
 from engine.formats.run import LEDGER_COLUMNS, RunRecord
+from engine.formats.scenario import BASELINE_ID
 from engine.llm import LlmFatal, make_provider, settings_from_env
-from engine.runner import NotSupportedYet, run, runs_folder
+from engine.runner import latest_baseline_run, run, runs_folder
 
 EXIT_OK, EXIT_FAILED, EXIT_STOPPED_BY_LIMIT = 0, 1, 2
 
@@ -33,7 +35,12 @@ def earlier_answers(root: Path, data_mode: str) -> list[Path]:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="python -m engine", description="상황 하나를 돌려 실행 결과를 쓴다.")
     parser.add_argument("--data", choices=("sample", "private"), required=True, help="sample 가상 예시 값, private 기본 데이터")
-    parser.add_argument("--scenario", default="baseline", help="상황의 scenario_id (기본 baseline)")
+    parser.add_argument("--scenario", default=BASELINE_ID, help="상황의 scenario_id (기본 baseline)")
+    parser.add_argument(
+        "--baseline",
+        metavar="RUN_ID",
+        help="기준이 아닌 상황이 페르소나·방문 조건·가중치를 가져올 기준 실행. 적지 않으면 끝까지 돈 가장 새 기준 실행",
+    )
     parser.add_argument("--prompt", default="p1", help="프롬프트의 판 이름. personas/prompts/<이름>.md 를 읽는다 (기본 p1)")
     parser.add_argument("--personas", nargs="+", metavar="ID", help="돌릴 페르소나. 적지 않으면 모두")
     parser.add_argument("--conditions", nargs="+", metavar="ID", help="돌릴 방문 조건. 적지 않으면 묶음의 모든 조건")
@@ -56,6 +63,9 @@ def main(argv: list[str] | None = None) -> int:
         call_limit = settings.call_limit if args.limit is None else args.limit
         if call_limit < 0:
             raise LlmFatal("--limit 은 0 이상의 정수다")
+        weights_from = args.baseline
+        if weights_from is None and args.scenario != BASELINE_ID:
+            weights_from = latest_baseline_run(root, args.data)
         run_dir = run(
             root,
             data_mode=args.data,
@@ -68,15 +78,26 @@ def main(argv: list[str] | None = None) -> int:
             venue_ids=args.venues,
             persona_ids=args.personas,
             condition_ids=args.conditions,
+            weights_from=weights_from,
             llm=provider,
             call_limit=call_limit,
         )
-    except (LlmFatal, NotSupportedYet, FileNotFoundError, FileExistsError, ValueError) as exc:
+    except (LlmFatal, FileNotFoundError, FileExistsError, ValueError) as exc:
         print(f"돌리지 못했다: {exc}", file=sys.stderr)
         return EXIT_FAILED
 
     record = read_model(run_dir / "run.json", RunRecord)
     print(f"실행 폴더: {run_dir}")
+    if record.weights_from is not None:
+        print(f"상황 {record.scenario_id} · 페르소나, 방문 조건, 가중치는 기준 실행 {record.weights_from} 의 것")
+        base = read_model(runs_folder(root, args.data) / record.weights_from / "run.json", RunRecord)
+        if base.counts.failed:
+            # 기준에서 실패한 방문은 금액이 0 인 줄이다. 이 상황에서 그 방문이 성공하면 차이에 상황의 변경이 아닌 것이 섞인다.
+            print(
+                f"기준 실행에 실패한 방문이 {base.counts.failed}건 있다. 그 방문에서는 기준과 이 상황을 견줄 수 없다. "
+                "기준 상황을 다시 돌려 실패를 없앤 뒤에 견준다.",
+                file=sys.stderr,
+            )
     print(f"공급자 {record.llm.provider} · 모델 {record.llm.model} · 프롬프트 {record.llm.prompt_version}")
     print(
         f"방문 {record.counts.visits}건 (실패 {record.counts.failed}건) · "

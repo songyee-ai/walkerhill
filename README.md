@@ -76,7 +76,12 @@ uv run python -m engine --data sample
 - 방문마다 앞선 실행의 저장된 응답을 먼저 찾아 재생하고, 없는 것만 LLM 을 부른다. 그래서 같은 것을 다시 돌리면 LLM 을 부르지 않는다.
 - LLM 을 부르려면 `.env.example` 을 `.env` 로 복사하고 자기 키를 넣는다. 공급자, 모델, 호출 상한도 `.env` 에서 바꾼다.
 - 키가 없으면 `--replay-only` 를 붙인다. 저장된 응답만 재생하고, 저장된 응답이 없는 방문은 실패로 남는다.
-- 일부만 돌릴 때: `--personas`, `--conditions`, `--venues` 뒤에 식별자를 적는다. 상황은 `--scenario`, 프롬프트의 판은 `--prompt` 다.
+- 일부만 돌릴 때: `--personas`, `--conditions`, `--venues` 뒤에 식별자를 적는다. 프롬프트의 판은 `--prompt` 다.
+- 기준이 아닌 상황은 `--scenario <scenario_id>` 로 돌린다 (`scenarios/<scenario_id>.json`). **기준 상황을 먼저 끝까지 돌려 둔다.**
+  상황은 끝까지 돈 가장 새 기준 실행의 페르소나, 방문 조건, 가중치로 돌아간다 (다른 기준 실행을 쓰려면 `--baseline <run_id>`).
+  그래서 `--personas`, `--conditions` 는 적지 않는다. `--venues` 로 업장을 골라 기준을 돌렸으면 상황에도 같은 업장을 적는다.
+  기준 실행 뒤에 업장 정의, 페르소나, 방문 조건 묶음, 값 목록, 프롬프트, 모델이 바뀌었으면 돌리지 않고 이유를 알린다. 기준 상황을 다시 돌린다.
+  상황은 업장 정의 파일을 고치지 않는다. 엔진이 읽어 둔 사본에만 적용한다.
 - 호출 상한(`LLM_CALL_LIMIT`, 이번만 바꾸려면 `--limit`)에 닿으면 거기서 멈추고 그 사실을 알린다. 다시 돌리면 받은 답은 재생하고 남은 방문만 부른다.
 - 키나 모델 이름이 틀렸거나 호출이 연달아 3번 실패하면 멈추고 이유를 알린다.
 - 검사에서 어긋난 응답은 실행 폴더의 `llm_rejected/` 에 남는다. 이유는 원장의 `fail_reason` 에 있다.
@@ -90,6 +95,12 @@ Copy-Item -Recurse tests/fixtures/example private/try-example
 
 ```powershell
 uv run python -m engine --data sample --root private/try-example --personas family-elders --conditions meal-dinner-weekend
+```
+
+  사본에 든 기준 실행은 손으로 만든 예시라, 상황은 위의 명령으로 기준 상황을 한 번 돌린 뒤에 돌린다 (그 실행을 `--baseline` 으로 가리킨다):
+
+```powershell
+uv run python -m engine --data sample --root private/try-example --scenario competitor-chinese-discount --baseline <위에서 나온 run_id>
 ```
 
 **알아둘 것**

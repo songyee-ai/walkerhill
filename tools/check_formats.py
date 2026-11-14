@@ -55,6 +55,7 @@ from engine.formats.run import (
 from engine.formats.scenario import BASELINE_ID, Scenario
 from engine.formats.summary import SUMMARY_COLUMNS, SummaryRow
 from engine.formats.venue import Venue
+from engine.scenarios import ScenarioError, apply_scenario
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
@@ -551,6 +552,7 @@ class Checker:
 
     def _check_scenario(self, path: Path, scenario: Scenario) -> None:
         # 바꾸는 것을 순서대로 적용해 가며, 그 시점에 가리키는 상품과 프로모션이 있는지 본다.
+        before = len(self.problems)
         products = {v.venue_id: {p.product_id for p in v.products} for v in self.venues.values()}
         promos = {v.venue_id: {p.promo_id for p in v.promotions} for v in self.venues.values()}
         for index, change in enumerate(scenario.changes):
@@ -598,6 +600,14 @@ class Checker:
                 if change.promo_id not in known_promos:
                     self.error(path, f"{where} — 프로모션 '{change.promo_id}' 가 업장 '{venue.venue_id}' 에 없다")
                 known_promos.discard(change.promo_id)
+
+        # 하나씩 볼 때는 맞아도 다 적용한 업장 정의가 3절의 규칙에 어긋날 수 있다 (예: 뺀 상품을 가리키는 프로모션이 남는다).
+        # 엔진이 실행할 때와 같은 코드로 적용해 본다. 위에서 이미 오류를 적었으면 겹쳐 적지 않는다.
+        if len(self.problems) == before:
+            try:
+                apply_scenario(self.venues, scenario)
+            except ScenarioError as exc:
+                self.error(path, str(exc))
 
     def _products_in(self, scenario_id: str) -> dict[str, set[str]]:
         """그 상황에서 업장마다 있을 수 있는 상품 (기준의 상품과 상황이 더한 상품)."""

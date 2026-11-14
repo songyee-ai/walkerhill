@@ -2,7 +2,8 @@
 
 방문마다 저장된 응답을 먼저 찾는다. 있으면 재생하고, 없으면 LLM 을 불러 답을 받아 검사한 뒤 저장한다.
 LLM 을 주지 않고 돌리면(재생만) 저장된 응답이 없는 방문은 실패로 남는다.
-상황 적용과 프로모션은 T10, 집계 파일로 가중치를 내는 것은 T11 에서 더한다.
+기준이 아닌 상황은 업장 정의의 사본에 상황을 적용해 돌리고, 페르소나·방문 조건·가중치는 기준 실행의 것을 그대로 쓴다.
+집계 파일로 가중치를 내는 것은 T11 에서 더한다.
 """
 
 import hashlib
@@ -20,8 +21,8 @@ from engine.formats.conditions import MANUAL_CONDITION_PREFIX, ConditionBundle
 from engine.formats.evidence import Vocab
 from engine.formats.io import read_json, read_model, write_json
 from engine.formats.persona import Persona, merge_persona_layers, merged_persona
-from engine.formats.run import VISIT_ID_SEPARATOR, LedgerRow, RunRecord, Weights
-from engine.formats.scenario import Scenario
+from engine.formats.run import RUN_ID_RE, VISIT_ID_SEPARATOR, LedgerRow, RunRecord, Weights
+from engine.formats.scenario import BASELINE_ID, Scenario
 from engine.formats.venue import Venue
 from engine.ledger import amount_problems, failed_row, no_candidate_row, visit_rows, write_ledger
 from engine.llm import (
@@ -34,16 +35,13 @@ from engine.llm import (
     prompt_path,
     user_message,
 )
+from engine.scenarios import apply_scenario
 
 # 실제로 돌아가는 엔진 코드가 있는 저장소. `--root` 로 다른 폴더의 자료를 돌려도 코드는 여기 것이다.
 CODE_ROOT = Path(__file__).resolve().parents[1]
 
 # 저장된 응답이 없는데 LLM 도 주지 않았을 때의 fail_reason.
 NO_SAVED_ANSWER = "저장된 응답이 없다 (LLM 을 부르지 않고 돌렸다)"
-
-
-class NotSupportedYet(ValueError):
-    """아직 만들지 않은 것이 필요한 입력이다. 틀린 금액을 내지 않으려고 멈춘다."""
 
 
 class CallLimitReached(Exception):
@@ -81,6 +79,7 @@ class LlmSession:
 class Inputs:
     """실행 하나가 읽는 것."""
 
+    # 상황을 적용한 업장 정의다. 파일에 적힌 그대로가 아니다 (기준 상황이면 같다).
     venues: dict[str, Venue]
     personas: dict[str, Persona]
     # 요청에 그대로 넣을 페르소나. 가상 예시는 공개 층 파일 그대로, 기본 데이터는 두 층을 합친 것이다.
@@ -118,6 +117,8 @@ def load_inputs(
     """입력 파일을 읽는다. `venue_ids`, `persona_ids` 를 주면 그것만 읽는다.
 
     가상 예시(`sample`)로 돌릴 때는 `private/` 를 읽지 않는다. 페르소나는 공개 층만 쓴다.
+    돌려주는 업장 정의는 상황의 `changes` 를 적용한 사본이다. 업장 정의 파일은 바뀌지 않는다 (docs/FORMATS.md 7절).
+    `venue_ids` 로 업장을 골랐으면 상황이 바꾸는 업장도 그 안에 있어야 한다.
     """
     runs_folder(root, data_mode)  # data_mode 가 맞는지 먼저 본다
 
@@ -153,12 +154,13 @@ def load_inputs(
     conditions_path = root / "engine" / "conditions.json"
     scenario_path = root / "scenarios" / f"{scenario_id}.json"
     vocab_path = root / "data" / "evidence" / "vocab.json"
+    scenario = read_model(scenario_path, Scenario)
     return Inputs(
-        venues=venues,
+        venues=apply_scenario(venues, scenario),
         personas=personas,
         persona_json=persona_json,
         conditions=read_model(conditions_path, ConditionBundle),
-        scenario=read_model(scenario_path, Scenario),
+        scenario=scenario,
         vocab=read_model(vocab_path, Vocab),
         hashes={
             "venues": _hash_files(venue_paths),
@@ -190,6 +192,55 @@ def even_weights(personas: list[Persona], condition_ids: list[str]) -> Weights:
             },
         }
     )
+
+
+def latest_baseline_run(root: Path, data_mode: str) -> str | None:
+    """끝까지 돈 기준 실행 가운데 가장 새것의 `run_id`. 없으면 None. 같은 `data_mode` 의 실행만 본다."""
+    folder = runs_folder(root, data_mode)
+    for run_dir in sorted(folder.glob(f"*-{BASELINE_ID}"), reverse=True):
+        try:
+            record = read_model(run_dir / "run.json", RunRecord)
+        except (OSError, ValueError):
+            continue
+        if record.scenario_id == BASELINE_ID and record.status == "ok":
+            return record.run_id
+    return None
+
+
+def baseline_record(root: Path, data_mode: str, run_id: str | None) -> RunRecord:
+    """기준이 아닌 상황이 페르소나, 방문 조건, 가중치를 가져올 기준 실행의 실행 기록 (docs/PRD.md 7.2절)."""
+    if run_id is None:
+        raise ValueError("기준이 아닌 상황은 기준 실행의 가중치로 돌린다. 기준 상황을 먼저 끝까지 돌린다")
+    if not RUN_ID_RE.match(run_id):
+        raise ValueError(f"기준 실행의 run_id 가 아니다: {run_id!r}")
+    path = runs_folder(root, data_mode) / run_id / "run.json"
+    if not path.is_file():
+        raise FileNotFoundError(f"기준 실행의 실행 기록이 없다: {path}")
+    record = read_model(path, RunRecord)
+    if record.scenario_id != BASELINE_ID:
+        raise ValueError(f"실행 '{run_id}' 는 기준 상황의 실행이 아니다")
+    if record.status != "ok":
+        raise ValueError(f"기준 실행 '{run_id}' 는 끝까지 돌지 않았다 (status 가 {record.status}). 기준 상황을 다시 돌린다")
+    return record
+
+
+def _same_as_baseline(what: str, given: list[str] | None, base: list[str]) -> list[str]:
+    """기준이 아닌 상황은 기준 실행과 같은 것을 돌린다. 따로 준 목록이 다르면 멈춘다."""
+    if given is not None and set(given) != set(base):
+        raise ValueError(f"기준 실행과 {what}의 목록이 다르다. 상황별 비교는 기준 실행과 같은 것으로 한다: {sorted(base)}")
+    return list(base)
+
+
+def _changed_since_baseline(base: RunRecord, hashes: dict[str, str], provider: str, model: str, prompt_version: str) -> list[str]:
+    """기준 실행 뒤에 달라진 것. 하나라도 있으면 상황 사이의 차이에 상황의 변경이 아닌 것이 섞인다."""
+    changed = [key for key in ("venues", "personas", "conditions", "vocab") if base.inputs.get(key) != hashes[key]]
+    # 프롬프트의 글은 LLM 을 부를 수 있게 돌린 실행에만 해시가 남는다. 둘 다 있을 때만 견준다.
+    if "prompt" in base.inputs and "prompt" in hashes and base.inputs["prompt"] != hashes["prompt"]:
+        changed.append("prompt")
+    for key, now in (("provider", provider), ("model", model), ("prompt_version", prompt_version)):
+        if getattr(base.llm, key) != now:
+            changed.append(f"llm.{key}")
+    return changed
 
 
 def represented(weights: Weights, persona: Persona, condition_id: str) -> float:
@@ -335,6 +386,7 @@ def run(
     persona_ids: list[str] | None = None,
     condition_ids: list[str] | None = None,
     weights: Weights | None = None,
+    weights_from: str | None = None,
     engine_commit: str | None = None,
     llm: Provider | None = None,
     call_limit: int | None = None,
@@ -343,7 +395,11 @@ def run(
 
     - `answers`: 저장된 응답을 찾을 폴더들 (정해 둔 답이나 앞선 실행의 `llm/`).
     - `now`: 실행 시각. 시간대가 있어야 한다. `run_id` 와 `created_at`, 저장하는 응답의 `created_at` 이 여기서 나온다.
-    - `weights` 를 주지 않으면 `even_weights` 를 쓴다.
+    - `weights` 를 주지 않으면 `even_weights` 를 쓴다. 기준 상황에만 줄 수 있다.
+    - `weights_from`: 기준이 아닌 상황을 돌릴 때 꼭 준다. 끝까지 돈 기준 실행의 `run_id` 다 (`latest_baseline_run`).
+      페르소나, 방문 조건, 가중치를 그 실행에서 가져온다. `persona_ids`, `condition_ids` 를 따로 주면 그 실행과 같아야 한다.
+      그 실행 뒤에 입력(업장 정의, 페르소나, 조건 묶음, 값 목록, 프롬프트)이나 공급자·모델이 달라졌으면 돌리지 않는다.
+      상황 사이의 차이에 상황의 변경만 남게 하려는 것이다 (docs/PRD.md 7.2절).
     - `llm`: 저장된 응답이 없는 방문에서 부를 공급자. 주지 않으면 부르지 않고 그 방문을 실패로 남긴다 (재생만).
       `provider` 와 `model` 은 `llm` 이 실제로 부르는 곳과 같아야 한다 (요청의 해시와 실행 기록에 들어간다).
     - `call_limit`: 이 실행에서 새로 부를 수 있는 횟수. 주지 않으면 `DEFAULT_CALL_LIMIT` 이다.
@@ -357,12 +413,18 @@ def run(
     private_root = (root / "private").resolve()
     if data_mode == "sample" and any(folder.resolve().is_relative_to(private_root) for folder in answers):
         raise ValueError("가상 예시로 돌릴 때는 private/ 아래의 저장된 응답을 쓰지 않는다")
+    base: RunRecord | None = None
+    if scenario_id == BASELINE_ID:
+        if weights_from is not None:
+            raise ValueError("기준 상황은 가중치를 스스로 정한다. weights_from 을 주지 않는다")
+    else:
+        if weights is not None:
+            raise ValueError("기준이 아닌 상황의 가중치는 기준 실행에서 가져온다. weights 를 따로 주지 않는다")
+        base = baseline_record(root, data_mode, weights_from)
+        persona_ids = _same_as_baseline("페르소나", persona_ids, base.persona_ids)
+        condition_ids = _same_as_baseline("방문 조건", condition_ids, base.condition_ids)
+        weights = base.weights
     inputs = load_inputs(root, data_mode, scenario_id, venue_ids, persona_ids)
-    if inputs.scenario.changes:
-        raise NotSupportedYet(f"상황 '{scenario_id}' 에 바꾸는 것이 있다. 상황 적용은 아직 넣지 않았다 (T10)")
-    promoted = sorted(v.venue_id for v in inputs.venues.values() if v.promotions)
-    if promoted:
-        raise NotSupportedYet(f"프로모션이 있는 업장이 있다: {promoted}. 프로모션 규칙은 아직 넣지 않았다 (T10)")
     if not inputs.personas:
         raise ValueError("돌릴 페르소나가 없다")
 
@@ -385,6 +447,13 @@ def run(
         limit = DEFAULT_CALL_LIMIT if call_limit is None else call_limit
         session = LlmSession(llm, load_prompt(root, prompt_version), limit)
         inputs.hashes["prompt"] = _hash_files([prompt_path(root, prompt_version)])
+    if base is not None:
+        changed = _changed_since_baseline(base, inputs.hashes, provider, model, prompt_version)
+        if changed:
+            raise ValueError(
+                f"기준 실행 '{base.run_id}' 과 달라진 것이 있다: {', '.join(changed)}. "
+                "기준 상황을 다시 돌린 뒤에 이 상황을 돌린다 (상황 사이의 차이에 상황의 변경만 남아야 한다)"
+            )
 
     rows: list[LedgerRow] = []
     skipped: set[str] = set()
@@ -453,7 +522,7 @@ def run(
                 "inputs": inputs.hashes,
                 "weights": weights,
                 "skipped_products": sorted(skipped),
-                "weights_from": None,
+                "weights_from": base.run_id if base else None,
                 "counts": {"visits": visits, "failed": failed},
                 "status": status,
             },
