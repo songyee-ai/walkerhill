@@ -66,11 +66,38 @@ uv run python -m streamlit run app/main.py
 
 지금 화면은 공통 틀이 돌아가는지 확인하는 뼈대이고, 지어낸 예시 파일을 보여 준다.
 
+**시뮬레이션을 돌린다** — 상황 하나를 돌려 실행 폴더(실행 기록, 소비 원장, 저장된 응답)를 쓴다.
+`--data sample` 은 가상 예시 값으로 돌려 `engine/samples/runs/` 에, `--data private` 은 기본 데이터로 돌려 `private/runs/` 에 쓴다.
+
+```powershell
+uv run python -m engine --data sample
+```
+
+- 방문마다 앞선 실행의 저장된 응답을 먼저 찾아 재생하고, 없는 것만 LLM 을 부른다. 그래서 같은 것을 다시 돌리면 LLM 을 부르지 않는다.
+- LLM 을 부르려면 `.env.example` 을 `.env` 로 복사하고 자기 키를 넣는다. 공급자, 모델, 호출 상한도 `.env` 에서 바꾼다.
+- 키가 없으면 `--replay-only` 를 붙인다. 저장된 응답만 재생하고, 저장된 응답이 없는 방문은 실패로 남는다.
+- 일부만 돌릴 때: `--personas`, `--conditions`, `--venues` 뒤에 식별자를 적는다. 상황은 `--scenario`, 프롬프트의 판은 `--prompt` 다.
+- 호출 상한(`LLM_CALL_LIMIT`, 이번만 바꾸려면 `--limit`)에 닿으면 거기서 멈추고 그 사실을 알린다. 다시 돌리면 받은 답은 재생하고 남은 방문만 부른다.
+- 키나 모델 이름이 틀렸거나 호출이 연달아 3번 실패하면 멈추고 이유를 알린다.
+- 검사에서 어긋난 응답은 실행 폴더의 `llm_rejected/` 에 남는다. 이유는 원장의 `fail_reason` 에 있다.
+- 명령이 끝날 때의 값(`$LASTEXITCODE`): `0` 끝까지 돌았다 (실패한 방문이 있어도 0 이다. 화면에 알린다), `1` 돌리지 못했거나 LLM 을 부를 수 없어 멈췄다, `2` 호출 상한에 닿아 멈췄다.
+- `.env` 는 명령을 돌리는 폴더의 것만 읽는다. 저장소의 맨 위 폴더에서 돌린다.
+- 저장소에는 아직 페르소나 정의와 기준 상황 파일이 없어, 지금은 예시 파일 한 벌의 사본으로만 돌려 볼 수 있다 (사본은 깃이 무시하는 `private/` 에 둔다):
+
+```powershell
+Copy-Item -Recurse tests/fixtures/example private/try-example
+```
+
+```powershell
+uv run python -m engine --data sample --root private/try-example --personas family-elders --conditions meal-dinner-weekend
+```
+
 **알아둘 것**
 
 - 명령은 `uv run python -m <도구>` 꼴로 쓴다. `uv run pytest` 나 `uv run streamlit` 처럼 쓰면 윈도우의 스마트 앱 컨트롤이
   실행 파일을 막는 PC 가 있다 (11-13, 스마트 앱 컨트롤이 켜진 윈도우 11 PC 에서 확인).
 - 화면은 이 PC 에서만 열린다 (`.streamlit/config.toml`). 화면에 내부 자료에서 계산한 값이 나올 수 있어서다.
 - LLM 을 실제로 부르려면 `.env.example` 을 `.env` 로 복사하고 자기 키를 넣는다. 키가 없어도 위의 확인과 화면은 돌아간다.
+  `.env` 는 깃에 올라가지 않는다. 키는 서로 주고받지 않는다.
 - 패키지를 더하거나 버전을 바꾸는 것은 엔진 담당만 한다. 필요하면 진행 문서의 "알릴 것"에 적는다.
 - 내부 자료와 실행 결과는 `private/` 에만 둔다 ([CLAUDE.md](CLAUDE.md) 의 "비밀값과 공개 저장소").

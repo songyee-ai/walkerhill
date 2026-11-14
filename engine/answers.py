@@ -2,7 +2,8 @@
 
 LLM 없이 돌릴 때 쓰는 "정해 둔 답"도 저장된 응답의 모양(`<request_hash>.json`)으로 둔다.
 원장에서 업장을 고른 줄은 저장된 응답에서 나온 것이어야 하기 때문이다.
-LLM 을 실제로 부르고 그 응답을 저장하는 것은 T05 에서 여기에 더한다.
+LLM 이 돌려준 글을 응답으로 읽는 것, 검사를 통과한 응답과 어긋난 응답을 저장하는 것도 여기 있다.
+LLM 을 부르는 것은 `engine/llm.py` 다.
 """
 
 import json
@@ -14,7 +15,7 @@ from pydantic import ValidationError
 
 from engine.formats.choice import ChoiceRequest, ChoiceResponse
 from engine.formats.io import write_json
-from engine.formats.run import SavedResponse, compute_request_hash
+from engine.formats.run import RejectedResponse, SavedResponse, compute_request_hash
 
 
 def request_as_json(request: ChoiceRequest) -> dict[str, Any]:
@@ -55,6 +56,52 @@ class AnswerBook:
         return request_hash, None, None, None
 
 
+def read_reply(raw_text: str) -> tuple[ChoiceResponse | None, list[str]]:
+    """LLM 이 돌려준 글을 응답으로 읽는다. (응답, 읽지 못한 이유)를 돌려준다.
+
+    글의 앞뒤에 코드 울타리나 말이 붙어 있으면 맨 바깥의 `{ … }` 만 읽는다. 그 안은 적힌 그대로 엄격하게 본다.
+    """
+    start, end = raw_text.find("{"), raw_text.rfind("}")
+    if start < 0 or end < start:
+        return None, ["응답에 JSON 이 없다"]
+    try:
+        return ChoiceResponse.model_validate_json(raw_text[start : end + 1], strict=True), []
+    except ValidationError as exc:
+        where = sorted({".".join(str(part) for part in error["loc"]) or "(맨 위)" for error in exc.errors()})
+        return None, [f"응답이 형식에 맞지 않는다: {', '.join(where)}"]
+
+
+def save_response(
+    folder: Path,
+    provider: str,
+    model: str,
+    request: ChoiceRequest,
+    response: ChoiceResponse,
+    created_at: datetime,
+    raw_text: str,
+    input_tokens: int,
+    output_tokens: int,
+) -> str:
+    """검사를 통과한 응답 하나를 저장한다 (docs/FORMATS.md 10.3절). 해시를 돌려준다."""
+    request_json = request_as_json(request)
+    request_hash = compute_request_hash(provider, model, request_json)
+    data = {
+        "format_version": 1,
+        "request_hash": request_hash,
+        "provider": provider,
+        "model": model,
+        "created_at": created_at.isoformat(),
+        "request": request_json,
+        "response": response.model_dump(mode="json"),
+        "raw_text": raw_text,
+        "usage": {"input_tokens": input_tokens, "output_tokens": output_tokens},
+    }
+    # 형식 검사가 받지 않을 파일을 쓰지 않는다. 쓰기 전에 같은 모델로 본다.
+    SavedResponse.model_validate(data)
+    write_json(folder / f"{request_hash}.json", data)
+    return request_hash
+
+
 def save_answer(
     folder: Path,
     provider: str,
@@ -67,21 +114,37 @@ def save_answer(
 
     LLM 이 답한 것이 아니므로 `raw_text` 에는 응답을 JSON 으로 적은 글을 넣고 `usage` 는 0 이다.
     """
+    raw_text = json.dumps(response.model_dump(mode="json"), ensure_ascii=False)
+    return save_response(folder, provider, model, request, response, created_at, raw_text, 0, 0)
+
+
+def save_rejected(
+    folder: Path,
+    provider: str,
+    model: str,
+    request: ChoiceRequest,
+    created_at: datetime,
+    llm_call: str,
+    raw_text: str,
+    problems: list[str],
+    input_tokens: int,
+    output_tokens: int,
+) -> str:
+    """검사에서 어긋난 응답 하나를 남긴다 (docs/FORMATS.md 10.3절의 "어긋난 응답"). 재생에는 쓰지 않는다. 해시를 돌려준다."""
     request_json = request_as_json(request)
     request_hash = compute_request_hash(provider, model, request_json)
-    response_json = response.model_dump(mode="json")
-    write_json(
-        folder / f"{request_hash}.json",
-        {
-            "format_version": 1,
-            "request_hash": request_hash,
-            "provider": provider,
-            "model": model,
-            "created_at": created_at.isoformat(),
-            "request": request_json,
-            "response": response_json,
-            "raw_text": json.dumps(response_json, ensure_ascii=False),
-            "usage": {"input_tokens": 0, "output_tokens": 0},
-        },
-    )
+    data = {
+        "format_version": 1,
+        "request_hash": request_hash,
+        "provider": provider,
+        "model": model,
+        "created_at": created_at.isoformat(),
+        "llm_call": llm_call,
+        "request": request_json,
+        "raw_text": raw_text,
+        "problems": problems,
+        "usage": {"input_tokens": input_tokens, "output_tokens": output_tokens},
+    }
+    RejectedResponse.model_validate(data)
+    write_json(folder / f"{request_hash}.json", data)
     return request_hash

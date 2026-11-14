@@ -759,6 +759,21 @@ customer_group,venue_id,product_id,occasion,meal,day_type,month,unit,quantity,pa
 마지막 항목을 뺀 나머지는 `engine.formats.problems_in_response` 가 본다. 마지막 항목은 업장 정의가 있어야 해서 엔진이 따로 본다 (`engine.ledger.amount_problems`).
 저장된 응답을 재생할 때도 같은 검사를 다시 한다.
 
+**LLM 을 부르는 법** (11-14 에 정함) — 공급자가 달라도 보내는 것은 같다 (`engine/llm.py`).
+
+- **시스템 프롬프트**: `personas/prompts/<prompt_version>.md` 의 글 그대로다. 엔진은 글을 덧붙이지 않는다.
+  그래서 판 이름 하나가 프롬프트의 글 하나다. 글을 고치면 `prompt_version` 을 바꾼다 (요청의 해시가 달라져 저장된 응답이 재생되지 않는다).
+  판 이름은 파일 이름이라 영어 소문자, 숫자, `.`, `_`, `-` 로 적는다. 예시는 `tests/fixtures/example/personas/prompts/p1.md` 다.
+- **사용자 메시지**: 위의 요청을 JSON 으로 적은 글이다.
+- **돌려받는 글**: 위의 응답을 JSON 으로 적은 글이다. 앞뒤에 다른 말이나 코드 울타리가 붙어 있으면 맨 바깥의 `{ … }` 만 읽는다.
+  그 안은 파일과 같이 엄격하게 본다 (약속에 없는 키, 따옴표로 감싼 숫자는 어긋난 답이다).
+- 공급자는 환경 변수 `LLM_PROVIDER` 로 고른다 (`.env.example`).
+  `anthropic` 은 응답의 모양을 구조화된 출력으로 묶어 보낸다. `openai-compatible` 은 OpenAI 의 chat completions 와 같은 모양으로 받는 주소를 부르고
+  JSON 으로 답하라고만 요청하므로, 응답의 모양은 프롬프트가 알려 줘야 한다. 어느 쪽이든 엔진이 답을 다시 검사한다.
+  `openai-compatible` 의 주소(`LLM_BASE_URL`)는 `https://` 여야 한다. `http://` 는 이 PC 의 주소(localhost, 127.0.0.1, ::1)일 때만 받고, 그때는 프록시를 거치지 않는다.
+  주소가 다른 곳으로 넘기는 답(3xx)은 따라가지 않는다. 키와 요청이 암호화되지 않은 채로, 또는 적지 않은 곳으로 나가지 않게 하려는 것이다.
+- 어긋난 답은 다시 묻지 않고 그 방문을 실패로 기록한다. 어긋난 답은 10.3절의 "어긋난 응답"으로 남는다.
+
 ## 10. 실행 결과
 
 상황 하나를 돌린 것이 실행 하나다. `run_id` 는 `<날짜>-<시각>-<scenario_id>` 다 (예: `20261117-101500-baseline`).
@@ -778,7 +793,8 @@ customer_group,venue_id,product_id,occasion,meal,day_type,month,unit,quantity,pa
 |---|---|
 | `run.json` | 실행 기록 |
 | `ledger.csv` | 소비 원장 |
-| `llm/<request_hash>.json` | 저장된 LLM 응답. 요청 하나가 파일 하나 |
+| `llm/<request_hash>.json` | 저장된 LLM 응답. 요청 하나가 파일 하나. 검사를 통과한 것만 둔다 |
+| `llm_rejected/<request_hash>.json` | 검사에서 어긋난 LLM 응답. 재생에는 쓰지 않는다 (10.3절) |
 | `calibration.json` | 보정의 대조 결과 (기준 상황만) |
 | `validation.json`, `validation_reviews.csv` | 떼어 둔 후기로 잰 검증 결과와, 후기 한 건마다의 결과 |
 
@@ -794,7 +810,7 @@ customer_group,venue_id,product_id,occasion,meal,day_type,month,unit,quantity,pa
 | `scenario_id`, `persona_ids`, `condition_ids` | 무엇을 돌렸나 |
 | `llm` | `provider`, `model`, `prompt_version`, `calls_new` (새로 부른 수), `calls_replayed` (저장된 응답을 재생한 수), `call_limit`, `stopped_by_limit` |
 | `base_profile_mode` | 기본 데이터에서 나온 값을 LLM 에 어떻게 보냈나: `none` 보내지 않음, `bucketed` 범주로 바꿔 보냄, `raw` 그대로 보냄. 기본 데이터로 돌릴 때의 기본값은 `bucketed` 다 (11-13 결정). 가상 예시로 돌릴 때는 늘 `none` 이다. 값을 붙이는 코드는 T11 에서 만들고, 그 전에 돌린 실행에는 실제로 보낸 대로 `none` 이 남는다 |
-| `inputs` | 입력 파일들의 해시. 같은 입력인지 견줄 때 쓴다. 읽은 것만 적는다: `venues`, `personas`, `conditions`, `scenario`, `vocab`, 집계 파일을 읽었으면 `summary` |
+| `inputs` | 입력 파일들의 해시. 같은 입력인지 견줄 때 쓴다. 읽은 것만 적는다: `venues`, `personas`, `conditions`, `scenario`, `vocab`, 집계 파일을 읽었으면 `summary`, LLM 을 부를 수 있게 돌렸으면 프롬프트 파일의 `prompt` (재생만 하는 실행은 프롬프트를 읽지 않는다) |
 | `weights` | `group_multiplier` 고객군 배수, `persona_weight` 페르소나의 가중치, `condition_ratio` 고객군마다 묶음의 비율, `grades` 각 값의 근거 등급. 묶음의 비율은 조건마다 등급을 적는다. `assumed_splits` 로 나눈 조건은 `assumption` 이다 |
 | `skipped_products` | 가격을 채우지 못해 후보에서 뺀 상품의 목록. `<venue_id>:<product_id>` 로 적는다 |
 | `weights_from` | 가중치를 정한 기준 상황의 `run_id`. 기준 상황 자신이면 `null` |
@@ -807,6 +823,19 @@ customer_group,venue_id,product_id,occasion,meal,day_type,month,unit,quantity,pa
 - 가상 예시로 돌린 실행(`data_mode` 가 `sample`)의 `grades` 에는 `internal` 을 쓰지 않는다. 지어낸 값에서 낸 가중치의 등급은 `assumption` 이다.
 - `counts` 는 원장과 맞아야 한다: `visits` 는 원장의 방문 수, `failed` 는 그중 실패한 방문 수다.
   끝까지 돌린 실행(`status` 가 `ok`)의 원장에는 `persona_ids` × `condition_ids` 마다 방문이 하나씩 있다.
+- **`llm` 의 수와 `status`** (11-14 에 정함)
+  - `calls_new` 는 이 실행에서 LLM 을 부른 수다. 실패한 호출과 답이 어긋난 호출도 센다 (상한은 비용을 막으려는 것이다).
+    `call_limit` 을 넘지 않는다. LLM 없이 재생만 한 실행은 둘 다 0 이다.
+    세는 것은 엔진이 공급자를 부른 수다. 공급자의 SDK 가 안에서 다시 보내 보는 요청은 세지 않는다.
+  - 새로 부르려는데 `calls_new` 가 `call_limit` 에 닿아 있으면 거기서 멈춘다. `status` 는 `stopped_by_limit`, `llm.stopped_by_limit` 은 `true` 다 (둘은 늘 함께다).
+  - 설정이 틀려 부를 수 없으면 그 방문을 실패로 남기고 멈춘다. `status` 는 `failed` 다.
+    키가 없거나 틀린 것, 없는 모델 이름, 공급자가 요청 자체를 받지 않는 것(HTTP 400·401·403·404), 주소가 다른 곳으로 넘기는 것(3xx)이 그렇다.
+    다시 불러도 같은 실패가 나는 것들이다.
+  - 한 번의 호출이 실패한 것(연결 오류, 요청 한도, 서버 오류, 답을 거절함, 답이 길이 한도에서 끊김)은 그 방문만 실패로 남기고 다음 방문으로 간다.
+    다만 **이렇게 실패한 호출이 연달아 3번이면 멈춘다** (`status` 는 `failed`). 닿지 않는 주소나 멈춘 공급자를 상한까지 계속 부르지 않으려는 것이다.
+    거절과 길이 한도에서 끊긴 답도 실패한 호출로 센다. 읽을 글을 받으면(검사에서 어긋난 답이어도) 다시 0 부터 센다.
+  - 멈춘 실행의 원장에는 멈추기 전까지 돌린 방문만 있다. 받은 답은 `llm/` 에 남아 있어, 다시 돌리면 재생하고 남은 방문만 새로 부른다.
+  - 예상하지 못한 오류로 끊긴 실행도 그때까지의 실행 기록과 원장을 쓴다 (`status` 는 `failed`). 실행 기록이 없는 실행 폴더는 형식 검사가 오류로 본다.
 
 ```json
 {
@@ -888,12 +917,14 @@ customer_group,venue_id,product_id,occasion,meal,day_type,month,unit,quantity,pa
   한 방문에 `ok` 인 줄과 `failed` 인 줄을 섞지 않는다. `fail_reason` 은 실패한 줄에만 적는다.
   저장된 응답의 파일을 찾았는데 쓰지 못해 실패한 방문은 `llm_call` 과 `request_hash` 를 적고 실행 기록의 `calls_replayed` 에 센다.
   응답이 검사에서 어긋난 경우, 파일을 읽을 수 없는 경우, 파일의 요청이 해시와 맞지 않는 경우가 그렇다.
-  그 파일은 실행 폴더의 `llm/` 에 베껴 두지 않으므로, 실패한 줄의 `request_hash` 가 가리키는 파일은 `llm/` 에 없을 수 있다
-  (형식 검사가 `llm/` 의 어긋난 응답을 오류로 본다). 어긋난 응답을 어디에 남길지는 T05 에서 정한다.
+  LLM 을 새로 불렀는데 실패한 방문(호출이 실패했거나 답이 어긋남)은 `llm_call` 이 `new` 다.
+  실패한 줄의 `request_hash` 가 가리키는 파일은 `llm/` 에 없다. 검사에서 어긋난 응답이면 `llm_rejected/` 에 있고 (10.3절),
+  읽을 수 없는 파일이거나 답을 받지 못한 호출이면 어디에도 없다.
 - **원장은 저장된 응답에서 나온 것이어야 한다.**
   - 업장을 고른 줄에는 `request_hash` 가 반드시 있다. 업장을 고르는 것은 LLM 의 응답뿐이기 때문이다.
-    후보가 하나도 없어 엔진이 응답 없이 "이용하지 않음"으로 정한 방문만 `llm_call` 과 `request_hash` 를 함께 비운다 (둘은 늘 함께 있거나 함께 비어 있다).
-    그 줄의 `reason_text` 는 "후보가 없음"이다.
+    `llm_call` 과 `request_hash` 를 함께 비우는 줄은 두 가지뿐이다 (둘은 늘 함께 있거나 함께 비어 있다).
+    후보가 하나도 없어 엔진이 응답 없이 "이용하지 않음"으로 정한 방문 (`reason_text` 는 "후보가 없음"),
+    그리고 LLM 을 부르지 않고 재생만 했는데 저장된 응답이 없어 실패한 방문이다.
   - 한 방문의 줄들은 `request_hash` 가 가리키는 저장된 응답(10.3절)과 같아야 한다:
     요청의 페르소나와 조건, 응답이 고른 업장, 고른 주문의 줄(상품, 수량, 단위, 단가, 할인, 금액), 고른 추가 상품(상품, 수량, 단위, 단가), 이유.
     손으로 고친 원장을 걸러 내려는 것이다. 위의 "파는 달이 아님" 줄은 이유가 따로라 이유를 견주지 않는다.
@@ -919,7 +950,23 @@ run_id,scenario_id,visit_id,persona_id,customer_group,condition_id,choice_kind,v
 - **해시를 내는 법**: `{"provider": …, "model": …, "request": …}` 를 키를 정렬하고 공백 없이 적은 JSON 으로 바꾼 뒤, 그 글의 SHA-256 에서 앞 16글자를 쓴다.
   직접 계산하지 말고 `engine.formats.compute_request_hash` 를 쓴다. PC 가 달라도 같은 요청이면 같은 값이 나온다.
 - 같은 `request_hash` 의 파일이 있으면 LLM 을 부르지 않고 그 응답을 쓴다. 그러면 원장이 똑같이 나온다 (PRD 7.3절).
+  실행하는 명령(`python -m engine`)은 같은 `data_mode` 의 앞선 실행들의 `llm/` 을 새 실행부터 찾는다. 재생한 응답은 그 실행의 `llm/` 에도 베껴 둔다.
 - 팀원끼리 이 폴더를 저장소 밖의 경로로 주고받으면 키가 없는 사람도 같은 결과를 재생할 수 있다.
+- `created_at` 은 그 응답을 받은 실행의 시각이다. `usage` 는 공급자가 알려 준 값이고, LLM 이 답한 것이 아닌 "정해 둔 답"은 0 이다.
+- `llm/` 에는 검사(9절)를 통과한 응답만 둔다. 받자마자 저장하므로 실행이 도중에 멈춰도 받은 답은 남는다.
+
+**어긋난 응답 `llm_rejected/<request_hash>.json`** (11-14 에 정함) — 검사에서 어긋난 응답은 여기에 따로 남긴다.
+프롬프트를 고칠 때 LLM 이 실제로 뭐라고 답했는지 보려는 것이다. 재생에는 쓰지 않으므로 다음 실행은 그 요청을 다시 부른다.
+
+| 키 | 뜻 |
+|---|---|
+| `format_version`, `request_hash`, `provider`, `model`, `created_at`, `request`, `raw_text`, `usage` | 저장된 응답과 같다 |
+| `llm_call` | `new` 이번 실행에서 새로 받은 답, `replay` 저장된 응답을 재생하다 어긋난 것 |
+| `problems` | 어긋난 곳을 적은 문장의 목록. 하나 이상. 원장의 `fail_reason` 은 이것을 `; ` 로 이은 글이다 |
+
+- `response` 는 없다. 글을 응답으로 읽지 못한 것도 여기에 남기 때문이다.
+- 이 파일이 있으면 원장에 같은 `request_hash` 의 실패한 줄이 있다. 한 실행에서 같은 요청이 `llm/` 과 `llm_rejected/` 에 함께 있을 수 없다.
+- 읽을 수 없는 저장 파일과 답을 받지 못한 호출은 남길 글이 없어 여기에 없다. 원장의 `fail_reason` 에만 이유가 남는다.
 
 ### 10.4 보정의 대조 결과 `calibration.json`
 
@@ -1007,6 +1054,8 @@ uv run python -m tools.check_formats --strict   # 다 만든 뒤의 기준으로
 - 묶음의 조건은 `month` 와 `stay` 가 `null` 이고 조식 조건이 없다. 상황의 `our_price`·`our_promo` 는 워커힐 업장만, `competitor` 는 경쟁 업장만 바꾼다.
 - `engine/samples/runs/` 의 실행 기록은 모두 `data_mode` 가 `sample` 이다. 가중치가 빠짐없이 있고 등급에 `internal` 이 없다.
   원장의 방문 수가 실행 기록과 맞고, 원장이 저장된 응답과 같다 (10절).
+  어긋난 응답(`llm_rejected/`)은 해시가 요청과 맞고, 공급자·모델·상황이 실행 기록과 같고, 같은 요청이 `llm/` 에 없다.
+  원장에 그 요청의 실패한 줄이 있고, 그 줄의 `llm_call` 과 `fail_reason` 이 파일의 `llm_call`, `problems` 와 같다.
 - 데이터 폴더에 1절의 표에 없는 파일이나 폴더가 없다. 확장자는 소문자다. (빈 폴더를 깃에 남기는 `.gitkeep` 은 둘 수 있다.)
 
 **올리면 안 되는 것** — 깃에 올라갈 수 있는 **모든 파일**을 훑는다. 확장자, 크기, 글자 인코딩, 폴더의 깊이를 가리지 않는다.
@@ -1018,7 +1067,7 @@ uv run python -m tools.check_formats --strict   # 다 만든 뒤의 기준으로
   글로 붙여 넣은 것을 찾는 검사는 후기 번호와 같이 이 문서와 테스트 코드를 예외로 둔다.
 - JSON 어디에도 `base_profile` 과 `overridden_by_private` 에 값이 없다 (키가 없거나 비어 있다). 둘 다 기본 데이터로 돌린 결과에만 값이 있다.
 - 자리가 정해진 파일이 그 자리 밖에 없다. 파일의 이름이 아니라 **내용으로** 알아본다:
-  후기 라벨, 가상 예시 값과 같은 열의 파일, 소비 원장, 실행 기록, 저장된 응답, 보정의 대조 결과.
+  후기 라벨, 가상 예시 값과 같은 열의 파일, 소비 원장, 실행 기록, 저장된 응답과 어긋난 응답, 보정의 대조 결과.
   - 표는 열 이름으로 알아본다: CSV·TSV 의 첫 줄, 글 파일(`.txt`)의 첫 줄이 여러 칸으로 나뉠 때 그 칸들, 마크다운 표의 머리글.
   - JSON 은 키로 알아본다: 맨 위뿐 아니라 안쪽의 묶음을 모두 본다. 응답 여럿을 목록 하나에 모은 파일, 한 줄에 하나씩 적은 `.jsonl`, 표를 JSON 으로 바꾼 파일도 같다.
 - 저장소 어디에도 둘 수 없는 것이 없다.
@@ -1056,7 +1105,7 @@ uv run python -m tools.check_formats --strict   # 다 만든 뒤의 기준으로
 | 7절의 기준 상황 | `set_price` 를 뺀 나머지 바꾸는 종류 |
 | 8절 가상 예시 값 | 기본 데이터 집계 파일, 가격이 `null` 인 상품을 채우는 규칙 |
 | 9절 선택 요청과 응답 | `addons`, 주문이 없는 후보, 후보의 `promotions` |
-| 10.1절 실행 기록, 10.2절 소비 원장, 10.3절 저장된 응답 | `counted_share`, 10.4절 보정, 10.5절 검증 |
+| 10.1절 실행 기록, 10.2절 소비 원장, 10.3절 저장된 응답과 어긋난 응답 | `counted_share`, 10.4절 보정, 10.5절 검증 |
 
 **아직 정하지 않은 것**
 

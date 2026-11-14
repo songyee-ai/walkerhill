@@ -47,6 +47,7 @@ from engine.formats.run import (
     VISIT_ID_SEPARATOR,
     Calibration,
     LedgerRow,
+    RejectedResponse,
     RunRecord,
     SavedResponse,
     compute_request_hash,
@@ -174,7 +175,8 @@ SUMMARY = Kind(
 )
 LEDGER = Kind("소비 원장", _RUN + r"/ledger\.csv", _RUN_WHERE)
 RUN_RECORD = Kind("실행 기록", _RUN + r"/run\.json", _RUN_WHERE)
-SAVED_RESPONSE = Kind("저장된 LLM 응답", _RUN + r"/llm/[^/]+\.json", _RUN_WHERE)
+# 검사에서 어긋난 응답(llm_rejected/)도 요청과 LLM 이 돌려준 글을 담고 있어 같은 종류로 본다.
+SAVED_RESPONSE = Kind("저장된 LLM 응답", _RUN + r"/llm(?:_rejected)?/[^/]+\.json", _RUN_WHERE)
 CALIBRATION = Kind("보정의 대조 결과", _RUN + r"/calibration\.json", _RUN_WHERE)
 
 # 표의 머리글이나 JSON 묶음의 키에 이 이름이 모두 있으면 그 종류다.
@@ -668,7 +670,10 @@ class Checker:
         records: dict[str, RunRecord] = {}
         for run_dir in run_dirs:
             self._managed(
-                run_dir, "실행 기록, 소비 원장, 보정의 대조 결과와 저장된 응답의 llm 폴더", files=RUN_FILES, dirs=("llm",)
+                run_dir,
+                "실행 기록, 소비 원장, 보정의 대조 결과와 저장된 응답의 llm 폴더, 어긋난 응답의 llm_rejected 폴더",
+                files=RUN_FILES,
+                dirs=("llm", "llm_rejected"),
             )
             record_path = run_dir / "run.json"
             if not record_path.is_file():
@@ -694,7 +699,8 @@ class Checker:
                 elif base.weights != record.weights:
                     self.error(path, "weights 가 weights_from 의 실행과 다르다 (가중치는 기준 상황에서 한 번 정하고 그대로 쓴다)")
             stems, saved = self._check_saved_responses(run_dir, record)
-            self._check_ledger(run_dir, record, stems, saved)
+            rejected = self._check_rejected_responses(run_dir, record, stems)
+            self._check_ledger(run_dir, record, stems, saved, rejected)
             self._check_calibration(run_dir, record)
 
     def _check_run_record(self, path: Path, dir_name: str, record: RunRecord) -> None:
@@ -779,8 +785,42 @@ class Checker:
                 self.error(path, f"응답 — {problem}")
         return stems, saved
 
+    def _check_rejected_responses(
+        self, run_dir: Path, record: RunRecord, stems: set[str]
+    ) -> dict[str, RejectedResponse | None]:
+        """검사에서 어긋난 응답(llm_rejected/)을 검사한다. 파일의 이름마다 읽은 것을 돌려준다 (읽지 못했으면 None)."""
+        rejected: dict[str, RejectedResponse | None] = {}
+        for path in self._managed(run_dir / "llm_rejected", "어긋난 응답 `<request_hash>.json`", suffix=".json"):
+            rejected[path.stem] = None
+            raw = self._raw_json(path)
+            if raw is None:
+                continue
+            try:
+                entry = RejectedResponse.model_validate_json(raw, strict=True)
+            except ValidationError as exc:
+                self._model_errors(path, exc)
+                continue
+            rejected[path.stem] = entry
+            if path.stem != entry.request_hash:
+                self.error(path, "파일 이름이 request_hash 와 다르다")
+            expected = compute_request_hash(entry.provider, entry.model, json.loads(raw)["request"])
+            if entry.request_hash != expected:
+                self.error(path, f"request_hash 가 요청으로 다시 낸 값 '{expected}' 와 다르다 (요청을 손으로 고쳤는가)")
+            if (entry.provider, entry.model) != (record.llm.provider, record.llm.model):
+                self.error(path, "provider 나 model 이 실행 기록과 다르다")
+            if entry.request.scenario_id != record.scenario_id:
+                self.error(path, "요청의 scenario_id 가 실행 기록과 다르다")
+            if path.stem in stems:
+                self.error(path, f"같은 요청의 응답이 llm/{path.name} 에도 있다. 한 요청의 답은 통과했거나 어긋났거나 둘 중 하나다")
+        return rejected
+
     def _check_ledger(
-        self, run_dir: Path, record: RunRecord, stems: set[str], saved: dict[str, SavedResponse]
+        self,
+        run_dir: Path,
+        record: RunRecord,
+        stems: set[str],
+        saved: dict[str, SavedResponse],
+        rejected: dict[str, RejectedResponse | None] | None = None,
     ) -> None:
         path = run_dir / "ledger.csv"
         if not path.is_file():
@@ -848,6 +888,19 @@ class Checker:
 
         for visit_rows in visits.values():
             self._check_visit(path, visit_rows, saved)
+
+        # 어긋난 응답은 실패한 방문에서만 나온다. 원장에 그 방문의 실패한 줄이 있고, 그 줄이 파일과 같은 말을 해야 한다.
+        failed_rows = {row.request_hash: row for rows_ in visits.values() for _, row in rows_ if row.status == "failed"}
+        for request_hash, entry in sorted((rejected or {}).items()):
+            where = f"llm_rejected/{request_hash}.json"
+            row = failed_rows.get(request_hash)
+            if row is None:
+                self.error(path, f"어긋난 응답 {where} 을 가리키는 실패한 줄이 원장에 없다")
+            elif entry is not None:
+                if row.llm_call != entry.llm_call:
+                    self.error(path, f"방문 {row.visit_id} 의 llm_call 이 어긋난 응답 {where} 과 다르다")
+                if row.fail_reason != "; ".join(entry.problems):
+                    self.error(path, f"방문 {row.visit_id} 의 fail_reason 이 어긋난 응답 {where} 의 problems 를 '; ' 로 이은 글과 다르다")
 
         # 읽지 못한 줄이 있으면 방문을 제대로 셀 수 없다. 그 줄의 오류는 위에서 이미 적었으므로,
         # 같은 원인에서 나오는 "방문 수가 다르다"를 겹쳐 적지 않는다. 그 줄을 고친 뒤 다시 돌리면 아래를 본다.
