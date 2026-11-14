@@ -17,6 +17,7 @@
 | `data/evidence/vocab.json`, `data/evidence/reviews/geumryong.csv` | 4절 | 문서의 예시 |
 | `personas/family-elders.json` | 5절 | 문서의 예시 |
 | `personas/family-kids.json` | 5절 | 문서에 없다. 같은 고객군의 둘째 페르소나이고, 후기 근거가 없는 경우("이유 근거 부족")의 예시 |
+| `personas/prompts/p1.md` | 9절 | 문서에 없다. 프롬프트의 예시. 엔진은 이 글을 시스템 프롬프트로 그대로 보낸다 |
 | `engine/conditions.json` | 6절 | 문서의 예시 |
 | `scenarios/baseline.json` | 7절 | 문서에 없다. 기준 상황 |
 | `scenarios/geumryong-course-price-up.json`, `competitor-chinese-discount.json` | 7절 | 문서의 예시 |
@@ -28,7 +29,9 @@
 
 ## 알아둘 것
 
-- 실행 결과는 엔진으로 돌린 것이 아니라 손으로 만든 것이다. 엔진이 생기면(T05) 엔진으로 다시 만든다.
+- 실행 결과는 엔진으로 돌린 것이 아니라 손으로 만든 것이다. 저장된 응답의 요청은 문서의 예시처럼 페르소나를 줄여 적은 것이라
+  엔진이 만든 요청과 해시가 달라 재생되지 않는다. 엔진으로 다시 만드는 것은 가중치를 집계 파일에서 내고(T11) 상황을 적용할 수 있게 된(T10) 뒤에 한다.
+  그 전에 엔진으로 만들면 가중치와 둘째 실행(경쟁 업장의 할인)이 문서의 예시와 달라진다.
 - 검사하는 법:
 
 ```powershell

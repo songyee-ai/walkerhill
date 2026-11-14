@@ -111,6 +111,10 @@ class RunRecord(FormatModel):
             raise ValueError("기준이 아닌 상황은 weights_from 에 가중치를 정한 기준 상황의 run_id 를 적는다")
         if self.counts.failed > self.counts.visits:
             raise ValueError("counts.failed 가 counts.visits 보다 크다")
+        if self.llm.stopped_by_limit != (self.status == "stopped_by_limit"):
+            raise ValueError("llm.stopped_by_limit 과 status 가 서로 다른 말을 한다")
+        if self.llm.calls_new > self.llm.call_limit:
+            raise ValueError("llm.calls_new 가 llm.call_limit 보다 크다")
         return self
 
 
@@ -237,6 +241,22 @@ class SavedResponse(FormatModel):
     request: ChoiceRequest
     response: ChoiceResponse
     raw_text: str
+    usage: Usage
+
+
+class RejectedResponse(FormatModel):
+    """검사에서 어긋난 LLM 응답 `llm_rejected/<request_hash>.json`. 프롬프트를 고칠 때 보려고 남긴다. 재생에는 쓰지 않는다."""
+
+    format_version: Literal[1]
+    request_hash: Text
+    provider: Text
+    model: Text
+    created_at: AwareDatetime
+    # 이번 실행에서 새로 받은 답인가, 저장된 응답을 재생하다 어긋난 것인가.
+    llm_call: Literal["new", "replay"]
+    request: ChoiceRequest
+    raw_text: str
+    problems: list[Text] = Field(min_length=1)
     usage: Usage
 
 
