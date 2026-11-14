@@ -33,7 +33,7 @@ from engine.formats import (
 from engine.formats.io import read_csv
 from engine.formats.run import SEASON_GAP_REASON, Weights
 from engine.ledger import NO_CANDIDATE_REASON, amount_problems, totals
-from engine.runner import NO_SAVED_ANSWER, NotSupportedYet, _engine_commit, load_inputs, run, run_visit
+from engine.runner import NO_SAVED_ANSWER, _engine_commit, load_inputs, run, run_visit
 from tests.conftest import BASELINE_RUN, EXAMPLE_ROOT, REPO_ROOT, load_json, save_csv, save_json
 from tools.check_formats import check
 
@@ -453,6 +453,10 @@ def test_amounts_are_recomputed_from_the_venue_definition(example_copy):
         change(line)
         line["line_total"] = line["quantity"] * line["unit_price"] - line["discount"]
         data["candidates"][0]["options"][0]["total"] = line["line_total"]
+        if line["discount"]:
+            # 깎인 줄이 있는 후보에는 적용된 프로모션이 있어야 요청의 모양이 맞다 (docs/FORMATS.md 9절).
+            benefit = {"type": "discount_amount", "value": line["discount"]}
+            data["candidates"][0]["promotions"] = [{"promo_id": "made-up", "name": "없는 할인", "benefit": benefit, "applied": True}]
         return ChoiceRequest.model_validate(data)
 
     assert "단가" in amount_problems(tampered(lambda line: line.update(unit_price=100000)), response, venues)[0]
@@ -879,28 +883,8 @@ def test_candidates_are_our_venues_and_their_competitors():
     assert [c.venue_id for c in found] == ["geumryong", "examplehotel-chinese"]
 
 
-# ── 아직 넣지 않은 것은 조용히 지나가지 않는다 ─────────────────────────
-
-
-def test_scenario_with_changes_is_refused_for_now(example_copy):
-    with pytest.raises(NotSupportedYet, match="T10"):
-        run(
-            example_copy,
-            data_mode="sample",
-            now=NOW,
-            provider=PROVIDER,
-            model=MODEL,
-            prompt_version="p1",
-            answers=[],
-            scenario_id="competitor-chinese-discount",
-        )
-
-
-def test_venue_with_a_promotion_is_refused_for_now(example_copy):
-    promotion = load_json(example_copy / "scenarios" / "competitor-chinese-discount.json")["changes"][0]["promotion"]
-    edit(venue_file(example_copy, "examplehotel-chinese"), lambda d: d["promotions"].append(promotion))
-    with pytest.raises(NotSupportedYet, match="examplehotel-chinese"):
-        run(example_copy, data_mode="sample", now=NOW, provider=PROVIDER, model=MODEL, prompt_version="p1", answers=[])
+# 상황 적용과 프로모션(T10)의 테스트는 tests/test_scenarios.py 에 있다. T04 에서 임시로 넣었던 막음
+# (`NotSupportedYet`: 프로모션이 있는 업장이나 기준이 아닌 상황이 오면 멈춤)은 T10 에서 없앴다.
 
 
 # ── 읽는 곳과 쓰는 곳 ───────────────────────────────────────────────────

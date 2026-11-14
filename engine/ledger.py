@@ -14,6 +14,7 @@ from engine.formats.io import write_csv
 from engine.formats.money import net_of_tax, round_half_up, to_paid_price, weighted_amount
 from engine.formats.run import LEDGER_COLUMNS, SEASON_GAP_REASON, LedgerRow
 from engine.formats.venue import Product, Venue
+from engine.promotions import order_discounts, promotions_for
 
 # 후보가 하나도 없어 엔진이 응답 없이 "이용하지 않음"으로 정한 방문의 reason_text.
 NO_CANDIDATE_REASON = "후보가 없음"
@@ -59,8 +60,9 @@ def _share(request: ChoiceRequest, venue: Venue, products: list[Product]) -> flo
 def amount_problems(request: ChoiceRequest, response: ChoiceResponse, venues: dict[str, Venue]) -> list[str]:
     """원장에 적을 금액을 업장 정의로 다시 계산해 요청의 금액과 견준다 (docs/FORMATS.md 9절의 마지막 검사).
 
-    요청의 후보를 믿지 않고 업장 정의에서 다시 낸다: 그 상품이 있는지, 이번 조건에 파는지, 수량과 단가가 맞는지.
+    요청의 후보를 믿지 않고 업장 정의에서 다시 낸다: 그 상품이 있는지, 이번 조건에 파는지, 수량과 단가와 할인이 맞는지.
     `problems_in_response` 가 보는 것(후보에 있는 업장과 주문인지 등)은 다시 보지 않는다.
+    `venues` 는 상황을 적용한 업장 정의다 (`engine.runner.load_inputs` 가 돌려주는 것).
     """
     venue_id = response.choice.venue_id
     if venue_id is None:
@@ -73,18 +75,26 @@ def amount_problems(request: ChoiceRequest, response: ChoiceResponse, venues: di
     lines, extras = _chosen_products(request, response, venue)
     problems: list[str] = []
 
+    amounts: list[tuple[str, int]] = []
     for product, line in lines:
         if product is None or product.product_id not in on_sale:
             problems.append(f"상품 '{line.product_id}' 는 업장 '{venue_id}' 가 이번 조건에 파는 상품이 아니다")
         elif product.qty_rule == "choice" or product.price is None:
             problems.append(f"상품 '{line.product_id}' 는 주문의 줄에 넣을 수 없다 (수량을 고객이 정하거나 가격이 없다)")
         else:
-            if line.quantity != quantity_for(product, condition.adults, condition.children):
+            quantity = quantity_for(product, condition.adults, condition.children)
+            unit_price = to_paid_price(product.price, product.price_basis)
+            if line.quantity != quantity:
                 problems.append(f"상품 '{line.product_id}' 의 수량이 수량 규칙으로 낸 값과 다르다")
-            if line.unit_price != to_paid_price(product.price, product.price_basis):
+            if line.unit_price != unit_price:
                 problems.append(f"상품 '{line.product_id}' 의 단가가 업장 정의의 가격과 다르다")
-            if line.discount != 0:
-                problems.append(f"상품 '{line.product_id}' 에 할인이 있다 (프로모션은 아직 넣지 않는다)")
+            amounts.append((product.product_id, quantity * unit_price))
+    # 할인은 주문 하나를 통째로 보고 정한다 (가장 큰 할인 하나만). 줄이 모두 업장 정의에 있을 때만 다시 낸다.
+    if len(amounts) == len(lines):
+        cuts, _ = order_discounts(promotions_for(venue, condition), amounts)
+        for (_, line), cut in zip(lines, cuts, strict=True):
+            if line.discount != cut:
+                problems.append(f"상품 '{line.product_id}' 의 할인이 프로모션 규칙으로 낸 값과 다르다")
     for product, addon, quantity in extras:
         if product is None or product.product_id not in on_sale or product.qty_rule != "choice":
             problems.append(f"추가 상품 '{addon.product_id}' 는 업장 '{venue_id}' 가 이번 조건에 파는 추가 상품이 아니다")

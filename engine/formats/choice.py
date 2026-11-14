@@ -88,7 +88,10 @@ class Addon(FormatModel):
 
 
 class CandidatePromotion(FormatModel):
-    """이번 조건에 해당하는 프로모션. `applied` 가 true 면 할인이 이미 `discount` 에 들어 있다."""
+    """이번 조건에 해당하는 프로모션. `applied` 가 true 면 할인이 이미 주문의 `discount` 에 들어 있다.
+
+    증정은 금액을 바꾸지 않아 늘 false 다. 더 큰 할인에 밀려 어느 주문에도 들어가지 않은 할인도 false 다.
+    """
 
     promo_id: Id
     name: Text
@@ -116,6 +119,15 @@ class Candidate(FormatModel):
     def _something_to_buy(self) -> Self:
         if not self.options and not self.addons:
             raise ValueError(f"업장 '{self.venue_id}' 에 고를 주문도 추가 상품도 없다")
+        if has_duplicates([p.promo_id for p in self.promotions]):
+            raise ValueError(f"업장 '{self.venue_id}' 의 promotions 에 같은 프로모션이 두 번 있다")
+        # 할인은 프로모션에서만 나온다. 깎인 줄이 있으면 적용된 할인이 있고, 없으면 적용된 것도 없다.
+        applied = [p for p in self.promotions if p.applied]
+        if any(p.benefit.type == "gift" for p in applied):
+            raise ValueError(f"업장 '{self.venue_id}' — 증정은 금액을 바꾸지 않아 applied 가 false 다")
+        discounted = any(line.discount for option in self.options for line in option.lines)
+        if discounted != bool(applied):
+            raise ValueError(f"업장 '{self.venue_id}' — 주문의 할인과 promotions 의 applied 가 서로 다른 말을 한다")
         return self
 
     def option(self, option_id: str | None) -> Option | None:

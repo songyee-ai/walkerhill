@@ -13,7 +13,7 @@ from engine.formats.conditions import MANUAL_CONDITION_PREFIX, ConditionBundle
 from engine.formats.money import TAX_RATE
 from engine.formats.persona import Persona
 from engine.formats.run import LedgerRow, SavedResponse
-from engine.formats.venue import Product, Venue
+from engine.formats.venue import Period, Product, Venue
 
 _BASIS_RATE = {
     "included": Decimal(1),
@@ -31,6 +31,56 @@ def _paid_price(price: int, basis: str) -> int:
 
 def _months(venue: Venue, product: Product) -> frozenset[int]:
     return frozenset(product.months or venue.months or _EVERY_MONTH)
+
+
+def _period_months(period: Period) -> set[int]:
+    """프로모션의 기간이 걸치는 달 (연도는 보지 않는다)."""
+    months: set[int] = set()
+    year, month = period.from_.year, period.from_.month
+    last = (period.to.year, period.to.month)
+    while (year, month) <= last and len(months) < 12:
+        months.add(month)
+        year, month = (year + 1, 1) if month == 12 else (year, month + 1)
+    return months
+
+
+def _expected_discounts(venue: Venue, condition: RunCondition, rows: list[LedgerRow], products: list[Product]) -> list[int]:
+    """주문의 줄마다 깎였어야 할 금액 (docs/FORMATS.md 3절의 "프로모션을 금액에 넣는 규칙").
+
+    후보를 만드는 코드(`engine/promotions.py`)를 쓰지 않고 업장 정의의 프로모션에서 따로 낸다.
+    `rows` 는 원장에 적힌 순서(주문의 줄 순서)의 줄이고, `products` 는 그 줄의 상품이다.
+    """
+    people = condition.adults + condition.children
+    amounts = [Decimal(row.quantity * row.list_price) for row in rows]
+    best = [0] * len(rows)
+    for promo in venue.promotions:
+        wanted = promo.conditions
+        if promo.benefit.type == "gift":
+            continue
+        if wanted.day_type is not None and wanted.day_type != condition.day_type:
+            continue
+        if wanted.meal is not None and wanted.meal != condition.meal:
+            continue
+        if wanted.stay is not None and wanted.stay != condition.stay:
+            continue
+        if wanted.party_min is not None and people < wanted.party_min:
+            continue
+        if promo.period is not None and condition.month is not None and condition.month not in _period_months(promo.period):
+            continue
+        hit = [promo.applies_to is None or product.product_id in promo.applies_to for product in products]
+        cuts = [0] * len(rows)
+        if promo.benefit.type == "discount_pct":
+            rate = Decimal(str(promo.benefit.value)) / 100
+            cuts = [
+                int((amount * rate).quantize(Decimal(1), rounding=ROUND_HALF_UP)) if on else 0
+                for amount, on in zip(amounts, hit, strict=True)
+            ]
+        elif True in hit:
+            first = hit.index(True)
+            cuts[first] = min(int(promo.benefit.value), int(amounts[first]))
+        if sum(cuts) > sum(best):
+            best = cuts
+    return best
 
 
 def _condition_problems(
@@ -74,6 +124,8 @@ def violations(
 
     `personas` 에는 그 실행에 쓴 페르소나를 준다. 기본 데이터로 돌린 실행이면 두 층을 합친 것이다
     (`engine.runner.load_inputs` 가 돌려주는 `personas`). 공개 층만 주면 비공개 층이 바꾼 예산이 "조건 불일치"로 나온다.
+    `venues` 에는 그 실행의 상황을 적용한 업장 정의를 준다 (`load_inputs` 가 돌려주는 `venues`).
+    파일에 적힌 그대로를 주면 상황이 바꾼 가격과 프로모션이 "금액 불일치"로 나온다.
     """
     found: list[str] = []
     visits: dict[str, list[LedgerRow]] = defaultdict(list)
@@ -118,6 +170,7 @@ def violations(
                 bad("예약 조건 위반", f"{people}명인데 '{venue.venue_id}' 는 {low}명부터 받는다")
 
         mains: list[Product] = []
+        main_rows: list[LedgerRow] = []
         extras: list[Product] = []
         covered = {"adult": False, "child": False}
         for row in bought:
@@ -140,8 +193,12 @@ def violations(
                 extras.append(product)
                 if row.quantity > (product.qty_max or 0):
                     bad("수량 초과", f"상품 '{product.product_id}' 를 qty_max 보다 많이 샀다")
+                # 추가 상품에 프로모션 할인을 적용할지는 아직 정하지 않았다 (FORMATS 12절). 그때까지 0 이어야 한다.
+                if row.discount != 0:
+                    bad("금액 불일치", f"추가 상품 '{product.product_id}' 의 줄에 할인이 있다")
                 continue
             mains.append(product)
+            main_rows.append(row)
             heads = {"adult": condition.adults, "child": condition.children, "all": people}[product.audience]
             wanted = heads if product.qty_rule == "per_person" else int(
                 (Decimal(heads) / product.serves).to_integral_value(rounding=ROUND_CEILING)
@@ -150,6 +207,11 @@ def violations(
                 bad("금액 불일치", f"상품 '{product.product_id}' 의 수량이 수량 규칙과 다르다")
             for who in ("adult", "child"):
                 covered[who] = covered[who] or product.audience in (who, "all")
+
+        # 주문의 줄에 적힌 할인이 업장 정의의 프로모션으로 낸 값과 같은가. 할인이 틀리면 낸 금액도, 아래의 예산도 틀린다.
+        for row, cut in zip(main_rows, _expected_discounts(venue, condition, main_rows, mains), strict=True):
+            if row.discount != cut:
+                bad("금액 불일치", f"상품 '{row.product_id}' 의 할인이 프로모션 규칙으로 낸 값({cut}원)과 다르다")
 
         # 예산의 max 는 산 것 전부(주문 + 추가 상품)와 견준다 (docs/FORMATS.md 9절).
         # 한도는 요청이 아니라 페르소나 정의에서 낸다. 요청의 예산이 틀렸으면 그 틀린 한도로는 넘은 것을 알 수 없다.

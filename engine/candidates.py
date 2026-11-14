@@ -1,18 +1,29 @@
 """후보 추리기와 수량·금액 계산 (docs/PRD.md 7.1절의 1단계, docs/FORMATS.md 3절·9절).
 
-LLM 에 맡기지 않는 것을 여기서 정한다: 갈 수 있는 업장, 주문할 수 있는 상품, 수량, 금액.
-프로모션은 아직 넣지 않는다 (T10). 그래서 할인은 늘 0 이고 후보의 `promotions` 는 비어 있다.
+LLM 에 맡기지 않는 것을 여기서 정한다: 갈 수 있는 업장, 주문할 수 있는 상품, 수량, 금액, 할인.
+`venues` 로는 상황을 적용한 업장 정의를 받는다 (`engine/scenarios.py`).
+추가 상품의 줄에는 아직 할인을 넣지 않는다 (적용할지 정하지 않았다. FORMATS 12절).
 """
 
 import math
 from typing import Any
 
-from engine.formats.choice import Addon, Candidate, ChoiceRequest, Line, Option, RequestVocab, RunCondition
+from engine.formats.choice import (
+    Addon,
+    Candidate,
+    CandidatePromotion,
+    ChoiceRequest,
+    Line,
+    Option,
+    RequestVocab,
+    RunCondition,
+)
 from engine.formats.conditions import Condition
 from engine.formats.evidence import Vocab
 from engine.formats.money import to_paid_price
 from engine.formats.persona import Persona
-from engine.formats.venue import Product, Venue
+from engine.formats.venue import Product, Promotion, Venue
+from engine.promotions import covers, order_discounts, promotions_for
 
 ALL_MONTHS = frozenset(range(1, 13))
 
@@ -86,6 +97,16 @@ def _line(product: Product, quantity: int) -> Line:
     )
 
 
+def _discounted(lines: list[Line], promotions: list[Promotion]) -> tuple[list[Line], str | None]:
+    """주문 하나의 줄에 할인을 넣는다 (docs/FORMATS.md 3절). 함께 돌려주는 것은 적용한 프로모션의 `promo_id` 다."""
+    cuts, promo_id = order_discounts(promotions, [(line.product_id, line.quantity * line.unit_price) for line in lines])
+    priced = [
+        line.model_copy(update={"discount": cut, "line_total": line.quantity * line.unit_price - cut})
+        for line, cut in zip(lines, cuts, strict=True)
+    ]
+    return priced, promo_id
+
+
 def _orders(venue: Venue, mains: list[Product], condition: RunCondition) -> list[list[Line]]:
     """고를 수 있는 주문들. 주문 하나는 일행 모두의 몫을 담는다.
 
@@ -130,11 +151,17 @@ def candidate_for(venue: Venue, condition: RunCondition) -> tuple[Candidate | No
     limit = condition.budget_limit()
 
     # 번호는 예산으로 거르기 전에 매긴다. 같은 주문은 누가 와도 같은 번호를 갖고, 걸러진 번호는 비어 있을 수 있다.
-    options = [
-        Option(option_id=f"{venue.venue_id}-o{number}", lines=lines, total=sum(line.line_total for line in lines))
-        for number, lines in enumerate(_orders(venue, [p for p in priced if p.qty_rule != "choice"], condition), 1)
-    ]
-    options = [option for option in options if option.total <= limit]
+    # 예산은 할인을 뺀 금액과 견준다 (고객이 내는 금액이다).
+    promotions = promotions_for(venue, condition)
+    options: list[Option] = []
+    applied: set[str] = set()
+    for number, order in enumerate(_orders(venue, [p for p in priced if p.qty_rule != "choice"], condition), 1):
+        lines, promo_id = _discounted(order, promotions)
+        option = Option(option_id=f"{venue.venue_id}-o{number}", lines=lines, total=sum(line.line_total for line in lines))
+        if option.total <= limit:
+            options.append(option)
+            if promo_id is not None:
+                applied.add(promo_id)
 
     # 수량 규칙이 있는 상품이 아예 없는 업장(포장·구매)은 추가 상품만으로 산다.
     # 그런 상품이 있는데 예산이나 가격 때문에 주문이 남지 않은 업장은 후보에서 뺀다. 음료만 사러 가는 곳이 아니다.
@@ -165,6 +192,14 @@ def candidate_for(venue: Venue, condition: RunCondition) -> tuple[Candidate | No
     ]
     if not (addons if addons_only else options):
         return None, skipped
+    # 이번 조건에 해당하고, 이 후보에서 살 수 있는 상품에 걸리는 프로모션만 알려 준다.
+    # `applied` 는 그 할인이 남은 주문 가운데 하나에라도 들어 있다는 뜻이다. 증정과, 더 큰 할인에 밀린 할인은 false 다.
+    offered = {line.product_id for option in options for line in option.lines} | {addon.product_id for addon in addons}
+    shown = [
+        CandidatePromotion(promo_id=p.promo_id, name=p.name, benefit=p.benefit, applied=p.promo_id in applied)
+        for p in promotions
+        if any(covers(p, product_id) for product_id in offered)
+    ]
     candidate = Candidate(
         venue_id=venue.venue_id,
         name=venue.name,
@@ -173,7 +208,7 @@ def candidate_for(venue: Venue, condition: RunCondition) -> tuple[Candidate | No
         cuisine=venue.cuisine,
         options=options,
         addons=addons,
-        promotions=[],
+        promotions=shown,
     )
     return candidate, skipped
 
