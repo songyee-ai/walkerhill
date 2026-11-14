@@ -77,10 +77,15 @@ uv run python -m engine --data sample
 - LLM 을 부르려면 `.env.example` 을 `.env` 로 복사하고 자기 키를 넣는다. 공급자, 모델, 호출 상한도 `.env` 에서 바꾼다.
 - 키가 없으면 `--replay-only` 를 붙인다. 저장된 응답만 재생하고, 저장된 응답이 없는 방문은 실패로 남는다.
 - 일부만 돌릴 때: `--personas`, `--conditions`, `--venues` 뒤에 식별자를 적는다. 프롬프트의 판은 `--prompt` 다.
+- 집계 파일이 있어야 돈다: `--data sample` 은 `data/samples/base_summary.csv`, `--data private` 은 `private/base/summary.csv` (업장 데이터 담당이 만든다).
+  기준 상황의 가중치(묶음의 비율, 고객군 배수)와 가격이 빈 상품의 단가를 이 파일에서 낸다 (`docs/FORMATS.md` 3절, 10.1절의 "가중치를 내는 법").
+  명령이 끝날 때 채운 상품과 채우지 못한 상품의 수를 알리고, 배수를 정하지 못한 고객군이 있으면 알린다.
+- `--data private` 은 기본 데이터의 요약을 범주로 바꿔 LLM 에 보낸다 (`--base-profile bucketed`, 기본값). 보내지 않으려면 `--base-profile none` 이다.
+  `--data sample` 은 늘 보내지 않는다 (`docs/FORMATS.md` 5절의 "기본 데이터의 요약").
 - 기준이 아닌 상황은 `--scenario <scenario_id>` 로 돌린다 (`scenarios/<scenario_id>.json`). **기준 상황을 먼저 끝까지 돌려 둔다.**
   상황은 끝까지 돈 가장 새 기준 실행의 페르소나, 방문 조건, 가중치로 돌아간다 (다른 기준 실행을 쓰려면 `--baseline <run_id>`).
   그래서 `--personas`, `--conditions` 는 적지 않는다. `--venues` 로 업장을 골라 기준을 돌렸으면 상황에도 같은 업장을 적는다.
-  기준 실행 뒤에 업장 정의, 페르소나, 방문 조건 묶음, 값 목록, 프롬프트, 모델이 바뀌었으면 돌리지 않고 이유를 알린다. 기준 상황을 다시 돌린다.
+  기준 실행 뒤에 업장 정의, 페르소나, 방문 조건 묶음, 값 목록, 집계 파일, 프롬프트, 모델이 바뀌었으면 돌리지 않고 이유를 알린다. 기준 상황을 다시 돌린다.
   상황은 업장 정의 파일을 고치지 않는다. 엔진이 읽어 둔 사본에만 적용한다.
 - 호출 상한(`LLM_CALL_LIMIT`, 이번만 바꾸려면 `--limit`)에 닿으면 거기서 멈추고 그 사실을 알린다. 다시 돌리면 받은 답은 재생하고 남은 방문만 부른다.
 - 키나 모델 이름이 틀렸거나 호출이 연달아 3번 실패하면 멈추고 이유를 알린다.
@@ -97,11 +102,15 @@ Copy-Item -Recurse tests/fixtures/example private/try-example
 uv run python -m engine --data sample --root private/try-example --personas family-elders --conditions meal-dinner-weekend
 ```
 
-  사본에 든 기준 실행은 손으로 만든 예시라, 상황은 위의 명령으로 기준 상황을 한 번 돌린 뒤에 돌린다 (그 실행을 `--baseline` 으로 가리킨다):
+  상황은 위의 명령으로 기준 상황을 한 번 돌린 뒤에, 그 실행을 `--baseline` 으로 가리켜 돌린다.
+  사본에 처음부터 든 기준 실행(`20261117-101500-baseline`)은 번호의 날짜가 늦어 "가장 새 기준 실행"으로 먼저 골라지기 때문이다:
 
 ```powershell
 uv run python -m engine --data sample --root private/try-example --scenario competitor-chinese-discount --baseline <위에서 나온 run_id>
 ```
+
+  사본에 처음부터 든 기준 실행은 엔진이 업장 두 곳만 읽어 돌린 것이다. 그 실행으로 상황을 돌리려면 같은 업장을 적는다:
+  `--scenario competitor-chinese-discount --venues geumryong examplehotel-chinese`.
 
 **알아둘 것**
 

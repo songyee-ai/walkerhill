@@ -1149,7 +1149,7 @@ def test_visit_entered_by_hand_needs_no_weights(example_copy):
     def to_manual(data):
         data["condition_ids"] = ["manual-1"]
         data["weights"].update(group_multiplier={}, persona_weight={}, condition_ratio={})
-        data["weights"]["grades"]["condition_ratio"] = {}
+        data["weights"]["grades"].update(group_multiplier={}, persona_weight={}, condition_ratio={})
 
     edit_json(example_copy, RUNS / BASELINE_RUN / "run.json", to_manual)
 
@@ -1178,7 +1178,11 @@ def test_unreadable_row_is_reported_once(example_copy):
 
 def test_represented_cannot_go_unchecked(example_copy):
     # 가중치를 지우면 represented 를 견줄 값이 없다. 조용히 넘어가지 않고 오류로 적는다.
-    edit_json(example_copy, RUNS / BASELINE_RUN / "run.json", lambda d: d["weights"].update(persona_weight={}))
+    def drop(data):
+        data["weights"].update(persona_weight={})
+        data["weights"]["grades"].update(persona_weight={})
+
+    edit_json(example_copy, RUNS / BASELINE_RUN / "run.json", drop)
     problems = check(example_copy)
     assert found(problems, "weights.persona_weight 에 페르소나 'family-elders' 의 가중치가 없다"), messages(problems)
     assert found(problems, "represented 를 확인할 수 없다"), messages(problems)
@@ -1346,14 +1350,69 @@ def test_rows_of_one_visit_must_agree(example_copy):
     assert found(problems, "'이용하지 않음'인 방문은 counted_share 가 1 인 줄 하나다"), messages(problems)
 
 
-def test_sample_run_cannot_claim_internal_grade(example_copy):
+@pytest.mark.parametrize(
+    "key, value",
+    [
+        ("group_multiplier", {"가족·친족": "internal"}),
+        ("persona_weight", {"family-elders": "internal"}),
+        ("condition_ratio", {"가족·친족": {"meal-dinner-weekend": "internal"}}),
+    ],
+)
+def test_sample_run_cannot_claim_internal_grade(example_copy, key, value):
+    edit_json(example_copy, RUNS / BASELINE_RUN / "run.json", lambda d: d["weights"]["grades"].update({key: value}))
+    problems = check(example_copy)
+    assert found(problems, "가중치의 등급에 내부 매출 자료(internal)가 있다"), messages(problems)
+
+
+@pytest.mark.parametrize(
+    "change, message",
+    [
+        # 등급은 값마다 적는다. 값이 있는데 등급이 없으면 막는다.
+        (lambda w: w["grades"].update(persona_weight={}), "weights.persona_weight 와 weights.grades.persona_weight 의 키가 다르다"),
+        (lambda w: w["grades"]["condition_ratio"].update({"가족·친족": {}}), "묶음 비율과 그 등급의 조건이 다르다"),
+        # 고객군마다 묶음의 비율을 더하면 1 이다 (매출이 없으면 모두 0).
+        (lambda w: w["condition_ratio"]["가족·친족"].update({"meal-dinner-weekend": 0.5}), "묶음 비율을 더하면 1 이어야 한다"),
+        (lambda w: w["persona_weight"].update({"family-elders": -1.0}), "0 이상이다"),
+    ],
+)
+def test_weights_and_their_grades_must_agree(example_copy, change, message):
+    edit_json(example_copy, RUNS / BASELINE_RUN / "run.json", lambda d: change(d["weights"]))
+    problems = check(example_copy)
+    assert found(problems, message), messages(problems)
+
+
+def test_group_multiplier_must_be_there(example_copy):
+    shutil.rmtree(example_copy / RUNS / COMPETITOR_RUN)
+
+    def drop(data):
+        data["weights"].update(group_multiplier={})
+        data["weights"]["grades"].update(group_multiplier={})
+
+    edit_json(example_copy, RUNS / BASELINE_RUN / "run.json", drop)
+    problems = check(example_copy)
+    assert found(problems, "weights.group_multiplier 에 고객군 '가족·친족' 의 배수가 없다"), messages(problems)
+
+
+def test_persona_weight_is_the_group_multiplier_times_the_share(example_copy):
+    # 기준 실행만 고친다. 가중치를 따르는 실행은 "기준과 다르다"로 따로 걸리므로 뺀다.
+    shutil.rmtree(example_copy / RUNS / COMPETITOR_RUN)
+    edit_json(example_copy, RUNS / BASELINE_RUN / "run.json", lambda d: d["weights"]["group_multiplier"].update({"가족·친족": 200.0}))
+    problems = check(example_copy)
+    assert found(problems, "페르소나 'family-elders' 의 가중치가 고객군 배수 × 고객군 안의 몫과 다르다"), messages(problems)
+
+
+def test_filled_products_must_be_products_without_a_price(example_copy):
+    shutil.rmtree(example_copy / RUNS / COMPETITOR_RUN)
+    edit_json(example_copy, RUNS / BASELINE_RUN / "run.json", lambda d: d.update(filled_products=["geumryong:course-a"]))
+    assert found(check(example_copy), "'geumryong:course-a' 는 업장 정의에 가격이 있는 상품이다")
+    edit_json(example_copy, RUNS / BASELINE_RUN / "run.json", lambda d: d.update(filled_products=["geumryong:course-z"]))
+    assert found(check(example_copy), "'geumryong:course-z' 가 업장 정의에 없는 상품이다")
     edit_json(
         example_copy,
         RUNS / BASELINE_RUN / "run.json",
-        lambda d: d["weights"]["grades"].update(group_multiplier="internal"),
+        lambda d: d.update(filled_products=["geumryong:tea"], skipped_products=["geumryong:tea"]),
     )
-    problems = check(example_copy)
-    assert found(problems, "가중치의 등급에 내부 매출 자료(internal)가 있다"), messages(problems)
+    assert found(check(example_copy), "filled_products 와 skipped_products 에 함께 있다")
 
 
 def test_number_must_be_finite(example_copy):

@@ -101,7 +101,8 @@ class Played:
         self.record = read_model(run_dir / "run.json", RunRecord)
         self.rows = [LedgerRow.from_row(row) for row in read_csv(run_dir / "ledger.csv", LEDGER_COLUMNS)]
         self.saved = {p.stem: read_model(p, SavedResponse) for p in (run_dir / "llm").glob("*.json")}
-        self.venues = {p.stem: read_model(p, Venue) for p in (root / "data" / "venues").glob("*.json")}
+        # 따로 확인하는 코드에는 엔진이 읽은 업장 정의를 준다 (가격이 빈 상품을 집계 파일로 채운 것. engine/audit.py).
+        self.venues = load_inputs(root, "sample").venues
         self.personas = {p.stem: read_model(p, Persona) for p in (root / "personas").glob("*.json")}
         self.bundle = read_model(root / "engine" / "conditions.json", ConditionBundle)
 
@@ -131,7 +132,32 @@ def requests_in(root: Path, persona_ids, condition_ids, venue_ids=None) -> dict[
     return found
 
 
-def play(root: Path, pick, persona_ids=("family-elders",), condition_ids=(DINNER,), venue_ids=None, now=NOW) -> Played:
+def even_weights(shares: dict[str, float], condition_ids: list[str], group: str = "가족·친족") -> Weights:
+    """고객군 배수 1, 묶음의 비율을 조건마다 고르게 나눈 가중치. 엔진이 집계 파일에서 내는 값 대신 정해 줄 때 쓴다."""
+    ratio = 1 / len(condition_ids)
+    return Weights.model_validate(
+        {
+            "group_multiplier": {group: 1.0},
+            "persona_weight": shares,
+            "condition_ratio": {group: dict.fromkeys(condition_ids, ratio)},
+            "grades": {
+                "group_multiplier": {group: "assumption"},
+                "persona_weight": dict.fromkeys(shares, "assumption"),
+                "condition_ratio": {group: dict.fromkeys(condition_ids, "assumption")},
+            },
+        }
+    )
+
+
+def no_sales(root: Path) -> None:
+    """가상 예시 값을 머리글만 남기고 비운다. 집계 파일에 팔린 것이 없으면 가격이 빈 상품을 채우지 못한다."""
+    path = root / "data" / "samples" / "base_summary.csv"
+    path.write_text(path.read_text(encoding="utf-8-sig").splitlines()[0] + "\n", encoding="utf-8-sig", newline="\n")
+
+
+def play(
+    root: Path, pick, persona_ids=("family-elders",), condition_ids=(DINNER,), venue_ids=None, now=NOW, weights=None
+) -> Played:
     """`pick(visit_id, request)` 이 돌려준 답을 정해 둔 답으로 써 두고 엔진을 돌린다. None 을 돌려주면 답을 두지 않는다."""
     persona_ids, condition_ids = list(persona_ids), list(condition_ids)
     answers = root.parent / f"answers-{now:%H%M%S}"
@@ -151,6 +177,7 @@ def play(root: Path, pick, persona_ids=("family-elders",), condition_ids=(DINNER
         venue_ids=venue_ids,
         persona_ids=persona_ids,
         condition_ids=condition_ids,
+        weights=weights,
         engine_commit="0000000",
     )
     return Played(root, run_dir, requests)
@@ -189,7 +216,6 @@ def test_replaying_the_doc_example_writes_the_same_ledger(example_copy):
         venue_ids=["geumryong", "examplehotel-chinese"],
         persona_ids=["family-elders"],
         condition_ids=[DINNER],
-        weights=Weights.model_validate(load_json(kept / "run.json")["weights"]),
         engine_commit="0000000",
     )
 
@@ -197,9 +223,12 @@ def test_replaying_the_doc_example_writes_the_same_ledger(example_copy):
     expected = (kept / "ledger.csv").read_bytes().replace(b",new,", b",replay,")
     assert (run_dir / "ledger.csv").read_bytes() == expected
     assert sorted(p.name for p in (run_dir / "llm").iterdir()) == sorted(p.name for p in (kept / "llm").iterdir())
-    record = load_json(run_dir / "run.json")
+    record, example = load_json(run_dir / "run.json"), load_json(kept / "run.json")
     assert record["llm"]["calls_replayed"] == 1 and record["llm"]["calls_new"] == 0
     assert record["counts"] == {"visits": 1, "failed": 0}
+    # 가중치는 엔진이 가상 예시 값에서 낸 것이 예시와 같다 (재생만 해서 프롬프트를 읽지 않은 것만 다르다).
+    assert record["weights"] == example["weights"]
+    assert record["inputs"] == {k: v for k, v in example["inputs"].items() if k != "prompt"}
 
 
 # ── 수량과 금액 ─────────────────────────────────────────────────────────
@@ -263,14 +292,17 @@ def test_price_is_what_the_customer_pays(example_copy, basis, unit_price):
 
 
 def test_product_without_a_price_is_left_out_and_recorded(example_copy):
+    """집계 파일에 팔린 것이 없어 단가를 채우지 못한 상품은 후보에서 빼고 실행 기록에 남긴다."""
     edit(
         venue_file(example_copy, "geumryong"),
         lambda d: product_of(d, "course-b").update(price=None, grade="unknown"),
     )
+    no_sales(example_copy)
     played = play(example_copy, pick_geumryong)
     request = played.requests[f"family-elders__{DINNER}"]
     assert [o.lines[0].product_id for o in request.candidate("geumryong").options] == ["course-a"]
     assert played.record.skipped_products == ["geumryong:course-b"]
+    assert played.record.filled_products == []
 
 
 # ── 검증 사례: 조건을 어긴 곳은 후보에 없고, 그곳을 고른 답은 실패로 남는다 ─────
@@ -902,6 +934,9 @@ def test_sample_run_does_not_read_the_private_folder(example_copy):
 
 def test_private_run_merges_the_private_layer_and_writes_under_private(example_copy, doc):
     save_json(example_copy / "private" / "personas" / "family-elders.json", doc.persona_private)
+    # 기본 데이터로 돌릴 때는 private/base/ 의 집계 파일을 읽는다. 여기서는 가상 예시 값을 그 자리에 베껴 둔다.
+    (example_copy / "private" / "base").mkdir(parents=True)
+    shutil.copyfile(example_copy / "data" / "samples" / "base_summary.csv", example_copy / "private" / "base" / "summary.csv")
     inputs = load_inputs(example_copy, "private", persona_ids=["family-elders"])
     assert inputs.persona_json["family-elders"]["overridden_by_private"] == ["evidence.preferences.refs"]
 
@@ -1116,6 +1151,7 @@ def test_venue_whose_orders_have_no_price_does_not_turn_into_an_addons_only_venu
                 product.update(price=None, grade="unknown")
 
     edit(venue_file(example_copy, "geumryong"), change)
+    no_sales(example_copy)  # 집계 파일로 채우지 못하게 한다
     inputs = load_inputs(example_copy, "sample")
     condition = run_condition(inputs.conditions.condition(DINNER), inputs.personas["family-elders"])
     assert candidate_for(inputs.venues["geumryong"], condition) == (None, ["geumryong:course-a", "geumryong:course-b"])
@@ -1260,11 +1296,17 @@ def test_sample_run_refuses_answers_kept_under_private(example_copy):
 
 def test_run_record_hashes_every_input_the_request_depends_on(example_copy):
     first = play(example_copy, pick_geumryong)
-    assert set(first.record.inputs) == {"venues", "personas", "conditions", "scenario", "vocab"}
+    assert set(first.record.inputs) == {"venues", "personas", "conditions", "scenario", "vocab", "summary"}
     edit(example_copy / "data" / "evidence" / "vocab.json", lambda d: d["pain_points"].append("새 라벨"))
     again = play(example_copy, pick_geumryong, now=NOW + timedelta(hours=1))
     assert again.record.inputs["vocab"] != first.record.inputs["vocab"]
     assert again.record.inputs["venues"] == first.record.inputs["venues"]
+    # 집계 파일은 채운 단가와 가중치, 기본 데이터의 요약을 바꾼다. 그래서 해시를 남긴다.
+    summary = example_copy / "data" / "samples" / "base_summary.csv"
+    summary.write_bytes(summary.read_bytes().replace(b",300,45000000,40909200,", b",310,46500000,42272840,"))
+    third = play(example_copy, pick_geumryong, now=NOW + timedelta(hours=2))
+    assert third.record.inputs["summary"] != again.record.inputs["summary"]
+    assert third.record.inputs["vocab"] == again.record.inputs["vocab"]
 
 
 def test_audit_checks_the_budget_of_a_visit_that_bought_added_products_only(example_copy):
@@ -1288,8 +1330,11 @@ def test_weighted_revenue_that_ends_in_a_half_is_rounded_up_and_accepted(example
     edit(persona_file(example_copy, "family-elders"), lambda d: d["share_in_group"].update(value=0.7))
     edit(persona_file(example_copy, "family-kids"), lambda d: d["share_in_group"].update(value=0.3))
     edit(venue_file(example_copy, "geumryong"), lambda d: product_of(d, "course-a").update(price=3025))
+    # 예시 묶음에 든 실행은 몫이 0.5 일 때의 가중치라, 몫을 바꾼 지금은 형식 검사가 어긋난다고 본다. 이 시험과 상관없어 뺀다.
+    shutil.rmtree(example_copy / "engine" / "samples" / "runs")
     eight = [c.condition_id for c in read_model(example_copy / "engine" / "conditions.json", ConditionBundle).conditions]
-    played = play(example_copy, pick_geumryong, condition_ids=eight)
+    # 대표하는 크기를 0.7 × 1/8 = 0.0875 로 정해 준다 (엔진이 집계 파일에서 내면 이 값이 나오지 않는다).
+    played = play(example_copy, pick_geumryong, condition_ids=eight, weights=even_weights({"family-elders": 0.7}, eight))
     (row,) = played.visit("family-elders", DINNER)
     assert (row.paid, row.revenue_net, row.represented, row.weighted_revenue) == (12100, 11000, 0.0875, 963)
     assert [str(p) for p in check(example_copy, strict=True)] == []

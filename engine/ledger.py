@@ -227,6 +227,48 @@ def totals(rows: list[LedgerRow]) -> dict[str, Any]:
     return {"total": total, "by_persona": dict(by_persona), "by_venue": dict(by_venue)}
 
 
+def venue_shares(rows: list[LedgerRow], customer_group: str | None = None) -> dict[str, Any]:
+    """업장별 가상 매출과 비중 (docs/PRD.md 7.2절의 4·5). 원장의 `weighted_revenue` 에서만 낸다.
+
+    - `walkerhill`: 워커힐 업장마다 `weighted_revenue` (가상 매출), `share` (워커힐 업장의 가상 매출 합에서의 비중), `visits`.
+    - `walkerhill_total`: 워커힐 업장의 가상 매출 합. 비중의 분모다.
+    - `competitor`: 경쟁 업장마다 `visits`. `none`: "이용하지 않음"의 `visits`. 둘은 분모에 넣지 않고 따로 보여 준다.
+
+    `visits` 는 그곳으로 간 방문이 대표하는 크기의 합(대표하는 크기 × 몫)이다. 한 방문의 여러 상품 줄은 한 번만 센다.
+    `status` 가 ok 인 줄만 넣는다. `customer_group` 을 주면 그 고객군의 줄만 본다 (보정의 대조에 쓴다).
+    가상 매출 합이 0 이면 비중은 None 이다.
+    """
+    revenue: dict[str, int] = defaultdict(int)
+    visits: dict[tuple[str, str | None], float] = defaultdict(float)
+    counted: set[tuple[str, str, str | None]] = set()
+    for row in rows:
+        if row.status != "ok" or (customer_group is not None and row.customer_group != customer_group):
+            continue
+        if row.choice_kind == "walkerhill":
+            revenue[row.venue_id] += round_half_up(row.weighted_revenue)
+        key = (row.visit_id, row.choice_kind, row.venue_id)
+        if key not in counted:
+            counted.add(key)
+            visits[(row.choice_kind, row.venue_id)] += row.represented * row.counted_share
+    total = sum(revenue.values())
+    walkerhill_ids = sorted({venue_id for kind, venue_id in visits if kind == "walkerhill"})
+    return {
+        "walkerhill": {
+            venue_id: {
+                "weighted_revenue": revenue[venue_id],
+                "share": revenue[venue_id] / total if total else None,
+                "visits": visits[("walkerhill", venue_id)],
+            }
+            for venue_id in walkerhill_ids
+        },
+        "walkerhill_total": total,
+        "competitor": {
+            venue_id: {"visits": size} for (kind, venue_id), size in sorted(visits.items()) if kind == "competitor"
+        },
+        "none": {"visits": visits.get(("none", None), 0.0)},
+    }
+
+
 def write_ledger(path: Path, rows: list[LedgerRow]) -> None:
     """원장을 CSV 로 쓴다. 가중 매출은 원 단위로 반올림한 정수로 적는다."""
     cells = []

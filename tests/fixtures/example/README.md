@@ -22,19 +22,20 @@
 | `scenarios/baseline.json` | 7절 | 문서에 없다. 기준 상황 |
 | `scenarios/geumryong-course-price-up.json`, `competitor-chinese-discount.json` | 7절 | 문서의 예시 |
 | `data/samples/base_summary.csv` | 8절 | 문서의 예시 |
-| `engine/samples/runs/20261117-101500-baseline/` | 9절, 10절 | 실행 기록, 원장, 저장된 응답, 보정 결과. 문서의 예시 |
-| `engine/samples/runs/20261117-103000-competitor-chinese-discount/` | 10절 | 원장은 문서의 예시 둘째 줄이고, 나머지는 그에 맞춰 만든 것 |
+| `engine/samples/runs/20261117-101500-baseline/` | 9절, 10절 | 실행 기록, 원장, 저장된 응답, 보정 결과. 문서의 예시. 보정 결과를 뺀 나머지는 엔진이 쓴 것 |
+| `engine/samples/runs/20261117-103000-competitor-chinese-discount/` | 10절 | 원장은 문서의 예시 둘째 줄이다. 엔진이 쓴 것 |
 
 문서의 예시 가운데 페르소나의 비공개 층과 검증 결과는 파일로 두지 않았다. 저장소에 올리지 않는 것이기 때문이다.
 
 ## 알아둘 것
 
-- 실행 결과는 엔진으로 돌린 것이 아니라 손으로 만든 것이다. 그래서 실행 기록의 입력 해시(`inputs`)는 자리만 채운 값이다.
-  원장과 저장된 응답은 엔진이 내는 것과 같다: 저장된 응답을 재생하면 두 실행 모두 같은 원장이 나오는 것을 테스트가 본다
-  (`tests/test_engine.py` 의 기준 실행, `tests/test_scenarios.py` 의 둘째 실행. 둘째 실행은 엔진이 상황을 적용해 만든 요청의 해시가 예시와 같아야 재생된다).
-- 실행 기록까지 엔진이 쓴 것으로 바꾸는 것은 가중치를 집계 파일에서 내게 된(T11) 뒤에 두 실행을 함께 한다. 지금 엔진으로 만들면 기준 실행의 가중치가 문서의 예시와 달라진다.
-  엔진은 기준 실행 뒤에 입력이 바뀌었으면 상황을 돌리지 않으므로(`FORMATS.md` 10.1절), 자리만 채운 해시가 든 이 기준 실행으로는 상황을 돌릴 수 없다.
-  이 폴더의 사본에서 상황을 돌려 보려면 기준 상황을 엔진으로 한 번 돌린 뒤에 한다 (`README.md` 의 "시뮬레이션을 돌린다").
+- 두 실행의 결과(실행 기록, 원장, 저장된 응답)는 엔진이 쓴 그대로다 (11-15, T11). 가중치도 엔진이 `data/samples/base_summary.csv` 에서 낸 것이다.
+  자리만 채운 값은 실행 기록의 `engine_commit`(`0000000`) 하나다. 보정의 대조 결과(`calibration.json`)는 엔진이 쓰지 않아 손으로 만든 것이다.
+  LLM 대신 저장된 응답의 글을 돌려주는 가짜 공급자로 돌려 두 실행이 바이트까지 같은 것을 테스트가 본다
+  (`tests/test_weights.py` 의 `test_engine_writes_both_example_runs_as_they_are`. 재생으로 같은 원장이 나오는 것은 `tests/test_engine.py`, `tests/test_scenarios.py` 가 본다).
+- 그래서 이 폴더의 입력 파일(업장 정의, 페르소나, 조건 묶음, 상황, 값 목록, 집계 값, 프롬프트)을 고치면 입력의 해시가 달라져 그 테스트가 실패한다.
+  그때는 두 실행을 엔진으로 다시 만들어 이 폴더와 `FORMATS.md` 10.1절의 예시를 함께 고친다 (가짜 공급자로 두 실행을 돌리는 것은 위 테스트와 같다).
+- 기준 실행은 업장 두 곳(`geumryong`, `examplehotel-chinese`)만 읽어 돌렸다. 이 폴더의 사본에서 그 실행으로 상황을 돌리려면 같은 업장을 적는다 (`README.md` 의 "시뮬레이션을 돌린다").
 - 검사하는 법:
 
 ```powershell

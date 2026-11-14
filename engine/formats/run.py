@@ -56,11 +56,15 @@ class LlmInfo(FormatModel):
 
 
 class WeightGrades(FormatModel):
-    """가중치의 근거 등급. 묶음의 비율은 조건마다 적는다."""
+    """가중치의 근거 등급. 값마다 적는다: 고객군 배수는 고객군마다, 가중치는 페르소나마다, 묶음의 비율은 고객군과 조건마다."""
 
-    group_multiplier: Grade
-    persona_weight: Grade
+    group_multiplier: dict[str, Grade]
+    persona_weight: dict[str, Grade]
     condition_ratio: dict[str, dict[str, Grade]]
+
+
+# 한 고객군의 묶음의 비율을 더한 값이 1 과 이만큼까지 다르면 같은 것으로 본다 (소수로 나눈 끝자리).
+RATIO_SUM_TOLERANCE = 1e-6
 
 
 class Weights(FormatModel):
@@ -70,6 +74,26 @@ class Weights(FormatModel):
     persona_weight: dict[str, float]
     condition_ratio: dict[str, dict[str, float]]
     grades: WeightGrades
+
+    @model_validator(mode="after")
+    def _rules(self) -> Self:
+        values = (self.group_multiplier, self.persona_weight, self.condition_ratio)
+        if any(value < 0 for value in (*self.group_multiplier.values(), *self.persona_weight.values())):
+            raise ValueError("고객군 배수와 페르소나의 가중치는 0 이상이다")
+        grades = (self.grades.group_multiplier, self.grades.persona_weight, self.grades.condition_ratio)
+        for name, value, grade in zip(("group_multiplier", "persona_weight", "condition_ratio"), values, grades, strict=True):
+            if set(value) != set(grade):
+                raise ValueError(f"weights.{name} 와 weights.grades.{name} 의 키가 다르다 (값마다 등급을 적는다)")
+        for group, ratios in self.condition_ratio.items():
+            if set(ratios) != set(self.grades.condition_ratio[group]):
+                raise ValueError(f"고객군 '{group}' 의 묶음 비율과 그 등급의 조건이 다르다")
+            if any(ratio < 0 or ratio > 1 for ratio in ratios.values()):
+                raise ValueError(f"고객군 '{group}' 의 묶음 비율은 0 ~ 1 이다")
+            total = sum(ratios.values())
+            # 그 고객군의 기본 데이터 매출이 없으면 비율을 낼 수 없어 모두 0 이다. 그 밖에는 더하면 1 이다.
+            if ratios and total != 0 and abs(total - 1) > RATIO_SUM_TOLERANCE:
+                raise ValueError(f"고객군 '{group}' 의 묶음 비율을 더하면 1 이어야 한다 (매출이 없어 낼 수 없으면 모두 0)")
+        return self
 
 
 class Counts(FormatModel):
@@ -93,6 +117,8 @@ class RunRecord(FormatModel):
     base_profile_mode: BaseProfileMode
     inputs: dict[str, str]
     weights: Weights
+    # 가격이 비어 있어 집계 파일로 단가를 채운 상품, 채우지 못해 후보에서 뺀 상품. 둘 다 `<venue_id>:<product_id>` 다.
+    filled_products: list[str]
     skipped_products: list[str]
     weights_from: str | None
     counts: Counts
@@ -115,6 +141,8 @@ class RunRecord(FormatModel):
             raise ValueError("llm.stopped_by_limit 과 status 가 서로 다른 말을 한다")
         if self.llm.calls_new > self.llm.call_limit:
             raise ValueError("llm.calls_new 가 llm.call_limit 보다 크다")
+        if set(self.filled_products) & set(self.skipped_products):
+            raise ValueError("같은 상품이 filled_products 와 skipped_products 에 함께 있다 (채웠으면 빼지 않는다)")
         return self
 
 
