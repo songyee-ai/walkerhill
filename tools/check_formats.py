@@ -721,7 +721,7 @@ class Checker:
         if record.base_profile_mode != "none":
             self.error(path, "가상 예시로 돌릴 때는 기본 데이터에서 나온 값을 쓰지 않는다 (base_profile_mode 는 none)")
         grades = record.weights.grades
-        used = {grades.group_multiplier, grades.persona_weight}
+        used = {*grades.group_multiplier.values(), *grades.persona_weight.values()}
         used.update(grade for by_condition in grades.condition_ratio.values() for grade in by_condition.values())
         if "internal" in used:
             self.error(
@@ -756,6 +756,24 @@ class Checker:
                         path,
                         f"weights.condition_ratio 에 고객군 '{persona.customer_group}' 의 조건 '{condition_id}' 비율이 없다",
                     )
+            # 페르소나의 가중치 = 고객군 배수 × 고객군 안의 몫 (docs/PRD.md 7.2절).
+            weight = record.weights.persona_weight.get(persona_id)
+            multiplier = record.weights.group_multiplier.get(persona.customer_group)
+            if multiplier is None:
+                self.error(path, f"weights.group_multiplier 에 고객군 '{persona.customer_group}' 의 배수가 없다")
+            elif weight is not None and abs(weight - multiplier * persona.share_in_group.value) > 1e-9 * max(1.0, abs(weight)):
+                self.error(path, f"페르소나 '{persona_id}' 의 가중치가 고객군 배수 × 고객군 안의 몫과 다르다")
+
+        # 집계 파일로 단가를 채운 상품은 업장 정의에서 가격이 비어 있는 상품이다.
+        products = self._products_in(record.scenario_id)
+        for item in record.filled_products:
+            venue_id, _, product_id = item.partition(":")
+            venue = self.venues.get(venue_id)
+            product = venue.product(product_id) if venue else None
+            if product_id not in products.get(venue_id, set()):
+                self.error(path, f"filled_products 의 '{item}' 가 업장 정의에 없는 상품이다 (<venue_id>:<product_id>)")
+            elif product is not None and product.price is not None:
+                self.error(path, f"filled_products 의 '{item}' 는 업장 정의에 가격이 있는 상품이다")
 
     def _known_condition(self, condition_id: str) -> bool:
         if condition_id.startswith(MANUAL_CONDITION_PREFIX):

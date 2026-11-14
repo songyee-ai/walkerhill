@@ -49,6 +49,12 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--replay-only", action="store_true", help="LLM 을 부르지 않고 저장된 응답만 재생한다 (키가 없어도 된다)")
     parser.add_argument("--limit", type=int, metavar="N", help="새로 부를 수 있는 횟수. 적지 않으면 LLM_CALL_LIMIT")
     parser.add_argument(
+        "--base-profile",
+        choices=("bucketed", "raw", "none"),
+        help="기본 데이터의 요약을 LLM 에 보내는 방식 (--data private 만). 적지 않으면 bucketed (범주로 바꿔 보냄). "
+        "기준이 아닌 상황은 기준 실행의 방식을 따른다",
+    )
+    parser.add_argument(
         "--root", type=Path, default=Path.cwd(), help="자료를 읽고 결과를 쓸 폴더 (기본은 지금 폴더). .env 는 늘 지금 폴더의 것을 읽는다"
     )
     args = parser.parse_args(argv)
@@ -81,6 +87,7 @@ def main(argv: list[str] | None = None) -> int:
             weights_from=weights_from,
             llm=provider,
             call_limit=call_limit,
+            base_profile_mode=args.base_profile,
         )
     except (LlmFatal, FileNotFoundError, FileExistsError, ValueError) as exc:
         print(f"돌리지 못했다: {exc}", file=sys.stderr)
@@ -99,6 +106,30 @@ def main(argv: list[str] | None = None) -> int:
                 file=sys.stderr,
             )
     print(f"공급자 {record.llm.provider} · 모델 {record.llm.model} · 프롬프트 {record.llm.prompt_version}")
+    print(
+        f"기본 데이터의 요약 {record.base_profile_mode} · "
+        f"가격을 집계 파일로 채운 상품 {len(record.filled_products)}개 · 채우지 못해 뺀 상품 {len(record.skipped_products)}개"
+    )
+    if record.weights_from is None:
+        # 배수를 정하지 못한 고객군은 가중치가 0 이라 그 고객군의 방문이 가상 매출에 들지 않는다. 상황에도 그대로 간다.
+        grades = record.weights.grades
+        unfitted = [group for group, grade in grades.group_multiplier.items() if grade == "unknown"]
+        # 묶음의 비율도 낼 수 없었으면 집계 파일에 그 고객군의 매출이 없는 것이다. 가장 흔한 까닭은 고객군 이름이 다른 것이다.
+        missing = [g for g in unfitted if set(grades.condition_ratio.get(g, {}).values()) <= {"unknown"}]
+        unchosen = [g for g in unfitted if g not in missing]
+        if missing:
+            print(
+                f"집계 파일에서 이 실행의 조건에 해당하는 매출을 찾지 못한 고객군이 있다: {', '.join(missing)}. "
+                "페르소나의 customer_group 이 집계 파일의 고객군 이름과 글자까지 같은지 본다. 그 고객군의 가중치는 0 이다.",
+                file=sys.stderr,
+            )
+        if unchosen:
+            print(
+                f"고객군 배수를 정하지 못한 고객군이 있다: {', '.join(unchosen)}. "
+                "이 실행에서 그 고객군이 묶음의 비율이 0 이 아닌 조건에서 워커힐 업장을 고른 방문이 없다 (실패한 방문은 세지 않는다). "
+                "그 고객군의 가중치는 0 이다.",
+                file=sys.stderr,
+            )
     print(
         f"방문 {record.counts.visits}건 (실패 {record.counts.failed}건) · "
         f"새로 부름 {record.llm.calls_new}번 · 재생 {record.llm.calls_replayed}번 · 호출 상한 {record.llm.call_limit}번"

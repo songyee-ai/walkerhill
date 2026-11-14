@@ -16,7 +16,6 @@ import engine.__main__ as cli
 from engine.answers import save_answer
 from engine.candidates import build_request, run_condition
 from engine.formats import ChoiceRequest, RunRecord, Scenario, Venue, net_of_tax, read_model
-from engine.formats.run import Weights
 from engine.formats.venue import Period, Promotion
 from engine.ledger import amount_problems
 from engine.promotions import meets_conditions, months_in, order_discounts
@@ -864,8 +863,9 @@ def test_seasonal_product_added_by_a_scenario_is_counted_by_its_share(example_co
 def test_engine_makes_the_second_example_run(example_copy):
     """예시 묶음의 둘째 실행(경쟁 업장의 할인)을 엔진이 그대로 만들어 낸다 (docs/FORMATS.md 10.2절의 둘째 줄).
 
-    기준 실행을 엔진으로 먼저 만들고(가중치는 예시의 값을 준다), 그 실행의 가중치로 상황을 돌려 저장된 응답을 재생한다.
+    기준 실행을 엔진으로 먼저 만들고(가중치는 엔진이 가상 예시 값에서 낸다), 그 실행의 가중치로 상황을 돌려 저장된 응답을 재생한다.
     엔진이 상황을 적용해 만든 요청의 해시가 예시와 같아야 재생된다. 다른 칸은 새로 불렀는지 재생했는지뿐이다.
+    새로 부른 것까지 글자 그대로 만드는 것은 tests/test_weights.py 의 test_engine_writes_both_example_runs_as_they_are 가 본다.
     """
     runs = example_copy / "engine" / "samples" / "runs"
     kept = example_copy.parent / "kept"
@@ -886,7 +886,6 @@ def test_engine_makes_the_second_example_run(example_copy):
         answers=[kept / BASELINE_RUN / "llm"],
         persona_ids=[ELDERS],
         condition_ids=[DINNER],
-        weights=Weights.model_validate(load_json(kept / BASELINE_RUN / "run.json")["weights"]),
         **same,
     )
     again = run(
@@ -905,8 +904,9 @@ def test_engine_makes_the_second_example_run(example_copy):
     record, example = load_json(again / "run.json"), load_json(old / "run.json")
     for key in ("run_id", "created_at", "data_mode", "scenario_id", "persona_ids", "condition_ids", "base_profile_mode"):
         assert record[key] == example[key], key
-    for key in ("weights", "weights_from", "skipped_products", "counts", "status"):
+    for key in ("weights", "weights_from", "filled_products", "skipped_products", "counts", "status"):
         assert record[key] == example[key], key
+    assert record["inputs"] == {k: v for k, v in example["inputs"].items() if k != "prompt"}
     assert (record["llm"]["calls_new"], record["llm"]["calls_replayed"]) == (0, 1)
     no_format_errors(example_copy)
 
@@ -930,7 +930,7 @@ def command(root: Path, *more: str) -> int:
 def test_command_runs_a_scenario_on_the_latest_finished_baseline_run(example_copy, clean_env, capsys):
     runs = example_copy / "engine" / "samples" / "runs"
 
-    # 예시 묶음에 든 기준 실행은 손으로 만든 것이라 입력의 해시가 지금 파일과 다르다. 그 실행으로는 돌리지 않는다.
+    # 예시 묶음에 든 기준 실행은 업장 두 곳만 읽어 돌린 것이라(--venues), 업장을 모두 읽는 이 실행과 입력의 해시가 다르다. 그 실행으로는 돌리지 않는다.
     assert command(example_copy, "--scenario", COMPETITOR_DISCOUNT) == cli.EXIT_FAILED
     assert "달라진 것이 있다" in capsys.readouterr().err
     for name in (BASELINE_RUN, COMPETITOR_RUN):

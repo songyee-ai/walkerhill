@@ -124,8 +124,8 @@ def violations(
 
     `personas` 에는 그 실행에 쓴 페르소나를 준다. 기본 데이터로 돌린 실행이면 두 층을 합친 것이다
     (`engine.runner.load_inputs` 가 돌려주는 `personas`). 공개 층만 주면 비공개 층이 바꾼 예산이 "조건 불일치"로 나온다.
-    `venues` 에는 그 실행의 상황을 적용한 업장 정의를 준다 (`load_inputs` 가 돌려주는 `venues`).
-    파일에 적힌 그대로를 주면 상황이 바꾼 가격과 프로모션이 "금액 불일치"로 나온다.
+    `venues` 에는 그 실행의 상황을 적용하고 가격이 빈 상품을 집계 파일로 채운 업장 정의를 준다 (`load_inputs` 가 돌려주는 `venues`).
+    파일에 적힌 그대로를 주면 상황이 바꾼 가격과 프로모션, 채운 단가가 "금액 불일치"로 나온다.
     """
     found: list[str] = []
     visits: dict[str, list[LedgerRow]] = defaultdict(list)

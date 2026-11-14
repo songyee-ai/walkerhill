@@ -3,7 +3,7 @@
 방문마다 저장된 응답을 먼저 찾는다. 있으면 재생하고, 없으면 LLM 을 불러 답을 받아 검사한 뒤 저장한다.
 LLM 을 주지 않고 돌리면(재생만) 저장된 응답이 없는 방문은 실패로 남는다.
 기준이 아닌 상황은 업장 정의의 사본에 상황을 적용해 돌리고, 페르소나·방문 조건·가중치는 기준 실행의 것을 그대로 쓴다.
-집계 파일로 가중치를 내는 것은 T11 에서 더한다.
+기준 상황의 가중치는 집계 파일에서 낸다: 묶음의 비율은 돌리기 전에, 고객군 배수는 방문을 다 돈 뒤 원장으로 맞춘다 (`engine.weights`).
 """
 
 import hashlib
@@ -20,9 +20,11 @@ from engine.formats.choice import RunCondition, problems_in_response
 from engine.formats.conditions import MANUAL_CONDITION_PREFIX, ConditionBundle
 from engine.formats.evidence import Vocab
 from engine.formats.io import read_json, read_model, write_json
+from engine.formats.money import round_half_up, weighted_amount
 from engine.formats.persona import Persona, merge_persona_layers, merged_persona
 from engine.formats.run import RUN_ID_RE, VISIT_ID_SEPARATOR, LedgerRow, RunRecord, Weights
 from engine.formats.scenario import BASELINE_ID, Scenario
+from engine.formats.summary import SummaryRow
 from engine.formats.venue import Venue
 from engine.ledger import amount_problems, failed_row, no_candidate_row, visit_rows, write_ledger
 from engine.llm import (
@@ -36,6 +38,16 @@ from engine.llm import (
     user_message,
 )
 from engine.scenarios import apply_scenario
+from engine.weights import (
+    base_profiles,
+    condition_ratios,
+    empty_profile,
+    fill_prices,
+    fit_weights,
+    group_revenue,
+    read_summary,
+    summary_path,
+)
 
 # 실제로 돌아가는 엔진 코드가 있는 저장소. `--root` 로 다른 폴더의 자료를 돌려도 코드는 여기 것이다.
 CODE_ROOT = Path(__file__).resolve().parents[1]
@@ -79,14 +91,19 @@ class LlmSession:
 class Inputs:
     """실행 하나가 읽는 것."""
 
-    # 상황을 적용한 업장 정의다. 파일에 적힌 그대로가 아니다 (기준 상황이면 같다).
+    # 상황을 적용하고 가격이 빈 상품을 집계 파일로 채운 업장 정의다. 파일에 적힌 그대로가 아니다.
     venues: dict[str, Venue]
     personas: dict[str, Persona]
     # 요청에 그대로 넣을 페르소나. 가상 예시는 공개 층 파일 그대로, 기본 데이터는 두 층을 합친 것이다.
+    # 기본 데이터의 요약을 보내기로 했으면(base_profile_mode) 그 요약이 `base_profile` 로 붙어 있다.
     persona_json: dict[str, dict[str, Any]]
     conditions: ConditionBundle
     scenario: Scenario
     vocab: Vocab
+    # 기본 데이터 집계 파일의 줄 (가상 예시로 돌릴 때는 가상 예시 값).
+    summary: list[SummaryRow]
+    # 가격이 비어 있어 집계 파일로 단가를 채운 상품 (`<venue_id>:<product_id>`).
+    filled: list[str]
     hashes: dict[str, str]
 
 
@@ -107,20 +124,35 @@ def _hash_files(paths: list[Path]) -> str:
     return digest.hexdigest()[:16]
 
 
+def default_base_profile_mode(data_mode: str) -> str:
+    """기본 데이터로 돌릴 때는 범주로 바꿔 보내고(11-13 결정), 가상 예시로 돌릴 때는 보내지 않는다 (docs/FORMATS.md 10.1절)."""
+    return "bucketed" if data_mode == "private" else "none"
+
+
 def load_inputs(
     root: Path,
     data_mode: str,
     scenario_id: str = "baseline",
     venue_ids: list[str] | None = None,
     persona_ids: list[str] | None = None,
+    base_profile_mode: str | None = None,
 ) -> Inputs:
     """입력 파일을 읽는다. `venue_ids`, `persona_ids` 를 주면 그것만 읽는다.
 
-    가상 예시(`sample`)로 돌릴 때는 `private/` 를 읽지 않는다. 페르소나는 공개 층만 쓴다.
-    돌려주는 업장 정의는 상황의 `changes` 를 적용한 사본이다. 업장 정의 파일은 바뀌지 않는다 (docs/FORMATS.md 7절).
+    가상 예시(`sample`)로 돌릴 때는 `private/` 를 읽지 않는다. 페르소나는 공개 층만 쓰고, 집계 파일은 가상 예시 값을 쓴다.
+    돌려주는 업장 정의는 상황의 `changes` 를 적용한 뒤 가격이 빈 상품을 집계 파일로 채운 사본이다.
+    업장 정의 파일은 바뀌지 않는다 (docs/FORMATS.md 3절·7절). 상황을 먼저 적용하므로 `change_price_pct` 는 채운 단가를 바꾸지 않는다.
     `venue_ids` 로 업장을 골랐으면 상황이 바꾸는 업장도 그 안에 있어야 한다.
+    `base_profile_mode` 가 `bucketed` 나 `raw` 면 페르소나마다 그 고객군의 기본 데이터 요약을 `base_profile` 로 붙인다 (기본 데이터로 돌릴 때만).
+    주지 않으면 실행과 같은 기본값이다 (`default_base_profile_mode`). 그래야 다른 영역이 이 함수로 만든 요청이 실행의 요청과 같다.
     """
     runs_folder(root, data_mode)  # data_mode 가 맞는지 먼저 본다
+    if base_profile_mode is None:
+        base_profile_mode = default_base_profile_mode(data_mode)
+    if base_profile_mode not in ("none", "bucketed", "raw"):
+        raise ValueError(f"모르는 base_profile_mode 다: {base_profile_mode!r}")
+    if data_mode == "sample" and base_profile_mode != "none":
+        raise ValueError("가상 예시로 돌릴 때는 기본 데이터의 요약을 보내지 않는다 (base_profile_mode 는 none)")
 
     venue_paths = sorted((root / "data" / "venues").glob("*.json"))
     if venue_ids is not None:
@@ -154,43 +186,31 @@ def load_inputs(
     conditions_path = root / "engine" / "conditions.json"
     scenario_path = root / "scenarios" / f"{scenario_id}.json"
     vocab_path = root / "data" / "evidence" / "vocab.json"
+    summary_file = summary_path(root, data_mode)
     scenario = read_model(scenario_path, Scenario)
+    summary = read_summary(summary_file)
+    if base_profile_mode != "none":
+        profiles = base_profiles(summary, base_profile_mode)
+        for persona_id, layered in persona_json.items():
+            layered["base_profile"] = profiles.get(personas[persona_id].customer_group, empty_profile())
+    filled_venues, filled = fill_prices(apply_scenario(venues, scenario), summary, data_mode)
     return Inputs(
-        venues=apply_scenario(venues, scenario),
+        venues=filled_venues,
         personas=personas,
         persona_json=persona_json,
         conditions=read_model(conditions_path, ConditionBundle),
         scenario=scenario,
         vocab=read_model(vocab_path, Vocab),
+        summary=summary,
+        filled=filled,
         hashes={
             "venues": _hash_files(venue_paths),
             "personas": _hash_files(hashed),
             "conditions": _hash_files([conditions_path]),
             "scenario": _hash_files([scenario_path]),
             "vocab": _hash_files([vocab_path]),
+            "summary": _hash_files([summary_file]),
         },
-    )
-
-
-def even_weights(personas: list[Persona], condition_ids: list[str]) -> Weights:
-    """집계 파일 없이 쓰는 가중치: 고객군 배수는 1, 묶음의 비율은 조건마다 고르게 나눈다. 등급은 모두 설계 가정이다.
-
-    집계 파일에서 계산한 값으로 바꾸는 것은 T11 이다. 그때까지 가상 매출의 크기에는 뜻이 없다.
-    """
-    planned = [c for c in condition_ids if not c.startswith(MANUAL_CONDITION_PREFIX)]
-    groups = sorted({p.customer_group for p in personas})
-    ratio = 1 / len(planned) if planned else 0.0
-    return Weights.model_validate(
-        {
-            "group_multiplier": dict.fromkeys(groups, 1.0),
-            "persona_weight": {p.persona_id: p.share_in_group.value for p in personas},
-            "condition_ratio": {group: dict.fromkeys(planned, ratio) for group in groups},
-            "grades": {
-                "group_multiplier": "assumption",
-                "persona_weight": "assumption",
-                "condition_ratio": {group: dict.fromkeys(planned, "assumption") for group in groups},
-            },
-        }
     )
 
 
@@ -233,7 +253,9 @@ def _same_as_baseline(what: str, given: list[str] | None, base: list[str]) -> li
 
 def _changed_since_baseline(base: RunRecord, hashes: dict[str, str], provider: str, model: str, prompt_version: str) -> list[str]:
     """기준 실행 뒤에 달라진 것. 하나라도 있으면 상황 사이의 차이에 상황의 변경이 아닌 것이 섞인다."""
-    changed = [key for key in ("venues", "personas", "conditions", "vocab") if base.inputs.get(key) != hashes[key]]
+    # 집계 파일이 바뀌면 채운 단가와 기본 데이터의 요약이 달라진다. 그래서 집계 파일도 견준다.
+    keys = ("venues", "personas", "conditions", "vocab", "summary")
+    changed = [key for key in keys if base.inputs.get(key) != hashes[key]]
     # 프롬프트의 글은 LLM 을 부를 수 있게 돌린 실행에만 해시가 남는다. 둘 다 있을 때만 견준다.
     if "prompt" in base.inputs and "prompt" in hashes and base.inputs["prompt"] != hashes["prompt"]:
         changed.append("prompt")
@@ -248,6 +270,19 @@ def represented(weights: Weights, persona: Persona, condition_id: str) -> float:
     if condition_id.startswith(MANUAL_CONDITION_PREFIX):
         return 0.0
     return weights.persona_weight[persona.persona_id] * weights.condition_ratio[persona.customer_group][condition_id]
+
+
+def reweigh(rows: list[LedgerRow], weights: Weights, personas: dict[str, Persona]) -> list[LedgerRow]:
+    """원장의 줄에 가중치를 다시 적는다: `represented` 와 `weighted_revenue`.
+
+    기준 상황은 고객군 배수를 방문을 다 돈 뒤에 원장으로 맞추므로, 방문을 돌 때는 대표하는 크기를 0 으로 적어 두고 여기서 채운다.
+    """
+    out = []
+    for row in rows:
+        size = represented(weights, personas[row.persona_id], row.condition_id)
+        weighted = round_half_up(weighted_amount(row.revenue_net, size, row.counted_share))
+        out.append(LedgerRow.model_validate({**row.model_dump(), "represented": size, "weighted_revenue": weighted}))
+    return out
 
 
 @dataclass
@@ -390,16 +425,19 @@ def run(
     engine_commit: str | None = None,
     llm: Provider | None = None,
     call_limit: int | None = None,
+    base_profile_mode: str | None = None,
 ) -> Path:
     """상황 하나를 돌려 실행 폴더(`run.json`, `ledger.csv`, `llm/`, `llm_rejected/`)를 쓰고 그 경로를 돌려준다.
 
     - `answers`: 저장된 응답을 찾을 폴더들 (정해 둔 답이나 앞선 실행의 `llm/`).
     - `now`: 실행 시각. 시간대가 있어야 한다. `run_id` 와 `created_at`, 저장하는 응답의 `created_at` 이 여기서 나온다.
-    - `weights` 를 주지 않으면 `even_weights` 를 쓴다. 기준 상황에만 줄 수 있다.
+    - 기준 상황의 가중치는 집계 파일에서 낸다 (`engine.weights`, docs/FORMATS.md 10.1절의 "가중치를 내는 법").
+      `weights` 를 주면 그 값을 그대로 쓴다 (테스트에서 쓴다). 기준 상황에만 줄 수 있다.
     - `weights_from`: 기준이 아닌 상황을 돌릴 때 꼭 준다. 끝까지 돈 기준 실행의 `run_id` 다 (`latest_baseline_run`).
-      페르소나, 방문 조건, 가중치를 그 실행에서 가져온다. `persona_ids`, `condition_ids` 를 따로 주면 그 실행과 같아야 한다.
-      그 실행 뒤에 입력(업장 정의, 페르소나, 조건 묶음, 값 목록, 프롬프트)이나 공급자·모델이 달라졌으면 돌리지 않는다.
+      페르소나, 방문 조건, 가중치, `base_profile_mode` 를 그 실행에서 가져온다. `persona_ids`, `condition_ids` 를 따로 주면 그 실행과 같아야 한다.
+      그 실행 뒤에 입력(업장 정의, 페르소나, 조건 묶음, 값 목록, 집계 파일, 프롬프트)이나 공급자·모델이 달라졌으면 돌리지 않는다.
       상황 사이의 차이에 상황의 변경만 남게 하려는 것이다 (docs/PRD.md 7.2절).
+    - `base_profile_mode`: 기본 데이터의 요약을 LLM 에 어떻게 보낼지. 주지 않으면 기본 데이터로 돌릴 때 `bucketed`, 가상 예시로 돌릴 때 `none` 이다.
     - `llm`: 저장된 응답이 없는 방문에서 부를 공급자. 주지 않으면 부르지 않고 그 방문을 실패로 남긴다 (재생만).
       `provider` 와 `model` 은 `llm` 이 실제로 부르는 곳과 같아야 한다 (요청의 해시와 실행 기록에 들어간다).
     - `call_limit`: 이 실행에서 새로 부를 수 있는 횟수. 주지 않으면 `DEFAULT_CALL_LIMIT` 이다.
@@ -424,17 +462,33 @@ def run(
         persona_ids = _same_as_baseline("페르소나", persona_ids, base.persona_ids)
         condition_ids = _same_as_baseline("방문 조건", condition_ids, base.condition_ids)
         weights = base.weights
-    inputs = load_inputs(root, data_mode, scenario_id, venue_ids, persona_ids)
+        # 요약을 보내는 방식이 다르면 요청이 달라져, 상황의 변경이 아닌 것이 차이에 섞인다.
+        if base_profile_mode is not None and base_profile_mode != base.base_profile_mode:
+            raise ValueError(
+                f"기준 실행의 base_profile_mode 는 {base.base_profile_mode} 다. 상황은 기준 실행과 같은 방식으로 돌린다"
+            )
+        base_profile_mode = base.base_profile_mode
+    if base_profile_mode is None:
+        base_profile_mode = default_base_profile_mode(data_mode)
+    inputs = load_inputs(root, data_mode, scenario_id, venue_ids, persona_ids, base_profile_mode)
     if not inputs.personas:
         raise ValueError("돌릴 페르소나가 없다")
 
     if condition_ids is None:
         condition_ids = [c.condition_id for c in inputs.conditions.conditions]
+    if len(set(condition_ids)) != len(condition_ids):
+        raise ValueError(f"같은 방문 조건을 두 번 적었다: {condition_ids}")
     conditions = [inputs.conditions.condition(condition_id) for condition_id in condition_ids]
     if None in conditions:
         raise ValueError(f"방문 조건 묶음에 없는 조건이 있다: {condition_ids}")
     personas = list(inputs.personas.values())
-    weights = weights or even_weights(personas, condition_ids)
+
+    # 기준 상황은 가중치를 집계 파일에서 낸다. 묶음의 비율은 지금 내고, 고객군 배수는 방문을 다 돈 뒤에 원장으로 맞춘다.
+    fitting = weights is None
+    if fitting:
+        revenue = group_revenue(inputs.summary, conditions, inputs.conditions.assumed_splits, inputs.venues)
+        groups = sorted({p.customer_group for p in personas})
+        ratios, ratio_grades = condition_ratios(revenue, groups, condition_ids, data_mode)
 
     run_id = f"{now:%Y%m%d-%H%M%S}-{scenario_id}"
     run_dir = runs_folder(root, data_mode) / run_id
@@ -469,7 +523,8 @@ def run(
                     inputs=inputs,
                     persona=persona,
                     condition=run_condition(condition, persona),
-                    represented=represented(weights, persona, condition.condition_id),
+                    # 가중치를 맞추는 중이면 0 으로 적어 두고, 다 돈 뒤에 reweigh 로 채운다.
+                    represented=0.0 if weights is None else represented(weights, persona, condition.condition_id),
                     prompt_version=prompt_version,
                     book=book,
                     run_dir=run_dir,
@@ -495,6 +550,9 @@ def run(
         # 폴더가 남으면 형식 검사가 막고, 가상 예시로 돌린 것이면 그 폴더가 저장소 안이다.
         if not finished:
             status = "failed"
+        if fitting:
+            weights = fit_weights(personas, ratios, ratio_grades, revenue, rows, data_mode)
+            rows = reweigh(rows, weights, inputs.personas)
         _write_run(
             run_dir,
             rows,
@@ -517,10 +575,10 @@ def run(
                     "call_limit": session.call_limit if session else 0,
                     "stopped_by_limit": status == "stopped_by_limit",
                 },
-                # 기본 데이터에서 나온 값을 요청에 붙이는 것은 T11 이다. 지금은 어느 쪽으로 돌려도 보내지 않는다.
-                "base_profile_mode": "none",
+                "base_profile_mode": base_profile_mode,
                 "inputs": inputs.hashes,
                 "weights": weights,
+                "filled_products": inputs.filled,
                 "skipped_products": sorted(skipped),
                 "weights_from": base.run_id if base else None,
                 "counts": {"visits": visits, "failed": failed},

@@ -22,11 +22,13 @@
   },
   "base_profile_mode": "none",
   "inputs": {
-    "venues": "0000000000000000",
-    "personas": "0000000000000000",
-    "conditions": "0000000000000000",
-    "scenario": "0000000000000000",
-    "summary": "0000000000000000"
+    "venues": "048b79beafe886d2",
+    "personas": "687c20fc4eaa5b6f",
+    "conditions": "81ec9570eef55a09",
+    "scenario": "7f0c40802f158f2c",
+    "vocab": "8198206734bb16a5",
+    "summary": "e03de3cfd0f4355d",
+    "prompt": "9fee7d4f42a62d8b"
   },
   "weights": {
     "group_multiplier": {
@@ -41,8 +43,12 @@
       }
     },
     "grades": {
-      "group_multiplier": "assumption",
-      "persona_weight": "assumption",
+      "group_multiplier": {
+        "가족·친족": "assumption"
+      },
+      "persona_weight": {
+        "family-elders": "assumption"
+      },
       "condition_ratio": {
         "가족·친족": {
           "meal-dinner-weekend": "assumption"
@@ -50,6 +56,7 @@
       }
     }
   },
+  "filled_products": [],
   "skipped_products": [],
   "weights_from": null,
   "counts": {

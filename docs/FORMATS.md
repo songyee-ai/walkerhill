@@ -123,7 +123,15 @@
 - 기본 데이터에는 있는데 공식 자료에서 확인하지 못한 상품은 이름을 일반적인 말로 적고 `price` 를 `null` 로 둔다.
 - **`price` 가 `null` 인 상품**: 기본 데이터로 돌릴 때는 엔진이 집계 파일(8절)의 `paid` ÷ `quantity` 로 단가를 채우고 등급을 `internal` 로 표시한다.
   `paid` 는 고객이 낸 금액(세금 포함)이라 그대로 고객이 낼 단가가 된다. 세금을 뺀 `revenue_net` 으로 나누면 단가가 세금만큼 낮아지므로 쓰지 않는다.
-  가상 예시로 돌릴 때는 가상 예시 값에서 같은 방법으로 채운다. 어느 쪽에도 없으면 그 상품을 후보에서 빼고 실행 기록에 남긴다.
+  가상 예시로 돌릴 때는 가상 예시 값에서 같은 방법으로 채운다 (등급은 `assumption`). 어느 쪽에도 없으면 그 상품을 후보에서 빼고 실행 기록에 남긴다.
+  - 그 상품의 모든 줄(고객군, 달, 조건)의 `paid` 합 ÷ `quantity` 합을 **백 원 단위로 반올림**한다 (11-15 팀장이 정함).
+    채운 단가는 후보의 가격으로 LLM 에 가므로(9절), 기본 데이터의 평균 단가가 원 단위 그대로 LLM 과 저장된 응답에 남지 않게 한다.
+    반올림해 0 원이 되면 채우지 않는다.
+  - 그 상품의 줄에 업장 정의와 다른 단위(`unit`)가 있으면 엔진이 멈춘다. 단위가 다른 수량을 더하면 단가가 틀린다 (8절: 집계 파일의 `unit` 은 업장 정의의 단위로 적는다).
+  - `paid` 는 할인이 빠진 금액이라, 채운 단가에 프로모션 할인이 걸리면 할인이 한 번 더 들어간다. 가격이 빈 상품에는 프로모션을 걸지 않는다.
+  - 채운 상품의 가격 표기는 `included` 다 (`paid` 가 세금이 든 금액이다). 업장 정의 파일은 바뀌지 않는다. 엔진이 읽은 사본에만 채운다.
+  - 상황(7절)을 먼저 적용하고 그 뒤에 채운다. 그래서 `change_price_pct` 는 채운 단가를 바꾸지 않는다. 가격이 빈 상품의 값을 정하려면 `set_price` 를 쓴다.
+  - 채운 상품과 채우지 못한 상품은 실행 기록의 `filled_products`, `skipped_products` 에 남는다 (10.1절).
 
 **파는 때를 적는 규칙** (`slots`)
 
@@ -381,7 +389,29 @@ R-geumryong-0027,geumryong,map,2026-03,,,,,,meal,dinner,,,,,,대기,,no,예약�
   - 코드에서는 `engine.formats.merged_persona` 로 합친다. 합친 결과가 이 절의 형식에 맞는지도 함께 본다.
 - **"이유 근거 부족"**: 합친 뒤에도 `evidence` 의 `visit`, `preferences`, `buying` 에 후기 번호가 하나도 없으면 화면이 그 페르소나를 "이유 근거 부족"으로 보여 준다.
 - 기본 데이터에서 계산하는 값(업장별 매출 비중, 사는 상품, 방문 시기, 유형, 성별·연령 구성)은 **파일에 적지 않는다.**
-  엔진이 실행할 때 집계 파일(8절)에서 계산해 `base_profile` 로 붙인다.
+  엔진이 실행할 때 집계 파일(8절)에서 계산해 `base_profile` 로 붙인다 (아래 "기본 데이터의 요약").
+
+**기본 데이터의 요약 `base_profile`** (11-15 에 정함. `engine/weights.py` 의 `base_profiles`)
+
+기본 데이터로 돌릴 때 엔진이 요청(9절)의 `persona` 에 붙이는 그 고객군의 요약이다. 페르소나 파일에는 적지 않는다.
+가상 예시로 돌릴 때는 붙이지 않는다. 어떻게 보낼지는 실행 기록의 `base_profile_mode` 다 (10.1절).
+
+| 키 | 뜻 |
+|---|---|
+| `venue_share` | 워커힐 업장마다 그 고객군의 매출 비중 |
+| `occasion_share` | 이용 상황(`meal`, `dessert`, `takeout`)마다 그 고객군의 매출 비중 |
+| `day_type_share` | 평일·주말(`weekday`, `weekend`)마다 그 고객군의 매출 비중 |
+| `top_products` | `venue_share` 에 있는 업장마다 그 고객군의 매출이 큰 상품의 `product_id` 를 큰 순서로 셋까지. 순위만 보낸다 |
+
+- `bucketed` (기본): 비중을 `high`·`mid`·`low` 로 바꿔 보낸다. 고르게 나눴을 때의 몫(업장은 8곳이라 1/8, 이용 상황 1/3, 평일·주말 1/2)과 견줘
+  1.5배 이상이면 `high`, 0.5배 이상이면 `mid`, 그보다 작으면 `low` 다. 이 기준은 설계 가정이다 (11-15 엔진 담당이 정함).
+  예를 들어 한 고객군의 업장별 비중이 금룡 0.6, 더뷔페 0.3, 온달 0.1 이면 (지어낸 값이다) `{"geumryong": "high", "thebuffet": "high", "ondal": "mid"}` 다.
+- `raw`: 비중을 소수 셋째 자리까지 그대로 보낸다. 내부 수치가 외부 LLM 과 저장된 응답에 남으므로 기본으로 쓰지 않는다.
+- 매출이 없는 갈래는 적지 않는다. 집계 파일에 매출이 없는 고객군은 네 키가 모두 빈 묶음이다.
+- 조식 매출은 넣지 않는다. 묶음에 조식이 없어(6절) 조식 매출이 다른 끼니의 선택을 끌어당기지 않게 한다.
+- 집계 파일의 모든 업장과 조건을 본다. 돌리는 업장이나 조건을 골라도 요약이 같아야 요청이 같아 저장된 응답이 재생된다.
+- 유형과 성별·연령 구성은 집계 파일에 없어 넣지 않는다.
+- 프롬프트에 이 요약의 뜻을 적는다 (예시는 `tests/fixtures/example/personas/prompts/p1.md`). 응답의 `used_attributes` 에 `base_profile.venue_share` 처럼 적을 수 있다.
 
 | 키 | 뜻 | 비고 |
 |---|---|---|
@@ -463,6 +493,8 @@ R-geumryong-0027,geumryong,map,2026-03,,,,,,meal,dinner,,,,,,대기,,no,예약�
 
 - 묶음의 조건에는 인원과 예산을 넣지 않는다. 그러면 페르소나의 값을 쓴다. 화면에서 한 번만 돌릴 때는 인원과 예산을 직접 넣을 수 있다 (9절의 `condition`).
 - 묶음마다의 비율은 고객군마다 다르고 기본 데이터에서 계산하므로 이 파일에 적지 않는다. 실행 기록(10절)에 남는다.
+  계산하는 법은 10.1절의 "가중치를 내는 법"이다. 끼니가 빈 식사 매출은, 업장 정의의 파는 때로 끼니를 알 수 없을 때만
+  `split_id` 가 `meal-lunch-dinner` 인 비율로 나눈다 (엔진이 이 이름으로 찾는다).
 - **조식은 묶음에 넣지 않는다** (11-13 결정). 조식은 고를 업장이 하나뿐이라 페르소나의 선택을 볼 것이 없다. 집계 파일의 조식 매출은 보정의 대조에서 뺀다.
 - **투숙 여부는 묶음에 넣지 않는다** (11-13 결정). 묶음의 조건은 `stay` 를 `null` 로 둔다. 기본 데이터에 투숙 여부가 없어 투숙객과 비투숙 방문객의 비율을 낼 수 없기 때문이다.
   투숙 여부는 화면에서 조건을 직접 넣어 한 번 돌릴 때와, 투숙객 전용 프로모션을 시험할 때만 쓴다.
@@ -600,24 +632,33 @@ R-geumryong-0027,geumryong,map,2026-03,,,,,,meal,dinner,,,,,,대기,,no,예약�
 - 기본 데이터의 업장 이름·상품 번호를 `venue_id`·`product_id` 로 바꾸는 표는 `private/base/map.json` 에 둔다. 기본 데이터의 이름이 들어 있으므로 저장소에 올리지 않는다.
 - 함께 두는 `private/base/meta.json` 에 기준 기간, 만든 날, 줄 수, 식별자로 바꾸지 못한 줄 수를 적는다.
 - **가상 예시**: `data/samples/base_summary.csv` 는 같은 열을 가진 지어낸 값이다. 기본 데이터의 수치를 따오지 않는다. 키나 기본 데이터가 없는 PC 는 이 파일로 돌린다.
+- 업장 정의의 파는 달 밖에서 팔린 줄(예: 더파빌리온 빙수)도 그대로 둔다. 엔진은 그 줄도 고객군의 매출과 업장별 비중에 넣는다 (11-15 팀장이 정함.
+  가중 합산과 보정은 일 년 합계만 쓰므로 그 매출이 어느 달에 팔렸는지는 상관없다). 형식 검사는 가상 예시 값에서만 이것을 오류로 본다.
 
 엔진은 이 파일에서 아래를 계산한다.
 
 | 계산하는 값 | 쓰는 곳 |
 |---|---|
-| 고객군마다 업장별 매출 비중 | 보정의 대조 (PRD 6.5절), 페르소나의 `base_profile` |
-| 고객군마다 방문 조건 묶음의 비율 | 가중 합산 (PRD 7.2절) |
-| 고객군의 다이닝 매출 합 | 고객군 배수 (PRD 7.2절). 다이닝의 범위는 기본 데이터에서 사업부문이 호텔 다이닝인 8개 업장이다 |
+| 고객군마다 업장별 매출 비중 | 보정의 대조 (PRD 6.5절), 페르소나의 `base_profile` (5절) |
+| 고객군마다 방문 조건 묶음의 비율 | 가중 합산 (PRD 7.2절, 10.1절의 "가중치를 내는 법") |
+| 고객군의 다이닝 매출 합 | 고객군 배수 (PRD 7.2절). 다이닝의 범위는 기본 데이터에서 사업부문이 호텔 다이닝인 8개 업장이다. 조식 매출은 넣지 않는다 (6절) |
+| 상품마다 `paid` 합 ÷ `quantity` 합 | 가격이 빈 상품의 단가 (3절) |
 | 고객군과 이용 상황마다 매출이 가장 큰 업장 | 검증의 단순 기준 (PRD 6.6절) |
 
-예시 (지어낸 값이다)
+예시 (지어낸 값이다. `revenue_net` 은 하나씩 팔린 줄마다 반올림한 값을 더한 것으로 지었다)
 
 ```csv
 customer_group,venue_id,product_id,occasion,meal,day_type,month,unit,quantity,paid,revenue_net,price_unconfirmed
-가족·친족,geumryong,course-a,meal,,weekday,5,1인,300,45000000,40909091,N
-가족·친족,geumryong,course-a,meal,,weekend,5,1인,500,75000000,68181818,N
-가족·친족,geumryong,course-b,meal,dinner,weekend,5,1인,120,24000000,21818182,N
+가족·친족,geumryong,course-a,meal,,weekday,5,1인,300,45000000,40909200,N
+가족·친족,geumryong,course-a,meal,,weekend,5,1인,480,72000000,65454720,N
+가족·친족,geumryong,course-b,meal,dinner,weekend,5,1인,180,36000000,32727240,N
 ```
+
+이 예시로 10.1절의 예시 실행(가족·친족의 페르소나 하나 × 조건 `meal-dinner-weekend`)을 돌리면 이렇게 된다.
+조건 `meal-dinner-weekend` 의 매출은 끼니가 빈 주말 줄의 반(점심·저녁 0.5·0.5)과 주말 저녁 줄을 더한 65,454,600 이다 (평일 줄은 돌리지 않는 조건이다).
+돌리는 조건이 하나라 묶음의 비율은 1 이다. 페르소나가 금룡 코스 A 를 4인분 골라 세금을 뺀 매출이 545,455 이고 고객군 안의 몫이 0.5 이므로,
+고객군 배수는 65,454,600 ÷ (545,455 × 0.5 × 1 × 1) = 240, 페르소나의 가중치는 240 × 0.5 = 120 이다.
+그러면 그 방문의 가중 매출이 545,455 × 120 = 65,454,600 으로 그 고객군의 매출과 같아진다.
 
 ## 9. 선택 요청과 응답
 
@@ -833,9 +874,10 @@ customer_group,venue_id,product_id,occasion,meal,day_type,month,unit,quantity,pa
 | `data_mode` | `private` 기본 데이터로 돌림, `sample` 가상 예시 값으로 돌림 |
 | `scenario_id`, `persona_ids`, `condition_ids` | 무엇을 돌렸나 |
 | `llm` | `provider`, `model`, `prompt_version`, `calls_new` (새로 부른 수), `calls_replayed` (저장된 응답을 재생한 수), `call_limit`, `stopped_by_limit` |
-| `base_profile_mode` | 기본 데이터에서 나온 값을 LLM 에 어떻게 보냈나: `none` 보내지 않음, `bucketed` 범주로 바꿔 보냄, `raw` 그대로 보냄. 기본 데이터로 돌릴 때의 기본값은 `bucketed` 다 (11-13 결정). 가상 예시로 돌릴 때는 늘 `none` 이다. 값을 붙이는 코드는 T11 에서 만들고, 그 전에 돌린 실행에는 실제로 보낸 대로 `none` 이 남는다 |
-| `inputs` | 입력 파일들의 해시. 같은 입력인지 견줄 때 쓴다. 읽은 것만 적는다: `venues`, `personas`, `conditions`, `scenario`, `vocab`, 집계 파일을 읽었으면 `summary`, LLM 을 부를 수 있게 돌렸으면 프롬프트 파일의 `prompt` (재생만 하는 실행은 프롬프트를 읽지 않는다) |
-| `weights` | `group_multiplier` 고객군 배수, `persona_weight` 페르소나의 가중치, `condition_ratio` 고객군마다 묶음의 비율, `grades` 각 값의 근거 등급. 묶음의 비율은 조건마다 등급을 적는다. `assumed_splits` 로 나눈 조건은 `assumption` 이다 |
+| `base_profile_mode` | 기본 데이터의 요약(5절의 `base_profile`)을 LLM 에 어떻게 보냈나: `none` 보내지 않음, `bucketed` 범주로 바꿔 보냄, `raw` 그대로 보냄. 기본 데이터로 돌릴 때의 기본값은 `bucketed` 다 (11-13 결정). 가상 예시로 돌릴 때는 늘 `none` 이다. 명령의 `--base-profile` 로 바꾼다. 기준이 아닌 상황은 기준 실행의 값을 따른다 |
+| `inputs` | 입력 파일들의 해시. 같은 입력인지 견줄 때 쓴다. 읽은 것만 적는다: `venues`, `personas`, `conditions`, `scenario`, `vocab`, 집계 파일 `summary` (늘 읽는다), LLM 을 부를 수 있게 돌렸으면 프롬프트 파일의 `prompt` (재생만 하는 실행은 프롬프트를 읽지 않는다) |
+| `weights` | `group_multiplier` 고객군 배수, `persona_weight` 페르소나의 가중치, `condition_ratio` 고객군마다 묶음의 비율, `grades` 각 값의 근거 등급. 등급은 값마다 적는다 (고객군 배수는 고객군마다, 가중치는 페르소나마다, 묶음의 비율은 고객군과 조건마다). 내는 법은 아래 "가중치를 내는 법" |
+| `filled_products` | 가격이 비어 있어 집계 파일로 단가를 채운 상품의 목록 (3절). `<venue_id>:<product_id>` 로 적는다. 채운 단가는 적지 않는다 |
 | `skipped_products` | 가격을 채우지 못해 후보에서 뺀 상품의 목록. `<venue_id>:<product_id>` 로 적는다 |
 | `weights_from` | 가중치를 정한 기준 상황의 `run_id`. 기준 상황 자신이면 `null` |
 | `counts` | `visits` 돌린 수, `failed` 실패한 수 |
@@ -844,11 +886,41 @@ customer_group,venue_id,product_id,occasion,meal,day_type,month,unit,quantity,pa
 - 묶음의 조건으로 돌린 실행은 `weights` 에 페르소나마다의 가중치와, 고객군과 조건마다의 비율이 빠짐없이 있어야 한다. 없으면 원장의 `represented` 를 확인할 수 없다.
   화면에서 조건을 직접 넣어 돌린 방문(`manual-`)에는 가중치가 없다.
 - 기준이 아닌 상황의 `weights` 는 `weights_from` 에 적은 기준 상황의 값과 같다. 가중치는 기준 상황에서 한 번 정하고 그대로 쓴다 (PRD 7.2절).
+- T11(11-15) 전에 돌린 실행 기록은 등급의 모양과 `filled_products` 가 달라 읽히지 않는다. 기준 상황부터 다시 돌린다.
+
+**가중치를 내는 법** (11-15 에 정함. `engine/weights.py`) — 기준 상황을 돌릴 때 엔진이 집계 파일(8절)에서 낸다 (PRD 7.2절).
+
+- 집계 파일: 기본 데이터로 돌리면 `private/base/summary.csv`, 가상 예시로 돌리면 `data/samples/base_summary.csv` 다. 없으면 돌리지 않는다.
+- **쓰는 매출**: 읽은 워커힐 업장의 줄만 쓴다 (`--venues` 로 고르면 그 업장의 줄). 줄마다 세금을 뺀 매출(`revenue_net`)을 돌리는 조건에 넣는다.
+  - 식사가 아닌 줄은 이용 상황과 평일·주말이 같은 조건에, 끼니가 있는 식사 줄은 끼니까지 같은 조건에 넣는다.
+  - 끼니가 빈 식사 줄은, 업장 정의에서 그 요일에 그 상품을 점심과 저녁 가운데 한 끼니에만 팔면(3절의 `slots`) 그 끼니의 조건에 넣는다.
+    예: "주말 점심과 모든 요일 저녁"에 파는 상품의 평일 줄은 저녁이다 (8절: 상품으로 알 수 없을 때만 나눈다. 11-15 독립 검토에서 나와 정함).
+    둘 다 팔면(또는 업장 정의에 그 상품이 없으면) 6절의 비율(`meal-lunch-dinner`)로 나눠 점심과 저녁 조건에 넣는다.
+  - 조식 줄과 돌리지 않는 조건의 줄은 넣지 않는다. 파는 달 밖에서 팔린 줄도 넣는다 (8절).
+- **묶음의 비율** = 그 고객군의 그 조건의 매출 ÷ 그 고객군의 돌리는 조건 모두의 매출. 고객군마다 더하면 1 이다.
+  조건의 일부만 돌리면(`--conditions`) 돌린 조건 안에서 나눈다. 그 고객군의 매출이 없으면 모두 0 이다.
+- **고객군 배수**는 방문을 다 돈 뒤 기준 상황의 원장으로 맞춘다. 그 고객군의 가상 매출 합이 기본 데이터의 매출과 같아지게 하는 값이다:
+  고객군 배수 = 그 고객군의 돌리는 조건 모두의 매출 ÷ Σ(그 고객군 방문의 워커힐 줄마다 `revenue_net` × 고객군 안의 몫 × 묶음의 비율 × `counted_share`).
+  실패한 방문은 세지 않는다. 기본 데이터에 그 고객군의 매출이 없거나, 그 고객군이 비율이 0 이 아닌 조건에서 워커힐 업장을 고른 방문이 없으면 맞출 수 없어 0 이다.
+  명령이 두 경우를 나눠 알린다. 앞의 경우는 페르소나의 `customer_group` 이 집계 파일의 고객군 이름과 다른 때가 가장 흔하다.
+- **페르소나의 가중치** = 고객군 배수 × 고객군 안의 몫 (5절의 `share_in_group.value`).
+- 그래서 엔진은 방문을 돌 때 원장의 `represented` 를 0 으로 적어 두고, 다 돈 뒤 가중치로 `represented` 와 `weighted_revenue` 를 채운다.
+  기준이 아닌 상황은 기준 실행의 가중치를 처음부터 쓴다.
+- **등급**
+  - 묶음의 비율: 기본 데이터면 `internal`. 팀이 정한 비율(6절의 `assumed_splits`)로 나눈 매출이 든 조건은 그 비율의 `grade` (지금은 `assumption`)와 견줘 약한 것이다.
+  - 고객군 배수: 기본 데이터면 `internal`.
+  - 나눈 매출의 일부만 돌리는 조건에 든 고객군(예: `--conditions` 로 저녁만 돌림)은 그 고객군의 합계가 나누는 비율에 기대므로,
+    그 고객군의 비율과 배수가 모두 나누는 비율의 등급을 따른다. 묶음의 조건을 모두 돌리면 생기지 않는다.
+  - 페르소나의 가중치: 고객군 배수의 등급과 `share_in_group.grade` 가운데 약한 것. 세기는 `internal`·`official` > `review` > `assumption` > `unknown` 이다.
+    세기가 같으면(`internal` 과 `official`) 고객군 배수의 등급을 쓴다.
+  - 가상 예시로 돌리면 `internal` 대신 `assumption` 이다. 매출이 없어 낼 수 없는 값은 `unknown` 이다.
+- 업장별 가상 매출과 비중은 원장에서 낸다: `engine.ledger.venue_shares` (PRD 7.2절의 4·5. 경쟁 업장과 "이용하지 않음"은 분모에 넣지 않고 방문의 크기로 따로 낸다).
 - **기준이 아닌 상황을 돌리는 법** (11-14 에 정함): 끝까지 돈 기준 실행(`status` 가 `ok`)이 먼저 있어야 한다.
   엔진은 그 실행의 `persona_ids`, `condition_ids`, `weights` 를 그대로 쓰고 `weights_from` 에 그 `run_id` 를 적는다.
   실행하는 명령은 같은 `data_mode` 의 끝까지 돈 가장 새 기준 실행을 고른다 (`--baseline` 으로 다른 실행을 가리킬 수 있다).
-  기준 실행 뒤에 입력(`inputs` 의 `venues`, `personas`, `conditions`, `vocab`. 두 실행 모두 프롬프트를 읽었으면 `prompt`)이나
+  기준 실행 뒤에 입력(`inputs` 의 `venues`, `personas`, `conditions`, `vocab`, `summary`. 두 실행 모두 프롬프트를 읽었으면 `prompt`)이나
   `llm` 의 `provider`·`model`·`prompt_version` 이 달라졌으면 돌리지 않는다. 기준 상황을 다시 돌린 뒤에 돌린다.
+  `base_profile_mode` 는 기준 실행의 값을 쓴다. 다른 값을 따로 주면 돌리지 않는다.
   상황 사이의 차이에 상황의 변경만 남게 하려는 것이다.
   - 이 검사가 보지 못하는 것: 엔진 코드가 바뀐 것(`engine_commit`), 기준 실행이 재생만 해서 프롬프트를 읽지 않았을 때 그 뒤에 바뀐 프롬프트의 글.
     코드나 프롬프트를 고쳤으면 기준 상황부터 다시 돌린다.
@@ -872,6 +944,9 @@ customer_group,venue_id,product_id,occasion,meal,day_type,month,unit,quantity,pa
   - 멈춘 실행의 원장에는 멈추기 전까지 돌린 방문만 있다. 받은 답은 `llm/` 에 남아 있어, 다시 돌리면 재생하고 남은 방문만 새로 부른다.
   - 예상하지 못한 오류로 끊긴 실행도 그때까지의 실행 기록과 원장을 쓴다 (`status` 는 `failed`). 실행 기록이 없는 실행 폴더는 형식 검사가 오류로 본다.
 
+예시 — 예시 묶음(`tests/fixtures/example/`)으로 엔진이 쓴 실행 기록이다. `engine_commit` 만 자리를 채운 값이다.
+입력의 해시는 예시 묶음의 파일로 낸 값이라, 예시 묶음의 입력 파일을 고치면 이 예시와 예시 묶음의 실행을 함께 다시 만든다 (테스트가 어긋나면 알려 준다).
+
 ```json
 {
   "format_version": 1,
@@ -893,22 +968,25 @@ customer_group,venue_id,product_id,occasion,meal,day_type,month,unit,quantity,pa
   },
   "base_profile_mode": "none",
   "inputs": {
-    "venues": "0000000000000000",
-    "personas": "0000000000000000",
-    "conditions": "0000000000000000",
-    "scenario": "0000000000000000",
-    "summary": "0000000000000000"
+    "venues": "048b79beafe886d2",
+    "personas": "687c20fc4eaa5b6f",
+    "conditions": "81ec9570eef55a09",
+    "scenario": "7f0c40802f158f2c",
+    "vocab": "8198206734bb16a5",
+    "summary": "e03de3cfd0f4355d",
+    "prompt": "9fee7d4f42a62d8b"
   },
   "weights": {
     "group_multiplier": {"가족·친족": 240.0},
     "persona_weight": {"family-elders": 120.0},
     "condition_ratio": {"가족·친족": {"meal-dinner-weekend": 1.0}},
     "grades": {
-      "group_multiplier": "assumption",
-      "persona_weight": "assumption",
+      "group_multiplier": {"가족·친족": "assumption"},
+      "persona_weight": {"family-elders": "assumption"},
       "condition_ratio": {"가족·친족": {"meal-dinner-weekend": "assumption"}}
     }
   },
+  "filled_products": [],
   "skipped_products": [],
   "weights_from": null,
   "counts": {"visits": 1, "failed": 0},
@@ -1090,6 +1168,8 @@ uv run python -m tools.check_formats --strict   # 다 만든 뒤의 기준으로
   상황의 `changes` 를 엔진과 같은 코드로 적용했을 때 업장 정의가 3절의 규칙을 지킨다 (7절).
 - 저장된 응답의 요청에서 깎인 줄과 후보의 `promotions` 의 `applied` 가 서로 맞는다 (9절).
 - `engine/samples/runs/` 의 실행 기록은 모두 `data_mode` 가 `sample` 이다. 가중치가 빠짐없이 있고 등급에 `internal` 이 없다.
+  가중치와 등급의 키가 같고, 고객군마다 묶음의 비율을 더하면 1 (매출이 없어 낼 수 없으면 모두 0) 이고, 페르소나의 가중치가 고객군 배수 × 고객군 안의 몫이다.
+  `filled_products` 의 상품은 업장 정의에서 가격이 빈 상품이다.
   원장의 방문 수가 실행 기록과 맞고, 원장이 저장된 응답과 같다 (10절).
   어긋난 응답(`llm_rejected/`)은 해시가 요청과 맞고, 공급자·모델·상황이 실행 기록과 같고, 같은 요청이 `llm/` 에 없다.
   원장에 그 요청의 실패한 줄이 있고, 그 줄의 `llm_call` 과 `fail_reason` 이 파일의 `llm_call`, `problems` 와 같다.
@@ -1150,7 +1230,7 @@ uv run python -m tools.check_formats --strict   # 다 만든 뒤의 기준으로
 - [x] 폴더 이름의 확정 (11-13, 팀장이 제안대로 확정함. `STRUCTURE.md` 의 폴더 표)
 - [x] 방문 조건 묶음에 조식과 투숙 여부를 넣을지 (11-13, 둘 다 넣지 않는다. 6절)
 - [x] `assumed_splits` 의 값 (11-13, 팀장이 정함. 끼니를 알 수 없는 식사 매출은 점심 0.5, 저녁 0.5 로 나눈다. 뒷받침하는 자료가 없어 반반으로 두었고 등급은 `assumption` 이다. `engine/conditions.json`)
-- [x] 기본 데이터에서 나온 값을 LLM 에 어떻게 보낼지, 곧 `base_profile_mode` 의 기본값 (11-13, 팀장이 정함. 범주로 바꿔 보내는 `bucketed`. 내부 수치가 외부 LLM 과 저장된 응답에 그대로 남지 않게 한다. 10.1절. 붙이는 코드는 T11)
+- [x] 기본 데이터에서 나온 값을 LLM 에 어떻게 보낼지, 곧 `base_profile_mode` 의 기본값 (11-13, 팀장이 정함. 범주로 바꿔 보내는 `bucketed`. 내부 수치가 외부 LLM 과 저장된 응답에 그대로 남지 않게 한다. 10.1절. 11-15 에 T11 에서 붙였다. 요약에 넣는 것은 5절의 "기본 데이터의 요약")
 - [ ] 라벨 값 목록의 첫 판 (11-13, 페르소나 담당)
 - [ ] 경쟁 업장의 `venue_id` (업장 데이터 담당)
 - [ ] 추가 상품(`addons`)에 프로모션 할인을 적용할지 (11-16 팀 회의에서 정하고 T10 에서 넣는다). 요청의 추가 상품에는 할인이 적혀 있지 않아,
