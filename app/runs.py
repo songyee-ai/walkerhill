@@ -16,8 +16,11 @@ import subprocess
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
+from urllib.parse import urlsplit
 
 from dotenv import dotenv_values
+
+from engine.llm import LOCAL_HOSTS, LlmFatal, make_provider, settings_from_env
 
 EXAMPLE_SOURCE = Path("tests") / "fixtures" / "example"
 EXAMPLE_COPY = Path("private") / "try-example"
@@ -102,14 +105,26 @@ def has_private_summary(root: Path) -> bool:
 
 
 def key_ready(repo_root: Path) -> bool:
-    """AI 를 새로 부를 수 있게 `.env` 가 채워져 있는가. 키의 값은 읽어서 있는지만 보고 어디에도 쓰지 않는다."""
+    """AI 를 새로 부를 수 있게 `.env` 가 채워져 있는가. 키의 값은 읽어서 있는지만 보고 어디에도 쓰지 않는다.
+
+    엔진(`engine/llm.py`)이 설정을 읽고 공급자를 만드는 함수를 그대로 써서, 엔진이 멈출 설정(공급자 이름의 오타, 주소, 모델,
+    `LLM_RESPONSE_FORMAT`)이면 켜지 않는다. 공급자를 만들어도 부르지는 않는다. `openai-compatible` 은 이 PC 의 주소(로컬 모델)가 아니면
+    키(`LLM_API_KEY`)도 있어야 한다 (11-16, T103: 주소만 보고 켜져 부르는 순간 실패했다).
+    """
     env_file = repo_root / ".env"
     if not env_file.is_file():
         return False
     env = {key: (value or "").strip() for key, value in dotenv_values(env_file).items()}
-    if (env.get("LLM_PROVIDER") or "anthropic") == "anthropic":
-        return bool(env.get("ANTHROPIC_API_KEY"))
-    return bool(env.get("LLM_BASE_URL"))
+    try:
+        settings = settings_from_env(env)
+        if settings.provider == "anthropic":
+            return bool(env.get("ANTHROPIC_API_KEY"))
+        make_provider(settings, env)
+    except LlmFatal:
+        return False
+    if settings.provider == "claude-code":
+        return True  # 자기 Claude 구독으로 로그인한 Claude Code 를 부른다 (T104). 실행 파일은 위에서 찾았다
+    return bool(env.get("LLM_API_KEY")) or urlsplit(env.get("LLM_BASE_URL", "")).hostname in LOCAL_HOSTS
 
 
 def engine_command(

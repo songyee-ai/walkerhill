@@ -1,0 +1,58 @@
+{
+  "format_version": 1,
+  "scenario_id": "parkview-yearend-price",
+  "name": "더 파크뷰 연말 성수기 요금",
+  "kind": "competitor",
+  "description": "경쟁 뷔페 더 파크뷰가 연말 성수기(12/18~31) 요금을 받을 때, 더뷔페와 다른 업장으로 누가 옮겨 오는지 본다.",
+  "changes": [
+    {
+      "op": "set_price",
+      "venue_id": "shilla-parkview",
+      "product_id": "weekday-lunch-adult",
+      "price": 205000
+    },
+    {
+      "op": "set_price",
+      "venue_id": "shilla-parkview",
+      "product_id": "weekend-lunch-adult",
+      "price": 225000
+    },
+    {
+      "op": "set_price",
+      "venue_id": "shilla-parkview",
+      "product_id": "weekday-dinner-adult",
+      "price": 235000
+    },
+    {
+      "op": "set_price",
+      "venue_id": "shilla-parkview",
+      "product_id": "weekend-dinner-adult",
+      "price": 235000
+    },
+    {
+      "op": "set_price",
+      "venue_id": "shilla-parkview",
+      "product_id": "weekday-lunch-child",
+      "price": 100000
+    },
+    {
+      "op": "set_price",
+      "venue_id": "shilla-parkview",
+      "product_id": "weekend-lunch-child",
+      "price": 110000
+    },
+    {
+      "op": "set_price",
+      "venue_id": "shilla-parkview",
+      "product_id": "weekday-dinner-child",
+      "price": 115000
+    },
+    {
+      "op": "set_price",
+      "venue_id": "shilla-parkview",
+      "product_id": "weekend-dinner-child",
+      "price": 115000
+    }
+  ],
+  "note": "신라호텔 공식 요금 페이지(업장 정의의 출처 S1, https://www.shillahotels.com/ko/theshilla/seoul/dining/restaurant/theParkview.do, 확인 2026-11-16)의 12/18~31 성수기(High) 성인·어린이 요금. 이 기간 저녁은 요일 구분 없이 한 값이라 월~목과 금~일 상품에 같은 값을 넣었다. 주말 점심은 페이지의 '토/일/공휴일/24~25일' 값이다. 엔진은 달을 보지 않으므로 '평소에 성수기 요금을 받는다면'으로 읽는다. 11-16 hojitea-ui 가 조사해 전함."
+}

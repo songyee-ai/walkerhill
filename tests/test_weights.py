@@ -136,7 +136,7 @@ class Replay:
     def __init__(self, saved_path: Path) -> None:
         self.saved = load_json(saved_path)
 
-    def complete(self, system: str, user: str) -> LlmReply:
+    def complete(self, system: str, user: str, schema: dict) -> LlmReply:
         assert json.loads(user) == self.saved["request"]
         usage = self.saved["usage"]
         return LlmReply(self.saved["raw_text"], usage["input_tokens"], usage["output_tokens"])
