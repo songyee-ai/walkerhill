@@ -87,6 +87,9 @@ def ignored_by_git(parts: tuple[str, ...], is_dir: bool) -> bool:
         return name in IGNORED_DIR_NAMES or name.endswith(".egg-info")
     if parts == (".claude", "settings.local.json"):
         return True
+    # 화면이 만든 상황 파일 (.gitignore 의 scenarios/ui-*.json. 맨 위의 scenarios/ 에만 걸린다).
+    if len(parts) == 2 and parts[0] == "scenarios" and name.startswith("ui-") and name.endswith(".json"):
+        return True
     return name in IGNORED_FILE_NAMES or name.endswith(IGNORED_SUFFIXES)
 
 
