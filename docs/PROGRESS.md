@@ -495,6 +495,8 @@ REVIEW_RULES 9절은 글에 없으면 비우게 해서 나머지 139건은 `priv
 - 실패한 방문, 호출 상한에 닿은 실행, `llm_rejected/` 가 있는 실행은 화면 위에 알린다. 파는 달이 아닌 몫을 이용하지 않음으로 센 줄은 고른 것으로 보지 않는다.
 - 무엇을 보여 줄지는 `app/results.py` 가 정하고 `app/main.py` 는 그리기만 한다. 서버 없이 테스트하려고 나눴다.
 - 팀장 요청으로 `scenarios/baseline.json` 을 예시에서 베껴 올렸다 (형식 검사 통과).
+- 예시의 저장된 답은 `anthropic`·`claude-opus-5-5` 로 받은 것이다. `.env` 가 다른 공급자를 가리키는 PC 에서도 예시를 재생할 수 있게,
+  예시를 재생만 할 때는 화면이 이 두 값을 환경 변수로 넘긴다 (`app/runs.py` 의 `replay_env`, 11-16 OpenAI 키로 바꾼 PC 에서 예시 재생이 실패해 고침).
 
 특이사항: 기본 데이터로 돌린 실행(`private/runs/`)과 주문 없이 추가 상품만 산 방문은 그런 실행이 아직 없어 화면에서 열어 보지 못했다. 생기면 T21 에서 확인한다.
 
@@ -1117,6 +1119,12 @@ REVIEW_RULES 9절은 글에 없으면 비우게 해서 나머지 139건은 `priv
   사진 수에 따라 열이 밀려서, 글 올린 날(`26.11.12.목`) 칸을 기준으로 1칸 앞을 본문, 2칸 앞을 제목으로 찾았습니다 (여덟 업장 파일 모두 이 방법으로 맞음).
   4절을 고치거나 80% 쪽 정돈에도 같은 방법을 써 주세요.
   - songyee-ai (11-16): 4절을 고쳤습니다 (글 올린 날의 칸을 기준으로 찾기, 작성자 칸은 나눈 기록의 `author_col`). borigunbbang 의 확인이 남았습니다.
+
+- [ ] borigunbbang ← wilstein91 (11-16): 프롬프트 p1 로 실제 LLM 을 한 번 불렀더니 답이 검사에서 어긋났습니다 (`llm_rejected/`).
+  이유는 둘입니다: 이유 라벨에 값 목록에 없는 `중식` 을 썼고, `used_attributes` 를 `preferences.cuisines_like` 가 아니라 `cuisines_like` 로 적었습니다.
+  돌린 것: `--data sample --personas family-parents --conditions meal-dinner-weekend --limit 1`, 공급자 `openai-compatible`·모델 `gpt-5.4-mini-2026-03-17`
+  (팀 기본은 Claude 이고, 이 PC 에 OpenAI 키만 있어 연습으로 돌렸습니다. 이 결과는 시연에 쓰지 않습니다).
+  어긋난 답 파일은 제 PC 의 `private/openai-trial/` 에 있어 저장소 밖으로 드리겠습니다. p2 를 만드실 때 "이유는 값 목록에서만, 속성은 점으로 이은 전체 경로로"를 적어 주시면 될 것 같습니다.
 
 ## 실측 기록
 

@@ -40,6 +40,7 @@ from app.runs import (  # noqa: E402
     has_private_summary,
     key_ready,
     make_example_copy,
+    replay_env,
     run_engine,
 )
 from engine.formats import KO  # noqa: E402
@@ -114,7 +115,7 @@ def run_panel() -> None:
                 root.path, REPO_ROOT, data_mode, scenario_id, prompt, persona_ids, condition_ids, venue_ids, call_llm
             )
             with st.spinner("엔진을 돌리는 중입니다…"):
-                outcome = run_engine(command, REPO_ROOT)
+                outcome = run_engine(command, REPO_ROOT, env_overrides=replay_env(root.is_example, call_llm))
             st.session_state["last_outcome"] = outcome
             if outcome.run_dir is not None:
                 st.session_state["pick"] = (outcome.run_dir.parent, outcome.run_dir.name)
