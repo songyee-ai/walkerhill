@@ -19,6 +19,8 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
+from app import simulator  # noqa: E402
+from app.compare import venue_names  # noqa: E402
 from app.results import (  # noqa: E402
     RunSource,
     condition_names,
@@ -58,8 +60,8 @@ st.caption("화면의 모든 금액은 가상 값입니다. 실제 매출이나 
 
 def run_panel() -> None:
     """1. 돌리기 — 조건을 골라 엔진을 돌린다. 끝나면 새 실행을 2. 결과 보기에서 고른 상태로 다시 그린다."""
-    st.sidebar.header("1. 돌리기")
-    with st.sidebar.expander("조건을 골라 새로 돌리기", expanded=False):
+    st.subheader("1. 돌리기")
+    with st.expander("조건을 골라 새로 돌리기", expanded=False):
         roots = data_roots(REPO_ROOT)
         root = st.radio("돌릴 자료", roots, format_func=lambda r: r.label, key="run_root")
         if root.is_example and not root.path.exists():
@@ -147,127 +149,139 @@ def apply_pick(sources: list[RunSource]) -> None:
         st.session_state["run_id"] = run_id
 
 
-run_panel()
-show_last_outcome()
 
-# ── 결과 보기 ──────────────────────────────────────────────
-st.sidebar.header("2. 결과 보기")
-sources = run_sources(REPO_ROOT)
-other = st.sidebar.text_input(
-    "다른 실행 폴더 (선택)",
-    help="엔진을 --root 로 다른 곳에서 돌렸으면 그 아래의 engine/samples/runs 나 private/runs 경로를 적습니다.",
-)
-if other.strip():
-    folder = Path(other.strip())
-    folder = folder if folder.is_absolute() else REPO_ROOT / folder
-    if list_runs(folder):
-        typed = RunSource(f"직접 적은 폴더 ({other.strip()})", folder)
-        sources.insert(0, typed)
-        # 경로를 새로 적었으면 그 폴더를 고른 상태로 한다. 같은 경로면 사람이 고른 값을 그대로 둔다.
-        if st.session_state.get("other_seen") != other.strip():
-            st.session_state["other_seen"] = other.strip()
-            st.session_state["source"] = typed
+def detail_view() -> None:
+    """실행 하나 자세히 보기 (T09): 1. 돌리기, 2. 결과 보기."""
+    run_panel()
+    show_last_outcome()
+
+    # ── 결과 보기 ──────────────────────────────────────────────
+    st.subheader("2. 결과 보기")
+    sources = run_sources(REPO_ROOT)
+    other = st.text_input(
+        "다른 실행 폴더 (선택)",
+        key="other_folder",
+        help="엔진을 --root 로 다른 곳에서 돌렸으면 그 아래의 engine/samples/runs 나 private/runs 경로를 적습니다.",
+    )
+    if other.strip():
+        folder = Path(other.strip())
+        folder = folder if folder.is_absolute() else REPO_ROOT / folder
+        if list_runs(folder):
+            typed = RunSource(f"직접 적은 폴더 ({other.strip()})", folder)
+            sources.insert(0, typed)
+            # 경로를 새로 적었으면 그 폴더를 고른 상태로 한다. 같은 경로면 사람이 고른 값을 그대로 둔다.
+            if st.session_state.get("other_seen") != other.strip():
+                st.session_state["other_seen"] = other.strip()
+                st.session_state["source"] = typed
+        else:
+            st.warning("그 폴더에서 실행을 찾지 못했습니다. run.json 이 든 실행 폴더들의 상위 폴더를 적어 주세요.")
+
+    if not sources:
+        st.error("보여 줄 실행이 없습니다. 저장소의 예시 파일(tests/fixtures/example)이 있는지 확인해 주세요.")
+        return
+
+    apply_pick(sources)
+    # 고른 값이 목록에서 사라졌으면(폴더를 지웠거나 출처를 바꿈) 처음 것으로 돌아간다.
+    if st.session_state.get("source") not in sources:
+        st.session_state.pop("source", None)
+    source = st.selectbox("결과를 읽을 곳", sources, format_func=lambda s: s.label, key="source")
+    run_ids = list_runs(source.folder)
+    if st.session_state.get("run_id") not in run_ids:
+        st.session_state.pop("run_id", None)
+    run_id = st.selectbox("실행 (새것이 위)", run_ids, key="run_id")
+
+    try:
+        run = load_run(source.folder / run_id)
+    except (OSError, ValueError) as error:
+        st.error(f"실행 `{run_id}` 를 읽지 못했습니다. 형식이 바뀌기 전에 돌린 실행이면 엔진으로 다시 돌려 주세요.\n\n{error}")
+        return
+
+    record = run.record
+    personas = persona_names(run)
+    conditions = condition_names(run)
+    persona_id = st.selectbox("페르소나", record.persona_ids, format_func=lambda p: personas[p])
+    condition_id = st.selectbox("방문 조건", record.condition_ids, format_func=lambda c: conditions[c])
+
+    # ── 실행 정보 ──────────────────────────────────────────────
+    scenario = "기준 상황" if record.scenario_id == "baseline" else f"상황 `{record.scenario_id}`"
+    st.markdown(
+        f"**{scenario}** · 실행 `{record.run_id}` · 모델 `{record.llm.model}` · 프롬프트 `{record.llm.prompt_version}` · "
+        f"방문 {record.counts.visits}건"
+    )
+    for notice in run_notices(run):
+        st.warning(notice)
+    simulator.show_validation(source.folder / run_id, venue_names(run))
+
+    # ── 실행 결과 ──────────────────────────────────────────────
+    view = visit_view(run, persona_id, condition_id)
+    st.header(f"{personas[persona_id]} · {conditions[condition_id]}")
+    if view.condition is not None:
+        st.caption(party_label(view.condition))
+
+    if not view.found:
+        st.info("이 실행에는 이 페르소나와 방문 조건의 방문이 없습니다 (호출 상한에 닿아 멈춘 실행일 수 있습니다).")
+    elif view.failed_reason:
+        st.error(f"이 방문은 실패했습니다: {view.failed_reason}")
     else:
-        st.sidebar.warning("그 폴더에서 실행을 찾지 못했습니다. run.json 이 든 실행 폴더들의 상위 폴더를 적어 주세요.")
-
-if not sources:
-    st.error("보여 줄 실행이 없습니다. 저장소의 예시 파일(tests/fixtures/example)이 있는지 확인해 주세요.")
-    st.stop()
-
-apply_pick(sources)
-# 고른 값이 목록에서 사라졌으면(폴더를 지웠거나 출처를 바꿈) 처음 것으로 돌아간다.
-if st.session_state.get("source") not in sources:
-    st.session_state.pop("source", None)
-source = st.sidebar.selectbox("결과를 읽을 곳", sources, format_func=lambda s: s.label, key="source")
-run_ids = list_runs(source.folder)
-if st.session_state.get("run_id") not in run_ids:
-    st.session_state.pop("run_id", None)
-run_id = st.sidebar.selectbox("실행 (새것이 위)", run_ids, key="run_id")
-
-try:
-    run = load_run(source.folder / run_id)
-except (OSError, ValueError) as error:
-    st.error(f"실행 `{run_id}` 를 읽지 못했습니다. 형식이 바뀌기 전에 돌린 실행이면 엔진으로 다시 돌려 주세요.\n\n{error}")
-    st.stop()
-
-record = run.record
-personas = persona_names(run)
-conditions = condition_names(run)
-persona_id = st.sidebar.selectbox("페르소나", record.persona_ids, format_func=lambda p: personas[p])
-condition_id = st.sidebar.selectbox("방문 조건", record.condition_ids, format_func=lambda c: conditions[c])
-
-# ── 실행 정보 ──────────────────────────────────────────────
-scenario = "기준 상황" if record.scenario_id == "baseline" else f"상황 `{record.scenario_id}`"
-st.markdown(
-    f"**{scenario}** · 실행 `{record.run_id}` · 모델 `{record.llm.model}` · 프롬프트 `{record.llm.prompt_version}` · "
-    f"방문 {record.counts.visits}건"
-)
-for notice in run_notices(run):
-    st.warning(notice)
-
-# ── 실행 결과 ──────────────────────────────────────────────
-view = visit_view(run, persona_id, condition_id)
-st.header(f"{personas[persona_id]} · {conditions[condition_id]}")
-if view.condition is not None:
-    st.caption(party_label(view.condition))
-
-if not view.found:
-    st.info("이 실행에는 이 페르소나와 방문 조건의 방문이 없습니다 (호출 상한에 닿아 멈춘 실행일 수 있습니다).")
-elif view.failed_reason:
-    st.error(f"이 방문은 실패했습니다: {view.failed_reason}")
-else:
-    st.subheader("고른 곳")
-    if view.choice_kind == "none":
-        st.markdown(f"**{KO['choice_kind']['none']}**")
-    else:
-        st.markdown(f"**{view.venue}** — {view.venue_detail}")
-        left, right = st.columns(2)
-        left.metric("낸 금액 (가상)", won(view.total_paid))
-        right.metric("워커힐 매출 (가상, 세금 뺀 값)", won(view.revenue_net))
-        money_table(
-            [
-                {
-                    "상품": line.product,
-                    "수량": line.quantity,
-                    "단위": line.unit,
-                    "표시가 (가상, 원)": line.list_price,
-                    "할인 (가상, 원)": line.discount,
-                    "낸 금액 (가상, 원)": line.paid,
-                }
-                for line in view.lines
-            ]
-        )
-        if view.counted_share < 1:
-            st.caption(
-                f"일부 달에만 파는 상품이라 이 방문의 {view.counted_share:.0%} 만 이 업장으로 셉니다. "
-                "나머지는 이용하지 않음으로 셉니다."
+        st.subheader("고른 곳")
+        if view.choice_kind == "none":
+            st.markdown(f"**{KO['choice_kind']['none']}**")
+        else:
+            st.markdown(f"**{view.venue}** — {view.venue_detail}")
+            left, right = st.columns(2)
+            left.metric("낸 금액 (가상)", won(view.total_paid))
+            right.metric("워커힐 매출 (가상, 세금 뺀 값)", won(view.revenue_net))
+            money_table(
+                [
+                    {
+                        "상품": line.product,
+                        "수량": line.quantity,
+                        "단위": line.unit,
+                        "표시가 (가상, 원)": line.list_price,
+                        "할인 (가상, 원)": line.discount,
+                        "낸 금액 (가상, 원)": line.paid,
+                    }
+                    for line in view.lines
+                ]
             )
+            if view.counted_share < 1:
+                st.caption(
+                    f"일부 달에만 파는 상품이라 이 방문의 {view.counted_share:.0%} 만 이 업장으로 셉니다. "
+                    "나머지는 이용하지 않음으로 셉니다."
+                )
 
-    st.subheader("고른 이유")
-    if view.reason_labels:
-        st.markdown(" ".join(f"`{label}`" for label in view.reason_labels))
-    st.write(view.reason_text or "이유가 적혀 있지 않습니다.")
-    if view.used_attributes:
-        st.caption("판단에 쓴 페르소나 속성: " + ", ".join(view.used_attributes))
-    if view.llm_call == "replay":
-        st.caption("앞선 실행에서 저장한 응답을 재생한 결과입니다.")
+        st.subheader("고른 이유")
+        if view.reason_labels:
+            st.markdown(" ".join(f"`{label}`" for label in view.reason_labels))
+        st.write(view.reason_text or "이유가 적혀 있지 않습니다.")
+        if view.used_attributes:
+            st.caption("판단에 쓴 페르소나 속성: " + ", ".join(view.used_attributes))
+        if view.llm_call == "replay":
+            st.caption("앞선 실행에서 저장한 응답을 재생한 결과입니다.")
 
-    st.subheader("고르지 않은 업장")
-    if view.not_chosen:
-        money_table(
-            [
-                {
-                    "업장": item.venue,
-                    "구분": item.kind,
-                    "가장 싼 주문 (가상, 원)": item.cheapest,
-                    "걸린 점": ", ".join(item.pain_labels),
-                    "고르지 않은 이유": item.text,
-                }
-                for item in view.not_chosen
-            ]
-        )
-    else:
-        st.write("다른 후보가 없었습니다.")
+        st.subheader("고르지 않은 업장")
+        if view.not_chosen:
+            money_table(
+                [
+                    {
+                        "업장": item.venue,
+                        "구분": item.kind,
+                        "가장 싼 주문 (가상, 원)": item.cheapest,
+                        "걸린 점": ", ".join(item.pain_labels),
+                        "고르지 않은 이유": item.text,
+                    }
+                    for item in view.not_chosen
+                ]
+            )
+        else:
+            st.write("다른 후보가 없었습니다.")
 
-with st.expander("이 실행의 모든 방문", expanded=False):
-    money_table(visit_table(run))
+    with st.expander("이 실행의 모든 방문", expanded=False):
+        money_table(visit_table(run))
+
+
+tab_sim, tab_detail = st.tabs(["간편 시뮬레이터", "실행 하나 자세히 보기"])
+with tab_sim:
+    simulator.render(REPO_ROOT)
+with tab_detail:
+    detail_view()

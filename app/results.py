@@ -52,6 +52,8 @@ class LoadedRun:
     responses: dict[str, SavedResponse]
     # 검사에서 어긋난 응답의 수 (`llm_rejected/`). 원장에는 실패한 줄로 남는다.
     rejected_files: int
+    # 읽은 실행 폴더. 같은 폴더의 검증 결과(validation.json)를 찾을 때 쓴다.
+    run_dir: Path | None = None
 
 
 def load_run(run_dir: Path) -> LoadedRun:
@@ -65,7 +67,7 @@ def load_run(run_dir: Path) -> LoadedRun:
             responses[request_hash] = read_model(path, SavedResponse)
     rejected_dir = run_dir / "llm_rejected"
     rejected_files = len(list(rejected_dir.glob("*.json"))) if rejected_dir.is_dir() else 0
-    return LoadedRun(record, rows, responses, rejected_files)
+    return LoadedRun(record, rows, responses, rejected_files, run_dir)
 
 
 def won(amount: int | float) -> str:

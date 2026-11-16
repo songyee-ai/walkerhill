@@ -73,16 +73,16 @@ def test_other_folder_reads_runs_written_elsewhere(tmp_path: Path):
     runs = tmp_path / "runs"
     shutil.copytree(EXAMPLE_RUNS, runs)
     app = _app().run()
-    app.sidebar.text_input[0].set_value(str(runs)).run()
+    app.text_input(key="other_folder").set_value(str(runs)).run()
     assert not app.exception
     assert app.selectbox(key="source").value.folder == runs
 
 
 def test_unknown_other_folder_warns_instead_of_failing(tmp_path: Path):
     app = _app().run()
-    app.sidebar.text_input[0].set_value(str(tmp_path / "없음")).run()
+    app.text_input(key="other_folder").set_value(str(tmp_path / "없음")).run()
     assert not app.exception
-    assert any("찾지 못했습니다" in w.value for w in app.sidebar.warning)
+    assert any("찾지 못했습니다" in w.value for w in app.warning)
 
 
 def test_run_panel_says_what_is_missing_in_the_repository():
@@ -94,6 +94,6 @@ def test_run_panel_says_what_is_missing_in_the_repository():
 
     missing = choices(REPO_ROOT).missing
     if missing:
-        assert any("아직 없는 것" in w.value for w in app.sidebar.warning)
+        assert any("아직 없는 것" in w.value for w in app.warning)
     else:
-        assert any(b.label == "돌리기" for b in app.sidebar.button)
+        assert any(b.label == "돌리기" for b in app.button)
