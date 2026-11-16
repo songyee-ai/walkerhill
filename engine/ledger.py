@@ -159,7 +159,7 @@ def visit_rows(
     """검사를 통과한 응답 하나를 원장의 줄로 바꾼다. 주문한 상품 한 줄이 원장의 한 줄이다.
 
     `base` 에는 방문마다 같은 값이 들어 있다: run_id, scenario_id, visit_id, persona_id, customer_group,
-    condition_id, represented. 추가 상품 줄의 할인은 0 이다 (할인을 적용할지는 아직 정하지 않았다. FORMATS 12절).
+    condition_id, represented. 추가 상품 줄의 할인은 0 이다 (추가 상품에는 할인을 적용하지 않는다. 11-16 회의. FORMATS 3절).
     """
     told = {
         "reason_labels": response.reason_labels,

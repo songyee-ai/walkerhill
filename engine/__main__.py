@@ -97,14 +97,6 @@ def main(argv: list[str] | None = None) -> int:
     print(f"실행 폴더: {run_dir}")
     if record.weights_from is not None:
         print(f"상황 {record.scenario_id} · 페르소나, 방문 조건, 가중치는 기준 실행 {record.weights_from} 의 것")
-        base = read_model(runs_folder(root, args.data) / record.weights_from / "run.json", RunRecord)
-        if base.counts.failed:
-            # 기준에서 실패한 방문은 금액이 0 인 줄이다. 이 상황에서 그 방문이 성공하면 차이에 상황의 변경이 아닌 것이 섞인다.
-            print(
-                f"기준 실행에 실패한 방문이 {base.counts.failed}건 있다. 그 방문에서는 기준과 이 상황을 견줄 수 없다. "
-                "기준 상황을 다시 돌려 실패를 없앤 뒤에 견준다.",
-                file=sys.stderr,
-            )
     print(f"공급자 {record.llm.provider} · 모델 {record.llm.model} · 프롬프트 {record.llm.prompt_version}")
     print(
         f"기본 데이터의 요약 {record.base_profile_mode} · "
