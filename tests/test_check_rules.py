@@ -1000,6 +1000,7 @@ def test_checker_skips_exactly_what_git_ignores():
         "Thumbs.db",
         "desktop.ini",
         ".claude/settings.local.json",
+        "scenarios/ui-*.json",
         "*.pyc",
         "*.egg-info/",
         "*.log",
@@ -1016,8 +1017,12 @@ def test_checker_skips_exactly_what_git_ignores():
         (("walkerhill_dining_sim.egg-info",), True),
         (("run.log",), False),
         (("app", "__pycache__"), True),
+        (("scenarios", "ui-competitor-pizzahill-d20.json"), False),
     ]
     kept = [
+        (("scenarios", "baseline.json"), False),
+        (("scenarios", "ui-notes.md"), False),
+        (("tests", "fixtures", "example", "scenarios", "ui-competitor-a.json"), False),
         ((".env.example",), False),
         (("private",), True),
         (("private", "README.md"), False),

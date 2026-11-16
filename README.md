@@ -64,7 +64,9 @@ uv run python -m pytest
 uv run python -m streamlit run app/main.py
 ```
 
-지금 화면은 공통 틀이 돌아가는지 확인하는 뼈대이고, 지어낸 예시 파일을 보여 준다.
+화면에서 조건을 골라 엔진을 돌리고, 페르소나와 방문 조건별 결과를 본다. 키가 없으면 저장된 답을 재생한다.
+쓰는 법은 화면 담당의 안내(`docs/PROGRESS.md` 의 T09, T202)를 본다.
+화면이 만든 상황 파일(`scenarios/ui-*.json`)은 깃이 무시한다. 시연에 쓸 상황은 사람이 확정해 `ui-` 없이 올린다.
 
 **시뮬레이션을 돌린다** — 상황 하나를 돌려 실행 폴더(실행 기록, 소비 원장, 저장된 응답)를 쓴다.
 `--data sample` 은 가상 예시 값으로 돌려 `engine/samples/runs/` 에, `--data private` 은 기본 데이터로 돌려 `private/runs/` 에 쓴다.
