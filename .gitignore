@@ -7,6 +7,9 @@
 private/*
 !private/README.md
 
+# 화면의 간편 시뮬레이터가 만든 상황 파일 (T202). 시연에 쓸 상황은 사람이 확정해 ui- 없이 올린다
+scenarios/ui-*.json
+
 # 운영체제·편집기
 .DS_Store
 Thumbs.db
