@@ -23,10 +23,11 @@ borigunbbang 이 wilstein91, songyee-ai 에게 부탁하는 일이다. 11-16 에
 
 | 맡는 사람 | 업장 (`venue_id`) | 구글 리뷰 수 |
 |---|---|---|
-| wilstein91 | 피자힐 (`pizzahill`), 금룡 (`geumryong`), 온달 (`ondal`) | 3,007 + 248 + 231 |
-| songyee-ai | 더뷔페 (`thebuffet`), 명월관 (`myongwolgwan`), 모에기 (`moegi`), 더파빌리온 (`pavilion`) | 1,650 + 1,253 + 302 + 397 |
+| wilstein91 | 금룡 (`geumryong`), 온달 (`ondal`) | 248 + 231 |
+| songyee-ai | 더뷔페 (`thebuffet`), 명월관 (`myongwolgwan`), 모에기 (`moegi`), 더파빌리온 (`pavilion`), 피자힐 (`pizzahill`) | 1,650 + 1,253 + 302 + 397 + 3,007 |
 
-르파사쥬(`lepassage`)는 끝났다. 구글 지도 주소 (구글의 업장 이름이 공식 이름과 다른 곳이 있어 주소로 연다):
+(11-16, 팀장이 피자힐을 wilstein91 에게서 넘겨받아 모았다)
+르파사쥬(`lepassage`)는 끝났다. (11-16, 접힌 리뷰가 1건 남아 있어 songyee-ai 가 다시 모았다. 접힌 리뷰 0) 구글 지도 주소 (구글의 업장 이름이 공식 이름과 다른 곳이 있어 주소로 연다):
 
 - 피자힐: https://www.google.com/maps/place/%ED%94%BC%EC%9E%90%ED%9E%90+%EA%B7%B8%EB%9E%9C%EB%93%9C%EC%9B%8C%EC%BB%A4%ED%9E%90%EC%84%9C%EC%9A%B8/data=!4m6!3m5!1s0x357cbab730f3d191:0x68fa9c507f3bc52f
 - 금룡: https://www.google.com/maps/place/%EA%B8%88%EB%A3%A1/data=!4m6!3m5!1s0x357ca31f74ec21a1:0xb48af638c71c37df
@@ -41,7 +42,7 @@ borigunbbang 이 wilstein91, songyee-ai 에게 부탁하는 일이다. 11-16 에
 ## 모으는 순서 (업장마다, 크롬)
 
 사람이 자기 브라우저에서 화면을 열고 저장한다. AI 도구로 모으지 않는다 (PRD 5.2절).
-(11-16, songyee-ai 의 네 업장은 팀장 결정으로 AI 도구가 팀장의 크롬을 조작해 모은다. PRD 5.2절의 예외)
+(11-16, songyee-ai 가 맡은 업장과 르파사쥬는 팀장 결정으로 AI 도구가 팀장의 크롬을 조작해 모은다. PRD 5.2절의 예외)
 
 1. 위 주소를 크롬으로 열고 **리뷰** 탭을 누른다.
 2. 리뷰 목록 위의 정렬 버튼에서 **최신순**을 고른다.
