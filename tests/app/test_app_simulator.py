@@ -1,4 +1,4 @@
-"""간편 시뮬레이터: 상황 만들기와 평소 대비 비교 (T202, app/scenario_builder.py, app/simulator.py)."""
+"""간편 시뮬레이터: 상황 만들기와 기본 시나리오 대비 비교 (T202, app/scenario_builder.py, app/simulator.py)."""
 
 import shutil
 import sys
@@ -85,7 +85,7 @@ def _copy(tmp_path: Path) -> Path:
 
 
 def test_prepared_scenario_compares_without_a_key(tmp_path: Path):
-    # 화면의 "평소와 비교하기"와 같은 흐름: 기준을 돌리고 그 가중치로 상황을 돌린다. 저장된 답을 재생한다.
+    # 화면의 "기본 시나리오와 비교하기"와 같은 흐름: 기준을 돌리고 그 가중치로 상황을 돌린다. 저장된 답을 재생한다.
     root = _copy(tmp_path)
     result = simulate(
         root, REPO_ROOT, "sample", "competitor-chinese-discount",
@@ -118,4 +118,4 @@ def test_simulator_tab_renders_with_season_and_weather_marked_pending():
     app.selectbox(key="sim_weather").set_value("비").run()
     assert not app.exception
     assert any("반영되지 않습니다" in c.value for c in app.caption)
-    assert any(b.label == "평소와 비교하기" for b in app.button)
+    assert any(b.label == "기본 시나리오와 비교하기" for b in app.button)

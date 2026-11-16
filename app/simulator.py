@@ -1,4 +1,4 @@
-"""간편 시뮬레이터 화면 (T202): ① 누가 → ② 언제, 무엇이 바뀌면 → ③ 평소와 무엇이 달라졌나.
+"""간편 시뮬레이터 화면 (T202): 왼쪽 변수 패널(자료 → 누가 → 언제 → 적용할 변수)과 오른쪽 결과(기본 시나리오 대비 변수 적용 후).
 
 전문 설정(실행 폴더, 프롬프트 같은 것)은 "실행 하나 자세히 보기" 탭에 두고, 여기서는 고르기만 하면 돌아가게 한다.
 돌리는 것은 app/runs.py 의 `simulate` (README 와 같은 엔진 명령), 견주는 것은 app/compare.py, 식당가 카드는 app/board.py 다.
@@ -6,12 +6,15 @@
 
 import json
 from dataclasses import dataclass
+from html import escape
 from pathlib import Path
 
 import streamlit as st
+import streamlit.components.v1 as components
 
 from app.board import WALKERHILL_NAMES, pct_change, venue_cards
 from app.compare import Comparison, compare, summary_groups
+from app.icons import as_img, persona_icon
 from app.results import load_run, visit_view, won
 from app.runs import (
     EXAMPLE_VENUES,
@@ -31,6 +34,7 @@ from app.scenario_builder import (
     our_price,
     write_scenario,
 )
+from app.street import AFTER_LABEL, BASE_LABEL, render_scene, scene_from_comparison
 from app.validation import LIMITS_SOURCE, VALIDATION_LIMITS, limits_not_in, load_validation, validation_rows
 from engine.formats import KO
 
@@ -53,6 +57,7 @@ class VenueInfo:
     name: str
     is_competitor: bool
     occasions: tuple[str, ...] = ()
+    cuisine: str = ""
 
 
 def _read(path: Path) -> dict:
@@ -68,7 +73,11 @@ def venue_catalog(root: Path) -> dict[str, VenueInfo]:
         data = _read(path)
         if data.get("venue_id"):
             catalog[data["venue_id"]] = VenueInfo(
-                data["venue_id"], data.get("name", path.stem), bool(data.get("is_competitor")), tuple(data.get("occasions", []))
+                data["venue_id"],
+                data.get("name", path.stem),
+                bool(data.get("is_competitor")),
+                tuple(data.get("occasions", [])),
+                data.get("cuisine", ""),
             )
     return catalog
 
@@ -124,95 +133,131 @@ def prepared_scenarios(root: Path) -> dict[str, str]:
     return found
 
 
-def render(repo_root: Path) -> None:
-    st.markdown("페르소나와 상황을 고르고 **평소와 비교하기**를 누르면, 평소(기준)와 바뀐 상황에서 누가 어디로 옮기는지 보여 줍니다.")
+@dataclass
+class Inputs:
+    """왼쪽 변수 패널에서 고른 것."""
 
+    root: object
+    catalog: dict
+    allowed: list[str]
+    cards: list[dict]
+    personas: list[str]
+    days: list[str]
+    whens: list[str]
+    condition_ids: list[str]
+    season: str
+    weather: str
+    scenario: object
+    scenario_id: str | None
+    data_mode: str
+    call_llm: bool
+    go: bool
+    missing: list[str]
+
+    @property
+    def problems(self) -> list[str]:
+        found = []
+        if not self.personas:
+            found.append("페르소나를 한 명 이상 고르세요")
+        if not self.condition_ids:
+            found.append("요일과 때를 하나 이상 고르세요")
+        if self.scenario_id is None:
+            found.append("적용할 변수를 고르세요")
+        return found
+
+
+def _section(number: int, title: str) -> None:
+    st.html(f'<div class="sim-sec"><span>{number}</span>{title}</div>')
+
+
+def variable_panel(repo_root: Path) -> Inputs:
+    """화면 왼쪽의 변수 패널. 위에서 아래로 고르고 맨 아래 버튼을 누른다."""
+    st.html('<div class="sim-panel-title">변수 설정</div>')
+
+    _section(1, "자료")
     roots = data_roots(repo_root)
     repo_missing = choices(roots[0].path).missing
     root = st.radio(
         "자료",
         roots,
         index=1 if repo_missing else 0,
-        format_func=lambda r: "예시로 연습 (키 없이)" if r.is_example else "팀이 올린 자료",
+        format_func=lambda r: "예시로 연습" if r.is_example else "팀 자료",
         horizontal=True,
         key="sim_root",
+        label_visibility="collapsed",
     )
     if root.is_example:
         make_example_copy(repo_root)
     found = choices(root.path)
-    if found.missing:
-        st.warning(
-            "팀이 올린 자료에 아직 없는 것이 있어 돌릴 수 없습니다: "
-            + ", ".join(found.missing)
-            + ". 페르소나와 프롬프트가 올라오면 바로 돌아갑니다. 그동안은 '예시로 연습'을 고르세요."
-        )
-        return
-
-    catalog = venue_catalog(root.path)
+    catalog = venue_catalog(root.path) if not found.missing else {}
     allowed = [v for v in EXAMPLE_VENUES if v in catalog] if root.is_example else list(catalog)
+    cards = persona_cards(root.path) if not found.missing else []
 
-    # ── ① 누가 ──
-    st.subheader("① 누가")
-    cards = persona_cards(root.path)
-    chosen_personas = []
-    columns = st.columns(min(3, max(1, len(cards))))
-    for i, card in enumerate(cards):
-        with columns[i % len(columns)].container(border=True):
-            default = card["id"] == "family-elders" if root.is_example else True
-            if st.checkbox(f"**{card['name']}**", value=default, key=f"sim_p_{root.is_example}_{card['id']}"):
-                chosen_personas.append(card["id"])
-            st.caption(f"{card['group']} · {card['line']}")
+    _section(2, "누가")
+    names = {c["id"]: c["name"] for c in cards}
+    default = ["family-elders"] if root.is_example and "family-elders" in names else list(names)
+    personas = st.multiselect(
+        "페르소나",
+        list(names),
+        default=default,
+        format_func=lambda i: names[i],
+        placeholder="페르소나를 고르세요",
+        key=f"sim_personas_{root.is_example}",
+        label_visibility="collapsed",
+        disabled=not cards,
+    )
 
-    # ── ② 언제, 무엇이 바뀌면 ──
-    st.subheader("② 언제, 무엇이 바뀌면")
+    _section(3, "언제")
+    days = st.pills("요일", list(DAY_TO_CODE), selection_mode="multi", default=["주말"], key="sim_days") or []
+    whens = st.pills("때", list(WHEN_TO_CONDITION), selection_mode="multi", default=["저녁"], key="sim_whens") or []
     left, right = st.columns(2)
-    with left:
-        days = st.pills("요일", list(DAY_TO_CODE), selection_mode="multi", default=["주말"], key="sim_days")
-        whens = st.pills("때", list(WHEN_TO_CONDITION), selection_mode="multi", default=["저녁"], key="sim_whens")
-        season = st.selectbox("계절", SEASONS, key="sim_season")
-        weather = st.selectbox("날씨", WEATHERS, key="sim_weather")
-        if season != SEASONS[0] or weather != WEATHERS[0]:
-            st.caption(f"계절·날씨: {PENDING_NOTE}")
-    with right:
-        change = st.radio("무엇이 바뀌면", CHANGE_KINDS, key="sim_change")
-        scenario = None
-        scenario_id = None
-        if change == "준비된 상황":
-            prepared = prepared_scenarios(root.path)
-            if prepared:
-                scenario_id = st.selectbox("상황", list(prepared), format_func=lambda s: prepared[s], key="sim_prepared")
-            else:
-                st.info("준비된 상황이 아직 없습니다. 아래 다른 변화를 골라 직접 만들어 보세요.")
-        elif change == "경쟁 호텔이 할인한다":
-            rivals = [v for v in allowed if catalog[v].is_competitor]
-            if rivals:
-                venue_id = st.selectbox("경쟁 업장", rivals, format_func=lambda v: catalog[v].name, key="sim_rival")
-                pct = st.slider("할인율 (%)", 5, 50, 20, 5, key="sim_disc")
-                when = st.radio("언제 할인", list(DAY_TYPES), horizontal=True, key="sim_disc_day")
-                scenario = competitor_discount(venue_id, catalog[venue_id].name, pct, DAY_TYPES[when])
-        else:
-            ours = [v for v in allowed if not catalog[v].is_competitor]
-            venue_id = st.selectbox("워커힐 업장", ours, format_func=lambda v: catalog[v].name, key="sim_ours") if ours else None
-            if venue_id and change == "우리 가격을 바꾼다":
-                pct = st.slider("가격 변화 (%)", -30, 30, 10, 5, key="sim_price")
-                if pct != 0:
-                    scenario = our_price(venue_id, catalog[venue_id].name, pct)
-            elif venue_id:
-                menu = st.text_input("한정 메뉴 이름", "겨울 한정 코스", key="sim_menu")
-                price = st.number_input("1인 가격 (원, 가상)", 10000, 1000000, 120000, 10000, key="sim_menu_price")
-                # 업장이 하는 이용 상황의 때만 고른다 (식사만 하는 업장에 디저트 메뉴를 더하면 엔진이 받지 않는다).
-                slots = menu_slots_for(catalog[venue_id].occasions)
-                when = st.radio("파는 때", slots, horizontal=True, key="sim_menu_when") if slots else None
-                day = st.radio("파는 요일", list(DAY_TYPES), horizontal=True, key="sim_menu_day")
-                if not slots:
-                    st.info("이 업장의 이용 상황을 알 수 없어 한정 메뉴를 더할 수 없습니다.")
-                elif menu.strip():
-                    scenario = our_limited_menu(venue_id, catalog[venue_id].name, menu.strip(), int(price), when, DAY_TYPES[day])
-        if scenario is not None:
-            scenario_id = scenario.scenario_id
-            st.caption(f"상황: {scenario.name}")
+    season = left.selectbox("계절", SEASONS, key="sim_season")
+    weather = right.selectbox("날씨", WEATHERS, key="sim_weather")
+    if season != SEASONS[0] or weather != WEATHERS[0]:
+        st.caption(f"계절·날씨: {PENDING_NOTE}")
 
-    condition_ids = conditions_for(root.path, days or [], whens or [])
+    _section(4, "적용할 변수")
+    change = st.selectbox("변수 종류", CHANGE_KINDS, key="sim_change")
+    scenario = None
+    scenario_id = None
+    first_day = list(DAY_TYPES)[0]
+    if not catalog:
+        pass
+    elif change == "준비된 상황":
+        prepared = prepared_scenarios(root.path)
+        if prepared:
+            scenario_id = st.selectbox("상황", list(prepared), format_func=lambda s: prepared[s], key="sim_prepared")
+        else:
+            st.info("준비된 상황이 아직 없습니다. 다른 변수를 골라 직접 만들어 보세요.")
+    elif change == "경쟁 호텔이 할인한다":
+        rivals = [v for v in allowed if catalog[v].is_competitor]
+        if rivals:
+            venue_id = st.selectbox("경쟁 업장", rivals, format_func=lambda v: catalog[v].name, key="sim_rival")
+            pct = st.number_input("할인율 (%)", 5, 50, 20, 5, key="sim_disc")
+            when = st.segmented_control("언제 할인", list(DAY_TYPES), default=first_day, key="sim_disc_day")
+            scenario = competitor_discount(venue_id, catalog[venue_id].name, int(pct), DAY_TYPES[when or first_day])
+    else:
+        ours = [v for v in allowed if not catalog[v].is_competitor]
+        venue_id = st.selectbox("워커힐 업장", ours, format_func=lambda v: catalog[v].name, key="sim_ours") if ours else None
+        if venue_id and change == "우리 가격을 바꾼다":
+            pct = st.number_input("가격 변화 (%, 내리면 음수)", -30, 30, 10, 5, key="sim_price")
+            if pct != 0:
+                scenario = our_price(venue_id, catalog[venue_id].name, int(pct))
+        elif venue_id:
+            menu = st.text_input("한정 메뉴 이름", "겨울 한정 코스", key="sim_menu")
+            price = st.number_input("1인 가격 (원, 가상)", 10000, 1000000, 120000, 10000, key="sim_menu_price")
+            # 업장이 하는 이용 상황의 때만 고른다 (식사만 하는 업장에 디저트 메뉴를 더하면 엔진이 받지 않는다).
+            slots = menu_slots_for(catalog[venue_id].occasions)
+            when = st.segmented_control("파는 때", slots, default=slots[0], key="sim_menu_when") if slots else None
+            day = st.segmented_control("파는 요일", list(DAY_TYPES), default=first_day, key="sim_menu_day")
+            if not slots:
+                st.info("이 업장의 이용 상황을 알 수 없어 한정 메뉴를 더할 수 없습니다.")
+            elif menu.strip() and when:
+                scenario = our_limited_menu(venue_id, catalog[venue_id].name, menu.strip(), int(price), when, DAY_TYPES[day or first_day])
+    if scenario is not None:
+        scenario_id = scenario.scenario_id
+
+    condition_ids = conditions_for(root.path, days, whens) if catalog else []
     ready = key_ready(repo_root)
     with st.expander("고급 설정"):
         modes = ["sample"] + (["private"] if has_private_summary(root.path) else [])
@@ -222,53 +267,103 @@ def render(repo_root: Path) -> None:
             st.caption("이 PC 에는 키가 없어 저장된 답만 재생합니다. 처음 해 보는 조합은 '견줄 수 없음'으로 나옵니다.")
         st.caption(f"고른 방문 조건: {', '.join(condition_ids) or '없음'} · 업장: {', '.join(allowed) if root.is_example else '모두'}")
 
-    problems = []
-    if not chosen_personas:
-        problems.append("페르소나를 한 명 이상 고르세요")
-    if not condition_ids:
-        problems.append("요일과 때를 하나 이상 고르세요")
-    if scenario_id is None:
-        problems.append("무엇이 바뀌는지 고르세요")
-    if st.button("평소와 비교하기", type="primary", key="sim_go"):
-        if problems:
-            st.error(" · ".join(problems))
-        else:
-            if scenario is not None:
-                write_scenario(root.path, scenario)
-            with st.spinner("평소와 바뀐 상황을 차례로 돌리는 중입니다…"):
-                result = simulate(
-                    root.path,
-                    repo_root,
-                    data_mode,
-                    scenario_id,
-                    chosen_personas,
-                    condition_ids,
-                    list(allowed) if root.is_example else [],
-                    call_llm,
-                    is_example=root.is_example,
-                )
-            st.session_state["sim_result"] = (result, root.path, data_mode, season, weather, list(allowed))
+    go = st.button(f"{BASE_LABEL}와 비교하기", type="primary", key="sim_go", width="stretch", disabled=bool(found.missing))
+    return Inputs(
+        root, catalog, allowed, cards, personas, days, whens, condition_ids, season, weather,
+        scenario, scenario_id, data_mode, call_llm, go, list(found.missing),
+    )  # fmt: skip
 
-    # ── ③ 평소와 무엇이 달라졌나 ──
-    saved = st.session_state.get("sim_result")
-    if saved is None:
-        return
+
+def _chips(inputs: Inputs) -> str:
+    names = {c["id"]: c["name"] for c in inputs.cards}
+    when = " · ".join(inputs.days + inputs.whens) or "요일·때 없음"
+    who = ", ".join(names.get(p, p) for p in inputs.personas) or "페르소나 없음"
+    if inputs.scenario is not None:
+        change = inputs.scenario.name
+    elif inputs.scenario_id:
+        change = prepared_scenarios(inputs.root.path).get(inputs.scenario_id, inputs.scenario_id)
+    else:
+        change = "변수 없음"
+    return (
+        '<div class="sim-chips">'
+        f'<span class="sim-chip base"><b>{BASE_LABEL}</b>{escape(who)} · {escape(when)}</span>'
+        f'<span class="sim-chip var"><b>{AFTER_LABEL}</b>{escape(change)}</span></div>'
+    )
+
+
+def _persona_strip(inputs: Inputs) -> str:
+    chosen = [c for c in inputs.cards if c["id"] in inputs.personas]
+    items = "".join(
+        f'<div class="sim-persona"><div class="ic">{as_img(persona_icon(c["name"], 30), "#6366f1", 30)}</div>'
+        f'<div><div class="nm">{escape(c["name"])}</div><div class="ln">{escape(c["group"])} · {escape(c["line"])}</div></div></div>'
+        for c in chosen
+    )
+    return f'<div class="sim-personas">{items}</div>' if items else ""
+
+
+def render(repo_root: Path) -> None:
+    panel, main = st.columns([1.3, 2.7], gap="medium")
+    with panel, st.container(border=True, key="sim_panel"):
+        inputs = variable_panel(repo_root)
+
+    with main:
+        if inputs.missing:
+            st.warning(
+                "팀 자료에 아직 없는 것이 있어 돌릴 수 없습니다: "
+                + ", ".join(inputs.missing)
+                + ". 페르소나와 프롬프트가 올라오면 바로 돌아갑니다. 그동안은 왼쪽에서 '예시로 연습'을 고르세요."
+            )
+            return
+        st.html(_chips(inputs))
+        if inputs.go:
+            if inputs.problems:
+                st.error(" · ".join(inputs.problems))
+            else:
+                if inputs.scenario is not None:
+                    write_scenario(inputs.root.path, inputs.scenario)
+                with st.spinner(f"{BASE_LABEL}와 {AFTER_LABEL}를 차례로 돌리는 중입니다…"):
+                    result = simulate(
+                        inputs.root.path,
+                        repo_root,
+                        inputs.data_mode,
+                        inputs.scenario_id,
+                        inputs.personas,
+                        inputs.condition_ids,
+                        list(inputs.allowed) if inputs.root.is_example else [],
+                        inputs.call_llm,
+                        is_example=inputs.root.is_example,
+                    )
+                st.session_state["sim_result"] = (
+                    result, inputs.root.path, inputs.data_mode, inputs.season, inputs.weather, list(inputs.allowed),
+                )  # fmt: skip
+
+        saved = st.session_state.get("sim_result")
+        if saved is None:
+            st.html(
+                _persona_strip(inputs) + '<div class="sim-empty"><div class="t">아직 돌린 결과가 없습니다</div>'
+                f'<div class="s">왼쪽 패널에서 페르소나, 요일·때, 적용할 변수를 고르고 <b>{BASE_LABEL}와 비교하기</b>를 누르세요.</div></div>'
+            )
+            return
+        show_result(saved)
+
+
+def show_result(saved: tuple) -> None:
     result, sim_root, sim_mode, sim_season, sim_weather, sim_allowed = saved
-    st.subheader("③ 평소와 무엇이 달라졌나")
     # 엔진이 남긴 말은 고쳐 쓰지 않고 그대로 보여 준다 (팀장 요청, 11-16).
-    outputs = [("평소(기준)", result.baseline)] + ([("바뀐 상황", result.scenario)] if result.scenario else [])
+    outputs = [(BASE_LABEL, result.baseline)] + ([(AFTER_LABEL, result.scenario)] if result.scenario else [])
     failed = not result.ok or any(o.exit_code != 0 for _, o in outputs)
-    with st.expander("엔진이 남긴 말", expanded=failed):
-        for label, outcome in outputs:
-            st.markdown(f"**{label}** — {outcome.meaning}")
-            st.code(outcome.output or "(남긴 말 없음)", language=None)
     if not result.ok:
-        st.error("비교할 결과를 만들지 못했습니다. 위의 '엔진이 남긴 말'을 보세요.")
-        return
+        st.error("비교할 결과를 만들지 못했습니다. 아래 '엔진이 남긴 말'을 보세요.")
     if sim_season != SEASONS[0] or sim_weather != WEATHERS[0]:
         st.info(f"고른 계절·날씨({sim_season}, {sim_weather}): {PENDING_NOTE}")
-    comparison = compare(load_run(result.baseline.run_dir), load_run(result.scenario.run_dir), summary_groups(sim_root, sim_mode))
-    show_comparison(comparison, venue_catalog(sim_root), scenario_name(sim_root, comparison.scen.record.scenario_id), sim_allowed)
+    if result.ok:
+        comparison = compare(load_run(result.baseline.run_dir), load_run(result.scenario.run_dir), summary_groups(sim_root, sim_mode))
+        show_comparison(comparison, venue_catalog(sim_root), scenario_name(sim_root, comparison.scen.record.scenario_id), sim_allowed)
+    with st.expander("엔진이 남긴 말", expanded=failed):
+        for label, outcome in outputs:
+            run_id = f" · 실행 `{outcome.run_dir.name}`" if outcome.run_dir else ""
+            st.markdown(f"**{label}**{run_id} — {outcome.meaning}")
+            st.code(outcome.output or "(남긴 말 없음)", language=None)
 
 
 # 결과 보기 (11-16 팀 결정: 지도 대신 식당가 카드와 페르소나로 행동 변화를 보여 준다)
@@ -292,8 +387,31 @@ def show_comparison(
 ) -> None:
     names = {v.venue_id: v.name for v in catalog.values()} | comparison.names
     record = comparison.scen.record
-    st.markdown(f"**{scenario_name or record.scenario_id}** · 평소 실행 `{comparison.base.record.run_id}` · 바뀐 실행 `{record.run_id}`")
 
+    # 식당가 그림: 페르소나가 기본 시나리오 → 변수 적용 후로 옮겨 가는 모습 (app/street.py)
+    shown = [v for v in (allowed or list(catalog)) if v in catalog]
+    scene = scene_from_comparison(
+        comparison,
+        names,
+        {v.venue_id: v.cuisine for v in catalog.values()},
+        [v for v in shown if not catalog[v].is_competitor],
+        [v for v in shown if catalog[v].is_competitor],
+        scenario_name or record.scenario_id,
+    )
+    html, height = render_scene(scene)
+    components.html(html, height=height, scrolling=False)
+
+    with st.expander("숫자와 카드로 자세히 보기"):
+        _show_cards(comparison, catalog, names, allowed)
+    # 검증 결과는 그 안에 접는 칸이 있어 위의 접는 칸 밖에 둔다 (접는 칸 안에 접는 칸은 둘 수 없다).
+    if comparison.base.run_dir is not None:
+        show_validation(comparison.base.run_dir, names)
+
+    with st.expander("한 사람씩 자세히 보기"):
+        _show_person(comparison)
+
+
+def _show_cards(comparison: Comparison, catalog: dict[str, VenueInfo], names: dict[str, str], allowed: list[str] | None) -> None:
     # 한눈에: 워커힐 가상 매출과 옮긴 사람
     diff = comparison.total_after - comparison.total_before
     a, b, c = st.columns(3)
@@ -302,14 +420,14 @@ def show_comparison(
         f"{comparison.total_after:,}원",
         delta=f"{diff:+,}원 ({pct_change(comparison.total_before, comparison.total_after)})" if diff else "변화 없음",
         delta_color="normal" if diff else "off",
-        help=f"평소 {won(comparison.total_before)} → 바뀐 뒤 {won(comparison.total_after)}",
+        help=f"{BASE_LABEL} {won(comparison.total_before)} → {AFTER_LABEL} {won(comparison.total_after)}",
     )
     b.metric("워커힐 밖으로 나간 방문", f"{comparison.count('out')}건", delta=-comparison.count("out") or None)
     c.metric("워커힐로 들어온 방문", f"{comparison.count('in')}건", delta=comparison.count("in") or None)
 
     changed = [m for m in comparison.moves if m.move not in ("same", "failed")]
     if not changed:
-        st.info("평소와 선택이 같습니다. 이 변화로는 고른 페르소나의 선택이 바뀌지 않았습니다.")
+        st.info(f"{BASE_LABEL}와 선택이 같습니다. 이 변수로는 고른 페르소나의 선택이 바뀌지 않았습니다.")
     unknown = [m for m in comparison.moves if m.move == "failed"]
     if unknown:
         st.warning(
@@ -317,7 +435,7 @@ def show_comparison(
             "(키가 있는 PC 에서 'AI 를 새로 부르기'로 돌리면 생깁니다)."
         )
 
-    # 페르소나: 사람마다 평소 → 바뀐 뒤
+    # 페르소나: 사람마다 기본 시나리오 → 변수 적용 후
     st.markdown("#### 페르소나는 어떻게 움직였나")
     for move in sorted(comparison.moves, key=lambda m: list(MOVE_BADGE).index(m.move)):
         with st.container(border=True):
@@ -358,25 +476,24 @@ def show_comparison(
             st.markdown("  \n".join(lines) if lines else ":small[고른 페르소나 중 온 사람 없음]")
     if comparison.uncovered_groups:
         st.caption("다루지 않은 고객군 (페르소나가 없어 이 비교에 들지 않음): " + ", ".join(comparison.uncovered_groups))
-    if comparison.base.run_dir is not None:
-        show_validation(comparison.base.run_dir, names)
 
-    with st.expander("한 사람씩 자세히 보기"):
-        options = [(m.persona_id, m.condition_id) for m in comparison.moves]
-        labels = {(m.persona_id, m.condition_id): f"{m.persona} · {m.condition}" for m in comparison.moves}
-        pick = st.selectbox("방문", options, format_func=lambda o: labels[o], key="sim_detail")
-        left, right = st.columns(2)
-        for column, title, run in ((left, "평소", comparison.base), (right, "바뀐 뒤", comparison.scen)):
-            with column:
-                st.markdown(f"**{title}**")
-                view = visit_view(run, *pick)
-                if view.failed_reason or not view.found:
-                    st.write(f"견줄 수 없음: {view.failed_reason or '방문이 없음'}")
-                    continue
-                st.write(f"{view.venue or KO['choice_kind']['none']} — {won(view.total_paid)}")
-                st.write(view.reason_text or "")
-                for item in view.not_chosen:
-                    st.caption(f"고르지 않음: {item.venue} — {item.text}")
+
+def _show_person(comparison: Comparison) -> None:
+    options = [(m.persona_id, m.condition_id) for m in comparison.moves]
+    labels = {(m.persona_id, m.condition_id): f"{m.persona} · {m.condition}" for m in comparison.moves}
+    pick = st.selectbox("방문", options, format_func=lambda o: labels[o], key="sim_detail")
+    left, right = st.columns(2)
+    for column, title, run in ((left, BASE_LABEL, comparison.base), (right, AFTER_LABEL, comparison.scen)):
+        with column:
+            st.markdown(f"**{title}**")
+            view = visit_view(run, *pick)
+            if view.failed_reason or not view.found:
+                st.write(f"견줄 수 없음: {view.failed_reason or '방문이 없음'}")
+                continue
+            st.write(f"{view.venue or KO['choice_kind']['none']} — {won(view.total_paid)}")
+            st.write(view.reason_text or "")
+            for item in view.not_chosen:
+                st.caption(f"고르지 않음: {item.venue} — {item.text}")
 
 
 def _place(place, names: dict[str, str]) -> str:

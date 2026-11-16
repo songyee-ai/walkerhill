@@ -19,7 +19,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from app import simulator  # noqa: E402
+from app import simulator, style  # noqa: E402
 from app.compare import venue_names  # noqa: E402
 from app.results import (  # noqa: E402
     RunSource,
@@ -56,8 +56,8 @@ def money_table(rows: list[dict]) -> None:
 
 
 st.set_page_config(page_title="워커힐 다이닝 페르소나 시뮬레이터", layout="wide")
-st.title("워커힐 다이닝 페르소나 시뮬레이터")
-st.caption("화면의 모든 금액은 가상 값입니다. 실제 매출이나 실제 구매율이 아닙니다.")
+style.inject()
+style.header()
 
 def run_panel() -> None:
     """1. 돌리기 — 조건을 골라 엔진을 돌린다. 끝나면 새 실행을 2. 결과 보기에서 고른 상태로 다시 그린다."""
