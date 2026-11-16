@@ -81,6 +81,7 @@
 | T109 | `main` 에 올리기 전 화면 확인 (11-16) | songyee-ai | 완료, 11-16, 자동 검사와 저장된 응답 재생으로 두 탭이 끝까지 뜨는 것을 확인했고 찾은 표시 두 가지를 화면 담당에게 알렸다. |
 | T301 | 구글 리뷰 수집 부탁 (출처 더하기) | borigunbbang | 진행 중, 11-16, hojitea-ui 가 20% 묶음을 확인했고 borigunbbang 의 PC 에서 지웠으며 모은 두 사람의 지우기가 남았다. |
 | T302 | 호텔 뷔페·빙수 가격 기사 정리 (경쟁 업장 근거 더하기) | borigunbbang | 진행 중, 11-16, 기사 9건의 가격을 정리해 "알릴 것"으로 넘겼고 hojitea-ui 의 확인이 남았다. |
+| T303 | `main` 시연 확인과 worktree 에서 깨지는 테스트 알리기 | borigunbbang | 진행 중, 11-16, 키 없이 `main` 의 두 탭이 끝까지 뜨는 것을 봤고 worktree 에서 실패하는 테스트 1건을 엔진 담당에게 넘겼다. |
 
 T03 ~ T24 는 11-13 에 팀장이 낸 제안이다. 팀이 확인하면 이 줄을 지운다. 유닛을 나눈 기준과 순서는 아래 "유닛의 순서"에 있다.
 
@@ -1390,6 +1391,23 @@ AI 는 새로 부르지 않았다. 팀이 정한 모델로 시연 답을 받으�
   [쿠키뉴스 07-12](https://www.kukinews.com/article/view/kuk202607100102)
 - 한계: 호텔 중식·한식·일식 코스 가격을 견준 기사는 찾지 못했다. 금룡·온달·모에기의 경쟁 업장 가격은 지금처럼 공식 메뉴판만 근거다.
 
+### T303 `main` 시연 확인과 worktree 에서 깨지는 테스트 알리기
+
+담당 borigunbbang · 기한 11-17 · 기다리는 것 없음 (고치는 사람은 songyee-ai)
+
+계획에 없던 작업이다 (11-16). 원격 `main` 을 받아 시연할 수 있는지 보다가, `git worktree` 로 받은 폴더에서만 테스트 1건이 실패하는 것을 찾았다.
+`tools/` 와 `tests/` 는 엔진 담당의 폴더라 고치지 않고 "알릴 것"으로 넘긴다.
+
+완료 조건
+- [x] `main` 의 화면이 키 없이 끝까지 뜬다 (11-16, macOS, `main` `bf21f7c` 를 일반 클론으로 받아 ruff·형식 검사·pytest 통과. README 의 예시 사본으로 기준·상황을 `--replay-only` 로 돌려 실패 0건. 화면의 "예시로 연습"에서 두 탭이 끝까지 뜨고 브라우저 콘솔 오류 없음)
+- [x] worktree 에서 실패하는 것을 develop 에서도 재현했다 (11-16, macOS, `develop` `dd54f62` 를 `git worktree add` 로 받아 `test_checker_walks_exactly_the_files_git_can_upload` 만 실패. 일반 클론은 통과)
+- [ ] songyee-ai 가 "알릴 것"에서 받아 고칠지 정했다
+
+경위
+- 11-16: 형식 검사 주의 1건(고객군 '가족·친족' 의 몫 합 0.75)은 페르소나를 다 만들지 않아서 나는 것이라 T17 에서 채운다. 견줄 수 없는 방문이 -100% 로 보이는 표시는 T109 에서 이미 화면 담당에게 넘겼다.
+- 원인: worktree 에서는 맨 위의 `.git` 이 폴더가 아니라 파일이다. 형식 검사의 `_walk` 는 `.git` 을 폴더일 때만 건너뛰어(`ignored_by_git` 의 이름 목록), 깃이 절대 올리지 않는 `.git` 파일을 훑는다.
+  자동 검사(일반 클론)에는 영향이 없고, worktree 로 일하는 PC(Claude Code 의 worktree 세션 포함)에서만 로컬 pytest 가 1건 실패한다.
+
 ## 알릴 것
 
 남의 영역을 고쳤거나 남이 알아야 할 변경이 있으면 여기에 적는다. 받은 사람이 확인하고 체크한다.
@@ -1779,6 +1797,10 @@ AI 는 새로 부르지 않았다. 팀이 정한 모델로 시연 답을 받으�
   시연에서 답이 없는 조합을 누르면 매출이 사라진 것처럼 읽힙니다. 견줄 수 없는 방문이 있으면 매출 변화를 내지 않고 "견줄 수 없음"으로 보이는 쪽을 제안합니다.
   ② "페르소나는 어떻게 움직였나"에서 견줄 수 없는 방문이 이름 대신 식별자(`family-parents · meal-dinner-weekend`)로 나옵니다.
   본 방법: 팀 자료, 가상 예시 값, 페르소나 1명 × 주말 저녁, 준비된 상황 하나, "AI 를 새로 부르기"는 끔 (윈도우 11, 브라우저).
+- [ ] songyee-ai ← borigunbbang (11-16): `git worktree` 로 받은 폴더에서 `tests/test_check_rules.py::test_checker_walks_exactly_the_files_git_can_upload` 가 실패합니다 (T303).
+  worktree 의 맨 위 `.git` 은 파일인데, `tools/check_formats.py` 의 `_walk` 가 `.git` 을 폴더일 때만 건너뛰어 그 파일을 훑습니다 ("Extra items in the left set: '.git'").
+  자동 검사에는 영향이 없고, Claude Code 의 worktree 세션처럼 worktree 로 일할 때 로컬 pytest 가 1건 실패합니다. 이름이 `.git` 이면 파일이어도 건너뛰기를 제안합니다.
+  본 방법: `develop` `dd54f62` 를 `git worktree add` 로 받아 pytest (macOS). 같은 커밋의 일반 클론은 통과.
 
 ## 실측 기록
 
