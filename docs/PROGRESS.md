@@ -1648,6 +1648,7 @@ README 에 둘을 나눠 적었다. 기준 상황도 멈추게 바꿀지는 정�
   (입력이 가려진다). 붙여 넣기가 안 된 줄 알고 멈추기 쉬운데, 그대로 Enter 를 누르면 `Login successful` 이 나온다. 실행 폴더는 깃이 무시하는 것을 `git status` 로 확인)
   (확인: borigunbbang 11-16, macOS 에서 공급자 `claude-code` 로 `--data sample --personas family-parents --prompt p2` 를 돌려 기준 상황 8건이 실패 0건으로 끝까지 돎.
   T08 의 확인과 같은 실행이고, 모델은 안내의 `claude-sonnet-5-5` 가 아니라 `claude-opus-5-5` 였다. 실행 폴더는 `private/` 의 사본에만 있다)
+  (확인: wilstein91 11-16, 윈도우 11 에서 `claude-code`·`claude-sonnet-5-5`·`--prompt p2` 로 `--data sample --personas family-parents --conditions meal-dinner-weekend` 를 돌려 방문 1건 실패 0건. 실행 폴더는 깃이 무시함을 `git status` 로 확인)
 - [ ] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-16): 가상 예시 값으로 돌린 실행 폴더(`engine/samples/runs/<run_id>/`)를 이제 깃이 모두 무시합니다 (T107).
   위 T106 안내의 "실행 폴더는 커밋하지 않는다"를 깃이 대신 지킵니다. 이미 그 폴더를 커밋해 둔 브랜치가 있으면 develop 을 받기 전에 알려 주세요.
   올리고 싶은 예시 실행은 `tests/fixtures/<이름>/engine/samples/runs/` 에 둡니다 (`FORMATS.md` 10절).
