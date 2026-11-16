@@ -1104,8 +1104,11 @@ class Clock:
         return (NOW + timedelta(minutes=self.minutes)).replace(tzinfo=None)
 
 
+EXAMPLE_PROMPT = ("--prompt", "p1")  # 예시 묶음에는 p1 만 있다. 명령의 기본값은 팀이 쓰는 판이다 (T108)
+
+
 def command(root, *more: str) -> int:
-    return cli.main(["--data", "sample", "--root", str(root), "--personas", ELDERS, "--conditions", DINNER, *more])
+    return cli.main(["--data", "sample", "--root", str(root), *EXAMPLE_PROMPT, "--personas", ELDERS, "--conditions", DINNER, *more])
 
 
 def runs_in(root) -> list[RunRecord]:
@@ -1165,6 +1168,34 @@ def test_command_replays_earlier_runs_without_calling(example_copy, stub, clean_
     assert "재생 1번" in capsys.readouterr().out
 
 
+def test_default_prompt_is_a_file_the_team_has():
+    """명령의 기본 판은 저장소의 `personas/prompts/` 에 있는 판이어야 한다. 없으면 `--prompt` 없이 돌린 명령이 모두 멈춘다 (T108)."""
+    assert (REPO_ROOT / "personas" / "prompts" / f"{cli.DEFAULT_PROMPT}.md").is_file()
+
+
+def test_command_without_prompt_reads_the_default_and_stops_where_it_is_missing(example_copy, stub, clean_env, capsys):
+    """`--prompt` 를 적지 않으면 기본 판을 읽는다. 그 판이 없는 폴더에서는 다른 판으로 돌리지 않고 이유를 알리고 멈춘다 (T108)."""
+    clean_env.setattr(cli, "datetime", Clock())
+    clean_env.setenv("LLM_PROVIDER", "openai-compatible")
+    clean_env.setenv("LLM_MODEL", "local-model")
+    clean_env.setenv("LLM_BASE_URL", stub.url)
+    stub.answer = openai_answers
+    plain = ["--data", "sample", "--root", str(example_copy), "--personas", ELDERS, "--conditions", DINNER]
+    default_file = example_copy / "personas" / "prompts" / f"{cli.DEFAULT_PROMPT}.md"
+
+    # 예시 묶음에는 기본 판이 없다.
+    assert not default_file.exists()
+    before = runs_in(example_copy)
+    assert cli.main(plain) == cli.EXIT_FAILED
+    assert "프롬프트 파일이 없다" in capsys.readouterr().err
+    assert stub.seen == [] and runs_in(example_copy) == before
+
+    default_file.write_text("기본 판의 글", encoding="utf-8")
+    assert cli.main(plain) == cli.EXIT_OK
+    assert runs_in(example_copy)[-1].llm.prompt_version == cli.DEFAULT_PROMPT
+    assert stub.seen[-1]["body"]["messages"][0]["content"] == "기본 판의 글"
+
+
 def test_command_without_a_key_or_saved_answers_fails_the_visits_and_says_why(example_copy, clean_env, capsys):
     """키가 없어도 재생만 하는 명령은 끝까지 돈다. 저장된 응답이 없는 방문은 실패로 남는다."""
     clean_env.setattr(cli, "datetime", Clock())
@@ -1183,7 +1214,7 @@ def test_command_says_when_the_limit_stopped_it(example_copy, stub, clean_env, c
     clean_env.setenv("LLM_CALL_LIMIT", "1")
     stub.answer = openai_answers
 
-    code = cli.main(["--data", "sample", "--root", str(example_copy), "--personas", ELDERS, "--conditions", DINNER, LUNCH])
+    code = cli.main(["--data", "sample", "--root", str(example_copy), *EXAMPLE_PROMPT, "--personas", ELDERS, "--conditions", DINNER, LUNCH])
 
     assert code == cli.EXIT_STOPPED_BY_LIMIT
     assert "호출 상한(1번)에 닿아 멈췄다" in capsys.readouterr().err
@@ -1203,7 +1234,7 @@ def test_command_says_when_the_limit_stopped_it(example_copy, stub, clean_env, c
     assert len(stub.seen) == asked
     capsys.readouterr()
 
-    assert command(example_copy, "--prompt", "p1", "--scenario", "baseline", "--limit", "-1") == cli.EXIT_FAILED
+    assert command(example_copy, "--scenario", "baseline", "--limit", "-1") == cli.EXIT_FAILED
     assert "--limit 은 0 이상의 정수다" in capsys.readouterr().err
 
 

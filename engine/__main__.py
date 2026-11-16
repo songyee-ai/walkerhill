@@ -22,6 +22,10 @@ from engine.runner import latest_baseline_run, run, runs_folder
 
 EXIT_OK, EXIT_FAILED, EXIT_STOPPED_BY_LIMIT = 0, 1, 2
 
+# `--prompt` 를 적지 않았을 때 읽는 판. 팀이 쓰는 가장 새 판이다 (personas/prompts/, 페르소나 담당이 올린다).
+# 예시 묶음(tests/fixtures/example)에는 p1 만 있어, 그 사본을 돌릴 때는 `--prompt p1` 을 적는다 (README.md).
+DEFAULT_PROMPT = "p2"
+
 
 def earlier_answers(root: Path, data_mode: str) -> list[Path]:
     """앞선 실행들의 저장된 응답 폴더. 새 실행부터 본다.
@@ -41,7 +45,9 @@ def main(argv: list[str] | None = None) -> int:
         metavar="RUN_ID",
         help="기준이 아닌 상황이 페르소나·방문 조건·가중치를 가져올 기준 실행. 적지 않으면 끝까지 돈 가장 새 기준 실행",
     )
-    parser.add_argument("--prompt", default="p1", help="프롬프트의 판 이름. personas/prompts/<이름>.md 를 읽는다 (기본 p1)")
+    parser.add_argument(
+        "--prompt", default=DEFAULT_PROMPT, help=f"프롬프트의 판 이름. personas/prompts/<이름>.md 를 읽는다 (기본 {DEFAULT_PROMPT})"
+    )
     parser.add_argument("--personas", nargs="+", metavar="ID", help="돌릴 페르소나. 적지 않으면 모두")
     parser.add_argument("--conditions", nargs="+", metavar="ID", help="돌릴 방문 조건. 적지 않으면 묶음의 모든 조건")
     parser.add_argument("--venues", nargs="+", metavar="ID", help="읽을 업장. 적지 않으면 모두")
