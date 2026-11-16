@@ -13,18 +13,21 @@
 import json
 import os
 import re
+import shutil
+import subprocess
+import tempfile
 import urllib.error
 import urllib.parse
 import urllib.request
 from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Protocol
+from typing import Any, Protocol
 
 import anthropic
 
 from engine.answers import request_as_json
-from engine.formats.choice import ChoiceRequest
+from engine.formats.choice import ChoiceRequest, has_path
 
 DEFAULT_PROVIDER = "anthropic"
 # 모델 이름을 적는 곳은 여기 하나다. 바꿀 때는 코드를 고치지 않고 .env 의 LLM_MODEL 에 적는다 (CLAUDE.md 의 "스택").
@@ -81,6 +84,53 @@ RESPONSE_SCHEMA = {
 }
 
 
+def _one_of(values: list[str]) -> dict[str, Any]:
+    """값 가운데 하나인 글. 고를 값이 없으면 글이기만 하면 된다 (빈 enum 은 공급자가 받지 않는다)."""
+    unique = list(dict.fromkeys(values))
+    return {"type": "string", "enum": unique} if unique else {"type": "string"}
+
+
+def _attribute_paths(data: Mapping[str, Any], prefix: str = "") -> list[str]:
+    """페르소나의 속성을 점으로 이은 경로들 (`preferences.cuisines_like` 꼴). 중간 경로도 넣는다 (엔진의 검사가 받는다)."""
+    paths: list[str] = []
+    for key, value in data.items():
+        path = f"{prefix}{key}"
+        paths.append(path)
+        if isinstance(value, Mapping):
+            paths += _attribute_paths(value, f"{path}.")
+    return paths
+
+
+def response_schema(request: ChoiceRequest) -> dict[str, Any]:
+    """이 요청에서 고를 수 있는 값만 받는 응답의 모양 (11-16, T103).
+
+    `RESPONSE_SCHEMA` 의 글 칸을 요청의 후보, 값 목록, 페르소나의 속성으로 묶는다. 값 목록에 없는 라벨이나
+    점으로 잇지 않은 속성 이름처럼 엔진이 받지 않는 답을 공급자가 처음부터 만들지 않게 하려는 것이다.
+    묶지 못하는 규칙(고른 업장의 주문인지, 고르지 않은 후보가 빠짐없는지, 예산)은 엔진이 답을 받은 뒤에 검사한다.
+    이유 라벨은 고른 경우와 "이용하지 않음"의 목록을 합쳐 받는다. 어느 쪽 목록인지도 엔진이 검사한다.
+    """
+    venues = [c.venue_id for c in request.candidates]
+    options = [o.option_id for c in request.candidates for o in c.options]
+    addons = [a.product_id for c in request.candidates for a in c.addons]
+    reasons = [*request.vocab.reasons_chosen, *request.vocab.pain_points]
+
+    # RESPONSE_SCHEMA 는 같은 칸 객체(_STRINGS 등)를 여러 곳에서 함께 쓴다. deepcopy 는 그 공유까지 복사해
+    # 한 칸을 바꾸면 다른 칸도 바뀐다. JSON 으로 한 번 풀어 공유를 끊는다.
+    schema = json.loads(json.dumps(RESPONSE_SCHEMA))
+    choice = schema["properties"]["choice"]["properties"]
+    choice["venue_id"] = {"anyOf": [_one_of(venues), {"type": "null"}]}
+    choice["option_id"] = {"anyOf": [_one_of(options), {"type": "null"}]}
+    choice["addons"]["items"]["properties"]["product_id"] = _one_of(addons)
+    schema["properties"]["reason_labels"]["items"] = _one_of(reasons)
+    # 키에 점이 들어 있으면 경로가 엔진의 검사와 다르게 읽힌다. 엔진이 받는 경로만 남긴다.
+    paths = [path for path in _attribute_paths(request.persona) if has_path(request.persona, path)]
+    schema["properties"]["used_attributes"]["items"] = _one_of(paths)
+    rejected = schema["properties"]["rejected"]["items"]["properties"]
+    rejected["venue_id"] = _one_of(venues)
+    rejected["pain_labels"]["items"] = _one_of(list(request.vocab.pain_points))
+    return schema
+
+
 class LlmError(Exception):
     """이번 호출이 실패했다. 그 방문을 실패로 남기고 다음 방문으로 넘어간다."""
 
@@ -97,8 +147,11 @@ class LlmReply:
 
 
 class Provider(Protocol):
-    def complete(self, system: str, user: str) -> LlmReply:
-        """시스템 프롬프트와 사용자 메시지를 주고 답을 적은 글을 받는다. 실패하면 `LlmError` 를 낸다."""
+    def complete(self, system: str, user: str, schema: dict[str, Any] | None = None) -> LlmReply:
+        """시스템 프롬프트와 사용자 메시지를 주고 답을 적은 글을 받는다. 실패하면 `LlmError` 를 낸다.
+
+        `schema` 는 답의 모양이다 (`response_schema`). 공급자가 받으면 그 모양으로 답하게 묶는다.
+        """
         ...
 
 
@@ -117,14 +170,14 @@ class AnthropicProvider:
         except anthropic.AnthropicError as exc:
             raise LlmFatal(f"Anthropic 연결을 만들지 못했다: {_short(exc)}") from exc
 
-    def complete(self, system: str, user: str) -> LlmReply:
+    def complete(self, system: str, user: str, schema: dict[str, Any] | None = None) -> LlmReply:
         try:
             message = self.client.messages.create(
                 model=self.model,
                 max_tokens=MAX_TOKENS,
                 system=system,
                 messages=[{"role": "user", "content": user}],
-                output_config={"format": {"type": "json_schema", "schema": RESPONSE_SCHEMA}},
+                output_config={"format": {"type": "json_schema", "schema": schema or RESPONSE_SCHEMA}},
             )
         except (
             anthropic.AuthenticationError,
@@ -161,13 +214,18 @@ class _NoRedirect(urllib.request.HTTPRedirectHandler):
 
 
 class OpenAICompatibleProvider:
-    """OpenAI 의 chat completions 와 같은 모양으로 받는 주소 (다른 공급자나 로컬 모델).
+    """OpenAI 의 chat completions 와 같은 모양으로 받는 주소 (OpenAI 나 다른 공급자, 로컬 모델).
 
     패키지를 더하지 않으려고 표준 라이브러리로 부른다. 주소는 `LLM_BASE_URL`, 키는 `LLM_API_KEY` 다
     (키 없이 받는 로컬 주소면 비워 둔다). 주소는 https 여야 하고, http 는 이 PC 의 주소(localhost, 127.0.0.1, ::1)일 때만 받는다.
+    답의 모양은 `response_format` 으로 묶는다 (`LLM_RESPONSE_FORMAT`). 기본은 `json_schema` 로 응답 스키마를 엄격하게 보낸다.
+    스키마를 받지 않는 주소면 `json_object` 로 적는다. 그때는 JSON 으로 답하라고만 하고 모양은 프롬프트에 맡긴다.
     """
 
-    def __init__(self, model: str, base_url: str, api_key: str | None) -> None:
+    def __init__(self, model: str, base_url: str, api_key: str | None, response_format: str = "json_schema") -> None:
+        if response_format not in RESPONSE_FORMATS:
+            raise LlmFatal(f"LLM_RESPONSE_FORMAT 이 '{response_format}' 다. 쓸 수 있는 값은 {', '.join(RESPONSE_FORMATS)} 다")
+        self.response_format = response_format
         address = urllib.parse.urlsplit(base_url)
         if address.scheme not in ("http", "https") or not address.hostname:
             raise LlmFatal("LLM_BASE_URL 은 http:// 나 https:// 로 시작하는 주소다 (예: https://api.openai.com/v1)")
@@ -182,11 +240,18 @@ class OpenAICompatibleProvider:
         handlers = [_NoRedirect, urllib.request.ProxyHandler({})] if local else [_NoRedirect]
         self.opener = urllib.request.build_opener(*handlers)
 
-    def complete(self, system: str, user: str) -> LlmReply:
+    def complete(self, system: str, user: str, schema: dict[str, Any] | None = None) -> LlmReply:
+        if self.response_format == "json_schema":
+            response_format: dict[str, Any] = {
+                "type": "json_schema",
+                "json_schema": {"name": "choice_response", "schema": schema or RESPONSE_SCHEMA, "strict": True},
+            }
+        else:
+            response_format = {"type": "json_object"}
         body = {
             "model": self.model,
             "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}],
-            "response_format": {"type": "json_object"},
+            "response_format": response_format,
         }
         headers = {"Content-Type": "application/json"}
         if self.api_key:
@@ -219,7 +284,116 @@ class OpenAICompatibleProvider:
         return LlmReply(text, tokens_in, tokens_out)
 
 
-PROVIDERS = ("anthropic", "openai-compatible")
+# Claude Code 를 한 번 부를 때 기다리는 시간(초). 프로그램을 띄우는 시간이 더 든다.
+CLAUDE_CODE_TIMEOUT = 300
+# 윈도우는 명령줄이 32,767 자를 넘으면 프로그램을 띄우지 못한다. 넘기 전에 멈춘다.
+COMMAND_LINE_LIMIT = 30000
+# 부르는 Claude Code 가 받으면 안 되는 환경 변수. API 키가 있으면 구독 대신 키로 부르고(공식 문서의 인증 순서),
+# 이 프로그램을 Claude Code 세션 안에서 돌릴 때 그 세션의 연결 정보(CLAUDE_CODE_*, 중계 주소)가 따라가면 안 된다.
+# 구독 로그인 대신 `claude setup-token` 의 토큰을 쓰는 CLAUDE_CODE_OAUTH_TOKEN 과 설정 폴더 CLAUDE_CONFIG_DIR 은 남긴다.
+_CLAUDE_CODE_KEEP = {"CLAUDE_CODE_OAUTH_TOKEN", "CLAUDE_CONFIG_DIR"}
+
+
+def _claude_code_env(env: Mapping[str, str]) -> dict[str, str]:
+    return {
+        name: value
+        for name, value in env.items()
+        if name in _CLAUDE_CODE_KEEP
+        or not (name.startswith(("ANTHROPIC_", "CLAUDE_CODE_", "CLAUDE_AGENT_SDK_")) or name in ("CLAUDECODE", "CLAUDE_PID"))
+    }
+
+
+class ClaudeCodeProvider:
+    """자기 Claude 구독으로 로그인한 Claude Code 명령(`claude -p`)을 부른다 (11-16, T104. 개인 연습용).
+
+    팀 기본은 OpenAI 다 (CLAUDE.md 의 "스택"). 이 공급자는 Anthropic API 키 없이 자기 구독으로 돌려 보려는 것이고,
+    공식 Claude Code 프로그램을 그대로 부른다 (구독의 로그인 정보를 다른 프로그램에 넘기지 않는다).
+    - 시스템 프롬프트는 Claude Code 의 것을 쓰지 않고 프롬프트 파일의 글로 통째로 바꾼다 (`--system-prompt`).
+    - 도구, MCP, 슬래시 명령, 설정 파일(훅, 플러그인)을 모두 끄고 세션을 남기지 않는다.
+    - 저장소 밖의 빈 폴더에서 띄워 저장소의 지침 파일(CLAUDE.md)이 답에 끼어들지 않게 한다.
+    - 답의 모양은 `--json-schema` 로 묶고, 검증된 답(`structured_output`)을 받는다.
+    사용 한도(5시간·주간)에 닿거나 로그인이 안 돼 있으면 다시 불러도 같으니 실행을 멈춘다.
+    """
+
+    def __init__(self, model: str, executable: str, workdir: Path | None = None) -> None:
+        found = shutil.which(executable) or (executable if Path(executable).is_file() else None)
+        if found is None:
+            raise LlmFatal(
+                f"Claude Code 명령을 찾지 못했다: '{executable}'. CLAUDE_CODE_PATH 에 claude 실행 파일의 경로를 적는다"
+            )
+        self.model = model
+        self.executable = found
+        self.workdir = workdir
+
+    def complete(self, system: str, user: str, schema: dict[str, Any] | None = None) -> LlmReply:
+        command = [
+            self.executable,
+            "-p",
+            "--model",
+            self.model,
+            "--system-prompt",
+            system,
+            "--tools",
+            "",
+            "--strict-mcp-config",
+            "--setting-sources",
+            "",
+            "--disable-slash-commands",
+            "--no-session-persistence",
+            "--output-format",
+            "json",
+            "--json-schema",
+            json.dumps(schema or RESPONSE_SCHEMA, ensure_ascii=False),
+        ]
+        if len(subprocess.list2cmdline(command)) > COMMAND_LINE_LIMIT:
+            raise LlmFatal("시스템 프롬프트와 응답 스키마가 너무 길어 Claude Code 를 띄울 수 없다 (윈도우 명령줄 한도)")
+        try:
+            with tempfile.TemporaryDirectory(prefix="walkerhill-claude-") as empty:
+                done = subprocess.run(
+                    command,
+                    input=user,
+                    cwd=self.workdir or empty,
+                    env=_claude_code_env(os.environ),
+                    capture_output=True,
+                    text=True,
+                    encoding="utf-8",
+                    errors="replace",
+                    timeout=CLAUDE_CODE_TIMEOUT,
+                )
+        except subprocess.TimeoutExpired as exc:
+            raise LlmError(f"Claude Code 가 {CLAUDE_CODE_TIMEOUT}초 안에 답하지 않았다") from exc
+        except OSError as exc:
+            raise LlmFatal(f"Claude Code 를 띄우지 못했다: {_short(exc)}") from exc
+        try:
+            payload = json.loads(done.stdout)
+            if not isinstance(payload, dict):
+                raise TypeError("결과가 JSON 객체가 아니다")
+        except (ValueError, TypeError) as exc:
+            tail = " ".join((done.stderr or done.stdout or "").split())[:200]
+            raise LlmError(f"Claude Code 의 결과를 읽지 못했다 (끝 값 {done.returncode}): {tail}") from exc
+        usage = payload.get("usage") or {}
+        tokens_in = sum(int(usage.get(k) or 0) for k in ("input_tokens", "cache_read_input_tokens", "cache_creation_input_tokens"))
+        tokens_out = int(usage.get("output_tokens") or 0)
+        if payload.get("is_error") or done.returncode != 0:
+            message = " ".join(str(payload.get("result") or payload.get("subtype") or "").split())[:300]
+            lowered = message.lower()
+            if "not logged in" in lowered or "/login" in lowered:
+                raise LlmFatal(f"Claude Code 에 로그인돼 있지 않다. 터미널에서 claude auth login 을 한 번 한다: {message}")
+            if "limit" in lowered:
+                raise LlmFatal(f"Claude 구독의 사용 한도에 닿았다. 한도가 풀린 뒤 다시 돌리면 받은 답은 재생한다: {message}")
+            raise LlmError(f"Claude Code 호출이 실패했다: {message}")
+        answer = payload.get("structured_output")
+        if not isinstance(answer, dict):
+            # 모델이 답을 거절하면 검증된 답이 없다. 글로 온 답이 있으면 엔진이 다시 검사하도록 넘긴다.
+            text = payload.get("result")
+            if not isinstance(text, str) or not text.strip():
+                raise LlmError("Claude Code 가 답(structured_output)을 주지 않았다")
+            return LlmReply(text, tokens_in, tokens_out)
+        return LlmReply(json.dumps(answer, ensure_ascii=False), tokens_in, tokens_out)
+
+
+PROVIDERS = ("anthropic", "openai-compatible", "claude-code")
+RESPONSE_FORMATS = ("json_schema", "json_object")
 
 
 @dataclass(frozen=True)
@@ -256,10 +430,13 @@ def make_provider(settings: LlmSettings, env: Mapping[str, str] | None = None) -
     env = os.environ if env is None else env
     if settings.provider == "anthropic":
         return AnthropicProvider(settings.model)
+    if settings.provider == "claude-code":
+        return ClaudeCodeProvider(settings.model, env.get("CLAUDE_CODE_PATH", "").strip() or "claude")
     base_url = env.get("LLM_BASE_URL", "").strip()
     if not base_url:
         raise LlmFatal("공급자가 openai-compatible 이면 LLM_BASE_URL 에 주소를 적는다")
-    return OpenAICompatibleProvider(settings.model, base_url, env.get("LLM_API_KEY", "").strip() or None)
+    response_format = env.get("LLM_RESPONSE_FORMAT", "").strip() or "json_schema"
+    return OpenAICompatibleProvider(settings.model, base_url, env.get("LLM_API_KEY", "").strip() or None, response_format)
 
 
 def prompt_path(root: Path, prompt_version: str) -> Path:

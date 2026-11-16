@@ -83,6 +83,9 @@ def ignored_by_git(parts: tuple[str, ...], is_dir: bool) -> bool:
         return parts != (PRIVATE_DIR, README)
     if name == ".env" or (name.startswith(".env.") and name != ".env.example"):
         return True
+    # 화면이 만든 상황으로 돌린 실행 폴더와 그 안의 파일 (.gitignore 의 engine/samples/runs/*-ui-*/. 폴더에만 걸린다).
+    if len(parts) >= 4 and parts[:3] == ("engine", "samples", "runs") and "-ui-" in parts[3] and (len(parts) > 4 or is_dir):
+        return True
     if is_dir:
         return name in IGNORED_DIR_NAMES or name.endswith(".egg-info")
     if parts == (".claude", "settings.local.json"):
