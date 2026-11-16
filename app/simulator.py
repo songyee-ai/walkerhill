@@ -245,6 +245,7 @@ def render(repo_root: Path) -> None:
                     condition_ids,
                     list(allowed) if root.is_example else [],
                     call_llm,
+                    is_example=root.is_example,
                 )
             st.session_state["sim_result"] = (result, root.path, data_mode, season, weather, list(allowed))
 

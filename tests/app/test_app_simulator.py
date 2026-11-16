@@ -89,7 +89,7 @@ def test_prepared_scenario_compares_without_a_key(tmp_path: Path):
     root = _copy(tmp_path)
     result = simulate(
         root, REPO_ROOT, "sample", "competitor-chinese-discount",
-        ["family-elders"], ["meal-dinner-weekend"], list(EXAMPLE_VENUES), False,
+        ["family-elders"], ["meal-dinner-weekend"], list(EXAMPLE_VENUES), False, is_example=True,
     )  # fmt: skip
     assert result.ok, result.baseline.output + (result.scenario.output if result.scenario else "")
     assert load_run(result.scenario.run_dir).record.weights_from == result.baseline.run_dir.name
@@ -104,7 +104,7 @@ def test_new_scenario_without_saved_answers_is_reported_not_hidden(tmp_path: Pat
     write_scenario(root, scenario)
     result = simulate(
         root, REPO_ROOT, "sample", scenario.scenario_id,
-        ["family-elders"], ["meal-dinner-weekend"], list(EXAMPLE_VENUES), False,
+        ["family-elders"], ["meal-dinner-weekend"], list(EXAMPLE_VENUES), False, is_example=True,
     )  # fmt: skip
     assert result.ok
     comparison = compare(load_run(result.baseline.run_dir), load_run(result.scenario.run_dir))

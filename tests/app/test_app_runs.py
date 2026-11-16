@@ -10,12 +10,14 @@ if str(REPO_ROOT) not in sys.path:
 
 from app.results import load_run, visit_view  # noqa: E402
 from app.runs import (  # noqa: E402
+    EXAMPLE_LLM,
     EXAMPLE_SOURCE,
     EXAMPLE_VENUES,
     choices,
     engine_command,
     key_ready,
     make_example_copy,
+    replay_env,
     run_engine,
 )
 
@@ -92,7 +94,8 @@ def test_engine_runs_from_the_screen_without_a_key(tmp_path: Path):
     command = engine_command(
         root, REPO_ROOT, "sample", "baseline", "p1", ["family-elders"], ["meal-dinner-weekend"], list(EXAMPLE_VENUES), False
     )
-    outcome = run_engine(command, REPO_ROOT, timeout=120)
+    # 화면처럼, 예시를 재생만 할 때는 이 PC 의 .env 와 상관없이 예시를 받은 공급자·모델로 돌린다.
+    outcome = run_engine(command, REPO_ROOT, timeout=120, env_overrides=replay_env(True, False))
     assert outcome.exit_code == 0, outcome.output
     assert outcome.run_dir is not None and (outcome.run_dir / "run.json").is_file()
     view = visit_view(load_run(outcome.run_dir), "family-elders", "meal-dinner-weekend")
@@ -108,3 +111,10 @@ def test_engine_failure_is_reported(tmp_path: Path):
     assert outcome.exit_code == 1
     assert outcome.run_dir is None
     assert "돌리지 못했다" in outcome.output
+
+
+def test_replay_env_only_for_example_replay():
+    # 예시의 저장된 답은 Claude 로 받은 것이라, .env 가 다른 공급자여도 예시 재생은 그 값으로 돌려야 재생된다.
+    assert replay_env(True, False) == EXAMPLE_LLM
+    assert replay_env(True, True) is None  # AI 를 새로 부를 때는 .env 를 따른다
+    assert replay_env(False, False) is None  # 팀 자료는 .env 를 따른다

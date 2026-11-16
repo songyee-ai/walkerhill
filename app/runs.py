@@ -26,6 +26,11 @@ EXAMPLE_VENUES = ("geumryong", "examplehotel-chinese")
 # 화면이 기다리는 가장 긴 시간(초). 넘으면 멈추고 알린다. 엔진의 호출 상한과 별개다.
 RUN_TIMEOUT = 600
 
+# 예시의 저장된 답을 받은 공급자와 모델. 저장된 답은 공급자·모델이 같아야 재생되므로(FORMATS 10절),
+# 예시를 재생만 할 때는 이 PC 의 .env 가 다른 공급자를 가리켜도 이 값으로 돌린다.
+# 엔진은 이미 있는 환경 변수를 .env 로 덮어쓰지 않는다 (python-dotenv 의 기본 동작).
+EXAMPLE_LLM = {"LLM_PROVIDER": "anthropic", "LLM_MODEL": "claude-opus-5-5"}
+
 RUN_DIR_RE = re.compile(r"^실행 폴더: (?P<path>.+)$", re.M)
 
 
@@ -159,8 +164,10 @@ class RunOutcome:
         return EXIT_MEANING.get(self.exit_code, f"알 수 없는 끝 값 {self.exit_code} 입니다.")
 
 
-def run_engine(command: list[str], repo_root: Path, timeout: int = RUN_TIMEOUT) -> RunOutcome:
-    """엔진 명령을 저장소 맨 위에서 돌린다 (`.env` 를 그 폴더에서 읽는다)."""
+def run_engine(
+    command: list[str], repo_root: Path, timeout: int = RUN_TIMEOUT, env_overrides: dict[str, str] | None = None
+) -> RunOutcome:
+    """엔진 명령을 저장소 맨 위에서 돌린다 (`.env` 를 그 폴더에서 읽는다). `env_overrides` 는 .env 보다 먼저 쓴다."""
     try:
         done = subprocess.run(
             command,
@@ -170,13 +177,18 @@ def run_engine(command: list[str], repo_root: Path, timeout: int = RUN_TIMEOUT) 
             encoding="utf-8",
             errors="replace",
             timeout=timeout,
-            env=_utf8_env(),
+            env=_utf8_env() | (env_overrides or {}),
         )
     except subprocess.TimeoutExpired:
         return RunOutcome(1, None, f"{timeout}초 안에 끝나지 않아 멈췄습니다. 방문 수를 줄이거나 명령으로 돌려 주세요.")
     output = "\n".join(part for part in (done.stdout.strip(), done.stderr.strip()) if part)
     match = RUN_DIR_RE.search(done.stdout)
     return RunOutcome(done.returncode, Path(match["path"].strip()) if match else None, output)
+
+
+def replay_env(is_example: bool, call_llm: bool) -> dict[str, str] | None:
+    """예시를 재생만 할 때 쓸 공급자와 모델. 그 밖에는 None (이 PC 의 .env 를 따른다)."""
+    return dict(EXAMPLE_LLM) if is_example and not call_llm else None
 
 
 @dataclass
@@ -201,6 +213,7 @@ def simulate(
     venue_ids: list[str],
     call_llm: bool,
     prompt: str = "p1",
+    is_example: bool = False,
 ) -> Simulation:
     """같은 페르소나·방문 조건·업장으로 기준과 상황을 차례로 돌린다 (PRD 7.2절: 상황은 기준의 가중치로 돈다).
 
@@ -208,13 +221,14 @@ def simulate(
     저장된 답을 재생하면 몇 초면 끝난다.
     """
     base_cmd = engine_command(root, repo_root, data_mode, "baseline", prompt, persona_ids, condition_ids, venue_ids, call_llm)
-    baseline = run_engine(base_cmd, repo_root)
+    env = replay_env(is_example, call_llm)
+    baseline = run_engine(base_cmd, repo_root, env_overrides=env)
     if baseline.run_dir is None or baseline.exit_code != 0:
         return Simulation(baseline, None)
     scen_cmd = engine_command(
         root, repo_root, data_mode, scenario_id, prompt, [], [], venue_ids, call_llm, baseline_run=baseline.run_dir.name
     )
-    return Simulation(baseline, run_engine(scen_cmd, repo_root))
+    return Simulation(baseline, run_engine(scen_cmd, repo_root, env_overrides=env))
 
 
 def _utf8_env() -> dict[str, str]:
