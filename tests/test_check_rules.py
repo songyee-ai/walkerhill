@@ -1131,6 +1131,20 @@ def test_ledger_rows_for_added_products_are_matched_too(example_copy):
     save_csv(example_copy / LEDGER, [rows[0], wrong])
     assert found(check(example_copy), "원장의 줄이 저장된 응답에서 고른 주문과 다르다")
 
+    # 추가 상품의 줄에 할인이 있으면 잡는다. 추가 상품에는 프로모션 할인을 적용하지 않는다 (11-16 회의. FORMATS 9절).
+    # 할인을 뺀 낸 금액, 매출, 가중 매출은 서로 맞게 적어 이 검사만 걸리게 한다.
+    discounted = {**added, "discount": "1600", "paid": "14400", "revenue_net": "13091", "weighted_revenue": "1570920"}
+    save_csv(example_copy / LEDGER, [rows[0], discounted])
+    problems = check(example_copy)
+    assert found(problems, "원장의 줄이 저장된 응답에서 고른 주문과 다르다"), messages(problems)
+    assert len(problems) == 1, messages(problems)
+
+    # 할인은 0 인데 낸 금액만 수량 × 표시가와 다른 줄도 잡는다.
+    overpaid = {**added, "paid": "17000", "revenue_net": "15455", "weighted_revenue": "1854600"}
+    save_csv(example_copy / LEDGER, [rows[0], overpaid])
+    problems = check(example_copy)
+    assert found(problems, "원장의 줄이 저장된 응답에서 고른 주문과 다르다"), messages(problems)
+
     # 추가 상품의 줄이 빠져도 잡는다.
     save_csv(example_copy / LEDGER, [rows[0]])
     assert found(check(example_copy), "원장의 줄이 저장된 응답에서 고른 주문과 다르다")

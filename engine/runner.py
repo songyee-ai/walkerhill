@@ -215,7 +215,11 @@ def load_inputs(
 
 
 def latest_baseline_run(root: Path, data_mode: str) -> str | None:
-    """끝까지 돈 기준 실행 가운데 가장 새것의 `run_id`. 없으면 None. 같은 `data_mode` 의 실행만 본다."""
+    """끝까지 돈 기준 실행 가운데 가장 새것의 `run_id`. 없으면 None. 같은 `data_mode` 의 실행만 본다.
+
+    실패한 방문이 있는 실행도 고른다. 그 실행으로 상황을 돌리면 `baseline_record` 가 막는다 (docs/FORMATS.md 10.1절).
+    화면에서 쓸 기준 실행을 미리 보여 줄 때는 `counts.failed` 도 함께 본다.
+    """
     folder = runs_folder(root, data_mode)
     for run_dir in sorted(folder.glob(f"*-{BASELINE_ID}"), reverse=True):
         try:
@@ -241,6 +245,14 @@ def baseline_record(root: Path, data_mode: str, run_id: str | None) -> RunRecord
         raise ValueError(f"실행 '{run_id}' 는 기준 상황의 실행이 아니다")
     if record.status != "ok":
         raise ValueError(f"기준 실행 '{run_id}' 는 끝까지 돌지 않았다 (status 가 {record.status}). 기준 상황을 다시 돌린다")
+    if record.counts.failed:
+        # 실패한 방문은 기준에서 금액이 0 인 줄이다. 상황에서 그 방문이 성공하면 차이에 상황의 변경이 아닌 것이 섞인다 (11-16 회의).
+        raise ValueError(
+            f"기준 실행 '{run_id}' 에 실패한 방문이 {record.counts.failed}건 있어 상황을 돌리지 않는다. "
+            "실패한 방문에서는 기준과 상황을 견줄 수 없다. 이유는 그 실행의 원장(ledger.csv)의 fail_reason 에 있다. "
+            "llm_call 이 new 이거나 비어 있는 실패는 기준 상황을 --replay-only 없이 다시 돌리면 그 방문만 LLM 을 새로 부른다. "
+            "llm_call 이 replay 인 실패는 저장된 응답이 다시 재생돼 그대로 남으니 fail_reason 의 원인을 먼저 고친다"
+        )
     return record
 
 
@@ -434,6 +446,7 @@ def run(
     - 기준 상황의 가중치는 집계 파일에서 낸다 (`engine.weights`, docs/FORMATS.md 10.1절의 "가중치를 내는 법").
       `weights` 를 주면 그 값을 그대로 쓴다 (테스트에서 쓴다). 기준 상황에만 줄 수 있다.
     - `weights_from`: 기준이 아닌 상황을 돌릴 때 꼭 준다. 끝까지 돈 기준 실행의 `run_id` 다 (`latest_baseline_run`).
+      그 실행에 실패한 방문이 있으면 실행 폴더를 만들기 전에 `ValueError` 로 멈춘다. 화면은 그 글을 그대로 보여 준다.
       페르소나, 방문 조건, 가중치, `base_profile_mode` 를 그 실행에서 가져온다. `persona_ids`, `condition_ids` 를 따로 주면 그 실행과 같아야 한다.
       그 실행 뒤에 입력(업장 정의, 페르소나, 조건 묶음, 값 목록, 집계 파일, 프롬프트)이나 공급자·모델이 달라졌으면 돌리지 않는다.
       상황 사이의 차이에 상황의 변경만 남게 하려는 것이다 (docs/PRD.md 7.2절).

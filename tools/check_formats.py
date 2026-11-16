@@ -1028,8 +1028,8 @@ class Checker:
                 return
             if any(row.venue_id != choice.venue_id for row in picked):
                 bad("원장의 업장이 저장된 응답에서 고른 업장과 다르다")
-            # 고른 주문의 줄은 금액까지 견준다. 추가 상품은 요청에 할인이 없어 상품, 수량, 단위, 표시가만 견준다
-            # (추가 상품에 프로모션 할인을 적용할지는 아직 정하지 않았다. docs/FORMATS.md 12절).
+            # 고른 주문의 줄과 추가 상품의 줄을 금액까지 견준다.
+            # 추가 상품에는 프로모션 할인을 적용하지 않는다 (11-16 회의. docs/FORMATS.md 9절). 할인은 0, 낸 금액은 수량 × 표시가다.
             line_ids = {ordered.product_id for ordered in lines}
             addons = {addon.product_id: addon for addon in candidate.addons}
             extra = {
@@ -1040,14 +1040,19 @@ class Checker:
             want_lines = sorted(
                 (o.product_id, o.quantity, o.unit, o.unit_price, o.discount, o.line_total) for o in lines
             )
-            want_extra = sorted((pid, qty, addons[pid].unit, addons[pid].unit_price) for pid, qty in extra.items())
+            want_extra = sorted(
+                (pid, qty, addons[pid].unit, addons[pid].unit_price, 0, qty * addons[pid].unit_price)
+                for pid, qty in extra.items()
+            )
             have_lines = sorted(
                 (r.product_id or "", r.quantity, r.unit or "", r.list_price, r.discount, r.paid)
                 for r in picked
                 if r.product_id not in extra
             )
             have_extra = sorted(
-                (r.product_id or "", r.quantity, r.unit or "", r.list_price) for r in picked if r.product_id in extra
+                (r.product_id or "", r.quantity, r.unit or "", r.list_price, r.discount, r.paid)
+                for r in picked
+                if r.product_id in extra
             )
             if have_lines != want_lines or have_extra != want_extra:
                 bad("원장의 줄이 저장된 응답에서 고른 주문과 다르다 (상품, 수량, 단위, 표시가, 할인, 낸 금액을 견준다)")
