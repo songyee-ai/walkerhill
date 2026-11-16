@@ -104,7 +104,8 @@ Get-ChildItem "$env:LOCALAPPDATA\Claude-Data" -Recurse -Filter claude.exe -Error
 - 일부만 돌릴 때: `--personas`, `--conditions`, `--venues` 뒤에 식별자를 적는다.
 - 프롬프트의 판은 `--prompt` 로 고른다. 적지 않으면 팀이 쓰는 판 `p2` 를 읽는다 (`personas/prompts/p2.md`, T108).
   그 판의 파일이 없는 폴더에서 LLM 을 부르려 하면 다른 판으로 돌리지 않고 이유를 알리고 멈춘다.
-  `--replay-only` 는 프롬프트 파일을 읽지 않아 멈추지 않는다. 그 판으로 받은 저장된 답이 없으면 방문이 실패로 남는다 (예시 사본에 `--prompt p1` 을 빼먹었을 때가 그렇다).
+  `--replay-only` 는 프롬프트 파일을 읽지 않는다. 그래서 기준 상황은 멈추지 않고, 그 판으로 받은 저장된 답이 없으면 방문이 실패로 남는다 (예시 사본에 `--prompt p1` 을 빼먹었을 때가 그렇다).
+  기준이 아닌 상황은 기준 실행과 프롬프트의 판이 다르면 `--replay-only` 여도 돌리지 않고 이유를 알린다 (아래의 "기준이 아닌 상황은").
 - 집계 파일이 있어야 돈다: `--data sample` 은 `data/samples/base_summary.csv`, `--data private` 은 `private/base/summary.csv` (업장 데이터 담당이 만든다).
   기준 상황의 가중치(묶음의 비율, 고객군 배수)와 가격이 빈 상품의 단가를 이 파일에서 낸다 (`docs/FORMATS.md` 3절, 10.1절의 "가중치를 내는 법").
   명령이 끝날 때 채운 상품과 채우지 못한 상품의 수를 알리고, 배수를 정하지 못한 고객군이 있으면 알린다.
