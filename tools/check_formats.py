@@ -75,16 +75,24 @@ IGNORED_FILE_NAMES = frozenset({".DS_Store", "Thumbs.db", "desktop.ini"})
 IGNORED_SUFFIXES = (".pyc", ".log")
 
 
-def ignored_by_git(parts: tuple[str, ...], is_dir: bool) -> bool:
-    """저장소 맨 위에서 본 경로 `parts` 를 깃이 무시하는가 (.gitignore 를 그대로 옮긴 것)."""
+SAMPLE_RUNS = ("engine", "samples", "runs")
+
+
+def ignored_by_git(parts: tuple[str, ...], is_dir: bool, at_repo_root: bool = True) -> bool:
+    """저장소 맨 위에서 본 경로 `parts` 를 깃이 무시하는가 (.gitignore 를 그대로 옮긴 것).
+
+    `at_repo_root` 가 거짓이면 깃 저장소가 아닌 곳(테스트의 예시 묶음과 그 사본)을 보는 것이다.
+    그곳의 실행 폴더는 예시로 올리는 파일이라 무시하지 않는다.
+    """
     name = parts[-1]
     if parts[0] == PRIVATE_DIR and len(parts) > 1:
         # 맨 위의 private/ 는 안내 파일만 빼고 모두 무시한다. 더 깊은 곳의 private/ 는 무시하지 않는다.
         return parts != (PRIVATE_DIR, README)
     if name == ".env" or (name.startswith(".env.") and name != ".env.example"):
         return True
-    # 화면이 만든 상황으로 돌린 실행 폴더와 그 안의 파일 (.gitignore 의 engine/samples/runs/*-ui-*/. 폴더에만 걸린다).
-    if len(parts) >= 4 and parts[:3] == ("engine", "samples", "runs") and "-ui-" in parts[3] and (len(parts) > 4 or is_dir):
+    # 가상 예시 값으로 돌린 실행 폴더와 그 안의 파일 (.gitignore 의 engine/samples/runs/*/. 폴더에만 걸리고,
+    # 맨 위의 engine/ 에만 걸린다. tests/fixtures/<이름>/engine/samples/runs/ 의 예시 실행은 올린다)
+    if at_repo_root and len(parts) >= 4 and parts[:3] == SAMPLE_RUNS and (len(parts) > 4 or is_dir):
         return True
     if is_dir:
         return name in IGNORED_DIR_NAMES or name.endswith(".egg-info")
@@ -247,6 +255,15 @@ class Checker:
     conditions: ConditionBundle | None = None
     scenarios: dict[str, Scenario] = field(default_factory=dict)
 
+    # 깃 저장소의 맨 위를 보는가. 아니면(예시 묶음과 그 사본) 깃이 맨 위에서만 무시하는 실행 폴더도 검사한다.
+    at_repo_root: bool = field(init=False)
+
+    def __post_init__(self) -> None:
+        self.at_repo_root = (self.root / ".git").exists()
+
+    def _ignored(self, parts: tuple[str, ...], is_dir: bool) -> bool:
+        return ignored_by_git(parts, is_dir, at_repo_root=self.at_repo_root)
+
     # ── 기록 ────────────────────────────────────────────────────────────────
 
     def error(self, path: Path | str, message: str) -> None:
@@ -324,9 +341,9 @@ class Checker:
         for path in sorted(folder.iterdir()):
             parts = path.relative_to(self.root).parts
             if path.is_dir():
-                if path.name not in dirs and not ignored_by_git(parts, is_dir=True):
+                if path.name not in dirs and not self._ignored(parts, is_dir=True):
                     self.error(path, f"약속에 없는 폴더다. 이 폴더에는 {holds} 만 둔다 (형식 약속 1절)")
-            elif ignored_by_git(parts, is_dir=False) or path.name in GUIDE_FILES or path.name in files:
+            elif self._ignored(parts, is_dir=False) or path.name in GUIDE_FILES or path.name in files:
                 continue
             elif suffix and path.suffix == suffix:
                 found.append(path)
@@ -679,7 +696,7 @@ class Checker:
         if not runs.is_dir():
             return
         run_dirs = sorted(
-            p for p in runs.iterdir() if p.is_dir() and not ignored_by_git(p.relative_to(self.root).parts, is_dir=True)
+            p for p in runs.iterdir() if p.is_dir() and not self._ignored(p.relative_to(self.root).parts, is_dir=True)
         )
         self._managed(runs, "실행마다의 폴더 `<run_id>/`", dirs=[p.name for p in run_dirs])
 
@@ -1098,7 +1115,7 @@ class Checker:
                 continue  # 깃은 바로 가기가 가리키는 곳의 내용이 아니라 바로 가기만 올린다
             parts = path.relative_to(self.root).parts
             if path.is_dir():
-                if ignored_by_git(parts, is_dir=True):
+                if self._ignored(parts, is_dir=True):
                     continue
                 if path.name.lower() == PRIVATE_DIR and parts != (PRIVATE_DIR,):
                     if len(parts) == 1:
@@ -1114,7 +1131,7 @@ class Checker:
                             "내부 자료는 맨 위의 private/ 로 옮긴다",
                         )
                 yield from self._walk(path)
-            elif path.is_file() and not ignored_by_git(parts, is_dir=False):
+            elif path.is_file() and not self._ignored(parts, is_dir=False):
                 yield path
 
     def check_nothing_private(self) -> None:
@@ -1194,7 +1211,7 @@ class Checker:
         # 올리면 안 되는 것은 위에서 이미 모든 파일을 훑었으므로 다시 훑지 않는다.
         fixtures = self.root.joinpath(*FIXTURES)
         for tree in sorted(fixtures.iterdir()) if fixtures.is_dir() else []:
-            if not tree.is_dir() or ignored_by_git(tree.relative_to(self.root).parts, is_dir=True):
+            if not tree.is_dir() or self._ignored(tree.relative_to(self.root).parts, is_dir=True):
                 continue
             nested = Checker(tree)
             nested.check_formats()

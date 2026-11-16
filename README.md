@@ -66,7 +66,8 @@ uv run python -m streamlit run app/main.py
 
 화면에서 조건을 골라 엔진을 돌리고, 페르소나와 방문 조건별 결과를 본다. 키가 없으면 저장된 답을 재생한다.
 쓰는 법은 화면 담당의 안내(`docs/PROGRESS.md` 의 T09, T202)를 본다.
-화면이 만든 상황 파일(`scenarios/ui-*.json`)과 그 상황으로 돌린 가상 예시 값의 실행 폴더(`engine/samples/runs/*-ui-*/`)는 깃이 무시한다. 시연에 쓸 상황은 사람이 확정해 `ui-` 없이 올린다.
+화면이 만든 상황 파일(`scenarios/ui-*.json`)은 깃이 무시한다. 시연에 쓸 상황은 사람이 확정해 `ui-` 없이 올린다.
+가상 예시 값으로 돌린 실행 폴더(`engine/samples/runs/<run_id>/`)도 깃이 무시한다 (T107). 각자 연습으로 받은 답이 올라가지 않게 한다.
 
 **시뮬레이션을 돌린다** — 상황 하나를 돌려 실행 폴더(실행 기록, 소비 원장, 저장된 응답)를 쓴다.
 `--data sample` 은 가상 예시 값으로 돌려 `engine/samples/runs/` 에, `--data private` 은 기본 데이터로 돌려 `private/runs/` 에 쓴다.
@@ -96,7 +97,7 @@ Get-ChildItem "$env:LOCALAPPDATA\Claude-Data" -Recurse -Filter claude.exe -Error
 
   - 데스크톱 앱의 로그인은 앱 안에서만 쓰인다. 앱에 로그인돼 있어도 `claude auth login` 은 따로 한 번 해야 한다. 경로를 적었으면 `& "<그 경로>" auth login` 이다.
   - 가상 예시 값(`--data sample`)으로만 돌린다. 기본 데이터(`--data private`)는 팀이 정한 공급자로만 돌린다 (요약이 어느 회사로 가는지 팀이 정한다. `docs/MEETING_1117.md` ③).
-  - 이 답은 시연과 보정에 쓰지 않는다. 실행 폴더(`engine/samples/runs/`)는 깃이 무시하지 않으니 커밋할 때 넣지 않는다.
+  - 이 답은 시연과 보정에 쓰지 않는다. 실행 폴더(`engine/samples/runs/<run_id>/`)는 깃이 무시하므로 올라가지 않는다 (T107).
   - 구독의 사용 한도는 자기 Claude Code 작업과 함께 쓴다. 호출 하나가 2만 토큰을 넘으니(T104 실측) `--personas`, `--conditions` 로 작게 돌린다.
     한도에 닿으면 엔진이 멈추고, 한도가 풀린 뒤 다시 돌리면 받은 답은 재생한다.
 - 키가 없으면 `--replay-only` 를 붙인다. 저장된 응답만 재생하고, 저장된 응답이 없는 방문은 실패로 남는다.

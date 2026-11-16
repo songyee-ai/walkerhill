@@ -22,7 +22,7 @@
 | 7 | 상황 정의 | `scenarios/<scenario_id>.json` | 화면 | 엔진 | 저장소 |
 | 8 | 기본 데이터 집계 파일 | `private/base/summary.csv` | 업장 데이터 | 엔진, 페르소나 | `private/`. 가상 예시는 `data/samples/base_summary.csv` |
 | 9 | 선택 요청과 응답 | 파일이 아니다. 엔진이 LLM 을 부를 때의 형식이다 | 엔진(요청), 페르소나(프롬프트) | 엔진 | — |
-| 10 | 실행 결과 | `private/runs/<run_id>/` | 엔진 | 화면, 페르소나 | `private/`. 가상 예시로 만든 것은 `engine/samples/runs/` |
+| 10 | 실행 결과 | `private/runs/<run_id>/` | 엔진 | 화면, 페르소나 | `private/`. 가상 예시로 만든 것은 `engine/samples/runs/` (깃이 무시한다. 올리는 예시는 `tests/fixtures/<이름>/engine/samples/runs/`) |
 
 파일 하나는 한 사람이 쓴다. 남이 만든 파일은 읽기만 하고, 고칠 것은 주인에게 요청한다.
 
@@ -863,6 +863,8 @@ customer_group,venue_id,product_id,occasion,meal,day_type,month,unit,quantity,pa
 | `sample` | 가상 예시 값과 페르소나의 공개 층만. `private/` 는 읽지 않는다 | `engine/samples/runs/<run_id>/` |
 
 - `sample` 로 돌린 결과만 저장소에 올릴 수 있다. `private` 로 돌린 결과에는 요청에 든 비공개 층과 기본 데이터의 값이 그대로 남는다.
+- 맨 위의 `engine/samples/runs/` 는 깃이 무시한다 (11-16, T107). 각자 연습으로 받은 답이 올라가지 않게 한다.
+  올릴 실행은 테스트의 예시 묶음(`tests/fixtures/<이름>/engine/samples/runs/`)에 둔다. 형식 검사는 깃 저장소가 아닌 곳(예시 묶음과 그 사본)의 실행 폴더만 본다.
 - 저장된 응답은 요청이 한 글자라도 다르면 재생되지 않는다. 그래서 `private` 결과를 다른 PC 에서 재생하려면 실행 결과와 함께 비공개 층과 집계 파일도 저장소 밖의 경로로 주고받는다.
   시연에 쓸 저장 응답은 한 PC 에서 만들어 그대로 쓴다.
 
@@ -1186,7 +1188,7 @@ uv run python -m tools.check_formats --strict   # 다 만든 뒤의 기준으로
 - 묶음의 조건은 `month` 와 `stay` 가 `null` 이고 조식 조건이 없다. 상황의 `our_price`·`our_promo` 는 워커힐 업장만, `competitor` 는 경쟁 업장만 바꾼다.
   상황의 `changes` 를 엔진과 같은 코드로 적용했을 때 업장 정의가 3절의 규칙을 지킨다 (7절).
 - 저장된 응답의 요청에서 깎인 줄과 후보의 `promotions` 의 `applied` 가 서로 맞는다 (9절).
-- `engine/samples/runs/` 의 실행 기록은 모두 `data_mode` 가 `sample` 이다. 가중치가 빠짐없이 있고 등급에 `internal` 이 없다.
+- 예시 묶음의 `engine/samples/runs/` 의 실행 기록은 모두 `data_mode` 가 `sample` 이다. 가중치가 빠짐없이 있고 등급에 `internal` 이 없다.
   가중치와 등급의 키가 같고, 고객군마다 묶음의 비율을 더하면 1 (매출이 없어 낼 수 없으면 모두 0) 이고, 페르소나의 가중치가 고객군 배수 × 고객군 안의 몫이다.
   `filled_products` 의 상품은 업장 정의에서 가격이 빈 상품이다.
   원장의 방문 수가 실행 기록과 맞고, 원장이 저장된 응답과 같다 (10절).
