@@ -1567,6 +1567,10 @@ README 에 둘을 나눠 적었다. 기준 상황도 멈추게 바꿀지는 정�
   설정은 README 의 "시뮬레이션을 돌린다"에 있습니다: `.env` 에서 `LLM_PROVIDER=claude-code`, `LLM_MODEL=claude-sonnet-5-5`, 필요하면 `CLAUDE_CODE_PATH` 를 적고 `claude auth login` 을 한 번 합니다.
   지킬 것 셋: 가상 예시 값(`--data sample`)으로만 돌린다, 이 답은 시연·보정에 쓰지 않는다, `engine/samples/runs/` 의 실행 폴더는 커밋하지 않는다.
   돌려 보고 끝까지 돌았으면 이 줄에 이름과 날짜를, 막히면 오류 원문을 적어 주세요.
+  (돌림: hojitea-ui 11-16, 윈도우 11. `--data sample --personas family-parents --conditions meal-dinner-weekend`, 프롬프트 p2. 방문 1건이 실패 0건, 어긋난 답 0건으로 끝났고
+  호출 하나가 20초쯤 걸렸다 (실행 폴더 이름의 시각과 응답 파일이 쓰인 시각으로 잼). `claude` 가 PATH 에 없어 `CLAUDE_CODE_PATH` 에 데스크톱 앱의 `claude.exe` 경로를 적었다.
+  알아 둘 것: README 대로 앱에 로그인돼 있어도 `auth login` 을 따로 해야 했다. 브라우저의 코드를 `Paste code here` 에 붙여 넣어도 화면에 아무것도 보이지 않는다
+  (입력이 가려진다). 붙여 넣기가 안 된 줄 알고 멈추기 쉬운데, 그대로 Enter 를 누르면 `Login successful` 이 나온다. 실행 폴더는 깃이 무시하는 것을 `git status` 로 확인)
 - [ ] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-16): 가상 예시 값으로 돌린 실행 폴더(`engine/samples/runs/<run_id>/`)를 이제 깃이 모두 무시합니다 (T107).
   위 T106 안내의 "실행 폴더는 커밋하지 않는다"를 깃이 대신 지킵니다. 이미 그 폴더를 커밋해 둔 브랜치가 있으면 develop 을 받기 전에 알려 주세요.
   올리고 싶은 예시 실행은 `tests/fixtures/<이름>/engine/samples/runs/` 에 둡니다 (`FORMATS.md` 10절).
