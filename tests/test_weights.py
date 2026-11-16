@@ -767,8 +767,13 @@ def quiet_env(monkeypatch):
     return monkeypatch
 
 
+EXAMPLE_PROMPT = ("--prompt", "p1")  # 예시 묶음에는 p1 만 있다. 명령의 기본값은 팀이 쓰는 판이다 (T108)
+
+
 def command(root: Path, *more: str) -> int:
-    return cli.main(["--data", "sample", "--root", str(root), "--replay-only", "--personas", ELDERS, "--conditions", DINNER, *more])
+    return cli.main(
+        ["--data", "sample", "--root", str(root), "--replay-only", *EXAMPLE_PROMPT, "--personas", ELDERS, "--conditions", DINNER, *more]
+    )
 
 
 def test_command_tells_about_filled_prices_and_unfitted_groups(example_copy, quiet_env, capsys):
@@ -812,7 +817,9 @@ def test_command_runs_on_the_example_baseline_with_the_same_venues(example_copy,
     """예시 묶음의 기준 실행은 엔진이 쓴 것이라, 같은 업장으로 고르면 그 실행의 가중치로 상황을 돌릴 수 있다."""
     venues = ["--venues", "geumryong", "examplehotel-chinese"]
     quiet_env.setattr(cli, "datetime", type("Later", (), {"now": staticmethod(lambda: NOW.replace(tzinfo=None))}))
-    code = cli.main(["--data", "sample", "--root", str(example_copy), "--replay-only", "--scenario", COMPETITOR_DISCOUNT, *venues])
+    code = cli.main(
+        ["--data", "sample", "--root", str(example_copy), "--replay-only", *EXAMPLE_PROMPT, "--scenario", COMPETITOR_DISCOUNT, *venues]
+    )
     said = capsys.readouterr()
     assert code == cli.EXIT_OK, said.err
     assert f"기준 실행 {BASELINE_RUN}" in said.out
