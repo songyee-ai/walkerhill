@@ -1,7 +1,8 @@
 """화면: 조건 입력과 실행 결과 (T09).
 
-엔진이 쓴 실행 폴더를 읽어, 고른 페르소나와 방문 조건의 결과를 보여 준다. 키와 기본 데이터가 없어도 돈다
-(실행 폴더가 하나도 없으면 저장소의 예시 실행을 보여 준다). 무엇을 보여 줄지는 app/results.py 가 정한다.
+1. 돌리기 — 조건을 골라 엔진을 돌린다 (app/runs.py. README 와 같은 `python -m engine` 명령이다).
+2. 결과 보기 — 엔진이 쓴 실행 폴더를 읽어, 고른 페르소나와 방문 조건의 결과를 보여 준다 (app/results.py).
+키와 기본 데이터가 없어도 돈다 (저장된 답을 재생하고, 실행 폴더가 없으면 저장소의 예시 실행을 보여 준다).
 
 띄우는 법 (저장소 맨 위에서):
 
@@ -31,6 +32,16 @@ from app.results import (  # noqa: E402
     visit_view,
     won,
 )
+from app.runs import (  # noqa: E402
+    EXAMPLE_VENUES,
+    choices,
+    data_roots,
+    engine_command,
+    has_private_summary,
+    key_ready,
+    make_example_copy,
+    run_engine,
+)
 from engine.formats import KO  # noqa: E402
 
 
@@ -44,8 +55,102 @@ st.set_page_config(page_title="워커힐 다이닝 페르소나 시뮬레이터"
 st.title("워커힐 다이닝 페르소나 시뮬레이터")
 st.caption("화면의 모든 금액은 가상 값입니다. 실제 매출이나 실제 구매율이 아닙니다.")
 
-# ── 조건 입력 ──────────────────────────────────────────────
-st.sidebar.header("조건 고르기")
+def run_panel() -> None:
+    """1. 돌리기 — 조건을 골라 엔진을 돌린다. 끝나면 새 실행을 2. 결과 보기에서 고른 상태로 다시 그린다."""
+    st.sidebar.header("1. 돌리기")
+    with st.sidebar.expander("조건을 골라 새로 돌리기", expanded=False):
+        roots = data_roots(REPO_ROOT)
+        root = st.radio("돌릴 자료", roots, format_func=lambda r: r.label, key="run_root")
+        if root.is_example and not root.path.exists():
+            st.info("예시 사본이 아직 없습니다. 예시 파일을 깃이 무시하는 private/ 에 베껴 씁니다.")
+            if st.button("예시 사본 만들기"):
+                make_example_copy(REPO_ROOT)
+                st.rerun()
+            return
+
+        found = choices(root.path)
+        if found.missing:
+            st.warning("아직 없는 것이 있어 돌릴 수 없습니다:\n\n" + "\n".join(f"- {name}" for name in found.missing))
+            st.caption("예시 사본으로는 지금도 연습할 수 있습니다.")
+            return
+
+        modes = ["sample"] + (["private"] if has_private_summary(root.path) else [])
+        data_mode = st.radio(
+            "값", modes, format_func=lambda m: {"sample": "가상 예시 값", "private": "기본 데이터 (이 PC 에만)"}[m], key="run_mode"
+        )
+        scenarios = sorted(found.scenarios, key=lambda s: (s != "baseline", s))
+        scenario_id = st.selectbox("상황", scenarios, key="run_scenario")
+        prompt = st.selectbox("프롬프트", found.prompts, index=found.prompts.index("p1") if "p1" in found.prompts else 0)
+        persona_ids: list[str] = []
+        condition_ids: list[str] = []
+        if scenario_id == "baseline":
+            persona_ids = st.multiselect(
+                "페르소나 (비우면 모두)", found.personas, default=["family-elders"] if root.is_example else []
+            )
+            condition_ids = st.multiselect(
+                "방문 조건 (비우면 모두)", found.conditions, default=["meal-dinner-weekend"] if root.is_example else []
+            )
+        else:
+            st.caption("기준이 아닌 상황은 가장 새 기준 실행의 페르소나와 방문 조건으로 돕니다. 기준 상황을 먼저 돌려 두세요.")
+        venue_default = [v for v in EXAMPLE_VENUES if v in found.venues] if root.is_example else []
+        venue_ids = st.multiselect(
+            "업장 (비우면 모두)",
+            found.venues,
+            default=venue_default,
+            help="기준 상황을 일부 업장으로 돌렸으면 다른 상황도 같은 업장으로 돌립니다. 예시의 저장된 답은 두 업장으로 받은 것입니다.",
+        )
+        ready = key_ready(REPO_ROOT)
+        call_llm = st.checkbox(
+            "AI 를 새로 부르기",
+            value=False,
+            disabled=not ready,
+            help="끄면 앞서 저장된 답만 재생합니다 (키가 필요 없고 바로 끝납니다). 저장된 답이 없는 방문은 실패로 남습니다.",
+        )
+        if not ready:
+            st.caption("이 PC 에 .env 의 키가 없어 저장된 답 재생으로만 돌립니다.")
+
+        if st.button("돌리기", type="primary"):
+            command = engine_command(
+                root.path, REPO_ROOT, data_mode, scenario_id, prompt, persona_ids, condition_ids, venue_ids, call_llm
+            )
+            with st.spinner("엔진을 돌리는 중입니다…"):
+                outcome = run_engine(command, REPO_ROOT)
+            st.session_state["last_outcome"] = outcome
+            if outcome.run_dir is not None:
+                st.session_state["pick"] = (outcome.run_dir.parent, outcome.run_dir.name)
+            st.rerun()
+
+
+def show_last_outcome() -> None:
+    """방금 돌린 결과를 화면 맨 위에 알린다."""
+    outcome = st.session_state.get("last_outcome")
+    if outcome is None:
+        return
+    if outcome.exit_code == 0:
+        st.success(f"돌리기: {outcome.meaning} 아래에 새 실행을 열었습니다.")
+    else:
+        st.error(f"돌리기: {outcome.meaning}")
+    with st.expander("엔진이 남긴 말", expanded=outcome.exit_code != 0):
+        st.code(outcome.output or "(남긴 말 없음)", language=None)
+
+
+def apply_pick(sources: list[RunSource]) -> None:
+    """방금 돌린 실행을 결과 보기의 선택 칸에 넣는다. 선택 칸을 그리기 전에 불러야 한다."""
+    pick = st.session_state.pop("pick", None)
+    if pick is None:
+        return
+    folder, run_id = pick
+    source = next((s for s in sources if s.folder.resolve() == Path(folder).resolve()), None)
+    if source is not None:
+        st.session_state["source"] = source
+        st.session_state["run_id"] = run_id
+
+
+run_panel()
+show_last_outcome()
+
+# ── 결과 보기 ──────────────────────────────────────────────
+st.sidebar.header("2. 결과 보기")
 sources = run_sources(REPO_ROOT)
 other = st.sidebar.text_input(
     "다른 실행 폴더 (선택)",
@@ -55,7 +160,12 @@ if other.strip():
     folder = Path(other.strip())
     folder = folder if folder.is_absolute() else REPO_ROOT / folder
     if list_runs(folder):
-        sources.insert(0, RunSource(f"직접 적은 폴더 ({other.strip()})", folder))
+        typed = RunSource(f"직접 적은 폴더 ({other.strip()})", folder)
+        sources.insert(0, typed)
+        # 경로를 새로 적었으면 그 폴더를 고른 상태로 한다. 같은 경로면 사람이 고른 값을 그대로 둔다.
+        if st.session_state.get("other_seen") != other.strip():
+            st.session_state["other_seen"] = other.strip()
+            st.session_state["source"] = typed
     else:
         st.sidebar.warning("그 폴더에서 실행을 찾지 못했습니다. run.json 이 든 실행 폴더들의 상위 폴더를 적어 주세요.")
 
@@ -63,9 +173,15 @@ if not sources:
     st.error("보여 줄 실행이 없습니다. 저장소의 예시 파일(tests/fixtures/example)이 있는지 확인해 주세요.")
     st.stop()
 
-source = st.sidebar.selectbox("결과를 읽을 곳", sources, format_func=lambda s: s.label)
+apply_pick(sources)
+# 고른 값이 목록에서 사라졌으면(폴더를 지웠거나 출처를 바꿈) 처음 것으로 돌아간다.
+if st.session_state.get("source") not in sources:
+    st.session_state.pop("source", None)
+source = st.sidebar.selectbox("결과를 읽을 곳", sources, format_func=lambda s: s.label, key="source")
 run_ids = list_runs(source.folder)
-run_id = st.sidebar.selectbox("실행 (새것이 위)", run_ids)
+if st.session_state.get("run_id") not in run_ids:
+    st.session_state.pop("run_id", None)
+run_id = st.sidebar.selectbox("실행 (새것이 위)", run_ids, key="run_id")
 
 try:
     run = load_run(source.folder / run_id)

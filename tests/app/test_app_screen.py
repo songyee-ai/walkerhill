@@ -25,8 +25,8 @@ def _app() -> AppTest:
 
 def _choose_example(app: AppTest, run_id: str) -> AppTest:
     # 이 PC 에 엔진으로 돌린 실행이 있어도 예시 실행을 고르게 한다. selectbox 의 값은 RunSource 다.
-    app.sidebar.selectbox[0].set_value(RunSource(EXAMPLE_LABEL, EXAMPLE_RUNS)).run()
-    app.sidebar.selectbox[1].set_value(run_id).run()
+    app.selectbox(key="source").set_value(RunSource(EXAMPLE_LABEL, EXAMPLE_RUNS)).run()
+    app.selectbox(key="run_id").set_value(run_id).run()
     return app
 
 
@@ -75,11 +75,25 @@ def test_other_folder_reads_runs_written_elsewhere(tmp_path: Path):
     app = _app().run()
     app.sidebar.text_input[0].set_value(str(runs)).run()
     assert not app.exception
-    assert app.sidebar.selectbox[0].value.folder == runs
+    assert app.selectbox(key="source").value.folder == runs
 
 
 def test_unknown_other_folder_warns_instead_of_failing(tmp_path: Path):
     app = _app().run()
     app.sidebar.text_input[0].set_value(str(tmp_path / "없음")).run()
     assert not app.exception
-    assert app.sidebar.warning
+    assert any("찾지 못했습니다" in w.value for w in app.sidebar.warning)
+
+
+def test_run_panel_says_what_is_missing_in_the_repository():
+    # 저장소에 페르소나나 프롬프트가 아직 없으면 돌리기 버튼 대신 모자란 것을 알린다.
+    app = _app().run()
+    app.radio(key="run_root").set_value(app.radio(key="run_root").options[0]).run()
+    assert not app.exception
+    from app.runs import choices
+
+    missing = choices(REPO_ROOT).missing
+    if missing:
+        assert any("아직 없는 것" in w.value for w in app.sidebar.warning)
+    else:
+        assert any(b.label == "돌리기" for b in app.sidebar.button)

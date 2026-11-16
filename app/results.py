@@ -17,6 +17,7 @@ from engine.runner import runs_folder
 DATA_MODES = (("private", "기본 데이터로 돌린 실행"), ("sample", "가상 예시 값으로 돌린 실행"))
 # 키와 기본 데이터가 없는 PC 에서도 화면이 돌게, 저장소에 든 예시 실행을 늘 마지막 출처로 둔다.
 EXAMPLE_LABEL = "예시 파일 (tests/fixtures/example)"
+EXAMPLE_COPY_LABEL = "예시 사본으로 돌린 실행 (private/try-example)"
 
 
 @dataclass(frozen=True)
@@ -30,6 +31,8 @@ class RunSource:
 def run_sources(repo_root: Path) -> list[RunSource]:
     """실행이 하나라도 든 출처. 앞에 있는 것이 먼저 고른 값이다."""
     sources = [RunSource(label, runs_folder(repo_root, mode)) for mode, label in DATA_MODES]
+    # 화면의 "돌리기"에서 예시 사본으로 돌린 실행 (app/runs.py 의 EXAMPLE_COPY).
+    sources.append(RunSource(EXAMPLE_COPY_LABEL, runs_folder(repo_root / "private" / "try-example", "sample")))
     sources.append(RunSource(EXAMPLE_LABEL, runs_folder(repo_root / "tests" / "fixtures" / "example", "sample")))
     return [source for source in sources if list_runs(source.folder)]
 
