@@ -14,7 +14,14 @@ if str(REPO_ROOT) not in sys.path:
 from app.board import WALKERHILL_NAMES, pct_change, venue_cards  # noqa: E402
 from app.compare import MOVE_LABEL, Place, baseline_dir_of, classify, compare, summary_groups  # noqa: E402
 from app.results import load_run  # noqa: E402
-from app.validation import VALIDATION_LIMITS, limits_not_in, load_validation, validation_rows  # noqa: E402
+from app.validation import (  # noqa: E402
+    LIMITS_SECTION,
+    LIMITS_SOURCE_LINES,
+    VALIDATION_LIMITS,
+    limits_not_in,
+    load_validation,
+    validation_rows,
+)
 from engine.formats import WALKERHILL_VENUE_IDS  # noqa: E402
 
 EXAMPLE = REPO_ROOT / "tests" / "fixtures" / "example"
@@ -136,3 +143,15 @@ def test_detail_tab_renders_validation_with_limits(tmp_path: Path):
     captions = " ".join(c.value for c in app.caption)
     assert "REVIEW_RULES.md 6절" in captions and "명월관 (이 결과에 없음) 한계" in captions
     assert any("검증 건수" in frame.value.columns for frame in app.dataframe)
+
+
+def test_limits_still_match_the_review_rules():
+    # 화면의 한계 문구는 REVIEW_RULES 6절을 옮긴 것이다. 원문이 바뀌면 이 테스트가 실패해 화면 문구를 함께 고치게 한다.
+    text = (REPO_ROOT / "docs" / "REVIEW_RULES.md").read_text(encoding="utf-8")
+    section = text[text.index("## 6."): text.index("## 7.")]
+    assert f"**{LIMITS_SECTION}**" in section
+    part = section[section.index(f"**{LIMITS_SECTION}**"):]
+    flat = " ".join(line.strip() for line in part.splitlines())
+    for venue_id, line in LIMITS_SOURCE_LINES.items():
+        assert line in flat, f"REVIEW_RULES 6절의 {venue_id} 한계 문장이 바뀌었다. 원문을 읽고 VALIDATION_LIMITS 를 고친다"
+    assert set(LIMITS_SOURCE_LINES) == set(VALIDATION_LIMITS)
