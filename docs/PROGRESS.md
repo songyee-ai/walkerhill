@@ -1560,6 +1560,8 @@ README 에 둘을 나눠 적었다. 기준 상황도 멈추게 바꿀지는 정�
   설정은 README 의 "시뮬레이션을 돌린다"에 있습니다: `.env` 에서 `LLM_PROVIDER=claude-code`, `LLM_MODEL=claude-sonnet-5-5`, 필요하면 `CLAUDE_CODE_PATH` 를 적고 `claude auth login` 을 한 번 합니다.
   지킬 것 셋: 가상 예시 값(`--data sample`)으로만 돌린다, 이 답은 시연·보정에 쓰지 않는다, `engine/samples/runs/` 의 실행 폴더는 커밋하지 않는다.
   돌려 보고 끝까지 돌았으면 이 줄에 이름과 날짜를, 막히면 오류 원문을 적어 주세요.
+  (확인: borigunbbang 11-16, macOS 에서 공급자 `claude-code` 로 `--data sample --personas family-parents --prompt p2` 를 돌려 기준 상황 8건이 실패 0건으로 끝까지 돎.
+  T08 의 확인과 같은 실행이고, 모델은 안내의 `claude-sonnet-5-5` 가 아니라 `claude-opus-5-5` 였다. 실행 폴더는 `private/` 의 사본에만 있다)
 - [ ] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-16): 가상 예시 값으로 돌린 실행 폴더(`engine/samples/runs/<run_id>/`)를 이제 깃이 모두 무시합니다 (T107).
   위 T106 안내의 "실행 폴더는 커밋하지 않는다"를 깃이 대신 지킵니다. 이미 그 폴더를 커밋해 둔 브랜치가 있으면 develop 을 받기 전에 알려 주세요.
   올리고 싶은 예시 실행은 `tests/fixtures/<이름>/engine/samples/runs/` 에 둡니다 (`FORMATS.md` 10절).
