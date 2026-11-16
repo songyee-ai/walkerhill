@@ -28,6 +28,8 @@ EXAMPLE_COPY = Path("private") / "try-example"
 EXAMPLE_VENUES = ("geumryong", "examplehotel-chinese")
 # 화면이 기다리는 가장 긴 시간(초). 넘으면 멈추고 알린다. 엔진의 호출 상한과 별개다.
 RUN_TIMEOUT = 600
+# 화면이 처음 고르는 프롬프트의 판. 엔진 명령의 기본값과 같게 둔다 (T108). 예시 묶음에는 p1 만 있어 그때는 p1 로 돈다.
+DEFAULT_PROMPT = "p2"
 
 # 예시의 저장된 답을 받은 공급자와 모델. 저장된 답은 공급자·모델이 같아야 재생되므로(FORMATS 10절),
 # 예시를 재생만 할 때는 이 PC 의 .env 가 다른 공급자를 가리켜도 이 값으로 돌린다.
@@ -77,13 +79,26 @@ class Choices:
     missing: list[str] = field(default_factory=list)
 
 
+def prompt_versions(root: Path) -> list[str]:
+    """`personas/prompts/` 에 있는 프롬프트의 판."""
+    return sorted(p.stem for p in (root / "personas" / "prompts").glob("*.md"))
+
+
+def default_prompt(prompts: list[str]) -> str:
+    """처음 고를 판. 팀 기본(`DEFAULT_PROMPT`)이 있으면 그것, 없으면 p1(예시 묶음), 그것도 없으면 첫 판."""
+    for version in (DEFAULT_PROMPT, "p1"):
+        if version in prompts:
+            return version
+    return prompts[0] if prompts else DEFAULT_PROMPT
+
+
 def choices(root: Path) -> Choices:
     """돌릴 수 있는 상황, 페르소나, 방문 조건, 업장, 프롬프트. 모자란 것은 `missing` 에 문장으로 적는다."""
     found = Choices(
         scenarios=_ids(root / "scenarios"),
         personas=_ids(root / "personas"),
         venues=_ids(root / "data" / "venues"),
-        prompts=sorted(p.stem for p in (root / "personas" / "prompts").glob("*.md")),
+        prompts=prompt_versions(root),
     )
     bundle = root / "engine" / "conditions.json"
     if bundle.is_file():
@@ -227,14 +242,16 @@ def simulate(
     condition_ids: list[str],
     venue_ids: list[str],
     call_llm: bool,
-    prompt: str = "p1",
+    prompt: str | None = None,
     is_example: bool = False,
 ) -> Simulation:
     """같은 페르소나·방문 조건·업장으로 기준과 상황을 차례로 돌린다 (PRD 7.2절: 상황은 기준의 가중치로 돈다).
 
     기준을 매번 새로 돌리는 것은, 고른 페르소나와 조건이 바뀌어도 늘 같은 것끼리 견주게 하려는 것이다.
-    저장된 답을 재생하면 몇 초면 끝난다.
+    저장된 답을 재생하면 몇 초면 끝난다. 판을 주지 않으면 그 자료에 있는 판에서 `default_prompt` 로 고른다.
     """
+    if prompt is None:
+        prompt = default_prompt(prompt_versions(root))
     base_cmd = engine_command(root, repo_root, data_mode, "baseline", prompt, persona_ids, condition_ids, venue_ids, call_llm)
     env = replay_env(is_example, call_llm)
     baseline = run_engine(base_cmd, repo_root, env_overrides=env)

@@ -38,6 +38,7 @@ from app.runs import (  # noqa: E402
     EXAMPLE_VENUES,
     choices,
     data_roots,
+    default_prompt,
     engine_command,
     has_private_summary,
     key_ready,
@@ -83,7 +84,7 @@ def run_panel() -> None:
         )
         scenarios = sorted(found.scenarios, key=lambda s: (s != "baseline", s))
         scenario_id = st.selectbox("상황", scenarios, key="run_scenario")
-        prompt = st.selectbox("프롬프트", found.prompts, index=found.prompts.index("p1") if "p1" in found.prompts else 0)
+        prompt = st.selectbox("프롬프트", found.prompts, index=found.prompts.index(default_prompt(found.prompts)) if found.prompts else 0)
         persona_ids: list[str] = []
         condition_ids: list[str] = []
         if scenario_id == "baseline":

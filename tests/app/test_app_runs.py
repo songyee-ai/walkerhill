@@ -10,10 +10,12 @@ if str(REPO_ROOT) not in sys.path:
 
 from app.results import load_run, visit_view  # noqa: E402
 from app.runs import (  # noqa: E402
+    DEFAULT_PROMPT,
     EXAMPLE_LLM,
     EXAMPLE_SOURCE,
     EXAMPLE_VENUES,
     choices,
+    default_prompt,
     engine_command,
     key_ready,
     make_example_copy,
@@ -159,3 +161,12 @@ def test_key_ready_for_claude_code_needs_the_program_and_the_model(tmp_path: Pat
     assert not key_ready(tmp_path)  # 모델이 없다
     env.write_text(f"LLM_PROVIDER=claude-code\nLLM_MODEL=m\nCLAUDE_CODE_PATH={tmp_path / 'none.exe'}\n", encoding="utf-8")
     assert not key_ready(tmp_path)  # 실행 파일이 없다
+
+
+def test_default_prompt_is_p2_and_falls_back_to_p1_for_the_example():
+    # 팀 자료는 엔진 명령과 같은 p2 로 처음 고른다 (T108). 예시 묶음에는 p1 만 있어 p1 로 돌아야 저장된 답이 재생된다.
+    assert DEFAULT_PROMPT == "p2"
+    assert default_prompt(["p1", "p2"]) == "p2"
+    assert default_prompt(choices(EXAMPLE).prompts) == "p1"
+    assert default_prompt(["p3"]) == "p3"
+    assert default_prompt(choices(REPO_ROOT).prompts) == "p2"
