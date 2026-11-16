@@ -74,8 +74,36 @@ def test_key_ready_needs_a_filled_key(tmp_path: Path):
     assert not key_ready(tmp_path)
     (tmp_path / ".env").write_text("ANTHROPIC_API_KEY=test-value\n", encoding="utf-8")
     assert key_ready(tmp_path)
-    (tmp_path / ".env").write_text("LLM_PROVIDER=openai-compatible\nLLM_BASE_URL=http://localhost:1\n", encoding="utf-8")
+    (tmp_path / ".env").write_text("LLM_PROVIDER=openai-compatible\nLLM_BASE_URL=http://localhost:1\nLLM_MODEL=m\n", encoding="utf-8")
+    assert key_ready(tmp_path)  # 이 PC 의 로컬 모델은 키가 없어도 된다
+
+
+def test_key_ready_for_openai_needs_the_key_and_the_model(tmp_path: Path):
+    """OpenAI 처럼 밖의 주소는 키와 모델이 있어야 켜진다. 주소만 있으면 부르는 순간 실패한다 (11-16, T103)."""
+    env = tmp_path / ".env"
+    openai = "LLM_PROVIDER=openai-compatible\nLLM_BASE_URL=https://api.openai.com/v1\n"
+    env.write_text(openai, encoding="utf-8")
+    assert not key_ready(tmp_path)
+    env.write_text(openai + "LLM_MODEL=m\n", encoding="utf-8")
+    assert not key_ready(tmp_path)  # 키가 없다
+    env.write_text(openai + "LLM_MODEL=m\nLLM_API_KEY=\n", encoding="utf-8")
+    assert not key_ready(tmp_path)  # 키가 비었다
+    env.write_text(openai + "LLM_API_KEY=test-value\n", encoding="utf-8")
+    assert not key_ready(tmp_path)  # 모델이 없다 (엔진이 멈춘다)
+    env.write_text(openai + "LLM_MODEL=m\nLLM_API_KEY=test-value\n", encoding="utf-8")
     assert key_ready(tmp_path)
+    env.write_text("LLM_PROVIDER=openai-compatible\nLLM_BASE_URL=http://localhost:1\n", encoding="utf-8")
+    assert not key_ready(tmp_path)  # 로컬 모델이어도 모델 이름은 있어야 한다
+    # 엔진이 멈출 설정이면 키가 있어도 켜지 않는다.
+    filled = "LLM_MODEL=m\nLLM_API_KEY=test-value\n"
+    for wrong in (
+        "LLM_PROVIDER=openai\nLLM_BASE_URL=https://api.openai.com/v1\n",  # 공급자 이름의 오타
+        "LLM_PROVIDER=openai-compatible\nLLM_BASE_URL=http://example.com/v1\n",  # 이 PC 가 아닌데 http
+        "LLM_PROVIDER=openai-compatible\nLLM_BASE_URL=api.openai.com/v1\n",  # 주소에 https:// 가 없다
+        "LLM_PROVIDER=openai-compatible\nLLM_BASE_URL=https://api.openai.com/v1\nLLM_RESPONSE_FORMAT=yaml\n",
+    ):
+        env.write_text(wrong + filled, encoding="utf-8")
+        assert not key_ready(tmp_path), wrong
 
 
 def test_example_copy_is_made_once(tmp_path: Path):
@@ -118,3 +146,16 @@ def test_replay_env_only_for_example_replay():
     assert replay_env(True, False) == EXAMPLE_LLM
     assert replay_env(True, True) is None  # AI 를 새로 부를 때는 .env 를 따른다
     assert replay_env(False, False) is None  # 팀 자료는 .env 를 따른다
+
+
+def test_key_ready_for_claude_code_needs_the_program_and_the_model(tmp_path: Path):
+    """자기 Claude 구독으로 Claude Code 를 부르는 공급자(T104)는 키가 없다. 실행 파일과 모델이 있으면 켜진다."""
+    program = tmp_path / "claude.exe"
+    program.write_text("", encoding="utf-8")
+    env = tmp_path / ".env"
+    env.write_text(f"LLM_PROVIDER=claude-code\nLLM_MODEL=m\nCLAUDE_CODE_PATH={program}\n", encoding="utf-8")
+    assert key_ready(tmp_path)
+    env.write_text(f"LLM_PROVIDER=claude-code\nCLAUDE_CODE_PATH={program}\n", encoding="utf-8")
+    assert not key_ready(tmp_path)  # 모델이 없다
+    env.write_text(f"LLM_PROVIDER=claude-code\nLLM_MODEL=m\nCLAUDE_CODE_PATH={tmp_path / 'none.exe'}\n", encoding="utf-8")
+    assert not key_ready(tmp_path)  # 실행 파일이 없다

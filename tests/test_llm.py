@@ -6,6 +6,7 @@
 
 import json
 import re
+import subprocess
 import threading
 from datetime import datetime, timedelta
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -15,6 +16,7 @@ import pytest
 from pydantic import ValidationError
 
 import engine.__main__ as cli
+import engine.llm as llm_module
 from engine.answers import AnswerBook, read_reply
 from engine.formats import (
     ChoiceRequest,
@@ -25,19 +27,23 @@ from engine.formats import (
     compute_request_hash,
     read_model,
 )
-from engine.formats.choice import AddonChoice, Choice, Rejected
+from engine.formats.choice import AddonChoice, Choice, Rejected, problems_in_response
 from engine.llm import (
     DEFAULT_CALL_LIMIT,
     RESPONSE_SCHEMA,
     AnthropicProvider,
+    ClaudeCodeProvider,
     LlmError,
     LlmFatal,
     LlmReply,
     LlmSettings,
     OpenAICompatibleProvider,
+    _attribute_paths,
+    _one_of,
     load_prompt,
     make_provider,
     prompt_path,
+    response_schema,
     settings_from_env,
     user_message,
 )
@@ -68,6 +74,7 @@ LLM_ENV = (
     "LLM_CALL_LIMIT",
     "LLM_BASE_URL",
     "LLM_API_KEY",
+    "LLM_RESPONSE_FORMAT",
     "ANTHROPIC_API_KEY",
     "ANTHROPIC_AUTH_TOKEN",
     "ANTHROPIC_BASE_URL",
@@ -86,19 +93,21 @@ def geumryong(request: ChoiceRequest) -> str:
 
 
 class Fake:
-    """테스트가 끼우는 공급자. `reply(요청)` 이 돌려준 글을 답으로 준다. 부른 것을 `calls` 에 남긴다."""
+    """테스트가 끼우는 공급자. `reply(요청)` 이 돌려준 글을 답으로 준다. 부른 것을 `calls`, 받은 응답 스키마를 `schemas` 에 남긴다."""
 
     def __init__(self, reply=geumryong) -> None:
         self.reply = reply
         self.calls: list[tuple[str, str]] = []
+        self.schemas: list[dict] = []
 
-    def complete(self, system: str, user: str) -> LlmReply:
+    def complete(self, system: str, user: str, schema: dict) -> LlmReply:
         self.calls.append((system, user))
+        self.schemas.append(schema)
         return LlmReply(self.reply(ChoiceRequest.model_validate_json(user)), 11, 7)
 
 
 class NeverCalled:
-    def complete(self, system: str, user: str) -> LlmReply:
+    def complete(self, system: str, user: str, schema: dict) -> LlmReply:
         raise AssertionError("저장된 응답이 있는데 LLM 을 불렀다")
 
 
@@ -553,9 +562,32 @@ def test_settings_default_to_the_values_in_env_example():
     assert written["LLM_PROVIDER"] == settings.provider
     assert written["LLM_MODEL"] == settings.model
     assert written["LLM_CALL_LIMIT"] == str(settings.call_limit)
+    assert written["LLM_RESPONSE_FORMAT"] == "json_schema"
     assert (settings.provider, settings.call_limit) == ("anthropic", DEFAULT_CALL_LIMIT)
-    # .env.example 을 그대로 베낀 .env 는 값이 비어 있다. 비어 있으면 기본값을 쓴다.
+    # 값이 비어 있으면 기본값을 쓴다.
     assert settings_from_env({"LLM_PROVIDER": "", "LLM_MODEL": " ", "LLM_CALL_LIMIT": ""}) == settings
+
+
+def test_env_example_copied_with_a_key_and_a_model_calls_openai():
+    """팀 설정(11-16): .env.example 을 베끼고 키와 모델만 넣으면 OpenAI 로 부른다. 키는 OpenAI 키 칸에 넣는다."""
+    example = (REPO_ROOT / ".env.example").read_text(encoding="utf-8")
+    env = dict(re.findall(r"^([A-Z_]+)=(.*)$", example, re.M))
+    assert env["LLM_PROVIDER"] == "openai-compatible"
+    assert env["LLM_BASE_URL"] == "https://api.openai.com/v1"
+    # 비밀값은 적혀 있지 않다.
+    assert env["LLM_API_KEY"] == env["ANTHROPIC_API_KEY"] == ""
+    with pytest.raises(LlmFatal, match="LLM_MODEL"):
+        settings_from_env(env)  # 모델은 팀이 정해 각자 적는다
+    filled = {**env, "LLM_API_KEY": "test-key", "LLM_MODEL": "team-model"}
+    settings = settings_from_env(filled)
+    assert (settings.provider, settings.model) == ("openai-compatible", "team-model")
+    provider = make_provider(settings, filled)
+    assert isinstance(provider, OpenAICompatibleProvider)
+    assert (provider.url, provider.api_key, provider.response_format) == (
+        "https://api.openai.com/v1/chat/completions",
+        "test-key",
+        "json_schema",
+    )
 
 
 def test_settings_are_read_from_the_environment():
@@ -717,8 +749,87 @@ def test_openai_compatible_request_and_reply(stub):
     assert seen["body"] == {
         "model": "local-model",
         "messages": [{"role": "system", "content": "시스템 프롬프트"}, {"role": "user", "content": "사용자 메시지"}],
-        "response_format": {"type": "json_object"},
+        # 응답의 모양을 엄격한 스키마로 묶어 보낸다 (11-16, T103). 스키마를 주지 않으면 기본 응답 스키마다.
+        "response_format": {
+            "type": "json_schema",
+            "json_schema": {"name": "choice_response", "schema": RESPONSE_SCHEMA, "strict": True},
+        },
     }
+
+
+def test_openai_compatible_sends_the_given_schema_or_only_json_object(stub):
+    """주어진 스키마를 그대로 보내고, 스키마를 받지 않는 주소는 `json_object` 로 바꿀 수 있다 (LLM_RESPONSE_FORMAT)."""
+    stub.answer = lambda path, body: (200, chat_completion("{}"))
+    narrowed = {"type": "object", "properties": {}, "required": [], "additionalProperties": False}
+    OpenAICompatibleProvider("local-model", stub.url, None).complete("s", "u", narrowed)
+    assert stub.seen[0]["body"]["response_format"]["json_schema"]["schema"] == narrowed
+    OpenAICompatibleProvider("local-model", stub.url, None, "json_object").complete("s", "u", narrowed)
+    assert stub.seen[1]["body"]["response_format"] == {"type": "json_object"}
+    with pytest.raises(LlmFatal, match="LLM_RESPONSE_FORMAT"):
+        OpenAICompatibleProvider("local-model", stub.url, None, "text")
+
+
+def test_make_provider_reads_the_response_format():
+    env = {"LLM_BASE_URL": "https://api.openai.com/v1", "LLM_API_KEY": "test-key"}
+    settings = LlmSettings("openai-compatible", "m", 1)
+    assert make_provider(settings, env).response_format == "json_schema"
+    assert make_provider(settings, {**env, "LLM_RESPONSE_FORMAT": "json_object"}).response_format == "json_object"
+    with pytest.raises(LlmFatal, match="LLM_RESPONSE_FORMAT"):
+        make_provider(settings, {**env, "LLM_RESPONSE_FORMAT": "yaml"})
+
+
+def test_response_schema_only_takes_what_the_request_offers(example_copy):
+    """요청마다 만든 스키마는 후보, 값 목록, 페르소나의 속성 경로에 있는 값만 받는다 (11-16, T103).
+
+    11-16 에 실제 LLM 의 답이 값 목록에 없는 라벨과 점으로 잇지 않은 속성 이름으로 어긋났다. 그 두 가지를 스키마가 먼저 막는다.
+    엔진이 받는 답은 스키마도 받는다 (스키마가 엔진보다 좁으면 맞는 답을 공급자가 만들 수 없다).
+    """
+    import jsonschema  # 건너뛰지 않는다: 없으면 이 테스트가 실패해야 스키마가 엔진보다 좁아진 것을 놓치지 않는다
+    fake = Fake()
+    go(example_copy, fake)
+    request = ChoiceRequest.model_validate_json(fake.calls[0][1])
+    schema = fake.schemas[0]
+    assert schema == response_schema(request)
+    # 고를 값(enum)을 빼면 기본 응답 스키마와 같다: 모양은 그대로이고 글 칸만 좁혔다.
+    assert without_enums(schema) == RESPONSE_SCHEMA
+    assert request.candidates[0].venue_id in schema["properties"]["rejected"]["items"]["properties"]["venue_id"]["enum"]
+
+    good = json.loads(geumryong(request))
+    jsonschema.validate(good, schema)
+    assert problems_in_response(request, ChoiceResponse.model_validate(good)) == []
+
+    attribute = good["used_attributes"][0] if good["used_attributes"] else None
+    bad_answers = [
+        {**good, "reason_labels": ["값 목록에 없는 라벨"]},
+        {**good, "used_attributes": ["점으로 잇지 않은 속성"]},
+        {**good, "choice": {**good["choice"], "venue_id": "후보에-없는-업장"}},
+        {**good, "rejected": [{"venue_id": "후보에-없는-업장", "pain_labels": [], "text": "t"}]},
+    ]
+    for bad in bad_answers:
+        with pytest.raises(jsonschema.ValidationError):
+            jsonschema.validate(bad, schema)
+    if attribute and "." in attribute:
+        leaf = attribute.split(".")[-1]
+        with pytest.raises(jsonschema.ValidationError):
+            jsonschema.validate({**good, "used_attributes": [leaf]}, schema)
+
+
+def without_enums(node):
+    if isinstance(node, dict):
+        return {key: without_enums(value) for key, value in node.items() if key != "enum"}
+    if isinstance(node, list):
+        return [without_enums(value) for value in node]
+    return node
+
+
+def test_response_schema_without_values_to_offer_still_takes_text():
+    """고를 값이 없는 칸은 빈 enum 대신 글로 둔다 (공급자는 빈 enum 을 받지 않는다). 엔진이 답을 받은 뒤에 검사한다."""
+    assert _one_of([]) == {"type": "string"}
+    assert _one_of(["a", "b", "a"]) == {"type": "string", "enum": ["a", "b"]}  # 겹친 값은 하나만 (공급자가 받지 않는다)
+
+
+def test_attribute_paths_cover_every_level_of_the_persona():
+    assert _attribute_paths({"a": 1, "b": {"c": [1], "d": {"e": "x"}}}) == ["a", "b", "b.c", "b.d", "b.d.e"]
 
 
 def test_openai_compatible_without_a_key_sends_no_authorization(stub):
@@ -787,8 +898,8 @@ def test_files_the_format_check_would_refuse_are_not_written(example_copy):
     """공급자가 틀린 값을 주더라도, 실행은 끝났는데 형식 검사가 막는 파일이 남지 않는다."""
 
     class NegativeTokens(Fake):
-        def complete(self, system: str, user: str) -> LlmReply:
-            return LlmReply(super().complete(system, user).text, -5, 7)
+        def complete(self, system: str, user: str, schema: dict) -> LlmReply:
+            return LlmReply(super().complete(system, user, schema).text, -5, 7)
 
     with pytest.raises(ValidationError):
         go(example_copy, NegativeTokens())
@@ -801,6 +912,105 @@ def test_files_the_format_check_would_refuse_are_not_written(example_copy):
 def test_openai_compatible_usage_may_be_missing(stub):
     stub.answer = lambda path, body: (200, {"choices": chat_completion("{}")["choices"]})
     assert OpenAICompatibleProvider("local-model", stub.url, None).complete("s", "u") == LlmReply("{}", 0, 0)
+
+
+# ── Claude Code 명령 (T104, 개인 연습용) ─────────────────────────────────
+
+
+def claude_code_result(structured=None, **more) -> str:
+    """`claude -p --output-format json` 의 결과 모양 (공식 문서의 headless 절)."""
+    payload = {
+        "type": "result",
+        "subtype": "success",
+        "is_error": False,
+        "result": "",
+        "usage": {"input_tokens": 40, "cache_read_input_tokens": 2, "cache_creation_input_tokens": 3, "output_tokens": 9},
+        **more,
+    }
+    if structured is not None:
+        payload["structured_output"] = structured
+    return json.dumps(payload, ensure_ascii=False)
+
+
+@pytest.fixture
+def fake_claude(monkeypatch, tmp_path):
+    """Claude Code 를 띄우는 대신 받은 명령, 입력, 폴더, 환경을 남기고 정해 둔 결과를 돌려준다."""
+    seen: dict = {}
+    reply = {"stdout": claude_code_result({"ok": True}), "returncode": 0}
+
+    def run(command, **kwargs):
+        seen.update(command=command, **kwargs)
+        return subprocess.CompletedProcess(command, reply["returncode"], reply["stdout"], "")
+
+    monkeypatch.setattr(llm_module.subprocess, "run", run)
+    executable = tmp_path / "claude.exe"
+    executable.write_text("", encoding="utf-8")
+    return seen, reply, str(executable)
+
+
+def test_claude_code_runs_the_official_command_with_everything_else_off(fake_claude, monkeypatch):
+    seen, _, executable = fake_claude
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "test-key")  # 있으면 구독 대신 키로 부르므로 넘기지 않는다
+    monkeypatch.setenv("ANTHROPIC_BASE_URL", "http://127.0.0.1:9")
+    monkeypatch.setenv("CLAUDE_CODE_SESSION_ID", "host-session")  # 이 프로그램을 띄운 Claude Code 세션의 것
+    monkeypatch.setenv("CLAUDE_CODE_OAUTH_TOKEN", "token-from-setup-token")  # 구독 토큰은 넘긴다
+    schema = {"type": "object", "properties": {}, "required": [], "additionalProperties": False}
+
+    reply = ClaudeCodeProvider("claude-sonnet-5-5", executable).complete("시스템 프롬프트", "사용자 메시지", schema)
+
+    assert reply == LlmReply('{"ok": true}', 45, 9)
+    command = seen["command"]
+    assert command[:2] == [executable, "-p"]
+    flag = {command[i]: command[i + 1] for i in range(2, len(command) - 1) if command[i].startswith("--")}
+    assert flag["--model"] == "claude-sonnet-5-5"
+    assert flag["--system-prompt"] == "시스템 프롬프트"  # Claude Code 의 시스템 프롬프트를 통째로 바꾼다
+    assert flag["--tools"] == "" and flag["--setting-sources"] == ""  # 도구와 설정 파일(훅, 플러그인)을 끈다
+    assert flag["--output-format"] == "json" and json.loads(flag["--json-schema"]) == schema
+    assert {"--strict-mcp-config", "--disable-slash-commands", "--no-session-persistence"} <= set(command)
+    assert seen["input"] == "사용자 메시지"  # 요청은 표준 입력으로 (명령줄 길이 한도를 피한다)
+    assert not Path(seen["cwd"]).resolve().is_relative_to(REPO_ROOT.resolve())  # 저장소의 지침 파일이 끼어들지 않게
+    env = seen["env"]
+    assert not {"ANTHROPIC_API_KEY", "ANTHROPIC_BASE_URL", "CLAUDE_CODE_SESSION_ID"} & set(env)
+    assert env["CLAUDE_CODE_OAUTH_TOKEN"] == "token-from-setup-token"
+
+
+@pytest.mark.parametrize(
+    ("stdout", "returncode", "error", "words"),
+    [
+        (claude_code_result(is_error=True, result="Not logged in · Please run /login"), 1, LlmFatal, "로그인"),
+        (claude_code_result(is_error=True, result="You've hit your session limit · resets 3pm"), 1, LlmFatal, "사용 한도"),
+        (claude_code_result(is_error=True, result="API Error: 500 overloaded"), 1, LlmError, "실패했다"),
+        ("not json", 1, LlmError, "읽지 못했다"),
+        (claude_code_result(), 0, LlmError, "structured_output"),  # 답이 없다 (거절 등)
+    ],
+)
+def test_claude_code_failures(fake_claude, stdout, returncode, error, words):
+    _, reply, executable = fake_claude
+    reply.update(stdout=stdout, returncode=returncode)
+    with pytest.raises(LlmError, match=words) as caught:
+        ClaudeCodeProvider("m", executable).complete("s", "u", RESPONSE_SCHEMA)
+    assert type(caught.value) is error
+
+
+def test_claude_code_passes_a_text_answer_on_for_the_engine_to_check(fake_claude):
+    """검증된 답이 없고 글로 된 답만 있으면 그대로 넘긴다. 엔진이 다시 검사해 어긋나면 실패로 남긴다."""
+    _, reply, executable = fake_claude
+    reply.update(stdout=claude_code_result(result='{"choice": null}'))
+    assert ClaudeCodeProvider("m", executable).complete("s", "u").text == '{"choice": null}'
+
+
+def test_claude_code_needs_the_program_and_fits_the_command_line(fake_claude, tmp_path):
+    _, _, executable = fake_claude
+    with pytest.raises(LlmFatal, match="CLAUDE_CODE_PATH"):
+        ClaudeCodeProvider("m", str(tmp_path / "없는-claude.exe"))
+    with pytest.raises(LlmFatal, match="명령줄"):
+        ClaudeCodeProvider("m", executable).complete("가" * 40000, "u")
+    settings = LlmSettings("claude-code", "claude-sonnet-5-5", 1)
+    provider = make_provider(settings, {"CLAUDE_CODE_PATH": executable})
+    assert isinstance(provider, ClaudeCodeProvider) and provider.executable == executable
+    # 모델은 정해 둔 기본값이 없다. 각자 .env 에 적는다.
+    with pytest.raises(LlmFatal, match="LLM_MODEL"):
+        settings_from_env({"LLM_PROVIDER": "claude-code"})
 
 
 def test_openai_compatible_address_that_does_not_answer_is_a_failed_call():
@@ -927,6 +1137,13 @@ def test_same_command_runs_to_the_end_on_another_provider_by_settings_only(examp
     # 두 공급자가 받은 시스템 프롬프트와 요청은 같다.
     assert stub.seen[0]["body"]["system"] == stub.seen[1]["body"]["messages"][0]["content"]
     assert stub.seen[0]["body"]["messages"][0]["content"] == stub.seen[1]["body"]["messages"][1]["content"]
+    # 두 공급자 모두 이 요청으로 만든 응답 스키마(고를 값이 든 것)를 받았다. 둘이 받은 스키마는 같다 (T103).
+    request = ChoiceRequest.model_validate_json(stub.seen[1]["body"]["messages"][1]["content"])
+    anthropic_schema = stub.seen[0]["body"]["output_config"]["format"]["schema"]
+    openai_format = stub.seen[1]["body"]["response_format"]
+    assert anthropic_schema == openai_format["json_schema"]["schema"] == response_schema(request)
+    assert openai_format["json_schema"]["strict"] is True
+    assert "enum" in json.dumps(anthropic_schema)
     assert "test-key" not in capsys.readouterr().out
     no_format_errors(example_copy)
 

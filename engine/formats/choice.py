@@ -292,12 +292,12 @@ def problems_in_response(request: ChoiceRequest, response: ChoiceResponse) -> li
             problems.append(f"고르지 않은 후보 '{venue_id}' 가 rejected 에 없다")
 
     for path in response.used_attributes:
-        if not _has_path(request.persona, path):
+        if not has_path(request.persona, path):
             problems.append(f"used_attributes 의 '{path}' 가 페르소나에 없는 속성이다")
     return problems
 
 
-def _has_path(data: dict[str, Any], dotted: str) -> bool:
+def has_path(data: dict[str, Any], dotted: str) -> bool:
     node: Any = data
     for part in dotted.split("."):
         if not isinstance(node, dict) or part not in node:

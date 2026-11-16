@@ -1001,6 +1001,7 @@ def test_checker_skips_exactly_what_git_ignores():
         "desktop.ini",
         ".claude/settings.local.json",
         "scenarios/ui-*.json",
+        "engine/samples/runs/*-ui-*/",
         "*.pyc",
         "*.egg-info/",
         "*.log",
@@ -1018,9 +1019,14 @@ def test_checker_skips_exactly_what_git_ignores():
         (("run.log",), False),
         (("app", "__pycache__"), True),
         (("scenarios", "ui-competitor-pizzahill-d20.json"), False),
+        (("engine", "samples", "runs", "20261116-140616-ui-competitor-a-d30"), True),
+        (("engine", "samples", "runs", "20261116-140616-ui-competitor-a-d30", "run.json"), False),
     ]
     kept = [
         (("scenarios", "baseline.json"), False),
+        (("engine", "samples", "runs", "20261116-140429-baseline"), True),
+        (("engine", "samples", "runs", "20261116-140429-baseline", "run.json"), False),
+        (("engine", "samples", "runs", "notes-ui-x.txt"), False),
         (("scenarios", "ui-notes.md"), False),
         (("tests", "fixtures", "example", "scenarios", "ui-competitor-a.json"), False),
         ((".env.example",), False),

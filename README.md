@@ -66,7 +66,7 @@ uv run python -m streamlit run app/main.py
 
 화면에서 조건을 골라 엔진을 돌리고, 페르소나와 방문 조건별 결과를 본다. 키가 없으면 저장된 답을 재생한다.
 쓰는 법은 화면 담당의 안내(`docs/PROGRESS.md` 의 T09, T202)를 본다.
-화면이 만든 상황 파일(`scenarios/ui-*.json`)은 깃이 무시한다. 시연에 쓸 상황은 사람이 확정해 `ui-` 없이 올린다.
+화면이 만든 상황 파일(`scenarios/ui-*.json`)과 그 상황으로 돌린 가상 예시 값의 실행 폴더(`engine/samples/runs/*-ui-*/`)는 깃이 무시한다. 시연에 쓸 상황은 사람이 확정해 `ui-` 없이 올린다.
 
 **시뮬레이션을 돌린다** — 상황 하나를 돌려 실행 폴더(실행 기록, 소비 원장, 저장된 응답)를 쓴다.
 `--data sample` 은 가상 예시 값으로 돌려 `engine/samples/runs/` 에, `--data private` 은 기본 데이터로 돌려 `private/runs/` 에 쓴다.
@@ -76,7 +76,8 @@ uv run python -m engine --data sample
 ```
 
 - 방문마다 앞선 실행의 저장된 응답을 먼저 찾아 재생하고, 없는 것만 LLM 을 부른다. 그래서 같은 것을 다시 돌리면 LLM 을 부르지 않는다.
-- LLM 을 부르려면 `.env.example` 을 `.env` 로 복사하고 자기 키를 넣는다. 공급자, 모델, 호출 상한도 `.env` 에서 바꾼다.
+- LLM 을 부르려면 `.env.example` 을 `.env` 로 복사하고 자기 OpenAI 키(`LLM_API_KEY`)와 팀이 정한 모델(`LLM_MODEL`)을 넣는다.
+  공급자와 주소는 `.env.example` 에 팀 설정으로 이미 적혀 있다. 호출 상한도 `.env` 에서 바꾼다.
 - 키가 없으면 `--replay-only` 를 붙인다. 저장된 응답만 재생하고, 저장된 응답이 없는 방문은 실패로 남는다.
 - 일부만 돌릴 때: `--personas`, `--conditions`, `--venues` 뒤에 식별자를 적는다. 프롬프트의 판은 `--prompt` 다.
 - 집계 파일이 있어야 돈다: `--data sample` 은 `data/samples/base_summary.csv`, `--data private` 은 `private/base/summary.csv` (업장 데이터 담당이 만든다).
@@ -94,32 +95,39 @@ uv run python -m engine --data sample
 - 검사에서 어긋난 응답은 실행 폴더의 `llm_rejected/` 에 남는다. 이유는 원장의 `fail_reason` 에 있다.
 - 명령이 끝날 때의 값(`$LASTEXITCODE`): `0` 끝까지 돌았다 (실패한 방문이 있어도 0 이다. 화면에 알린다), `1` 돌리지 못했거나 LLM 을 부를 수 없어 멈췄다, `2` 호출 상한에 닿아 멈췄다.
 - `.env` 는 명령을 돌리는 폴더의 것만 읽는다. 저장소의 맨 위 폴더에서 돌린다.
-- 저장소에는 아직 페르소나 정의와 기준 상황 파일이 없어, 지금은 예시 파일 한 벌의 사본으로만 돌려 볼 수 있다 (사본은 깃이 무시하는 `private/` 에 둔다):
+- 키 없이 연습할 때는 예시 파일 한 벌의 사본을 돌린다 (사본은 깃이 무시하는 `private/` 에 둔다).
+  예시의 저장된 답은 Anthropic(`claude-opus-5-5`)으로 받은 것이다. 팀 `.env`(OpenAI)와 공급자가 달라 그대로는 재생되지 않으므로,
+  **그 창에서만** 공급자를 예시의 값으로 바꾸고 `--replay-only` 를 붙인다 (`.env` 는 이미 있는 환경 변수를 덮어쓰지 않는다. 화면은 이것을 스스로 한다):
 
 ```powershell
 Copy-Item -Recurse tests/fixtures/example private/try-example
 ```
 
 ```powershell
-uv run python -m engine --data sample --root private/try-example --personas family-elders --conditions meal-dinner-weekend
+$env:LLM_PROVIDER = 'anthropic'; $env:LLM_MODEL = 'claude-opus-5-5'
 ```
+
+```powershell
+uv run python -m engine --data sample --root private/try-example --personas family-elders --conditions meal-dinner-weekend --venues geumryong examplehotel-chinese --replay-only
+```
+
+  다 돌렸으면 창을 닫거나 `Remove-Item Env:LLM_PROVIDER, Env:LLM_MODEL` 로 되돌린다. 되돌리지 않으면 그 창의 다음 실행도 예시 공급자로 돈다.
 
   상황은 위의 명령으로 기준 상황을 한 번 돌린 뒤에, 그 실행을 `--baseline` 으로 가리켜 돌린다.
   사본에 처음부터 든 기준 실행(`20261117-101500-baseline`)은 번호의 날짜가 늦어 "가장 새 기준 실행"으로 먼저 골라지기 때문이다:
 
 ```powershell
-uv run python -m engine --data sample --root private/try-example --scenario competitor-chinese-discount --baseline <위에서 나온 run_id>
+uv run python -m engine --data sample --root private/try-example --scenario competitor-chinese-discount --venues geumryong examplehotel-chinese --replay-only --baseline <위에서 나온 run_id>
 ```
 
-  사본에 처음부터 든 기준 실행은 엔진이 업장 두 곳만 읽어 돌린 것이다. 그 실행으로 상황을 돌리려면 같은 업장을 적는다:
-  `--scenario competitor-chinese-discount --venues geumryong examplehotel-chinese`.
+  기준 상황을 업장 두 곳만 읽어 돌렸으므로 상황에도 같은 업장을 적는다 (`--venues`).
 
 **알아둘 것**
 
 - 명령은 `uv run python -m <도구>` 꼴로 쓴다. `uv run pytest` 나 `uv run streamlit` 처럼 쓰면 윈도우의 스마트 앱 컨트롤이
   실행 파일을 막는 PC 가 있다 (11-13, 스마트 앱 컨트롤이 켜진 윈도우 11 PC 에서 확인).
 - 화면은 이 PC 에서만 열린다 (`.streamlit/config.toml`). 화면에 내부 자료에서 계산한 값이 나올 수 있어서다.
-- LLM 을 실제로 부르려면 `.env.example` 을 `.env` 로 복사하고 자기 키를 넣는다. 키가 없어도 위의 확인과 화면은 돌아간다.
+- LLM 을 실제로 부르려면 `.env.example` 을 `.env` 로 복사하고 자기 OpenAI 키와 팀이 정한 모델을 넣는다. 키가 없어도 위의 확인과 화면은 돌아간다.
   `.env` 는 깃에 올라가지 않는다. 키는 서로 주고받지 않는다.
 - 패키지를 더하거나 버전을 바꾸는 것은 엔진 담당만 한다. 필요하면 진행 문서의 "알릴 것"에 적는다.
 - 내부 자료와 실행 결과는 `private/` 에만 둔다 ([CLAUDE.md](CLAUDE.md) 의 "비밀값과 공개 저장소").
