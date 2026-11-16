@@ -1,0 +1,9 @@
+{
+  "format_version": 1,
+  "scenario_id": "baseline",
+  "name": "기준",
+  "kind": "baseline",
+  "description": "지금의 가격·구성·프로모션 그대로 돌린다.",
+  "changes": [],
+  "note": ""
+}

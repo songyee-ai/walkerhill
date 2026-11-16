@@ -31,7 +31,7 @@
 | 이름 | 깃헙 | 맡은 영역 | 브랜치 이름에 쓸 이름 | 중간 작업 번호대 |
 |---|---|---|---|---|
 | (팀장) | songyee-ai | 엔진·통합 | songyee | T100번대 |
-| | wilstein91 | 화면·실험·발표 | (각자 채움) | T200번대 |
+| | wilstein91 | 화면·실험·발표 | wilstein91 | T200번대 |
 | | borigunbbang | 외부 데이터·페르소나 | borigunbbang | T300번대 |
 | | hojitea-ui | 업장 데이터 | hojitea | T400번대 |
 
@@ -52,7 +52,7 @@
 | T06 | 업장 1곳과 경쟁 업장 1곳의 정의 | hojitea-ui | 완료, 11-13, 피자힐과 경쟁 업장 메르카토521 의 정의가 형식 검사(--strict)를 통과했다. |
 | T07 | 라벨 값 목록과 업장 1곳의 후기 라벨 | borigunbbang | 진행 중, 11-13, 금룡 후기 라벨 80건을 올렸고 세 업장 수집과 수집 속도 기록이 남았다. |
 | T08 | 페르소나 1명과 프롬프트 첫 판 | borigunbbang | 예약, 11-13, 기한은 11-16 이다. |
-| T09 | 화면 뼈대: 조건 입력과 실행 결과 | wilstein91 | 예약, 11-13, 기한은 11-16 이다. |
+| T09 | 화면 뼈대: 조건 입력과 실행 결과 | wilstein91 | 완료, 11-16, 조건 고르기와 실행 결과 화면을 넣었고 예시 실행과 엔진의 실제 실행(저장 응답 재생)으로 도는 것을 확인했다. |
 | T10 | 상황 적용과 프로모션 규칙 | songyee-ai | 진행 중, 11-14, 추가 상품의 할인을 정하는 것(11-16 회의)만 남았다. |
 | T11 | 방문 조건 묶음과 가중 합산 | songyee-ai | 완료, 11-15, 가중 합산과 가격 채우기, 기본 데이터의 요약을 넣고 독립 검증 둘에서 승인을 받았으며 진짜 집계 파일로 돌리는 확인은 특이사항으로 남겼다. |
 | T12 | 워커힐 8개 업장의 정의 | hojitea-ui | 완료, 11-13, 8개 업장 정의가 형식 검사를 오류 없이 통과했다 (경쟁 업장은 T14). |
@@ -429,11 +429,22 @@ REVIEW_RULES 9절은 글에 없으면 비우게 해서 나머지 139건은 `priv
 담당 wilstein91 · 기한 11-16 · 기다리는 것 T03
 
 완료 조건
-- [ ] 페르소나와 방문 조건을 고르는 화면이 있다
-- [ ] 실행 결과 화면에 고른 업장과 상품, 금액, 고른 이유, 고르지 않은 업장과 그 이유가 보인다
-- [ ] 모든 금액에 "가상" 표시가 붙는다
-- [ ] 예시 실행 결과로 화면이 돌아가고, 엔진의 실제 결과로도 돌아간다
-- [ ] 키와 기본 데이터가 없는 PC 에서 돌아간다
+- [x] 페르소나와 방문 조건을 고르는 화면이 있다 (11-16, 브라우저에서 왼쪽의 결과를 읽을 곳·실행·페르소나·방문 조건을 바꿔 결과가 바뀌는 것을 봄. `tests/app/test_app_screen.py`)
+- [x] 실행 결과 화면에 고른 업장과 상품, 금액, 고른 이유, 고르지 않은 업장과 그 이유가 보인다 (11-16, 예시 기준 실행에서 금룡·코스 A 4명·600,000원과 고르지 않은 예시호텔 중식당의 이유를 브라우저와 `tests/app/test_app_results.py` 로 확인)
+- [x] 모든 금액에 "가상" 표시가 붙는다 (11-16, 금액 열·지표에 "가상"이 없으면 실패하는 테스트가 통과)
+- [x] 예시 실행 결과로 화면이 돌아가고, 엔진의 실제 결과로도 돌아간다 (11-16, 예시 사본으로 `python -m engine --replay-only` 를 돌려 나온 기준·경쟁 상황 실행을 "다른 실행 폴더"로 열어 봄)
+- [x] 키와 기본 데이터가 없는 PC 에서 돌아간다 (11-16, `.env` 와 `private/runs/` 가 없는 이 PC 에서 예시 실행으로 화면이 뜸)
+
+경위
+
+- 화면은 엔진이 쓴 실행 폴더(`run.json`, `ledger.csv`, `llm/`)를 읽기만 한다. 금액은 원장에서, 업장·상품 이름과 고르지 않은 업장의 이유는 저장된 응답에서 가져온다.
+  화면에서 엔진을 돌리지는 않는다 (LLM 호출이 화면을 멈추게 하지 않도록. 돌리는 것은 명령으로 한다).
+- 결과를 읽는 곳은 `private/runs/`, `engine/samples/runs/`, 예시 실행 순서로 찾고, 엔진을 `--root` 로 다른 곳에서 돌렸으면 "다른 실행 폴더"에 경로를 적는다.
+- 실패한 방문, 호출 상한에 닿은 실행, `llm_rejected/` 가 있는 실행은 화면 위에 알린다. 파는 달이 아닌 몫을 이용하지 않음으로 센 줄은 고른 것으로 보지 않는다.
+- 무엇을 보여 줄지는 `app/results.py` 가 정하고 `app/main.py` 는 그리기만 한다. 서버 없이 테스트하려고 나눴다.
+- 팀장 요청으로 `scenarios/baseline.json` 을 예시에서 베껴 올렸다 (형식 검사 통과).
+
+특이사항: 기본 데이터로 돌린 실행(`private/runs/`)과 주문 없이 추가 상품만 산 방문은 그런 실행이 아직 없어 화면에서 열어 보지 못했다. 생기면 T21 에서 확인한다.
 
 ### T10 상황 적용과 프로모션 규칙
 
@@ -805,12 +816,12 @@ REVIEW_RULES 9절은 글에 없으면 비우게 해서 나머지 139건은 `priv
 - [x] hojitea-ui ← songyee-ai (11-13): 업장 데이터 영역에 일이 더해졌습니다. 떼어 둘 후기 20%의 분리·보관·라벨, 기본 데이터 집계 파일, 가상 예시 값, 11-17 부터 후기 라벨링 지원입니다 (PRD 5.2절, 10절, 14절). (확인: hojitea-ui 11-13, PRD 5.2·10·14절을 읽고 T13·T15 사전 작업을 시작함)
 - [ ] borigunbbang ← songyee-ai (11-13): 후기는 주소 목록으로 먼저 모으고, 그중 20%는 hojitea-ui 가 가져갑니다. 그 후기는 페르소나를 다 만든 뒤에 받습니다. 라벨은 값 목록에서 고릅니다 (PRD 5.2절).
 - [ ] wilstein91 ← songyee-ai (11-13): 시연 시나리오 후보 세 개가 PRD 3절에 있습니다. 11-17 까지 대상 업장과 바꿀 내용을 확정해 주세요.
-- [ ] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-13): 공통 틀이 들어갔습니다. `git pull` 뒤 `README.md` 의 "실행 방법"대로 `uv sync` 와 세 가지 확인을 돌려 주세요. 안 되면 이 목록에 적어 주세요. 그다음 내 폴더의 안내 파일(`README.md`)을 읽고, `tests/fixtures/example/` 의 예시 파일을 베껴서 시작합니다. (확인: borigunbbang 11-13, macOS 에서 `uv sync` 뒤 ruff·형식 검사·pytest 274개 모두 통과)
+- [ ] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-13): 공통 틀이 들어갔습니다. `git pull` 뒤 `README.md` 의 "실행 방법"대로 `uv sync` 와 세 가지 확인을 돌려 주세요. 안 되면 이 목록에 적어 주세요. 그다음 내 폴더의 안내 파일(`README.md`)을 읽고, `tests/fixtures/example/` 의 예시 파일을 베껴서 시작합니다. (확인: borigunbbang 11-13, macOS 에서 `uv sync` 뒤 ruff·형식 검사·pytest 274개 모두 통과) (확인: wilstein91 11-16, 윈도우 11 에서 `uv sync` 뒤 ruff·형식 검사·pytest 622개 모두 통과)
 - [ ] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-13): 패키지를 더하거나 버전을 바꾸는 것은 엔진 담당만 합니다. 필요한 패키지가 생기면 이 목록에 적어 주세요. 명령은 `uv run python -m <도구>` 꼴로 씁니다 (`CLAUDE.md` 의 "스택" 절).
-- [ ] wilstein91 ← songyee-ai (11-13): `app/main.py` 에 화면의 뼈대를 넣어 두었습니다. T09 에서 마음대로 고쳐 쓰면 됩니다. `.streamlit/config.toml` 의 `address` 는 바꾸지 말아 주세요.
+- [x] wilstein91 ← songyee-ai (11-13): `app/main.py` 에 화면의 뼈대를 넣어 두었습니다. T09 에서 마음대로 고쳐 쓰면 됩니다. `.streamlit/config.toml` 의 `address` 는 바꾸지 말아 주세요. (확인: wilstein91 11-16, T09 에서 고쳐 썼고 `.streamlit/config.toml` 은 고치지 않음)
 - [ ] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-13): 형식 검사가 깃에 올라갈 모든 파일을 훑습니다. 데이터 폴더(`data/`, `personas/`, `scenarios/`)에는 [FORMATS.md](FORMATS.md) 1절의 파일과 안내 파일만 두고, 엑셀 파일과 묶은 파일은 올리지 않습니다. 작업 중인 파일은 맨 위의 `private/` 에 둡니다. JSON 의 숫자는 따옴표 없이 적고, CSV 는 "CSV UTF-8"로 저장합니다. 검사가 막는데 꼭 필요한 파일이면 이 목록에 적어 주세요.
 - [ ] borigunbbang ← songyee-ai (11-13): 프롬프트의 문장은 `personas/prompts/` 에 둡니다. 응답의 `rejected` 에는 고르지 않은 후보가 빠짐없이 한 번씩 있어야 하니, 프롬프트에 그렇게 적어 주세요 (`FORMATS.md` 9절).
-- [ ] wilstein91 ← songyee-ai (11-13): 코드에서 JSON 파일을 읽을 때는 `engine.formats.read_model(경로, 모델)` 을 씁니다. 화면의 뼈대도 그렇게 바꿨습니다. 화면 테스트에 쓸 예시 파일을 더할 때는 `tests/fixtures/<이름>/` 아래에 저장소와 같은 폴더 모양으로 둡니다 (`tests/fixtures/example/` 을 베껴서 고치면 됩니다. 그 묶음도 형식 검사를 받습니다). 원장의 합계는 `status` 가 `ok` 인 줄로만 냅니다. 실패한 방문은 금액이 0 인 줄 하나로 남습니다 (`FORMATS.md` 10.2절).
+- [x] wilstein91 ← songyee-ai (11-13): (확인: wilstein91 11-16, 화면은 `read_model` 로 읽고 실패한 줄을 합계에 넣지 않음. 화면 테스트는 예시 실행을 임시 폴더에 베껴 씀) 코드에서 JSON 파일을 읽을 때는 `engine.formats.read_model(경로, 모델)` 을 씁니다. 화면의 뼈대도 그렇게 바꿨습니다. 화면 테스트에 쓸 예시 파일을 더할 때는 `tests/fixtures/<이름>/` 아래에 저장소와 같은 폴더 모양으로 둡니다 (`tests/fixtures/example/` 을 베껴서 고치면 됩니다. 그 묶음도 형식 검사를 받습니다). 원장의 합계는 `status` 가 `ok` 인 줄로만 냅니다. 실패한 방문은 금액이 0 인 줄 하나로 남습니다 (`FORMATS.md` 10.2절).
 - [ ] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-13): 표나 JSON 에 `순매출`, `총결제액` 이라는 열 이름이 있으면 형식 검사가 기본 데이터로 보고 막습니다. 지어낸 값으로 만든 표의 열 이름은 `FORMATS.md` 의 영어 이름(`revenue_net`, `paid`)으로 적어 주세요.
 - [ ] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-13): 작업 유닛 T03 ~ T24 를 진행 표에 올렸습니다. 내 유닛의 번호, 기한, 기다리는 것, 완료 조건을 읽어 주세요. 나누는 방식이나 기한에 고칠 것이 있으면 이 목록에 적어 주세요. 커밋과 PR 제목 앞에는 이 번호를 붙입니다. (확인: hojitea-ui 11-13)
 - [ ] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-13): 데이터 형식 약속의 초안이 [FORMATS.md](FORMATS.md) 에 있습니다. 1절의 표에서 내가 만드는 파일과 쓰는 파일을 찾아 읽어 주세요. 고칠 것이 있으면 이 목록에 적고, 없으면 체크해 주세요. 세 명이 체크하면 확정합니다. (확인: hojitea-ui 11-13, 고칠 것 7건이 PR 26번으로 반영된 것을 확인)
@@ -888,18 +899,18 @@ REVIEW_RULES 9절은 글에 없으면 비우게 해서 나머지 139건은 `priv
 - [ ] hojitea-ui ← songyee-ai (11-13): 엔진은 가격이 빈(`price` 가 `null`) 상품을 후보에서 빼고 실행 기록의 `skipped_products` 에 남깁니다. 집계 파일로 채우는 것은 T11 입니다.
   그때까지 르파사쥬는 하나뿐인 상품의 가격이 비어 있어 후보가 되지 못합니다. 또 영업 시간(`hours`)에 그 끼니의 줄이 없으면 그 끼니에는 후보에서 빠집니다
   (디저트·포장은 `meal` 이 `null` 인 줄이 있어야 합니다. 지금 16개 파일은 모두 맞습니다). 정한 점심·저녁 비율은 0.5·0.5 입니다 (`engine/conditions.json`).
-- [ ] wilstein91 ← songyee-ai (11-13): 엔진의 첫 판이 들어갑니다. 실행은 `engine.runner.run(...)`, 합계는 `engine.ledger.totals(rows)` 입니다 (쓰는 예는 `tests/test_engine.py` 의 `play`).
+- [x] wilstein91 ← songyee-ai (11-13): (확인: wilstein91 11-16, `scenarios/baseline.json` 을 올렸고 T09 화면이 엔진의 실행 폴더를 읽음) 엔진의 첫 판이 들어갑니다. 실행은 `engine.runner.run(...)`, 합계는 `engine.ledger.totals(rows)` 입니다 (쓰는 예는 `tests/test_engine.py` 의 `play`).
   아직 LLM 을 부르지 않아 저장된 응답이 없는 방문은 실패 줄로 남고(T05), 기준 상황만 돌릴 수 있고(T10), 가중치는 고르게 나눈 값이라 가상 매출의 크기에는 뜻이 없습니다(T11).
   엔진은 기준 상황 파일 `scenarios/baseline.json` 을 읽습니다. 저장소에 아직 없으니 `tests/fixtures/example/scenarios/baseline.json` 을 베껴 올려 주세요 (최소 버전 11-16 에 필요합니다).
 - [ ] borigunbbang ← songyee-ai (11-14): LLM 연결이 들어갑니다. 프롬프트는 `personas/prompts/<판 이름>.md` 에 두면 엔진이 그 글을 시스템 프롬프트로 **그대로** 보냅니다 (덧붙이는 글이 없습니다).
   사용자 메시지로는 `FORMATS.md` 9절의 요청이 JSON 으로 갑니다. 판 이름은 파일 이름이라 영어 소문자, 숫자, `.`, `_`, `-` 로 적고, 글을 고치면 판 이름도 바꿔 주세요 (그대로 두면 옛 글로 받은 응답이 재생됩니다).
   응답의 모양과 지킬 규칙(주문이 없는 후보, 예산, `rejected`)을 프롬프트에 적어야 합니다. 베껴서 시작할 예시가 `tests/fixtures/example/personas/prompts/p1.md` 에 있습니다.
   `personas/README.md` 에 이 내용을 한 줄 더해 주세요 (담당 폴더라 제가 고치지 않았습니다). 검사에서 어긋난 응답은 실행 폴더의 `llm_rejected/` 에 원문과 이유가 남으니 프롬프트를 고칠 때 보면 됩니다.
-- [ ] wilstein91 ← songyee-ai (11-14): 실행하는 명령이 생겼습니다: `uv run python -m engine --data sample` (`README.md` 의 "시뮬레이션을 돌린다"). 화면에서 알아 둘 것은 셋입니다.
+- [x] wilstein91 ← songyee-ai (11-14): (확인: wilstein91 11-16, 셋 모두 화면 위에 알리게 했고 실패한 방문은 실패 이유를 보여 줌. 테스트와 브라우저로 확인) 실행하는 명령이 생겼습니다: `uv run python -m engine --data sample` (`README.md` 의 "시뮬레이션을 돌린다"). 화면에서 알아 둘 것은 셋입니다.
   ① 실행 폴더에 `llm_rejected/` 가 생길 수 있습니다 (검사에서 어긋난 응답. `FORMATS.md` 10.3절). ② 실행 기록의 `status` 가 `stopped_by_limit` 이나 `failed` 인 실행은 원장에 방문이 일부만 있습니다.
   ③ 원장의 `llm_call` 이 `new` 인 실패한 줄이 나올 수 있습니다 (LLM 을 불렀는데 실패했거나 답이 어긋난 방문).
 - [ ] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-14): `.env.example` 에 변수가 늘었습니다 (`LLM_BASE_URL`, `LLM_API_KEY`. 다른 공급자를 쓸 때만 적습니다). 키는 각자 발급해 자기 PC 의 `.env` 에만 둡니다.
-  키가 없으면 `--replay-only` 로 저장된 응답만 재생할 수 있습니다. 명령은 저장소의 맨 위 폴더에서 돌립니다 (`.env` 를 그 폴더에서 읽습니다).
+  키가 없으면 `--replay-only` 로 저장된 응답만 재생할 수 있습니다. 명령은 저장소의 맨 위 폴더에서 돌립니다 (`.env` 를 그 폴더에서 읽습니다). (확인: wilstein91 11-16, 키 없이 `--replay-only` 로 예시 사본을 돌려 봄)
 - [ ] wilstein91 ← songyee-ai (11-14): 기준이 아닌 상황을 돌릴 수 있습니다 (T10): `uv run python -m engine --data sample --scenario <scenario_id>` (`README.md` 의 "시뮬레이션을 돌린다").
   ① **기준 상황을 먼저 끝까지 돌려야 합니다.** 상황은 가장 새 기준 실행의 페르소나, 방문 조건, 가중치로 돌고, 실행 기록의 `weights_from` 에 그 `run_id` 가 남습니다. 상황별 비교 화면(T21)은 이 값으로 짝을 찾으면 됩니다.
   ② 기준 실행 뒤에 업장 정의, 페르소나, 조건 묶음, 값 목록, 프롬프트, 모델이 바뀌었으면 상황이 돌지 않고 이유를 알립니다. 기준 상황을 다시 돌리면 됩니다 (`FORMATS.md` 10.1절).
@@ -917,7 +928,7 @@ REVIEW_RULES 9절은 글에 없으면 비우게 해서 나머지 139건은 `priv
 - [ ] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-15): 가중 합산이 들어갑니다 (T11). 엔진이 **집계 파일을 읽어야 돕니다**:
   `--data sample` 은 `data/samples/base_summary.csv`, `--data private` 은 `private/base/summary.csv`. 기준 상황의 가중치(묶음의 비율, 고객군 배수)와 가격이 빈 상품의 단가를 이 파일에서 냅니다.
   실행 기록의 형식도 바뀌었습니다: 가중치의 등급을 값마다 적고(`weights.grades` 의 고객군 배수는 고객군마다, 가중치는 페르소나마다), 집계 파일로 단가를 채운 상품의 `filled_products` 가 생겼습니다.
-  그 전에 돌린 실행 기록은 읽히지 않으니 기준 상황부터 다시 돌려 주세요 (`FORMATS.md` 10.1절의 "가중치를 내는 법").
+  그 전에 돌린 실행 기록은 읽히지 않으니 기준 상황부터 다시 돌려 주세요 (`FORMATS.md` 10.1절의 "가중치를 내는 법"). (확인: wilstein91 11-16, 화면은 읽지 못한 실행 기록이면 다시 돌리라고 알림)
 - [ ] wilstein91 ← songyee-ai (11-15): 업장별 가상 매출과 비중은 `engine.ledger.venue_shares(rows)` 로 원장에서 냅니다 (T21). 워커힐 업장마다 가상 매출·비중·방문의 크기가,
   경쟁 업장과 "이용하지 않음"은 분모 밖에서 방문의 크기로 따로 나옵니다. 고객군 하나만 보려면 `venue_shares(rows, "고객군")` 입니다.
   근거 보기(T22)에서 가중치와 묶음 비율의 등급은 `run.json` 의 `weights.grades` 에, 단가를 기본 데이터로 채운 상품은 `filled_products` 에 있습니다 (단가는 원장의 `list_price`).
@@ -934,6 +945,11 @@ REVIEW_RULES 9절은 글에 없으면 비우게 해서 나머지 139건은 `priv
   단가를 채울 상품의 집계 줄 단위(`unit`)가 업장 정의와 다르면 엔진이 멈춥니다.
   끼니가 빈 식사 줄은, 그 요일에 그 상품을 한 끼니에만 팔면 엔진이 업장 정의의 `slots` 로 그 끼니에 넣습니다 (예: 더뷔페의 "주말 점심과 모든 요일 저녁" 상품의 평일 줄은 저녁).
   둘 다 파는 줄만 점심·저녁 0.5·0.5 로 나눕니다. 집계 파일을 고칠 것은 없습니다. 빙수의 파는 달 밖 매출은 위의 답처럼 그대로 셉니다.
+- [ ] songyee-ai ← wilstein91 (11-16): T09 화면이 들어갑니다. 공통 틀 두 곳에 고칠 것이 있습니다.
+  ① `README.md` 의 "지금 화면은 공통 틀이 돌아가는지 확인하는 뼈대이고, 지어낸 예시 파일을 보여 준다." 를
+  "화면은 엔진의 실행 폴더를 읽어 페르소나와 방문 조건별 결과를 보여 준다. 실행이 없으면 예시 실행을 보여 준다." 로 바꿔 주세요.
+  ② `tests/test_app.py` 의 "표가 셋" 검사는 지금도 통과하지만, 화면이 바뀌어 우연히 맞는 것입니다 (상품·고르지 않은 업장·모든 방문 표).
+  화면 테스트는 `tests/app/` 에 새로 두었으니 그 파일을 지우거나 제목과 "가상" 검사만 남겨 주세요.
 
 ## 실측 기록
 
@@ -954,3 +970,5 @@ REVIEW_RULES 9절은 글에 없으면 비우게 해서 나머지 139건은 `priv
   (그 가운데 상황 적용과 프로모션 테스트는 85개다). 실제 LLM 은 부르지 않았다.
 - 11-15, 윈도우 11 (스마트 앱 컨트롤 켜짐) + Python 3.13.15 + uv 0.12.15: T11 의 테스트를 더한 뒤 `uv run python -m pytest` 로 테스트 608개가 모두 통과했고 43초쯤 걸렸다
   (그 가운데 가중 합산 테스트 `tests/test_weights.py` 는 33개다). 실제 LLM 은 부르지 않았고, 진짜 집계 파일로는 돌리지 않았다.
+- 11-16, 윈도우 11 + Python 3.13.15 + Streamlit 1.66.0: T09 의 테스트를 더한 뒤 `uv run python -m pytest` 로 테스트 622개가 모두 통과했고 1분 30초쯤 걸렸다
+  (그 가운데 화면 테스트 `tests/app/` 는 14개다). 실제 LLM 은 부르지 않았고 저장된 응답만 재생했다.
