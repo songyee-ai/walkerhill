@@ -1,0 +1,42 @@
+{
+  "format_version": 1,
+  "scenario_id": "geumryong-yearend-course",
+  "name": "금룡 연말 특선 코스 출시",
+  "kind": "our_promo",
+  "description": "금룡이 평일 점심·저녁에 연말 특선 코스(1인 150,000원)를 더했을 때 누가 새로 오거나 다른 메뉴·업장에서 옮겨 오는지 본다.",
+  "changes": [
+    {
+      "op": "add_product",
+      "venue_id": "geumryong",
+      "product": {
+        "product_id": "yearend-course",
+        "name": "연말 특선 코스",
+        "occasion": "meal",
+        "slots": [
+          {
+            "meal": "lunch",
+            "day_type": "weekday"
+          },
+          {
+            "meal": "dinner",
+            "day_type": "weekday"
+          }
+        ],
+        "months": [
+          11,
+          12
+        ],
+        "audience": "all",
+        "unit": "1인",
+        "serves": 1,
+        "qty_rule": "per_person",
+        "qty_max": null,
+        "price": 150000,
+        "price_basis": "unknown",
+        "grade": "official",
+        "source_id": "S2"
+      }
+    }
+  ],
+  "note": "금룡 공식 메뉴판(업장 정의의 출처 S2, https://www.walkerhill.com/FileDownload.wh?guid=E12F1A99-5F2C-43D7-4C2B-99CE12002419, 확인 2026-11-13)의 연말 특선 코스. 판매 기간 2026-11-02 ~ 12-31, 주중(평일), 홀 전용. 홀 전용은 형식에 적을 칸이 없어 넣지 않았다. 11-16 hojitea-ui 가 조사해 전함."
+}
