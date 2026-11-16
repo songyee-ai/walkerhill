@@ -1001,7 +1001,7 @@ def test_checker_skips_exactly_what_git_ignores():
         "desktop.ini",
         ".claude/settings.local.json",
         "scenarios/ui-*.json",
-        "engine/samples/runs/*-ui-*/",
+        "engine/samples/runs/*/",
         "*.pyc",
         "*.egg-info/",
         "*.log",
@@ -1021,12 +1021,15 @@ def test_checker_skips_exactly_what_git_ignores():
         (("scenarios", "ui-competitor-pizzahill-d20.json"), False),
         (("engine", "samples", "runs", "20261116-140616-ui-competitor-a-d30"), True),
         (("engine", "samples", "runs", "20261116-140616-ui-competitor-a-d30", "run.json"), False),
+        (("engine", "samples", "runs", "20261116-140429-baseline"), True),
+        (("engine", "samples", "runs", "20261116-140429-baseline", "llm", "a.json"), False),
     ]
     kept = [
         (("scenarios", "baseline.json"), False),
-        (("engine", "samples", "runs", "20261116-140429-baseline"), True),
-        (("engine", "samples", "runs", "20261116-140429-baseline", "run.json"), False),
         (("engine", "samples", "runs", "notes-ui-x.txt"), False),
+        (("engine", "samples", "runs", ".gitkeep"), False),
+        (("tests", "fixtures", "example", "engine", "samples", "runs", "20261117-101500-baseline"), True),
+        (("tests", "fixtures", "example", "engine", "samples", "runs", "20261117-101500-baseline", "run.json"), False),
         (("scenarios", "ui-notes.md"), False),
         (("tests", "fixtures", "example", "scenarios", "ui-competitor-a.json"), False),
         ((".env.example",), False),
@@ -1041,6 +1044,17 @@ def test_checker_skips_exactly_what_git_ignores():
         assert ignored_by_git(parts, is_dir), parts
     for parts, is_dir in kept:
         assert not ignored_by_git(parts, is_dir), parts
+    # 깃 저장소가 아닌 곳(예시 묶음과 그 사본)의 실행 폴더는 예시로 올리는 것이라 무시하지 않는다.
+    assert not ignored_by_git(("engine", "samples", "runs", "20261116-140429-baseline"), True, at_repo_root=False)
+
+
+def test_sample_runs_are_checked_only_outside_a_git_repo(example_copy):
+    """깃 저장소의 맨 위에서는 실행 폴더를 깃이 무시하므로 검사도 건너뛴다. 예시 묶음의 사본에서는 검사한다."""
+    write(example_copy, f"engine/samples/runs/{BASELINE_RUN}/extra.csv", "a\n")
+    assert found(check(example_copy), f"engine/samples/runs/{BASELINE_RUN}/extra.csv: 약속에 없는 파일이다")
+    (example_copy / ".git").mkdir()
+    problems = check(example_copy)
+    assert not found(problems, "engine/samples/runs/"), messages(problems)
 
 
 def test_checker_walks_exactly_the_files_git_can_upload():

@@ -9,8 +9,9 @@ private/*
 
 # 화면의 간편 시뮬레이터가 만든 상황 파일 (T202). 시연에 쓸 상황은 사람이 확정해 ui- 없이 올린다
 scenarios/ui-*.json
-# 그 상황으로 돌린 가상 예시 값의 실행 폴더 (<시각>-ui-<…>). 상황 파일이 없으면 형식 검사가 막는다 (11-16)
-engine/samples/runs/*-ui-*/
+# 가상 예시 값으로 돌린 실행 폴더 모두. 각자 연습으로 돌린 답이 올라가지 않게 한다 (11-16, T107).
+# 맨 위의 engine/ 에만 걸린다. 테스트의 예시 묶음(tests/fixtures/<이름>/engine/samples/runs/)은 올린다
+engine/samples/runs/*/
 
 # 운영체제·편집기
 .DS_Store
