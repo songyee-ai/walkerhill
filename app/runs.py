@@ -117,11 +117,17 @@ def engine_command(
     condition_ids: list[str],
     venue_ids: list[str],
     call_llm: bool,
+    baseline_run: str | None = None,
 ) -> list[str]:
-    """README 와 같은 명령. 기준이 아닌 상황은 기준 실행의 페르소나와 조건으로 돌아 `--personas`, `--conditions` 를 적지 않는다."""
+    """README 와 같은 명령. 기준이 아닌 상황은 기준 실행의 페르소나와 조건으로 돌아 `--personas`, `--conditions` 를 적지 않는다.
+
+    `baseline_run` 을 주면 그 기준 실행의 가중치로 돌린다. 주지 않으면 엔진이 가장 새 기준 실행을 고른다.
+    """
     command = [sys.executable, "-m", "engine", "--data", data_mode, "--scenario", scenario_id, "--prompt", prompt]
     if root.resolve() != repo_root.resolve():
         command += ["--root", str(root)]
+    if baseline_run and scenario_id != "baseline":
+        command += ["--baseline", baseline_run]
     if scenario_id == "baseline":
         if persona_ids:
             command += ["--personas", *persona_ids]
@@ -171,6 +177,44 @@ def run_engine(command: list[str], repo_root: Path, timeout: int = RUN_TIMEOUT) 
     output = "\n".join(part for part in (done.stdout.strip(), done.stderr.strip()) if part)
     match = RUN_DIR_RE.search(done.stdout)
     return RunOutcome(done.returncode, Path(match["path"].strip()) if match else None, output)
+
+
+@dataclass
+class Simulation:
+    """간편 시뮬레이터의 한 번: 고른 조건으로 기준 상황을 돌리고, 그 가중치로 바뀐 상황을 돌린다."""
+
+    baseline: RunOutcome
+    scenario: RunOutcome | None
+
+    @property
+    def ok(self) -> bool:
+        return self.scenario is not None and self.scenario.run_dir is not None
+
+
+def simulate(
+    root: Path,
+    repo_root: Path,
+    data_mode: str,
+    scenario_id: str,
+    persona_ids: list[str],
+    condition_ids: list[str],
+    venue_ids: list[str],
+    call_llm: bool,
+    prompt: str = "p1",
+) -> Simulation:
+    """같은 페르소나·방문 조건·업장으로 기준과 상황을 차례로 돌린다 (PRD 7.2절: 상황은 기준의 가중치로 돈다).
+
+    기준을 매번 새로 돌리는 것은, 고른 페르소나와 조건이 바뀌어도 늘 같은 것끼리 견주게 하려는 것이다.
+    저장된 답을 재생하면 몇 초면 끝난다.
+    """
+    base_cmd = engine_command(root, repo_root, data_mode, "baseline", prompt, persona_ids, condition_ids, venue_ids, call_llm)
+    baseline = run_engine(base_cmd, repo_root)
+    if baseline.run_dir is None or baseline.exit_code != 0:
+        return Simulation(baseline, None)
+    scen_cmd = engine_command(
+        root, repo_root, data_mode, scenario_id, prompt, [], [], venue_ids, call_llm, baseline_run=baseline.run_dir.name
+    )
+    return Simulation(baseline, run_engine(scen_cmd, repo_root))
 
 
 def _utf8_env() -> dict[str, str]:
