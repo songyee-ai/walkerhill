@@ -16,10 +16,11 @@ import engine.__main__ as cli
 from engine.answers import save_answer
 from engine.candidates import build_request, run_condition
 from engine.formats import ChoiceRequest, RunRecord, Scenario, Venue, net_of_tax, read_model
+from engine.formats.scenario import BASELINE_ID
 from engine.formats.venue import Period, Promotion
 from engine.ledger import amount_problems
 from engine.promotions import meets_conditions, months_in, order_discounts
-from engine.runner import NO_SAVED_ANSWER, latest_baseline_run, load_inputs, run
+from engine.runner import latest_baseline_run, load_inputs, run
 from engine.scenarios import ScenarioError, apply_scenario
 from tests.conftest import BASELINE_RUN, COMPETITOR_RUN, EXAMPLE_ROOT, load_json, save_json
 from tests.test_engine import (
@@ -519,8 +520,8 @@ def test_discount_that_survives_on_no_order_is_not_marked_applied(example_copy):
     assert shown(request, "geumryong") == []
 
 
-def test_addon_rows_are_not_discounted_until_the_team_decides(example_copy):
-    """추가 상품에 프로모션 할인을 적용할지는 11-16 팀 회의에서 정한다 (FORMATS 12절). 그때까지 0 이다."""
+def test_addon_rows_are_not_discounted(example_copy):
+    """추가 상품에는 프로모션 할인을 적용하지 않는다 (11-16 회의에서 정함. FORMATS 3절). 추가 상품 줄의 할인은 0 이다."""
     edit(venue_file(example_copy, "geumryong"), add_tea)
     give(example_copy, "geumryong", promo(), promo("tea-only", "discount_amount", 3000, ["tea"]))
     played = play(example_copy, lambda visit, request: answer(request, "geumryong", "geumryong-o1", [("tea", 3)]))
@@ -933,8 +934,10 @@ def test_command_runs_a_scenario_on_the_latest_finished_baseline_run(example_cop
     # 예시 묶음에 든 기준 실행은 업장 두 곳만 읽어 돌린 것이라(--venues), 업장을 모두 읽는 이 실행과 입력의 해시가 다르다. 그 실행으로는 돌리지 않는다.
     assert command(example_copy, "--scenario", COMPETITOR_DISCOUNT) == cli.EXIT_FAILED
     assert "달라진 것이 있다" in capsys.readouterr().err
+    kept = example_copy.parent / "kept"
+    kept.mkdir()
     for name in (BASELINE_RUN, COMPETITOR_RUN):
-        shutil.rmtree(runs / name)
+        shutil.move(runs / name, kept / name)
     assert command(example_copy, "--scenario", COMPETITOR_DISCOUNT) == cli.EXIT_FAILED
     assert "기준 상황을 먼저" in capsys.readouterr().err
     assert not list(runs.iterdir())
@@ -943,24 +946,37 @@ def test_command_runs_a_scenario_on_the_latest_finished_baseline_run(example_cop
         return [read_model(p / "run.json", RunRecord) for p in sorted(runs.iterdir())]
 
     clean_env.setattr(cli, "datetime", Clock())  # 부를 때마다 5분씩 가는 시계
-    assert command(example_copy, "--personas", ELDERS, "--conditions", DINNER) == cli.EXIT_OK
-    assert command(example_copy, "--personas", ELDERS, "--conditions", DINNER) == cli.EXIT_OK
-    older, newer = records()
+    two_venues = ("--venues", "geumryong", "examplehotel-chinese")
+    # 재생만 했고 저장된 응답이 없어 방문이 실패로 남은 기준 실행이다.
+    assert command(example_copy, "--personas", ELDERS, "--conditions", DINNER, *two_venues) == cli.EXIT_OK
+    (failed_base,) = records()
+    assert failed_base.counts.failed == 1
     capsys.readouterr()
 
-    # 적지 않으면 끝까지 돈 가장 새 기준 실행을 쓴다.
-    assert command(example_copy, "--scenario", COMPETITOR_DISCOUNT) == cli.EXIT_OK
-    said = capsys.readouterr()
-    assert f"기준 실행 {newer.run_id}" in said.out
-    assert "기준 실행에 실패한 방문이 1건 있다" in said.err  # 재생만 해서 기준의 방문이 실패로 남았다. 그것을 알린다
-    record = records()[-1]
-    assert (record.scenario_id, record.weights_from) == (COMPETITOR_DISCOUNT, newer.run_id)
-    assert (record.persona_ids, record.condition_ids, record.weights) == ([ELDERS], [DINNER], newer.weights)
-    ledger = (runs / record.run_id / "ledger.csv").read_text(encoding="utf-8-sig")
-    assert NO_SAVED_ANSWER in ledger  # 재생만 했고 저장된 응답이 없어 방문은 실패로 남는다
+    # 실패한 방문이 있는 기준 실행으로는 상황을 돌리지 않고 그 까닭을 알린다 (11-16 회의).
+    assert command(example_copy, "--scenario", COMPETITOR_DISCOUNT, *two_venues) == cli.EXIT_FAILED
+    said = capsys.readouterr().err
+    assert f"기준 실행 '{failed_base.run_id}' 에 실패한 방문이 1건 있어 상황을 돌리지 않는다" in said
+    assert "fail_reason" in said and "그 방문만 LLM 을 새로 부른다" in said and "replay 인 실패는" in said
+    assert records() == [failed_base]  # 실행 폴더를 만들지 않았다
 
-    # 기준 실행을 직접 가리킬 수도 있다. 없는 실행을 가리키면 돌리지 않는다.
-    assert command(example_copy, "--scenario", PRICE_UP, "--baseline", older.run_id) == cli.EXIT_OK
-    assert records()[-1].weights_from == older.run_id
+    # 저장된 응답이 있으면 기준 실행이 실패 없이 끝난다. 적지 않으면 끝까지 돈 가장 새 기준 실행을 쓴다.
+    base_answers = ("--answers", str(kept / BASELINE_RUN / "llm"))
+    assert command(example_copy, "--personas", ELDERS, "--conditions", DINNER, *two_venues, *base_answers) == cli.EXIT_OK
+    newer = records()[-1]
+    assert (newer.scenario_id, newer.counts.failed) == (BASELINE_ID, 0)
+    capsys.readouterr()
+    scenario_answers = ("--answers", str(kept / COMPETITOR_RUN / "llm"))
+    assert command(example_copy, "--scenario", COMPETITOR_DISCOUNT, *two_venues, *scenario_answers) == cli.EXIT_OK
+    assert f"기준 실행 {newer.run_id}" in capsys.readouterr().out
+    record = records()[-1]
+    assert (record.scenario_id, record.weights_from, record.counts.failed) == (COMPETITOR_DISCOUNT, newer.run_id, 0)
+    assert (record.persona_ids, record.condition_ids, record.weights) == ([ELDERS], [DINNER], newer.weights)
+
+    # 기준 실행을 직접 가리킬 수도 있다. 실패한 방문이 있는 실행이나 없는 실행을 가리키면 돌리지 않는다.
+    assert command(example_copy, "--scenario", PRICE_UP, *two_venues, "--baseline", newer.run_id) == cli.EXIT_OK
+    assert records()[-1].weights_from == newer.run_id
+    assert command(example_copy, "--scenario", PRICE_UP, *two_venues, "--baseline", failed_base.run_id) == cli.EXIT_FAILED
+    assert "실패한 방문이 1건 있어" in capsys.readouterr().err
     assert command(example_copy, "--scenario", PRICE_UP, "--baseline", "20200101-000000-baseline") == cli.EXIT_FAILED
     no_format_errors(example_copy)
