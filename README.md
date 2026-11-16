@@ -101,7 +101,10 @@ Get-ChildItem "$env:LOCALAPPDATA\Claude-Data" -Recurse -Filter claude.exe -Error
   - 구독의 사용 한도는 자기 Claude Code 작업과 함께 쓴다. 호출 하나가 2만 토큰을 넘으니(T104 실측) `--personas`, `--conditions` 로 작게 돌린다.
     한도에 닿으면 엔진이 멈추고, 한도가 풀린 뒤 다시 돌리면 받은 답은 재생한다.
 - 키가 없으면 `--replay-only` 를 붙인다. 저장된 응답만 재생하고, 저장된 응답이 없는 방문은 실패로 남는다.
-- 일부만 돌릴 때: `--personas`, `--conditions`, `--venues` 뒤에 식별자를 적는다. 프롬프트의 판은 `--prompt` 다.
+- 일부만 돌릴 때: `--personas`, `--conditions`, `--venues` 뒤에 식별자를 적는다.
+- 프롬프트의 판은 `--prompt` 로 고른다. 적지 않으면 팀이 쓰는 판 `p2` 를 읽는다 (`personas/prompts/p2.md`, T108).
+  그 판의 파일이 없는 폴더에서 LLM 을 부르려 하면 다른 판으로 돌리지 않고 이유를 알리고 멈춘다.
+  `--replay-only` 는 프롬프트 파일을 읽지 않아 멈추지 않는다. 그 판으로 받은 저장된 답이 없으면 방문이 실패로 남는다 (예시 사본에 `--prompt p1` 을 빼먹었을 때가 그렇다).
 - 집계 파일이 있어야 돈다: `--data sample` 은 `data/samples/base_summary.csv`, `--data private` 은 `private/base/summary.csv` (업장 데이터 담당이 만든다).
   기준 상황의 가중치(묶음의 비율, 고객군 배수)와 가격이 빈 상품의 단가를 이 파일에서 낸다 (`docs/FORMATS.md` 3절, 10.1절의 "가중치를 내는 법").
   명령이 끝날 때 채운 상품과 채우지 못한 상품의 수를 알리고, 배수를 정하지 못한 고객군이 있으면 알린다.
@@ -119,7 +122,8 @@ Get-ChildItem "$env:LOCALAPPDATA\Claude-Data" -Recurse -Filter claude.exe -Error
 - `.env` 는 명령을 돌리는 폴더의 것만 읽는다. 저장소의 맨 위 폴더에서 돌린다.
 - 키 없이 연습할 때는 예시 파일 한 벌의 사본을 돌린다 (사본은 깃이 무시하는 `private/` 에 둔다).
   예시의 저장된 답은 Anthropic(`claude-opus-5-5`)으로 받은 것이다. 팀 `.env`(OpenAI)와 공급자가 달라 그대로는 재생되지 않으므로,
-  **그 창에서만** 공급자를 예시의 값으로 바꾸고 `--replay-only` 를 붙인다 (`.env` 는 이미 있는 환경 변수를 덮어쓰지 않는다. 화면은 이것을 스스로 한다):
+  **그 창에서만** 공급자를 예시의 값으로 바꾸고 `--replay-only` 를 붙인다 (`.env` 는 이미 있는 환경 변수를 덮어쓰지 않는다. 화면은 이것을 스스로 한다).
+  예시에는 프롬프트가 `p1` 하나뿐이고 저장된 답도 `p1` 로 받은 것이라 `--prompt p1` 도 적는다:
 
 ```powershell
 Copy-Item -Recurse tests/fixtures/example private/try-example
@@ -130,7 +134,7 @@ $env:LLM_PROVIDER = 'anthropic'; $env:LLM_MODEL = 'claude-opus-5-5'
 ```
 
 ```powershell
-uv run python -m engine --data sample --root private/try-example --personas family-elders --conditions meal-dinner-weekend --venues geumryong examplehotel-chinese --replay-only
+uv run python -m engine --data sample --root private/try-example --prompt p1 --personas family-elders --conditions meal-dinner-weekend --venues geumryong examplehotel-chinese --replay-only
 ```
 
   다 돌렸으면 창을 닫거나 `Remove-Item Env:LLM_PROVIDER, Env:LLM_MODEL` 로 되돌린다. 되돌리지 않으면 그 창의 다음 실행도 예시 공급자로 돈다.
@@ -139,7 +143,7 @@ uv run python -m engine --data sample --root private/try-example --personas fami
   사본에 처음부터 든 기준 실행(`20261117-101500-baseline`)은 번호의 날짜가 늦어 "가장 새 기준 실행"으로 먼저 골라지기 때문이다:
 
 ```powershell
-uv run python -m engine --data sample --root private/try-example --scenario competitor-chinese-discount --venues geumryong examplehotel-chinese --replay-only --baseline <위에서 나온 run_id>
+uv run python -m engine --data sample --root private/try-example --prompt p1 --scenario competitor-chinese-discount --venues geumryong examplehotel-chinese --replay-only --baseline <위에서 나온 run_id>
 ```
 
   기준 상황을 업장 두 곳만 읽어 돌렸으므로 상황에도 같은 업장을 적는다 (`--venues`).

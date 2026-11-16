@@ -925,7 +925,8 @@ def clean_env(monkeypatch):
 
 
 def command(root: Path, *more: str) -> int:
-    return cli.main(["--data", "sample", "--root", str(root), "--replay-only", *more])
+    # 예시 묶음에는 p1 만 있다. 명령의 기본값은 팀이 쓰는 판이다 (T108)
+    return cli.main(["--data", "sample", "--root", str(root), "--replay-only", "--prompt", "p1", *more])
 
 
 def test_command_runs_a_scenario_on_the_latest_finished_baseline_run(example_copy, clean_env, capsys):
