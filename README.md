@@ -78,6 +78,27 @@ uv run python -m engine --data sample
 - 방문마다 앞선 실행의 저장된 응답을 먼저 찾아 재생하고, 없는 것만 LLM 을 부른다. 그래서 같은 것을 다시 돌리면 LLM 을 부르지 않는다.
 - LLM 을 부르려면 `.env.example` 을 `.env` 로 복사하고 자기 OpenAI 키(`LLM_API_KEY`)와 팀이 정한 모델(`LLM_MODEL`)을 넣는다.
   공급자와 주소는 `.env.example` 에 팀 설정으로 이미 적혀 있다. 호출 상한도 `.env` 에서 바꾼다.
+- **로컬에서 시험할 때는 자기 Claude 구독으로 먼저 돌린다** (공급자 `claude-code`, T104·T106). OpenAI 키는 보정·시연 답을 받을 때 쓴다.
+  `.env` 에서 아래 세 줄만 바꾸고, 터미널에서 `claude auth login` 을 한 번 한다 (브라우저가 열리면 자기 Claude 계정으로 로그인).
+
+```text
+LLM_PROVIDER=claude-code
+LLM_MODEL=claude-sonnet-5-5
+CLAUDE_CODE_PATH=
+```
+
+  - `claude` 명령이 PATH 에 있으면 `CLAUDE_CODE_PATH` 는 비워 둔다. 있는지는 `Get-Command claude` 로 본다.
+    데스크톱 앱에 든 Claude Code 만 있으면 그 `claude.exe` 의 전체 경로를 적는다. 아래 명령이 찾아 준다 (앱이 업데이트되면 경로가 바뀌니 다시 찾는다):
+
+```powershell
+Get-ChildItem "$env:LOCALAPPDATA\Claude-Data" -Recurse -Filter claude.exe -ErrorAction SilentlyContinue | Sort-Object LastWriteTime | Select-Object -Last 1 -ExpandProperty FullName
+```
+
+  - 데스크톱 앱의 로그인은 앱 안에서만 쓰인다. 앱에 로그인돼 있어도 `claude auth login` 은 따로 한 번 해야 한다. 경로를 적었으면 `& "<그 경로>" auth login` 이다.
+  - 가상 예시 값(`--data sample`)으로만 돌린다. 기본 데이터(`--data private`)는 팀이 정한 공급자로만 돌린다 (요약이 어느 회사로 가는지 팀이 정한다. `docs/MEETING_1117.md` ③).
+  - 이 답은 시연과 보정에 쓰지 않는다. 실행 폴더(`engine/samples/runs/`)는 깃이 무시하지 않으니 커밋할 때 넣지 않는다.
+  - 구독의 사용 한도는 자기 Claude Code 작업과 함께 쓴다. 호출 하나가 2만 토큰을 넘으니(T104 실측) `--personas`, `--conditions` 로 작게 돌린다.
+    한도에 닿으면 엔진이 멈추고, 한도가 풀린 뒤 다시 돌리면 받은 답은 재생한다.
 - 키가 없으면 `--replay-only` 를 붙인다. 저장된 응답만 재생하고, 저장된 응답이 없는 방문은 실패로 남는다.
 - 일부만 돌릴 때: `--personas`, `--conditions`, `--venues` 뒤에 식별자를 적는다. 프롬프트의 판은 `--prompt` 다.
 - 집계 파일이 있어야 돈다: `--data sample` 은 `data/samples/base_summary.csv`, `--data private` 은 `private/base/summary.csv` (업장 데이터 담당이 만든다).
