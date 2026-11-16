@@ -16,7 +16,7 @@ from typing import Any
 
 from engine.answers import AnswerBook, read_reply, save_rejected, save_response
 from engine.candidates import build_request, run_condition
-from engine.formats.choice import RunCondition, problems_in_response
+from engine.formats.choice import ChoiceRequest, RunCondition, problems_in_response
 from engine.formats.conditions import MANUAL_CONDITION_PREFIX, ConditionBundle
 from engine.formats.evidence import Vocab
 from engine.formats.io import read_json, read_model, write_json
@@ -35,6 +35,7 @@ from engine.llm import (
     Provider,
     load_prompt,
     prompt_path,
+    response_schema,
     user_message,
 )
 from engine.scenarios import apply_scenario
@@ -76,15 +77,16 @@ class LlmSession:
     # 답을 받지 못한 호출이 연달아 몇 번인가. 답을 받으면 0 으로 돌아간다.
     failed_in_a_row: int = 0
 
-    def ask(self, request_text: str) -> LlmReply:
+    def ask(self, request: ChoiceRequest) -> LlmReply:
         """한 번 부른다. 실패한 호출도 부른 수에 센다 (상한은 비용을 막으려는 것이다).
 
         세는 것은 엔진이 공급자를 부른 수다. SDK 가 안에서 다시 보내 보는 요청은 세지 않는다.
+        답의 모양은 이 요청에서 고를 수 있는 값으로 묶어 보낸다 (`engine.llm.response_schema`).
         """
         if self.calls >= self.call_limit:
             raise CallLimitReached
         self.calls += 1
-        return self.provider.complete(self.system, request_text)
+        return self.provider.complete(self.system, user_message(request), response_schema(request))
 
 
 @dataclass
@@ -374,7 +376,7 @@ def run_visit(
     if run_dir is None or now is None:
         raise ValueError("LLM 을 부르려면 답을 저장할 run_dir 과 now 가 있어야 한다")
     try:
-        reply = session.ask(user_message(request))
+        reply = session.ask(request)
     except LlmFatal as exc:
         return VisitResult([failed_row(base, str(exc), "new", request_hash)], skipped, fatal=True)
     except LlmError as exc:
