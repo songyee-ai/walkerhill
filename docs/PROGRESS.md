@@ -869,7 +869,7 @@ REVIEW_RULES 9절은 글에 없으면 비우게 해서 나머지 139건은 `priv
 - [ ] borigunbbang, hojitea-ui ← songyee-ai (11-13): 후기 라벨의 형식이 바뀌었습니다. `purpose`, `party` 는 글과 화면에 없으면 비웁니다. 값을 지어내지 않습니다.
   `summary` 는 본문이 있으면 꼭 쓰고, 본문 없이 화면 값만 있는 후기만 비웁니다 (이것은 형식 검사가 보지 못합니다).
   `purpose`, `party`, `ordered`, `reasons_chosen`, `pain_points`, `compared_with`, `would_return` 이 모두 빈 줄은 형식 검사가 막습니다. 그런 후기는 올리지 않습니다.
-  borigunbbang: 금룡의 나머지 후기를 같은 번호로 더해 주세요. hojitea-ui: 떼어 둔 후기와 돕는 라벨에도 같은 규칙입니다 (`FORMATS.md` 4.1절).
+  borigunbbang: 금룡의 나머지 후기를 같은 번호로 더해 주세요. hojitea-ui: 떼어 둔 후기와 돕는 라벨에도 같은 규칙입니다 (`FORMATS.md` 4.1절). (확인: hojitea-ui 11-16, 떼어 둔 후기와 돕는 라벨에 같은 규칙을 씁니다)
   (반영: borigunbbang 11-13, 금룡 80건. T07 절의 특이사항)
 - [ ] songyee-ai ← borigunbbang (11-13): REVIEW_RULES 를 금룡 방문자 리뷰 175건에 써 본 결과입니다 (T101 의 "9절 기준으로 돌려 봤다" 참고용).
   ① 3절 분리 조건은 모두 통과했습니다. 다만 수집 파일은 값 사이에 빈 칸이 끼어 있어 "몇 칸 앞·뒤"를 값이 있는 칸끼리 세야 맞습니다.
@@ -885,9 +885,10 @@ REVIEW_RULES 9절은 글에 없으면 비우게 해서 나머지 139건은 `priv
   후보의 `options` 가 빈 목록이고 `addons` 만 있습니다. 그 업장을 고를 때는 `option_id` 를 `null` 로 두고 추가 상품을 하나 이상 삽니다. 주문이 있는 업장에서는 주문을 꼭 하나 고릅니다.
   예산의 `max` 는 고른 주문과 추가 상품을 더한 금액과 견줍니다. 넘는 답은 실패로 남습니다.
   borigunbbang: 프롬프트에 이 두 규칙을 적어 주세요. wilstein91: 실행 결과 화면에서 주문 없이 추가 상품 줄만 있는 방문이 나올 수 있습니다. hojitea-ui: 업장 정의는 고칠 것이 없습니다.
-- [ ] hojitea-ui ← songyee-ai (11-13): 엔진은 가격이 빈(`price` 가 `null`) 상품을 후보에서 빼고 실행 기록의 `skipped_products` 에 남깁니다. 집계 파일로 채우는 것은 T11 입니다.
+- [x] hojitea-ui ← songyee-ai (11-13): 엔진은 가격이 빈(`price` 가 `null`) 상품을 후보에서 빼고 실행 기록의 `skipped_products` 에 남깁니다. 집계 파일로 채우는 것은 T11 입니다.
   그때까지 르파사쥬는 하나뿐인 상품의 가격이 비어 있어 후보가 되지 못합니다. 또 영업 시간(`hours`)에 그 끼니의 줄이 없으면 그 끼니에는 후보에서 빠집니다
   (디저트·포장은 `meal` 이 `null` 인 줄이 있어야 합니다. 지금 16개 파일은 모두 맞습니다). 정한 점심·저녁 비율은 0.5·0.5 입니다 (`engine/conditions.json`).
+  (확인: hojitea-ui 11-16, T11 이 합쳐진 뒤 `engine.weights` 의 `read_summary`·`fill_prices` 로 가상 예시 값과 진짜 집계 파일을 각각 읽어, 가격이 빈 상품이 모두 채워지고 남은 빈 가격이 없음을 확인. 단위가 달라 멈춘 곳도 없었다. 수치는 `private/` 에만)
 - [ ] wilstein91 ← songyee-ai (11-13): 엔진의 첫 판이 들어갑니다. 실행은 `engine.runner.run(...)`, 합계는 `engine.ledger.totals(rows)` 입니다 (쓰는 예는 `tests/test_engine.py` 의 `play`).
   아직 LLM 을 부르지 않아 저장된 응답이 없는 방문은 실패 줄로 남고(T05), 기준 상황만 돌릴 수 있고(T10), 가중치는 고르게 나눈 값이라 가상 매출의 크기에는 뜻이 없습니다(T11).
   엔진은 기준 상황 파일 `scenarios/baseline.json` 을 읽습니다. 저장소에 아직 없으니 `tests/fixtures/example/scenarios/baseline.json` 을 베껴 올려 주세요 (최소 버전 11-16 에 필요합니다).
@@ -909,9 +910,10 @@ REVIEW_RULES 9절은 글에 없으면 비우게 해서 나머지 139건은 `priv
 - [ ] borigunbbang ← songyee-ai (11-14): 요청의 후보에 `promotions` 가 채워져 나옵니다 (`FORMATS.md` 9절). 주문의 금액(`discount`, `line_total`, `total`)에는 할인이 이미 들어 있습니다.
   `applied` 가 `true` 인 것은 금액에 들어 있는 할인이고, `false` 인 것은 금액에 들어 있지 않은 것(증정, 더 큰 할인에 밀린 할인, 추가 상품에만 걸리는 할인)입니다. 증정은 목록에 있으면 받는 것입니다.
   프롬프트에 이 뜻을 적어 주세요 (LLM 이 할인을 한 번 더 빼서 생각하지 않게). 프롬프트의 글을 고치면 판 이름도 바꿉니다.
-- [ ] hojitea-ui ← songyee-ai (11-14): 업장 정의의 `promotions` 를 엔진이 금액에 넣기 시작했습니다 (`FORMATS.md` 3절). 지금 진행 중인 프로모션을 적으면 기준 상황의 금액이 달라집니다.
+- [x] hojitea-ui ← songyee-ai (11-14): 업장 정의의 `promotions` 를 엔진이 금액에 넣기 시작했습니다 (`FORMATS.md` 3절). 지금 진행 중인 프로모션을 적으면 기준 상황의 금액이 달라집니다.
   기간(`period`)은 방문 조건에 달이 있을 때만 보고, 묶음의 조건에는 달이 없어 기간과 상관없이 적용됩니다. 그러니 이미 끝난 프로모션은 `promotions` 에 두지 않습니다.
   할인이 둘 이상 해당하면 깎이는 금액이 가장 큰 것 하나만 적용하고, 같으면 먼저 적힌 것입니다.
+  (확인: hojitea-ui 11-16, 16개 업장 모두 `promotions` 에 넣을 것이 없습니다. 공식 자료에서 본 진행 중 행사는 새 상품 출시이거나 특정 카드·회원에게만 주는 할인이라, 모든 손님에게 같은 조건으로 걸리는 할인이 아닙니다. 새 상품은 상품으로 이미 들어가 있습니다)
 - [ ] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-14): 11-16 회의에서 정할 "추가 상품에 프로모션 할인을 적용할지"는 그대로 남아 있습니다 (위 11-13 의 안 셋).
   함께 정할 것이 하나 더 있습니다: 실패한 방문이 있는 기준 실행으로 상황을 돌리는 것을 막을지입니다. 지금은 막지 않고 명령이 건수를 알립니다 (T10 의 경위).
 - [ ] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-15): 가중 합산이 들어갑니다 (T11). 엔진이 **집계 파일을 읽어야 돕니다**:
