@@ -193,7 +193,7 @@ def violations(
                 extras.append(product)
                 if row.quantity > (product.qty_max or 0):
                     bad("수량 초과", f"상품 '{product.product_id}' 를 qty_max 보다 많이 샀다")
-                # 추가 상품에 프로모션 할인을 적용할지는 아직 정하지 않았다 (FORMATS 12절). 그때까지 0 이어야 한다.
+                # 추가 상품에는 프로모션 할인을 적용하지 않는다 (11-16 회의. FORMATS 3절). 0 이어야 한다.
                 if row.discount != 0:
                     bad("금액 불일치", f"추가 상품 '{product.product_id}' 의 줄에 할인이 있다")
                 continue
