@@ -24,7 +24,8 @@ EXIT_OK, EXIT_FAILED, EXIT_STOPPED_BY_LIMIT = 0, 1, 2
 
 # `--prompt` 를 적지 않았을 때 읽는 판. 팀이 쓰는 가장 새 판이다 (personas/prompts/, 페르소나 담당이 올린다).
 # 예시 묶음(tests/fixtures/example)에는 p1 만 있어, 그 사본을 돌릴 때는 `--prompt p1` 을 적는다 (README.md).
-DEFAULT_PROMPT = "p2"
+# p3 은 방문 조건의 달(`condition.month`)을 읽는 법과 값 목록의 "이용 시간 제한"을 적은 판이다 (T304, T113).
+DEFAULT_PROMPT = "p3"
 
 
 def earlier_answers(root: Path, data_mode: str) -> list[Path]:
