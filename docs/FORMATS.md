@@ -1155,7 +1155,7 @@ run_id,scenario_id,visit_id,persona_id,customer_group,condition_id,choice_kind,v
 {
   "format_version": 1,
   "run_id": "20261117-101500-baseline",
-  "criteria": {"top_venue_must_match": true, "max_diff_pp": 15},
+  "criteria": {"top_venue_must_match": true, "max_diff_pp": 15, "diff_min_personas": 2},
   "groups": {
     "가족·친족": {
       "venues": {
@@ -1164,6 +1164,7 @@ run_id,scenario_id,visit_id,persona_id,customer_group,condition_id,choice_kind,v
       },
       "top_sim": "thebuffet",
       "top_base": "thebuffet",
+      "personas": 2,
       "pass": true
     }
   },
@@ -1189,6 +1190,9 @@ run_id,scenario_id,visit_id,persona_id,customer_group,condition_id,choice_kind,v
   적힌 비중이 같으면 업장 정의의 차례에서 앞의 것이다. 가장 큰 업장과 통과 여부는 모두 파일에 적힌 값으로 정하므로, 파일만 보고 다시 낼 수 있다.
 - **통과** (`pass`): `top_sim` 과 `top_base` 가 같고, 적힌 `diff_pp` 의 크기가 모두 `max_diff_pp` 이내다. 어느 한쪽에 매출이 없는 고객군은 견줄 수 없어 통과가 아니다
   (그 고객군이 워커힐 업장을 고른 방문이 없거나, 집계 파일에 그 고객군의 매출이 없다). 맨 위의 `pass` 는 고객군이 모두 통과일 때다.
+- **페르소나 수** (`personas`): 저장소에 있는 그 고객군의 페르소나 수다 (실행에서 돌린 수가 아니다). 이 수가 `criteria.diff_min_personas` 보다 작은 고객군은
+  `diff_pp` 를 적기만 하고 통과를 가르는 데 쓰지 않는다. 가장 큰 업장이 같은지만 본다 (11-17 에 고침, PRD 6.5절과 `PROGRESS.md` 의 T18).
+  두 칸이 없는 옛 파일(11-17 의 첫 대조)은 `diff_min_personas` 를 1 로, `personas` 를 모르는 것으로 읽어 모든 고객군의 차이를 본 것으로 둔다.
 - **통과 기준** (`criteria`)은 코드에 적혀 있다 (`engine/calibration.py`). 명령의 인자로 바꿀 수 없다. 첫 대조 뒤 한 번만 고칠 수 있고, 고치면 이유를 진행 문서의 T18 절에 적는다 (PRD 6.5절).
 - 기본 데이터로 돌린 실행의 대조 결과는 `private/runs/<run_id>/` 에만 있다. 명령이 화면에 적는 고객군별 결과에도 기본 데이터에서 계산한 값이 있으니 저장소의 파일에 옮겨 적지 않는다.
 
