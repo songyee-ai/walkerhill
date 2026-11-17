@@ -33,10 +33,16 @@ def months_sold(venue: Venue, product: Product) -> frozenset[int]:
     return frozenset(product.months or venue.months or ALL_MONTHS)
 
 
-def run_condition(condition: Condition, persona: Persona) -> RunCondition:
-    """묶음의 조건에 페르소나의 인원과 예산을 붙인다 (묶음의 조건에는 인원과 예산이 없다)."""
+def run_condition(condition: Condition, persona: Persona, month: int | None = None) -> RunCondition:
+    """묶음의 조건에 페르소나의 인원과 예산을 붙인다 (묶음의 조건에는 인원과 예산이 없다).
+
+    `month` 를 주면 그 달의 방문으로 본다 (실행의 달. docs/FORMATS.md 6절). 묶음의 조건에는 달이 없어 여기서 붙인다.
+    """
+    planned = condition.model_dump()
+    if month is not None:
+        planned["month"] = month
     return RunCondition(
-        **condition.model_dump(),
+        **planned,
         adults=persona.visit.party.adults,
         children=persona.visit.party.children,
         budget=persona.budget,

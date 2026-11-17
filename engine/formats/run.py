@@ -13,7 +13,17 @@ from typing import Any, Literal, Self
 from pydantic import AwareDatetime, Field, model_validator
 
 from engine.formats.choice import ChoiceRequest, ChoiceResponse
-from engine.formats.codes import BaseProfileMode, ChoiceKind, DataMode, FormatModel, Grade, Id, Text, Won
+from engine.formats.codes import (
+    BaseProfileMode,
+    ChoiceKind,
+    DataMode,
+    FormatModel,
+    Grade,
+    Id,
+    Month,
+    Text,
+    Won,
+)
 from engine.formats.io import blank_to_none, split_list
 from engine.formats.money import net_of_tax, weighted_amount
 
@@ -113,6 +123,9 @@ class RunRecord(FormatModel):
     scenario_id: Id
     persona_ids: list[Id] = Field(min_length=1)
     condition_ids: list[Id] = Field(min_length=1)
+    # 실행의 달 (명령의 `--month`). 묶음의 조건을 모두 이 달의 방문으로 돌렸다. 일 년 전체로 돌렸으면 null 이다.
+    # 이 칸이 생기기 전(T112, 11-17)에 돌린 실행 기록에는 없다. 그 실행은 달을 주지 않고 돌린 것이라 null 로 읽는다.
+    month: Month | None = None
     llm: LlmInfo
     base_profile_mode: BaseProfileMode
     inputs: dict[str, str]
