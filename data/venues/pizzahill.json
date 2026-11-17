@@ -96,6 +96,31 @@
       "source_id": null
     },
     {
+      "product_id": "seis-set",
+      "name": "SEIS 세트 (패밀리 샐러드, 세이스 피자, 파스타 2, 음료 6)",
+      "occasion": "meal",
+      "slots": [
+        {
+          "meal": "lunch",
+          "day_type": "all"
+        },
+        {
+          "meal": "dinner",
+          "day_type": "all"
+        }
+      ],
+      "months": null,
+      "audience": "all",
+      "unit": "세트",
+      "serves": 6,
+      "qty_rule": "per_serves",
+      "qty_max": null,
+      "price": 351000,
+      "price_basis": "unknown",
+      "grade": "official",
+      "source_id": null
+    },
+    {
       "product_id": "seis-pizza",
       "name": "세이스 피자",
       "occasion": "meal",
@@ -112,9 +137,9 @@
       "months": null,
       "audience": "all",
       "unit": "판",
-      "serves": 4,
-      "qty_rule": "per_serves",
-      "qty_max": null,
+      "serves": 1,
+      "qty_rule": "choice",
+      "qty_max": 1,
       "price": 143000,
       "price_basis": "unknown",
       "grade": "official",
