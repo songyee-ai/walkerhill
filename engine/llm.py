@@ -304,9 +304,9 @@ def _claude_code_env(env: Mapping[str, str]) -> dict[str, str]:
 
 
 class ClaudeCodeProvider:
-    """자기 Claude 구독으로 로그인한 Claude Code 명령(`claude -p`)을 부른다 (11-16, T104. 개인 연습용).
+    """자기 Claude 구독으로 로그인한 Claude Code 명령(`claude -p`)을 부른다 (11-16, T104).
 
-    팀 기본은 OpenAI 다 (CLAUDE.md 의 "스택"). 이 공급자는 Anthropic API 키 없이 자기 구독으로 돌려 보려는 것이고,
+    팀이 쓰는 공급자다 (11-17, T114. CLAUDE.md 의 "스택"). Anthropic API 키 없이 각자의 구독으로 부르고,
     공식 Claude Code 프로그램을 그대로 부른다 (구독의 로그인 정보를 다른 프로그램에 넘기지 않는다).
     - 시스템 프롬프트는 Claude Code 의 것을 쓰지 않고 프롬프트 파일의 글로 통째로 바꾼다 (`--system-prompt`).
     - 도구, MCP, 슬래시 명령, 설정 파일(훅, 플러그인)을 모두 끄고 세션을 남기지 않는다.
