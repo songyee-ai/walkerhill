@@ -1,0 +1,141 @@
+﻿review_id,venue_id,source_kind,posted_ym,customer_group,purpose,party,adults,children,occasion,meal,day_type,stay,ordered,paid_total,reasons_chosen,pain_points,compared_with,would_return,summary,labeler,labeled_on
+R-pavilion-0001,pavilion,map,2023-04,,,,,,dessert,lunch,weekend,,,,,,,yes,직원이 친절하고 음료 맛이 좋았다는 짧은 평이다.,borigunbbang,2026-11-17
+R-pavilion-0004,pavilion,map,2025-04,가족·친족,휴식·티타임,아이 동반 가족,,,dessert,dinner,weekday,,,,,,,yes,"호텔 식사 전 남는 시간에 로비 카페에서 음료를 마시며 쉬었고, 보기 좋고 맛있는 음료에 만족해 다시 오고 싶다고 했다.",borigunbbang,2026-11-17
+R-pavilion-0006,pavilion,map,2022-06,,,,,,dessert,dinner,weekend,,이름:얼그레이 하이볼,,,,,,얼그레이 하이볼이 맛있었다는 짧은 평이다.,borigunbbang,2026-11-17
+R-pavilion-0007,pavilion,map,2025-02,커플·기념일,일상 외식,부부·연인,,,dessert,lunch,weekday,,,,,,,,로비라 넓고 깨끗하며 음료·식사·디저트가 함께 나오는 구성이 값에 비해 만족스럽다고 했다. 조용한 공간이라 가볍게 끼니를 때우거나 짧은 회의 자리로 알맞겠다고 평했다.,borigunbbang,2026-11-17
+R-pavilion-0008,pavilion,map,2025-12,혼자 휴식,일상 외식,혼자,,,dessert,lunch,weekday,,이름:딸기 디저트 세트;bingsu,,,,,yes,딸기 세트에 딸기 빙수까지 먹었고 둘 다 양이 넉넉하고 맛과 구성이 좋았다고 했다. 디저트 모양이 예술적이고 매니저들이 친절했다고 칭찬했다.,borigunbbang,2026-11-17
+R-pavilion-0009,pavilion,map,2025-01,가족·친족,여행·호캉스,아이 동반 가족,,,dessert,lunch,weekend,,,,,,,,"워커힐에 여러 번 왔지만 카페는 처음 들렀고, 아이들 간식을 여러 가지 사 왔다. 디저트 종류가 많아 다 먹어 보고 싶었다고 했다.",borigunbbang,2026-11-17
+R-pavilion-0012,pavilion,map,2026-08,가족·친족,일상 외식,부모와 성인 자녀,,,dessert,dinner,weekday,,bingsu,,,,,,빙수가 많이 달지 않아 부모님과 함께 먹기에 알맞았다고 했다.,borigunbbang,2026-11-17
+R-pavilion-0013,pavilion,map,2023-11,커플·기념일,,부부·연인,,,dessert,dinner,weekday,,이름:애프터눈티,,,,,,직원이 친절하고 애프터눈티가 값에 비해 좋았다고 했다.,borigunbbang,2026-11-17
+R-pavilion-0014,pavilion,map,2024-12,가족·친족,모임,아이 동반 가족,,,dessert,lunch,weekday,,이름:딸기디저트;이름:티;이름:커피,,,,,,딸기 디저트가 보기 좋고 많이 달지 않았으며 함께 나온 음료와 함박 요리도 맛있었다고 했다. 오후 라이브 공연 덕에 분위기가 좋았다고 평했다.,borigunbbang,2026-11-17
+R-pavilion-0015,pavilion,map,2024-12,친구·모임,모임,동료·거래처,,,dessert,lunch,weekday,,이름:딸기 디저트,,,,,yes,"다른 호텔들의 라운지와 견줘 응대가 더 친절해 늘 편하게 지낸다고 했고, 이번 철 딸기 메뉴 구성과 함박스테이크도 좋아 다시 오겠다고 했다.",borigunbbang,2026-11-17
+R-pavilion-0016,pavilion,map,2024-11,친구·모임,모임,동료·거래처,,,dessert,lunch,weekday,,,,,,,,"전망과 정갈한 음식, 친절한 직원 모두 만족스러웠다고 했다.",borigunbbang,2026-11-17
+R-pavilion-0017,pavilion,map,2024-03,친구·모임,모임,동료·거래처,,,dessert,lunch,weekend,,,,,,,,맛과 가격 모두 괜찮았다는 짧은 평이다.,borigunbbang,2026-11-17
+R-pavilion-0018,pavilion,map,2024-02,비즈니스·접대,,동료·거래처,,,dessert,lunch,weekend,,,,,,,yes,긍정적인 한 단어 평이다.,borigunbbang,2026-11-17
+R-pavilion-0024,pavilion,map,2022-12,,,,,,dessert,lunch,weekday,,,,,메뉴 구성,,,딸기 뷔페가 없어진 점은 아쉽지만 딸기철이면 떠오르는 곳이라며 디저트가 귀엽고 맛있었다고 했다.,borigunbbang,2026-11-17
+R-pavilion-0025,pavilion,map,2021-06,,,,,,dessert,dinner,weekend,,bingsu;이름:버거,,,,,,우유 빙수와 버거를 함께 먹는 조합이 좋았다고 했다.,borigunbbang,2026-11-17
+R-pavilion-0026,pavilion,map,2025-06,가족·친족,가족 행사,,,,dessert,dinner,weekend,,bingsu,,,,,yes,"시그니처 빙수와 망고 빙수를 주문했고 곁들임과 망고, 브라우니 케이크가 맛있었다고 했다. 떡 토핑을 더 잘게 썰어 주면 좋겠고 지난해 과일 크기가 더 마음에 들었다고 덧붙였다.",borigunbbang,2026-11-17
+R-pavilion-0028,pavilion,map,2024-01,가족·친족,가족 행사,부모와 성인 자녀,,,dessert,lunch,weekend,,,,,,,yes,어머니와 함께 갔고 가는 길의 풍경을 어머니가 무척 좋아했다. 디저트가 맛있고 직원들이 부담 없이 친절해 다시 오고 싶다고 했다.,borigunbbang,2026-11-17
+R-pavilion-0029,pavilion,map,2024-11,,,,,,dessert,lunch,weekday,,,,,가격,,,"로비 한가운데 자리가 예쁘지만 커피값이 매우 비싸다고 느꼈고, 음식값은 무난하며 서비스 값으로 여긴다고 했다.",borigunbbang,2026-11-17
+R-pavilion-0031,pavilion,map,2023-12,커플·기념일,,부부·연인,,,dessert,dinner,weekday,,,,,,,,생각보다 배부르고 맛있었다는 짧은 평이다.,borigunbbang,2026-11-17
+R-pavilion-0032,pavilion,map,2021-08,,,,,,dessert,lunch,weekend,,,,,가격;맛 기대 이하,,,과일 상태가 좋지 않아 비싼 값에 비해 아쉬웠다고 했다.,borigunbbang,2026-11-17
+R-pavilion-0033,pavilion,map,2024-01,커플·기념일,휴식·티타임,부부·연인,,,dessert,lunch,weekend,,이름:커피,,분위기·전망,,,yes,좋은 전망을 보며 커피를 마시려고 자주 찾는다고 했다.,borigunbbang,2026-11-17
+R-pavilion-0035,pavilion,map,2025-03,가족·친족,일상 외식,아이 동반 가족,,,dessert,lunch,weekday,,,,,,,,딸과 함께 와서 좋은 시간을 보냈고 어른 입맛에는 맛있었지만 아이들은 많이 먹지 못한 것 같다고 했다.,borigunbbang,2026-11-17
+R-pavilion-0036,pavilion,map,2024-12,친구·모임,일상 외식,친구,,,dessert,lunch,weekday,,,,,,,,전체적으로 무난했고 디저트보다는 한 끼 식사에 가깝다고 했다. 자리가 편안하고 분위기 덕에 오래 이야기를 나눴다고 했다.,borigunbbang,2026-11-17
+R-pavilion-0037,pavilion,map,2025-12,가족·친족,일상 외식,아이 동반 가족,,,dessert,dinner,weekday,guest,,,,가격,,,투숙객 할인은 좋았지만 비슷한 값의 다른 선택지가 많아 다시 올지는 고민해 봐야겠다고 했다.,borigunbbang,2026-11-17
+R-pavilion-0038,pavilion,map,2024-08,커플·기념일,,부부·연인,,,dessert,dinner,weekday,,,,,,,yes,긍정적인 한 단어 평이다.,borigunbbang,2026-11-17
+R-pavilion-0039,pavilion,map,2023-12,가족·친족,가족 행사,아이 동반 가족,,,dessert,dinner,weekend,,,,,,,,,borigunbbang,2026-11-17
+R-pavilion-0040,pavilion,map,2026-10,친구·모임,모임,동료·거래처,,,dessert,lunch,weekday,,이름:브런치,,,맛 기대 이하;서비스;주차·접근,,,"동료와 브런치를 예약해 갔으나 주차 자리가 없어 발레파킹을 했고, 응대가 늦고 예약석에서 자리를 옮기라는 등 서비스가 불쾌했다고 했다. 채소가 신선하지 않고 로비가 추워 음식이 금방 식어 실망했다고 적었다.",borigunbbang,2026-11-17
+R-pavilion-0043,pavilion,map,2023-02,가족·친족,,아이 동반 가족,,,dessert,lunch,weekday,,,,,,,,직원이 친절했고 아이들과 즐겁게 디저트를 먹었다고 했다.,borigunbbang,2026-11-17
+R-pavilion-0045,pavilion,map,2025-08,커플·기념일,기념일,부부·연인,,,dessert,dinner,weekend,,bingsu,,,,,,시그니처 빙수를 먹었다는 짧은 글이다.,borigunbbang,2026-11-17
+R-pavilion-0046,pavilion,map,2021-05,,,,,,dessert,dinner,weekend,,bingsu,,,,,,빙수가 아주 맛있었다는 짧은 평이다.,borigunbbang,2026-11-17
+R-pavilion-0048,pavilion,map,2023-10,,,,,,dessert,lunch,weekend,,fall-dessert-set,,,,,,가을 디저트 세트를 먹었고 모양이 창의적이고 섬세하며 맛도 과하게 달지 않아 즐거웠다고 했다.,borigunbbang,2026-11-17
+R-pavilion-0050,pavilion,map,2020-10,,,,,,dessert,lunch,weekday,,이름:아이스초코,,,,,,아이스 초코가 맛있고 호텔 분위기도 좋았다고 했다.,borigunbbang,2026-11-17
+R-pavilion-0051,pavilion,map,2023-10,,,,,,dessert,dinner,weekday,,,,,,,yes,긍정적인 한 단어 평이다.,borigunbbang,2026-11-17
+R-pavilion-0052,pavilion,map,2022-11,,,,,,dessert,dinner,weekend,,,,,가격,,,기대에 비해 값만큼의 만족이 없어 크게 실망했고 사진만 잘 나왔다며 권하지 않겠다고 했다.,borigunbbang,2026-11-17
+R-pavilion-0053,pavilion,map,2024-01,가족·친족,,아이 동반 가족,,,dessert,lunch,weekday,,이름:커피,,,가격;맛 기대 이하,,,가족과 함께 시간을 보냈고 장식과 서비스는 훌륭했지만 디저트와 커피가 값에 비해 아쉬웠다고 했다. 무료 주차 덕에 주변을 산책했고 전체적으로는 가 볼 만하다고 평했다.,borigunbbang,2026-11-17
+R-pavilion-0055,pavilion,map,2023-02,가족·친족,,아이 동반 가족,,,dessert,lunch,weekend,,,,,,,,급한 일로 예약 시각보다 한참 늦었는데도 직원이 친절히 맞아 주어 아이와 즐겁게 지냈다고 했다.,borigunbbang,2026-11-17
+R-pavilion-0056,pavilion,map,2024-06,,,,,,dessert,lunch,weekday,,,,,,,yes,직원이 친절하고 의자가 편하다는 짧은 평이다.,borigunbbang,2026-11-17
+R-pavilion-0057,pavilion,map,2026-01,커플·기념일,,부부·연인,,,dessert,lunch,weekend,,,,,,,,직원이 친절하고 분위기가 편안했으며 디저트가 맛있어 매우 만족했다고 했다. 피자는 식기 전에 먹으라고 권했다.,borigunbbang,2026-11-17
+R-pavilion-0059,pavilion,map,2023-12,커플·기념일,,부부·연인,,,dessert,lunch,weekend,,이름:딸기뷔페,,시즌 메뉴,메뉴 구성;양,,,딸기 뷔페인 줄 알고 기대했는데 정해진 구성이 나와 크게 실망했고 생딸기도 적었다고 했다. 다음에는 돈을 더 내더라도 뷔페로 가고 싶다고 했다.,borigunbbang,2026-11-17
+R-pavilion-0063,pavilion,map,2020-04,,,,,,dessert,dinner,weekday,,이름:커피,,,,,,커피가 맛있고 직원이 친절하다는 짧은 평이다.,borigunbbang,2026-11-17
+R-pavilion-0064,pavilion,map,2021-05,,,,,,dessert,dinner,weekend,,bingsu,,,맛 기대 이하,,,밀크티 맛 브라우니 빙수를 먹었는데 밀크티 맛이 아이스크림과 시럽뿐이라 사실상 브라우니 빙수에 가까워 아쉬웠다고 했다.,borigunbbang,2026-11-17
+R-pavilion-0065,pavilion,map,2020-09,,,,,,dessert,breakfast,weekday,,이름:아메리카노,,,대기;서비스,,yes,커피는 맛있지만 두 번 모두 미리 넣은 온라인 주문을 매장에서 놓쳐 픽업 때 기다려야 했다고 했다.,borigunbbang,2026-11-17
+R-pavilion-0066,pavilion,map,2023-04,,,,,,dessert,lunch,weekend,,이름:디저트 세트,,,,,,"디저트 세트가 최고였고 직원들의 친절함과 전문성, 청결하고 아름다운 공간 모두 훌륭했다고 했다.",borigunbbang,2026-11-17
+R-pavilion-0067,pavilion,map,2023-09,,,,,,dessert,lunch,weekend,,이름:차,,,,,,차를 맛있게 마셨다는 짧은 평이다.,borigunbbang,2026-11-17
+R-pavilion-0068,pavilion,map,2026-01,커플·기념일,,부부·연인,,,dessert,lunch,weekend,,이름:커피,,,,,,호텔 라운지답게 커피값이 보통 카페를 웃돌고 봄철에는 딸기 테마의 디저트와 티 세트를 판다고 소개했다. 친절하고 깨끗하며 커피도 맛있다고 했다.,borigunbbang,2026-11-17
+R-pavilion-0069,pavilion,map,2026-02,,,,,,dessert,dinner,weekend,,이름:커피,,,,,,다른 업장에서 식사한 뒤 들러 커피를 마셨다는 짧은 글이다.,borigunbbang,2026-11-17
+R-pavilion-0071,pavilion,map,2026-03,친구·모임,모임,친구,,,dessert,lunch,weekday,,이름:커피,,,,,,"친구 생일을 축하하러 평소 가 보고 싶던 곳에 갔고, 디저트 외에 피자도 나와 색다르게 즐겼다. 양이 많아 남은 것은 포장해 갔다고 했다.",borigunbbang,2026-11-17
+R-pavilion-0072,pavilion,map,2024-04,친구·모임,모임,친구,,,dessert,lunch,weekday,,,,분위기·전망;시즌 메뉴,메뉴 구성,,,벚꽃 구경을 겸해 딸기 시즌 끝무렵에 갔다. 디저트가 느끼한 쪽에 치우치고 겹치는 맛이 있어 아쉬웠지만 좋은 시간을 보냈다고 했다.,borigunbbang,2026-11-17
+R-pavilion-0073,pavilion,map,2025-01,친구·모임,모임,친구,,,dessert,dinner,weekend,,,,,,,,좋았다는 짧은 평이다.,borigunbbang,2026-11-17
+R-pavilion-0075,pavilion,map,2024-12,친구·모임,모임,친구,,,dessert,lunch,weekday,,,,,,,,긍정적인 한 단어 평이다.,borigunbbang,2026-11-17
+R-pavilion-0076,pavilion,map,2024-04,,,,,,dessert,dinner,weekend,,이름:빵,,,,,yes,빵이 맛있다는 짧은 평이다.,borigunbbang,2026-11-17
+R-pavilion-0077,pavilion,map,2023-12,혼자 휴식,일상 외식,혼자,,,dessert,lunch,weekday,,이름:Lovely Strawberry 디저트 플레이트;bingsu,,,,,yes,딸기 플레이트에 딸기 빙수까지 먹었고 새 트레이와 모양이 예쁘며 맛도 좋았다고 했다. 매니저들이 음료를 적극적으로 채워 주어 고마웠다고 했다.,borigunbbang,2026-11-17
+R-pavilion-0078,pavilion,map,2023-02,,,,,,dessert,lunch,weekday,,이름:디저트 셋트,,,메뉴 구성;양,,yes,딸기 뷔페가 다시 열리길 바라며 대신 세트 메뉴로 서운함을 달랬다고 했다. 생딸기를 더 넉넉히 주면 좋겠다고 했다.,borigunbbang,2026-11-17
+R-pavilion-0079,pavilion,map,2024-01,커플·기념일,기념일,부부·연인,,,dessert,dinner,weekend,,이름:딸기 디저트,,,,,,남편과 함께 딸기 디저트를 먹으러 왔고 딸기 한 가지로 여러 디저트를 만든 점이 놀라웠다고 했다.,borigunbbang,2026-11-17
+R-pavilion-0080,pavilion,map,2025-01,커플·기념일,,부부·연인,,,dessert,dinner,weekday,,,,,,,,음식과 분위기 모두 좋았다는 짧은 평이다.,borigunbbang,2026-11-17
+R-pavilion-0081,pavilion,map,2021-06,,,,,,dessert,lunch,weekend,,,,,,,yes,맛을 칭찬한 한 줄 평이다.,borigunbbang,2026-11-17
+R-pavilion-0082,pavilion,map,2026-02,커플·기념일,,부부·연인,,,dessert,lunch,weekday,,,,,,,,연인과 데이트로 방문해 매우 만족했다는 짧은 평이다.,borigunbbang,2026-11-17
+R-pavilion-0083,pavilion,map,2023-09,가족·친족,휴식·티타임,아이 동반 가족,,,dessert,dinner,weekday,,,,,,,yes,아기와 잠시 쉬다 왔는데 유모차 둘 자리까지 챙겨 주는 등 직원이 친절했다고 했다.,borigunbbang,2026-11-17
+R-pavilion-0084,pavilion,map,2024-04,친구·모임,일상 외식,동료·거래처,,,dessert,lunch,weekday,,,,,,,,예약하고 갔고 직원이 친절하며 디저트가 예쁘고 맛있었다고 했다. 처음엔 비싸다고 여겼지만 품질과 양을 보면 값어치를 한다며 기념일에 어울리겠다고 했다.,borigunbbang,2026-11-17
+R-pavilion-0086,pavilion,map,2024-12,친구·모임,,친구,,,dessert,lunch,weekday,,,,,,,,"샐러드와 함박스테이크, 디저트까지 맛있게 먹으며 즐거운 시간을 보냈다고 했다.",borigunbbang,2026-11-17
+R-pavilion-0087,pavilion,map,2025-03,친구·모임,모임,친구,,,dessert,lunch,weekend,,,,,,,,예약한 덕에 기다리지 않고 들어갔고 빵류와 생딸기 등 과일이 특히 달고 맛있었다고 했다.,borigunbbang,2026-11-17
+R-pavilion-0088,pavilion,map,2023-10,가족·친족,,,,,dessert,lunch,weekend,,,,,,,yes,디저트가 먹기 아까울 만큼 예뻐 사진을 많이 찍었고 가족과 즐거운 시간을 보냈다며 추천했다.,borigunbbang,2026-11-17
+R-pavilion-0090,pavilion,map,2024-04,친구·모임,,친구,,,dessert,lunch,weekday,,,,,맛 기대 이하;서비스,,yes,"디저트는 예쁘지만 맛은 평범했고, 라운지 분위기 덕에 친구와 오래 이야기하기 좋아 내년에 다시 오겠다고 했다. 덜어 먹을 집게와 나이프가 기본으로 없어 불편했다고 했다.",borigunbbang,2026-11-17
+R-pavilion-0091,pavilion,map,2021-04,,,,,,dessert,dinner,weekday,,이름:커피,,,,,,디저트와 커피가 맛있었고 할인 행사가 있으면 다시 가고 싶다고 했다.,borigunbbang,2026-11-17
+R-pavilion-0092,pavilion,map,2024-03,친구·모임,모임,친구,,,dessert,lunch,weekday,,,,,,,yes,"해마다 다시 찾는 손님으로, 매년 새로워지는 디저트의 모양과 맛, 직원의 친절에 모두 만족했다.",borigunbbang,2026-11-17
+R-pavilion-0093,pavilion,map,2025-02,가족·친족,,부모와 성인 자녀,,,dessert,lunch,weekday,,,,,,,,세트에 고기 요리까지 함께 나와 만족했고 편하게 쉬다 왔다는 짧은 소감이다.,borigunbbang,2026-11-17
+R-pavilion-0094,pavilion,map,2023-12,,,,,,dessert,lunch,weekday,,,,,,,yes,빵 종류가 늘어난 뒤로는 디저트와 함께 빵도 꼭 먹게 된다는 여러 번 온 손님의 소감이다.,borigunbbang,2026-11-17
+R-pavilion-0095,pavilion,map,2024-04,커플·기념일,기념일,부부·연인,,,dessert,lunch,weekday,,,,,,,,호텔에 묵기만 하다가 처음 이용했는데 직원이 친절하고 값도 적당했으며 예전 뷔페보다 차분해서 매우 만족했다.,borigunbbang,2026-11-17
+R-pavilion-0096,pavilion,map,2021-09,,,,,,dessert,dinner,weekend,,,,,가격,,,양이 넉넉해 놀랐고 한 번은 가 볼 만하지만 값이 조금 낮으면 더 좋겠다고 했다.,borigunbbang,2026-11-17
+R-pavilion-0098,pavilion,map,2025-06,커플·기념일,,부부·연인,,,dessert,dinner,weekend,,bingsu,,,가격,,,"한여름에 빙수를 먹었는데 시원한 실내와 부드러운 얼음이 좋았고, 값은 높지만 맛과 분위기에 만족했다.",borigunbbang,2026-11-17
+R-pavilion-0099,pavilion,map,2024-11,친구·모임,모임,동료·거래처,,,dessert,lunch,weekday,,,,,,,,직원의 친절과 서비스 덕분에 편안한 시간을 보냈다는 칭찬이다.,borigunbbang,2026-11-17
+R-pavilion-0100,pavilion,map,2024-06,커플·기념일,,부부·연인,,,dessert,dinner,weekday,,,,,,,yes,좋았다는 한마디만 남긴 후기다.,borigunbbang,2026-11-17
+R-pavilion-0101,pavilion,map,2024-03,가족·친족,가족 행사,아이 동반 가족,,,dessert,lunch,weekend,,,,,,,,좋았다는 한마디만 남긴 후기다.,borigunbbang,2026-11-17
+R-pavilion-0102,pavilion,map,2023-12,,,,,,dessert,dinner,weekend,,,,,맛 기대 이하,,yes,딸기 자체의 단맛이 약해 아쉬웠고 연유나 설탕을 곁들인 부분은 맛있었다.,borigunbbang,2026-11-17
+R-pavilion-0103,pavilion,map,2025-04,가족·친족,가족 행사,3대 가족,,,dessert,lunch,weekend,,,,,,,,서비스가 좋고 맛도 무난했다는 짧은 평가다.,borigunbbang,2026-11-17
+R-pavilion-0104,pavilion,map,2023-04,,,,,,dessert,lunch,weekend,,이름:빵;이름:아이스크림,,,,,,"라운지의 빵, 그리고 아이스크림 맛을 크게 칭찬했다.",borigunbbang,2026-11-17
+R-pavilion-0105,pavilion,map,2025-08,,,,,,dessert,dinner,weekend,,,,,,,yes,다른 곳에서 보기 힘든 메뉴가 있다는 짧은 평가다.,borigunbbang,2026-11-17
+R-pavilion-0106,pavilion,map,2026-01,친구·모임,모임,친구,,,dessert,lunch,weekday,,이름:커피,,,,,,커피 맛이 좋았다는 짧은 평가다.,borigunbbang,2026-11-17
+R-pavilion-0107,pavilion,map,2025-04,,,,,,dessert,dinner,weekday,,이름:커피,,,,,,전망이 없고 실내 장식이 낡은 느낌이라 취향에 맞지 않았지만 커피와 직원 응대는 괜찮았다.,borigunbbang,2026-11-17
+R-pavilion-0108,pavilion,map,2026-04,친구·모임,모임,친구,,,dessert,lunch,weekday,,이름:브런치;이름:커피,,,,,yes,"정갈한 브런치로 배불리 먹고 커피도 다시 채워 줘서 좋았으며, 평일 벚꽃길 산책이 특히 좋아 내년 봄에도 오고 싶다고 했다.",borigunbbang,2026-11-17
+R-pavilion-0109,pavilion,map,2023-12,친구·모임,모임,,,,dessert,breakfast,weekend,,이름:차,,,,,,"연말 모임으로 저녁을 먹은 뒤 들러 디저트와 차를 즐겼고, 남은 것은 싸 가서 집에서 마저 즐겼다.",borigunbbang,2026-11-17
+R-pavilion-0110,pavilion,map,2022-12,커플·기념일,기념일,부부·연인,,,dessert,lunch,weekend,,,,,가격;맛 기대 이하,,,"결혼기념일에 찾았지만 빵이 마르고 전반적으로 맛이 없어 겉모양에만 신경 쓴 느낌이었고, 값을 생각하면 권하지 않는다고 했다.",borigunbbang,2026-11-17
+R-pavilion-0111,pavilion,map,2024-03,가족·친족,휴식·티타임,아이 동반 가족,,,dessert,lunch,weekend,,,,,,,,아이를 데리고 디저트를 즐긴 방문이다.,borigunbbang,2026-11-17
+R-pavilion-0113,pavilion,map,2024-04,친구·모임,일상 외식,친구,,,dessert,lunch,weekday,,,,,,,,디저트 맛과 직원 친절 모두 좋았다는 짧은 평가다.,borigunbbang,2026-11-17
+R-pavilion-0114,pavilion,map,2024-06,,,,,,dessert,lunch,weekday,,,,,,,yes,값에 비해 디저트 양이 넉넉하다는 평가다.,borigunbbang,2026-11-17
+R-pavilion-0115,pavilion,map,2023-01,,,,,,dessert,lunch,weekend,,,,,대기,,,"예약했는데도 자리가 없어 잠시 기다려야 했고, 사진은 예쁘게 나오며 맛은 예상한 만큼 달았다.",borigunbbang,2026-11-17
+R-pavilion-0116,pavilion,map,2023-10,,,,,,dessert,lunch,weekend,,이름:케잌,,,,,,케이크가 부드럽고 맛있었다는 짧은 평가다.,borigunbbang,2026-11-17
+R-pavilion-0117,pavilion,map,2026-01,커플·기념일,,부부·연인,,,dessert,lunch,weekday,,,,,,,,모양과 맛이 좋고 직원이 친절하며 사진이 잘 나온다는 칭찬이다.,borigunbbang,2026-11-17
+R-pavilion-0118,pavilion,map,2024-11,,,,,,dessert,lunch,weekend,,이름:커피,,,대기,,,주말 오후에 조금 기다렸지만 응대와 커피가 모두 좋았다.,borigunbbang,2026-11-17
+R-pavilion-0119,pavilion,map,2025-12,친구·모임,모임,친구,,,dessert,dinner,weekday,,,,,,,,"디저트도 맛있고 늦게까지 운영해서 좋았지만, 다른 고급 호텔과 달리 라이브 공연이 없어 아쉬웠다.",borigunbbang,2026-11-17
+R-pavilion-0120,pavilion,map,2023-03,가족·친족,일상 외식,아이 동반 가족,,,dessert,lunch,weekday,,,,분위기·전망,,,,"오후 차 시간을 즐기기 좋고 딸기 철을 특히 권하며, 조용하고 고전적인 호텔 분위기 때문에 자주 온다고 했다.",borigunbbang,2026-11-17
+R-pavilion-0121,pavilion,map,2023-09,,,,,,dessert,lunch,weekend,,fall-dessert-set,,시즌 메뉴,,,yes,"가을 디저트 세트를 먹으러 왔는데 전년보다 작품 같은 메뉴가 많아 보기에도 좋고 맛도 좋았으며, 가벼운 식사 메뉴도 있어 한 끼로도 괜찮다고 했다.",borigunbbang,2026-11-17
+R-pavilion-0122,pavilion,map,2024-01,친구·모임,일상 외식,동료·거래처,,,dessert,lunch,weekday,,이름:딸기뷔페;이름:케이크,,,가격,,,"딸기 뷔페를 다녀오는 길에 케이크를 사 왔는데 모양도 맛도 좋았고, 값은 높지만 가끔 먹기엔 괜찮겠다고 했다.",borigunbbang,2026-11-17
+R-pavilion-0124,pavilion,map,2023-12,가족·친족,일상 외식,아이 동반 가족,,,dessert,lunch,weekday,,이름:커피,,,대기,,yes,"연말이라 꽤 오래 기다려 들어갔고, 연말 장식과 커피가 좋아 즐거운 시간을 보냈다.",borigunbbang,2026-11-17
+R-pavilion-0125,pavilion,map,2020-08,,,,,,dessert,lunch,weekday,,,,,,,yes,빠르고 편하게 이용했다는 짧은 평가다.,borigunbbang,2026-11-17
+R-pavilion-0126,pavilion,map,2023-11,가족·친족,,아이 동반 가족,,,dessert,lunch,weekday,,이름:클라우드케이크,,,주차·접근,,yes,"멀어서 가지 않던 곳을 근처 병원 일정 김에 처음 들렀는데, 전망과 고급스러움은 덜해도 편했고 친절과 귀여운 디저트가 좋아 다음 딸기 철 방문을 기대했다.",borigunbbang,2026-11-17
+R-pavilion-0127,pavilion,map,2024-09,가족·친족,,아이 동반 가족,,,dessert,lunch,weekday,,,,,,,,좋았다는 한마디만 남긴 후기다.,borigunbbang,2026-11-17
+R-pavilion-0128,pavilion,map,2023-09,,,,,,dessert,lunch,weekday,,이름:커피,,,,,yes,"커피와 디저트, 곁들여 주는 쿠키가 맛있고 직원도 친절했다는 칭찬이다.",borigunbbang,2026-11-17
+R-pavilion-0130,pavilion,map,2025-04,가족·친족,여행·호캉스,아이 동반 가족,,,dessert,dinner,weekend,,,,,,,,,borigunbbang,2026-11-17
+R-pavilion-0131,pavilion,map,2024-01,친구·모임,모임,친구,,,dessert,lunch,weekend,,이름:커피,,,메뉴 구성,,,친구 생일에 찾았고 커피가 맛있어 만족했지만 샌드위치 종류가 더 있으면 좋겠다고 했다.,borigunbbang,2026-11-17
+R-pavilion-0132,pavilion,map,2024-02,가족·친족,일상 외식,아이 동반 가족,,,dessert,dinner,weekday,,bingsu,,,,,,딸기 빙수 맛과 실내 분위기 모두 좋았다는 평가다.,borigunbbang,2026-11-17
+R-pavilion-0133,pavilion,map,2023-12,커플·기념일,,부부·연인,,,dessert,lunch,weekend,,,,,,,,,borigunbbang,2026-11-17
+R-pavilion-0134,pavilion,map,2024-12,친구·모임,모임,동료·거래처,,,dessert,dinner,weekend,,,,분위기·전망,,,yes,"평소 낮에 만나던 일행이 연말 장식을 보려고 늦은 오후에 예약해 왔고, 디저트와 고기 요리, 딸기 모두 만족해 내년에도 오겠다고 했다.",borigunbbang,2026-11-17
+R-pavilion-0135,pavilion,map,2026-03,친구·모임,모임,동료·거래처,,,dessert,lunch,weekday,,이름:브런치,,,맛 기대 이하,,,직원은 친절했지만 음식은 평범했고 브런치가 식은 채 나와 딱딱했다.,borigunbbang,2026-11-17
+R-pavilion-0136,pavilion,map,2023-12,,,,,,dessert,lunch,weekend,,,,,,,yes,명성에 걸맞다는 짧은 평가다.,borigunbbang,2026-11-17
+R-pavilion-0137,pavilion,map,2020-09,,,,,,dessert,lunch,weekday,,,,,,,yes,늘 빨리 준비해 준다는 짧은 평가다.,borigunbbang,2026-11-17
+R-pavilion-0138,pavilion,map,2025-01,커플·기념일,,부부·연인,,,dessert,lunch,weekday,,이름:딸기디저트,,,맛 기대 이하;메뉴 구성,,,함박스테이크와 딸기 디저트는 대체로 만족했지만 채소가 적고 단맛이 강하며 빵이 건조한 점을 아쉬워했다. 커피 리필과 남은 음식 포장은 고마워했다.,borigunbbang,2026-11-17
+R-pavilion-0140,pavilion,map,2026-02,커플·기념일,기념일,부부·연인,,,dessert,dinner,weekend,,,,,,,,"연인과 기념일에 찾았는데 구성과 맛, 차림새가 모두 좋고 이야기 나누기에도 알맞아 연인도 크게 만족했다.",borigunbbang,2026-11-17
+R-pavilion-0141,pavilion,map,2021-06,,,,,,dessert,dinner,weekday,,이름:자몽 타르트,,,,,,자몽 타르트가 아주 맛있었다는 평가다.,borigunbbang,2026-11-17
+R-pavilion-0142,pavilion,map,2020-09,,,,,,dessert,dinner,weekday,,이름:빵,,,,,yes,빵이 맛있는 곳이라는 짧은 평가다.,borigunbbang,2026-11-17
+R-pavilion-0143,pavilion,map,2026-01,커플·기념일,,부부·연인,,,dessert,lunch,weekend,,,,,주차·접근,,,집에서 멀지만 기분을 바꾸러 가기에 좋은 곳이라고 했다.,borigunbbang,2026-11-17
+R-pavilion-0144,pavilion,map,2024-06,,일상 외식,,,,dessert,lunch,weekend,,bingsu,,시즌 메뉴,,,,"드라이브 길에 망고 빙수가 먹고 싶어 들렀는데 멜론 쪽이 더 맛있었고, 값에 비해 구성은 괜찮다고 했다.",borigunbbang,2026-11-17
+R-pavilion-0145,pavilion,map,2025-12,커플·기념일,,부부·연인,,,dessert,lunch,weekend,,이름:딸기 디저트,,,,,,딸기 디저트가 모두 맛있었고 그중 생딸기가 가장 좋았다며 메뉴별로 순위를 매겼다.,borigunbbang,2026-11-17
+R-pavilion-0146,pavilion,map,2026-04,친구·모임,모임,,,,dessert,lunch,weekday,,,,,,,,특별한 메뉴로 즐거운 시간을 보냈고 자신이 초대한 사람들도 매우 만족했다.,borigunbbang,2026-11-17
+R-pavilion-0148,pavilion,map,2024-07,커플·기념일,,부부·연인,,,dessert,dinner,weekday,,,,,,,,좋았다는 한마디만 남긴 후기다.,borigunbbang,2026-11-17
+R-pavilion-0149,pavilion,map,2022-01,,,,,,dessert,lunch,weekend,,이름:딸기디저트세트,,,,,,혹시 몰라 예약하고 갔는데 딸기 디저트 세트가 맛있고 직원도 매우 친절해 기분 좋게 다녀왔다.,borigunbbang,2026-11-17
+R-pavilion-0150,pavilion,map,2023-11,,선물 구매,,,,dessert,dinner,weekday,,이름:케이크,,,,,yes,아내 생일 케이크로 샀는데 아주 맛있어서 케이크가 필요할 때 한 번 사 보길 권했다.,borigunbbang,2026-11-17
+R-pavilion-0151,pavilion,map,2024-04,커플·기념일,여행·호캉스,부부·연인,,,dessert,lunch,weekend,guest,이름:브런치,,,맛 기대 이하,,,호텔에 들어가기 전 낮에 가볍게 브런치를 먹었는데 빵 두 가지 말고는 모두 별로였다.,borigunbbang,2026-11-17
+R-pavilion-0153,pavilion,map,2023-12,커플·기념일,,부부·연인,,,dessert,lunch,weekday,,,,,,,,한적한 곳을 좋아해 평일 낮의 조용함에 만족했고 음료와 디저트 맛은 무난했다.,borigunbbang,2026-11-17
+R-pavilion-0154,pavilion,map,2023-12,커플·기념일,,부부·연인,,,dessert,lunch,weekend,,이름:빵,,,,,,빵이 맛있어서 좋았다는 짧은 평가다.,borigunbbang,2026-11-17
+R-pavilion-0155,pavilion,map,2024-07,혼자 휴식,,혼자,,,dessert,lunch,weekend,,이름:케잌,,,,,,특별한 날 케이크를 주문해 함께 먹었는데 요즘 동네 빵집 값과 견주면 값어치가 좋다고 했다.,borigunbbang,2026-11-17
+R-pavilion-0156,pavilion,map,2025-02,친구·모임,모임,,,,dessert,lunch,weekday,,,,,,,yes,늘 친절하고 편해서 좋은 시간을 보낸다는 단골의 짧은 평가다.,borigunbbang,2026-11-17
+R-pavilion-0157,pavilion,map,2024-03,친구·모임,일상 외식,친구,,,dessert,lunch,weekday,,,,,,,,다른 식당 이름 하나만 적혀 있고 평가나 상황은 없다.,borigunbbang,2026-11-17
+R-pavilion-0158,pavilion,map,2023-03,가족·친족,,아이 동반 가족,,,dessert,dinner,weekend,,,,,,,,맛도 좋고 아이들도 즐거워해서 권한다고 했다.,borigunbbang,2026-11-17
+R-pavilion-0160,pavilion,map,2026-01,커플·기념일,,부부·연인,,,dessert,lunch,weekday,,이름:커피,,,,,yes,디저트와 커피 맛이 기대보다 좋아 놀랐고 다시 오겠다고 했다.,borigunbbang,2026-11-17
+R-pavilion-0161,pavilion,map,2021-08,,,,,,dessert,dinner,weekday,,bingsu,,,맛 기대 이하,,,지난번 오후 차 세트는 맛있었지만 이번에 먹은 빙수는 평범했다.,borigunbbang,2026-11-17
+R-pavilion-0162,pavilion,map,2023-01,,,,,,dessert,dinner,weekend,,이름:빵,,,,,,빵이 모두 맛있다는 짧은 평가다.,borigunbbang,2026-11-17
+R-pavilion-0163,pavilion,map,2026-03,친구·모임,모임,동료·거래처,,,dessert,lunch,weekday,,,,,,,,값어치가 좋고 아주 만족했다는 짧은 평가다.,borigunbbang,2026-11-17
+R-pavilion-0164,pavilion,map,2020-04,,,,,,dessert,dinner,weekend,,이름:분식,,,,,yes,늘 그렇듯 좋았고 가벼운 음식이 맛있다는 짧은 평가다.,borigunbbang,2026-11-17
+R-pavilion-0165,pavilion,map,2023-02,가족·친족,,아이 동반 가족,,,dessert,dinner,weekday,,,,,서비스;양,,,"로비 카페라 공간이 트여 있고 어두워 기대보다 별로였고, 먹고도 따로 저녁을 먹어야 했으며, 아기 의자는 챙겨 줬지만 직원이 수유실 위치를 잘못 안내해 아쉬웠다.",borigunbbang,2026-11-17
+R-pavilion-0166,pavilion,map,2026-01,친구·모임,모임,친구,,,dessert,lunch,weekend,,이름:애프터눈티세트,,분위기·전망,,,yes,"예쁜 곳에서 기분을 내려고 친구와 찾았는데 친절, 편한 좌석, 식사 메뉴까지 든 구성과 딸기 맛 모두 기대 이상이라 배우자와도 오고 싶다고 했다.",borigunbbang,2026-11-17
+R-pavilion-0167,pavilion,map,2022-12,,,,,,dessert,breakfast,weekday,,,,,,,yes,디저트가 맛있다는 짧은 평가다.,borigunbbang,2026-11-17
+R-pavilion-0168,pavilion,map,2024-09,친구·모임,모임,동료·거래처,,,dessert,lunch,weekday,,,,,,,,맛있다는 짧은 평가다.,borigunbbang,2026-11-17
+R-pavilion-0169,pavilion,map,2026-03,가족·친족,가족 행사,부모와 성인 자녀,,,dessert,lunch,weekday,,이름:딸기뷔페,,,,,yes,딸기 뷔페에 크게 만족했고 조용히 대화하기 좋았으며 단 음식과 커피 맛도 좋아 다시 오겠다고 했다.,borigunbbang,2026-11-17
+R-pavilion-0170,pavilion,map,2026-03,커플·기념일,,부부·연인,,,dessert,lunch,weekend,,이름:딸기 디저트,,,,,,직원이 친절하고 분위기가 좋으며 여러 가지 딸기 디저트를 맛볼 수 있어 좋았다.,borigunbbang,2026-11-17
+R-pavilion-0172,pavilion,map,2020-04,,,,,,dessert,dinner,weekday,,,,,메뉴 구성;양,,,"음식 가짓수는 많지 않아도 맛이 좋고 직원이 친절했으며, 다음 해에는 더 넉넉하게 내 주길 바랐다.",borigunbbang,2026-11-17
+R-pavilion-0173,pavilion,map,2025-04,친구·모임,휴식·티타임,동료·거래처,,,dessert,lunch,weekday,,이름:애프터눈티,,,맛 기대 이하;메뉴 구성,,,"오후 차 세트를 기대하고 갔는데 곁들임 음식은 맛있었지만 정작 차에 신경을 덜 쓴 듯해 아쉬웠고, 모두 단 메뉴라 남은 것은 싸 왔다.",borigunbbang,2026-11-17
+R-pavilion-0174,pavilion,map,2024-11,비즈니스·접대,,동료·거래처,,,dessert,lunch,weekday,,,,,,,,좋았다는 한마디만 남긴 후기다.,borigunbbang,2026-11-17
+R-pavilion-0175,pavilion,map,2020-04,,,,,,dessert,dinner,weekend,,이름:딸기뷔페,,,,,,"해마다 오는 딸기 뷔페를 감염병 걱정 속에 찾았는데 위생 관리와 띄운 좌석 덕에 안심했고, 벚꽃과 딸기를 즐기며 쉬다 왔다.",borigunbbang,2026-11-17
+R-pavilion-0176,pavilion,map,2024-03,친구·모임,모임,친구,,,dessert,lunch,weekday,,이름:에프터눈티,,,,,yes,오후 차 세트가 해마다 나아지는 것 같고 딸기도 아주 맛있었다.,borigunbbang,2026-11-17
