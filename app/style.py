@@ -37,12 +37,18 @@ CSS = """
 [data-testid="stButtonGroup"] button[aria-pressed="true"] * { background-color:transparent !important; }
 [data-testid="stSlider"] [role="slider"] { background:#4f46e5; }
 
+/* 지우는 버튼이 두 개로 보이지 않게 한다 (11-17, T204). 페르소나는 이름표마다 있는 × 로 빼고,
+   계절(달)은 "정하지 않음"을 고른다. 그래서 칸 오른쪽의 "전부 지우기"·"값 지우기" 버튼은 숨긴다. */
+[data-testid="stMultiSelect"] button[aria-label="Clear all"],
+[data-testid="stSelectbox"] button[aria-label="Clear value"] { display:none !important; }
+
 /* 페르소나 고르기: 이름이 길어도 잘리지 않게 태그가 줄을 바꾼다 */
-[data-testid="stMultiSelect"] span[data-tag] { background:#4f46e5; max-width:100% !important; height:auto !important;
+[data-testid="stMultiSelect"] span[data-tag] { background:#4f46e5; font-size:13px; max-width:100% !important; height:auto !important;
   padding-top:3px; padding-bottom:3px; white-space:normal !important; }
 [data-testid="stMultiSelect"] span[data-tag] span { white-space:normal !important; overflow:visible !important; text-overflow:clip !important; max-width:none !important; }
 
-/* 왼쪽 변수 패널 */
+/* 왼쪽 변수 패널. 창이 좁아도 페르소나 이름표가 접히지 않을 만큼의 폭은 지킨다 (T204) */
+[data-testid="stColumn"]:has(.st-key-sim_panel) { min-width:270px; }
 .st-key-sim_panel { border-radius:14px !important; background:rgba(148,163,184,.05); }
 .st-key-sim_panel [data-testid="stVerticalBlock"] { gap:.55rem; }
 .st-key-sim_panel [data-testid="stWidgetLabel"] p { font-size:.8rem; opacity:.75; }
@@ -60,8 +66,10 @@ CSS = """
 .sim-chip.base b { background:rgba(100,116,139,.18); }
 .sim-chip.var b { background:rgba(99,102,241,.16); color:#6366f1; }
 
-/* 고른 페르소나와 결과가 없을 때 */
-.sim-personas { display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:8px; margin:.25rem 0 .75rem; }
+/* 고른 페르소나와 결과가 없을 때. 카드는 이름 한 줄, 설명 한 줄로 두고 넘치면 … 로 줄인다 (전체는 마우스를 올리면 보인다, T204) */
+.sim-personas { display:grid; grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr)); gap:8px; margin:.25rem 0 .75rem; }
+.sim-persona .tx { min-width:0; }
+.sim-persona .nm, .sim-persona .ln { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .sim-persona { display:flex; gap:10px; align-items:center; padding:10px 12px; border-radius:12px;
   border:1px solid rgba(148,163,184,.3); background:rgba(148,163,184,.05); }
 .sim-persona .ic { width:38px; height:38px; flex:none; border-radius:10px; display:flex; align-items:center; justify-content:center; background:rgba(99,102,241,.14); }

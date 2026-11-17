@@ -126,6 +126,7 @@ def test_simulator_tab_renders_with_month_and_weather_marked_next_step():
         month.set_value(12).run()
         assert not app.exception
         assert any("그 달에 파는 메뉴" in c.value for c in app.caption)
+        assert any("12월로 계산" in c.value for c in app.caption)  # 계절은 대표 달 하나로 돈다
     assert any(b.label == "기본 시나리오와 비교하기" for b in app.button)
 
 
