@@ -43,6 +43,7 @@ from engine.llm import (
     load_prompt,
     make_provider,
     prompt_path,
+    receiver_of,
     response_schema,
     settings_from_env,
     user_message,
@@ -69,6 +70,7 @@ PROVIDER, MODEL = "fake", "fake-model"
 ELDERS, KIDS = "family-elders", "family-kids"
 ELDERS_DINNER = f"{ELDERS}__{DINNER}"
 LLM_ENV = (
+    "BASE_PROFILE_CONFIRMED_FOR",
     "LLM_PROVIDER",
     "LLM_MODEL",
     "LLM_CALL_LIMIT",
@@ -607,6 +609,20 @@ def test_env_example_can_still_be_pointed_at_openai():
         "test-key",
         "json_schema",
     )
+
+
+def test_receiver_is_the_provider_and_for_an_address_also_its_host():
+    """요약을 보내도 된다는 확인은 받는 곳의 이름으로 적는다 (T115). 주소로 받는 곳이 갈리는 공급자는 호스트까지 든다."""
+    assert receiver_of(LlmSettings("anthropic", "m", 1), {}) == "anthropic"
+    # 주소가 적혀 있어도 그 공급자가 쓰지 않으면 보지 않는다.
+    assert receiver_of(LlmSettings("claude-code", "m", 1), {"LLM_BASE_URL": "https://api.openai.com/v1"}) == "claude-code"
+    openai = LlmSettings("openai-compatible", "m", 1)
+    assert receiver_of(openai, {"LLM_BASE_URL": "https://api.openai.com/v1"}) == "openai-compatible:api.openai.com"
+    # 호스트만 본다: 대소문자, 포트, 경로는 받는 곳을 가르지 않는다.
+    assert receiver_of(openai, {"LLM_BASE_URL": " https://API.OpenAI.com:443/v1/ "}) == "openai-compatible:api.openai.com"
+    assert receiver_of(openai, {"LLM_BASE_URL": "http://localhost:11434/v1"}) == "openai-compatible:localhost"
+    # 주소가 없으면 어느 확인과도 맞지 않는 이름이 된다 (공급자의 이름만 적은 확인으로는 통하지 않는다).
+    assert receiver_of(openai, {}) == "openai-compatible:"
 
 
 def test_settings_are_read_from_the_environment():

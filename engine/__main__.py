@@ -8,6 +8,7 @@
 """
 
 import argparse
+import os
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -17,8 +18,8 @@ from dotenv import load_dotenv
 from engine.formats.io import read_csv, read_model
 from engine.formats.run import LEDGER_COLUMNS, RunRecord
 from engine.formats.scenario import BASELINE_ID
-from engine.llm import LlmFatal, make_provider, settings_from_env
-from engine.runner import latest_baseline_run, month_label, run, runs_folder
+from engine.llm import LlmFatal, make_provider, receiver_of, settings_from_env
+from engine.runner import BASE_PROFILE_CONFIRMED_ENV, latest_baseline_run, month_label, run, runs_folder
 
 EXIT_OK, EXIT_FAILED, EXIT_STOPPED_BY_LIMIT = 0, 1, 2
 
@@ -67,6 +68,7 @@ def main(argv: list[str] | None = None) -> int:
         "--base-profile",
         choices=("bucketed", "raw", "none"),
         help="기본 데이터의 요약을 LLM 에 보내는 방식 (--data private 만). 적지 않으면 bucketed (범주로 바꿔 보냄). "
+        f"요약을 보내려면 .env 의 {BASE_PROFILE_CONFIRMED_ENV} 에 확인한 받는 곳의 이름이 적혀 있어야 한다. "
         "기준이 아닌 상황은 기준 실행의 방식을 따른다",
     )
     parser.add_argument(
@@ -111,6 +113,9 @@ def main(argv: list[str] | None = None) -> int:
             call_limit=call_limit,
             base_profile_mode=args.base_profile,
             month=args.month,
+            # 기본 데이터의 요약을 보내도 된다고 확인한 받는 곳 (.env). 지금 받는 곳과 다르면 요약을 보내는 실행을 멈춘다.
+            base_profile_confirmed_for=os.environ.get(BASE_PROFILE_CONFIRMED_ENV, "").strip() or None,
+            receiver=receiver_of(settings),
         )
     except (LlmFatal, FileNotFoundError, FileExistsError, ValueError) as exc:
         print(f"돌리지 못했다: {exc}", file=sys.stderr)

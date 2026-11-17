@@ -1,0 +1,261 @@
+{
+  "format_version": 1,
+  "persona_id": "family-kids",
+  "name": "아이를 데려온 가족",
+  "customer_group": "가족·친족",
+  "share_in_group": {
+    "value": 0.41,
+    "grade": "review",
+    "basis": "네 업장 후기(번호 0001 ~ 2999)의 가족·친족 가운데 동행이 적힌 줄에서, 아이 동반 가족과 3대 가족의 반을 이 사람의 몫으로 셈"
+  },
+  "visit": {
+    "purposes": [
+      "가족 행사",
+      "일상 외식"
+    ],
+    "party": {
+      "label": "아이 동반 가족",
+      "adults": 2,
+      "children": 1
+    },
+    "occasions": [
+      "meal",
+      "dessert"
+    ],
+    "meals": [
+      "lunch",
+      "dinner"
+    ],
+    "day_types": [
+      "weekend",
+      "weekday"
+    ]
+  },
+  "budget": {
+    "basis": "per_person",
+    "typical": 100000,
+    "max": 200000
+  },
+  "preferences": {
+    "cuisines_like": [
+      "피자·파스타",
+      "뷔페"
+    ],
+    "cuisines_avoid": [],
+    "dietary": [
+      "아이가 먹을 수 있는 메뉴"
+    ],
+    "atmosphere": {
+      "전망": 2,
+      "조용함": 1,
+      "격식": 1
+    },
+    "needs": [
+      "아이 식기·아기 의자",
+      "아이 생일 축하 응대",
+      "넉넉한 테이블 간격",
+      "주차"
+    ]
+  },
+  "buying": {
+    "price_sensitivity": "mid",
+    "promo_response": "아이 생일 같은 자리는 혜택보다 날짜와 창가 자리를 먼저 맞추고, 평소 외식은 값과 투숙객 할인 같은 혜택을 따진다",
+    "reservation": "아이 생일은 한 달쯤 앞서 예약하고, 평소 외식은 예약 없이 일찍 가서 기다리기도 한다",
+    "wait_tolerance": "mid"
+  },
+  "revisit": {
+    "returns_for": [
+      "아이 편의",
+      "분위기·전망",
+      "기념일 응대",
+      "서비스"
+    ],
+    "leaves_for": [
+      "서비스",
+      "맛 기대 이하",
+      "가격",
+      "혼잡·좌석 간격"
+    ]
+  },
+  "compares_with": [
+    "shilla-parkview",
+    "parnas-mercato521"
+  ],
+  "evidence": {
+    "share_in_group": {
+      "grade": "review",
+      "refs": [
+        "R-geumryong-0003",
+        "R-geumryong-0018",
+        "R-geumryong-0085",
+        "R-geumryong-0086",
+        "R-geumryong-0098",
+        "R-geumryong-0117",
+        "R-geumryong-0130",
+        "R-pavilion-0004",
+        "R-pavilion-0009",
+        "R-pavilion-0014",
+        "R-pavilion-0035",
+        "R-pavilion-0037",
+        "R-pavilion-0039",
+        "R-pavilion-0043",
+        "R-pavilion-0053",
+        "R-pavilion-0055",
+        "R-pavilion-0083",
+        "R-pavilion-0101",
+        "R-pavilion-0103",
+        "R-pavilion-0111",
+        "R-pavilion-0120",
+        "R-pavilion-0124",
+        "R-pavilion-0126",
+        "R-pavilion-0127",
+        "R-pavilion-0130",
+        "R-pavilion-0132",
+        "R-pavilion-0158",
+        "R-pavilion-0165",
+        "R-pavilion-2007",
+        "R-pizzahill-0011",
+        "R-pizzahill-0015",
+        "R-pizzahill-0021",
+        "R-pizzahill-0024",
+        "R-pizzahill-0035",
+        "R-pizzahill-0038",
+        "R-pizzahill-0043",
+        "R-pizzahill-0044",
+        "R-pizzahill-0049",
+        "R-pizzahill-0055",
+        "R-pizzahill-0071",
+        "R-pizzahill-0075",
+        "R-pizzahill-0099",
+        "R-pizzahill-0100",
+        "R-pizzahill-0109",
+        "R-pizzahill-0114",
+        "R-pizzahill-0115",
+        "R-pizzahill-0116",
+        "R-pizzahill-0121",
+        "R-pizzahill-0124",
+        "R-pizzahill-0129",
+        "R-pizzahill-0137",
+        "R-pizzahill-0138",
+        "R-pizzahill-0142",
+        "R-pizzahill-0145",
+        "R-pizzahill-0147",
+        "R-pizzahill-0150",
+        "R-pizzahill-0154",
+        "R-pizzahill-0166",
+        "R-pizzahill-2010",
+        "R-pizzahill-2013",
+        "R-pizzahill-2014",
+        "R-pizzahill-2016",
+        "R-pizzahill-2021",
+        "R-pizzahill-2030",
+        "R-pizzahill-2040",
+        "R-pizzahill-2047",
+        "R-thebuffet-0017",
+        "R-thebuffet-0018",
+        "R-thebuffet-0021",
+        "R-thebuffet-0044",
+        "R-thebuffet-0048",
+        "R-thebuffet-0054",
+        "R-thebuffet-0057",
+        "R-thebuffet-0072",
+        "R-thebuffet-0080",
+        "R-thebuffet-0082",
+        "R-thebuffet-0086",
+        "R-thebuffet-0102",
+        "R-thebuffet-0104",
+        "R-thebuffet-0111",
+        "R-thebuffet-0113",
+        "R-thebuffet-0132",
+        "R-thebuffet-0152",
+        "R-thebuffet-0164",
+        "R-thebuffet-0166",
+        "R-thebuffet-0178",
+        "R-thebuffet-0179",
+        "R-thebuffet-0183",
+        "R-thebuffet-0188",
+        "R-thebuffet-0191",
+        "R-thebuffet-0192",
+        "R-thebuffet-2001",
+        "R-thebuffet-2007",
+        "R-thebuffet-2015",
+        "R-thebuffet-2029"
+      ],
+      "note": "3대 가족은 어른을 모신 자리이면서 아이도 있어 두 페르소나에 반씩 셈 (borigunbbang 결정). 골라 붙인 후기(3001 ~)는 비율에 넣지 않음. 후기 건수로 나눈 몫이라 매출의 몫과는 다를 수 있다"
+    },
+    "visit": {
+      "grade": "review",
+      "refs": [
+        "R-pizzahill-2010",
+        "R-pizzahill-2013",
+        "R-pizzahill-2014",
+        "R-pizzahill-0100",
+        "R-pizzahill-3033",
+        "R-pizzahill-3046",
+        "R-thebuffet-2001",
+        "R-thebuffet-3021",
+        "R-thebuffet-0018",
+        "R-pavilion-0120",
+        "R-pavilion-0126"
+      ],
+      "note": "아이 생일·돌잔치 대신 식사·성탄절 같은 행사 자리와, 평일 낮 외식·라운지 디저트가 함께 나온다. 점심·저녁, 평일·주말 모두 있다. 어른 둘과 아이 하나는 후기에 드물게 적힌 인원에서 정한 설계 가정이다"
+    },
+    "budget": {
+      "grade": "assumption",
+      "refs": [
+        "pizzahill:S2",
+        "thebuffet:S1",
+        "pavilion:S2"
+      ],
+      "note": "후기에 낸 금액이 없어 공식 가격으로 정함. 평소는 피자힐 세트를 사람 수로 나눈 값 언저리, max 는 더뷔페 저녁 성인 요금이 들어오도록 둠"
+    },
+    "preferences": {
+      "grade": "review",
+      "refs": [
+        "R-pizzahill-2010",
+        "R-pizzahill-2013",
+        "R-pizzahill-2014",
+        "R-pizzahill-2030",
+        "R-pizzahill-2047",
+        "R-pavilion-0165",
+        "R-thebuffet-3021",
+        "R-thebuffet-3035"
+      ],
+      "note": "아이 식기·아기 의자·컵 바꿈 같은 응대, 생일상·손편지, 창가 강 전망, 테이블 간격과 주차가 반복된다. 아이가 먹을 메뉴는 설계 가정이다"
+    },
+    "buying": {
+      "grade": "review",
+      "refs": [
+        "R-pizzahill-2013",
+        "R-pizzahill-2014",
+        "R-pizzahill-2030",
+        "R-pavilion-0037",
+        "R-pavilion-0053",
+        "R-pavilion-0124",
+        "R-thebuffet-0057"
+      ],
+      "note": "한 달 앞 예약과 예약 없이 개장 전 줄 서기가 모두 있다. 투숙객 할인을 좋게 본 글, 오른 값·값에 비해 아쉬운 디저트를 든 글이 있다. 기다림은 연말에 오래 기다린 글이 있어 중간으로 둠"
+    },
+    "revisit": {
+      "grade": "review",
+      "refs": [
+        "R-thebuffet-3021",
+        "R-thebuffet-3035",
+        "R-thebuffet-3016",
+        "R-pizzahill-0011",
+        "R-pizzahill-0024",
+        "R-pizzahill-3024",
+        "R-thebuffet-0132"
+      ],
+      "note": "다시 오겠다는 글은 생일 응대·전망·친절을 들고, 떠나는 글은 아이 식기를 챙기지 않은 응대, 예전만 못한 맛, 붐비는 자리를 든다"
+    },
+    "compares_with": {
+      "grade": "review",
+      "refs": [
+        "R-thebuffet-2001",
+        "parnas-mercato521:S1"
+      ],
+      "note": "더뷔페와 신라 더 파크뷰를 견준 글이 있다. 피자힐의 경쟁 업장(파르나스 메르카토521)은 업장 데이터 담당이 정한 것을 그대로 둔 설계 가정이다"
+    }
+  }
+}

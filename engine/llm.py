@@ -425,6 +425,19 @@ def settings_from_env(env: Mapping[str, str] | None = None) -> LlmSettings:
     return LlmSettings(provider, model, call_limit)
 
 
+def receiver_of(settings: LlmSettings, env: Mapping[str, str] | None = None) -> str:
+    """요청을 받는 곳의 이름. 기본 데이터의 요약을 보내도 된다는 확인을 이 이름으로 적는다 (`.env` 의 `BASE_PROFILE_CONFIRMED_FOR`).
+
+    `anthropic` 과 `claude-code` 는 받는 회사가 하나라 공급자의 이름 그대로다. `openai-compatible` 은 주소에 따라 받는 곳이 달라
+    `openai-compatible:<주소의 호스트>` 다 (예: `openai-compatible:api.openai.com`). 주소를 바꾸면 이름도 바뀌어 다시 확인하게 된다.
+    """
+    env = os.environ if env is None else env
+    if settings.provider != "openai-compatible":
+        return settings.provider
+    host = urllib.parse.urlsplit(env.get("LLM_BASE_URL", "").strip()).hostname or ""
+    return f"openai-compatible:{host.lower()}"
+
+
 def make_provider(settings: LlmSettings, env: Mapping[str, str] | None = None) -> Provider:
     """설정에 적힌 공급자를 만든다. 공급자를 바꾸는 것은 환경 변수뿐이다."""
     env = os.environ if env is None else env

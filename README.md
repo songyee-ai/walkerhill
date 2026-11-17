@@ -101,6 +101,9 @@ Get-ChildItem "$env:LOCALAPPDATA\Claude-Data" -Recurse -Filter claude.exe -Error
     한도에 닿으면 엔진이 멈추고, 한도가 풀린 뒤 다시 돌리면 받은 답은 재생한다.
   - 기본 데이터(`--data private`)로 부르기 전에, 답을 받는 계정의 Claude 개인정보 설정에서 "모델 학습에 사용"이 꺼져 있는지 확인한다.
     확인하기 전에는 `--base-profile none` 으로 돌린다 (`CLAUDE.md` 의 "스택", `docs/MEETING_1117.md` ③).
+    확인이 끝나면 답을 받는 PC 의 `.env` 에 `BASE_PROFILE_CONFIRMED_FOR=claude-code` 를 적는다. 적혀 있지 않으면 엔진은 기본 데이터의 요약을 보내는 실행을 멈추고 이유를 알린다 (T115).
+    요약을 보내지 않거나(`--base-profile none`) 재생만 하면(`--replay-only`) 적혀 있지 않아도 돈다.
+    저장된 답이 모두 있어 실제로는 부르지 않게 될 실행도 `--replay-only` 를 붙이지 않으면 멈춘다 (돌려 보기 전에는 부를지 알 수 없다).
   - 가상 예시 값으로 돌린 실행 폴더(`engine/samples/runs/<run_id>/`)는 깃이 무시하므로 올라가지 않는다 (T107).
   - 다른 공급자(OpenAI 등)로 따로 돌려 볼 수는 있다. 그 답은 보정과 시연에 쓰지 않는다. 공급자나 모델이 다르면 팀이 받은 답과 서로 재생되지 않는다.
 - 로그인하지 않았거나 LLM 을 부르지 않으려면 `--replay-only` 를 붙인다. 저장된 응답만 재생하고, 저장된 응답이 없는 방문은 실패로 남는다.
@@ -118,6 +121,7 @@ Get-ChildItem "$env:LOCALAPPDATA\Claude-Data" -Recurse -Filter claude.exe -Error
   기준 상황의 가중치(묶음의 비율, 고객군 배수)와 가격이 빈 상품의 단가를 이 파일에서 낸다 (`docs/FORMATS.md` 3절, 10.1절의 "가중치를 내는 법").
   명령이 끝날 때 채운 상품과 채우지 못한 상품의 수를 알리고, 배수를 정하지 못한 고객군이 있으면 알린다.
 - `--data private` 은 기본 데이터의 요약을 범주로 바꿔 LLM 에 보낸다 (`--base-profile bucketed`, 기본값). 보내지 않으려면 `--base-profile none` 이다.
+  요약을 보내는 실행은 `.env` 의 `BASE_PROFILE_CONFIRMED_FOR` 에 지금 받는 곳의 이름(팀 설정이면 `claude-code`)이 적혀 있어야 돈다 (위의 "기본 데이터로 부르기 전에").
   `--data sample` 은 늘 보내지 않는다 (`docs/FORMATS.md` 5절의 "기본 데이터의 요약").
 - 기준이 아닌 상황은 `--scenario <scenario_id>` 로 돌린다 (`scenarios/<scenario_id>.json`). **기준 상황을 먼저 끝까지 돌려 둔다.**
   상황은 끝까지 돈 가장 새 기준 실행의 페르소나, 방문 조건, 가중치로 돌아간다 (다른 기준 실행을 쓰려면 `--baseline <run_id>`).
