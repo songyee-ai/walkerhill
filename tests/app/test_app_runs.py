@@ -14,6 +14,7 @@ from app.runs import (  # noqa: E402
     EXAMPLE_LLM,
     EXAMPLE_SOURCE,
     EXAMPLE_VENUES,
+    ai_env,
     choices,
     default_prompt,
     engine_command,
@@ -163,10 +164,37 @@ def test_key_ready_for_claude_code_needs_the_program_and_the_model(tmp_path: Pat
     assert not key_ready(tmp_path)  # 실행 파일이 없다
 
 
-def test_default_prompt_is_p2_and_falls_back_to_p1_for_the_example():
-    # 팀 자료는 엔진 명령과 같은 p2 로 처음 고른다 (T108). 예시 묶음에는 p1 만 있어 p1 로 돌아야 저장된 답이 재생된다.
-    assert DEFAULT_PROMPT == "p2"
-    assert default_prompt(["p1", "p2"]) == "p2"
+def test_default_prompt_is_p3_and_falls_back_to_p1_for_the_example():
+    # 팀 자료는 엔진 명령과 같은 판으로 처음 고른다 (T108, 11-17 T113 으로 p3). 예시 묶음에는 p1 만 있어 p1 로 돌아야 저장된 답이 재생된다.
+    assert DEFAULT_PROMPT == "p3"
+    assert default_prompt(["p1", "p2", "p3"]) == "p3"
     assert default_prompt(choices(EXAMPLE).prompts) == "p1"
-    assert default_prompt(["p3"]) == "p3"
-    assert default_prompt(choices(REPO_ROOT).prompts) == "p2"
+    assert default_prompt(["p4"]) == "p4"
+    assert default_prompt(choices(REPO_ROOT).prompts) == "p3"
+
+
+def test_ai_menu_offers_only_the_ai_this_pc_can_call(tmp_path: Path):
+    """화면의 AI 메뉴 (11-17): 고른 AI 의 공급자와 모델을 그 실행에만 넘긴다. 모델은 .env 에서 읽는다."""
+    assert ai_env(tmp_path, "claude") is None  # .env 가 없다
+    program = tmp_path / "claude.exe"
+    program.write_text("", encoding="utf-8")
+    lines = ["LLM_PROVIDER=claude-code", "LLM_MODEL=claude-test", f"CLAUDE_CODE_PATH={program}"]
+    base = "\n".join([*lines, "LLM_BASE_URL=https://api.openai.com/v1", ""])
+    env = tmp_path / ".env"
+    env.write_text(base, encoding="utf-8")
+    assert ai_env(tmp_path, "claude") == {"LLM_PROVIDER": "claude-code", "LLM_MODEL": "claude-test"}
+    assert ai_env(tmp_path, "openai") is None  # OpenAI 의 모델과 키가 없다
+    env.write_text(base + "OPENAI_MODEL=gpt-test\n", encoding="utf-8")
+    assert ai_env(tmp_path, "openai") is None  # 키가 없다
+    env.write_text(base + "OPENAI_MODEL=gpt-test\nLLM_API_KEY=not-a-real-key\n", encoding="utf-8")
+    assert ai_env(tmp_path, "openai") == {"LLM_PROVIDER": "openai-compatible", "LLM_MODEL": "gpt-test"}
+    assert ai_env(tmp_path, "claude") == {"LLM_PROVIDER": "claude-code", "LLM_MODEL": "claude-test"}
+    assert ai_env(tmp_path, "nothing") is None
+
+
+def test_month_goes_to_the_engine_only_when_chosen():
+    """화면의 계절(달)은 엔진의 --month 로 넘긴다 (T112). 고르지 않으면 적지 않아 저장된 답이 그대로 재생된다."""
+    args = (EXAMPLE, REPO_ROOT, "sample", "baseline", "p2", ["family-elders"], ["meal-dinner-weekend"], [], False)
+    assert "--month" not in engine_command(*args)
+    tail = _tail(engine_command(*args, month=12))
+    assert tail[tail.index("--month") + 1] == "12"

@@ -19,7 +19,7 @@ MOVE_LABEL = {
     "inside": "워커힐 안에서 옮김",
     "other": "워커힐 밖에서 옮김",
     "same": "그대로",
-    "failed": "견줄 수 없음",
+    "failed": "AI 답 못 받음",
 }
 
 
@@ -81,6 +81,11 @@ def baseline_dir_of(scen_dir: Path) -> Path:
     return scen_dir.parent / record.weights_from
 
 
+def _named(names: dict[str, str]) -> dict[str, str]:
+    """이름을 찾은 것만 남긴다 (찾지 못하면 식별자를 그대로 이름으로 쓴다)."""
+    return {k: v for k, v in names.items() if k != v}
+
+
 def classify(before: Place, after: Place) -> str:
     if "failed" in (before.kind, after.kind):
         return "failed"
@@ -117,10 +122,17 @@ def _place(run: LoadedRun, persona_id: str, condition_id: str) -> tuple[Place, f
     return Place(view.choice_kind, venue_id), represented, view.reason_text, None
 
 
-def compare(base: LoadedRun, scen: LoadedRun, summary_groups: list[str] | None = None) -> Comparison:
-    """방문마다 두 실행의 선택을 견주고, 업장별 가상 매출의 변화를 낸다."""
-    personas = persona_names(base) | persona_names(scen)
-    conditions = condition_names(base) | condition_names(scen)
+def compare(
+    base: LoadedRun, scen: LoadedRun, summary_groups: list[str] | None = None, file_names: dict[str, str] | None = None
+) -> Comparison:
+    """방문마다 두 실행의 선택을 견주고, 업장별 가상 매출의 변화를 낸다.
+
+    `file_names` 는 정의 파일에서 읽은 페르소나·방문 조건의 이름이다 (`app.results.names_from_files`).
+    AI 답을 받지 못한 방문도 식별자가 아니라 이름으로 보이게 한다.
+    """
+    file_names = file_names or {}
+    personas = {k: file_names.get(k, v) for k, v in persona_names(base).items()} | _named(persona_names(scen))
+    conditions = {k: file_names.get(k, v) for k, v in condition_names(base).items()} | _named(condition_names(scen))
     moves = []
     for persona_id in base.record.persona_ids:
         for condition_id in base.record.condition_ids:
@@ -140,8 +152,11 @@ def compare(base: LoadedRun, scen: LoadedRun, summary_groups: list[str] | None =
                     fail_after or fail_before,
                 )
             )
-    shares_before = venue_shares(base.rows)
-    shares_after = venue_shares(scen.rows)
+    # AI 답을 받지 못한 방문은 두 실행 모두에서 매출에 넣지 않는다. 넣으면 답이 없는 쪽만 0원이 되어
+    # 매출이 -100% 처럼 보인다 (11-16, T109 에서 찾음). 화면은 빠진 건수를 따로 알린다.
+    missing = {(m.persona_id, m.condition_id) for m in moves if m.move == "failed"}
+    shares_before = venue_shares([r for r in base.rows if (r.persona_id, r.condition_id) not in missing])
+    shares_after = venue_shares([r for r in scen.rows if (r.persona_id, r.condition_id) not in missing])
     names = venue_names(base, scen)
     ids = sorted(set(shares_before["walkerhill"]) | set(shares_after["walkerhill"]))
     venues = [

@@ -51,7 +51,7 @@ class Scene:
     tokens: list[Token]
     total_before: int
     total_after: int
-    hidden: int = 0  # 견줄 수 없어 그리지 않은 방문 수
+    hidden: int = 0  # AI 답을 받지 못해 그리지 않은 방문 수
 
 
 NONE_KEY = "none"
@@ -360,7 +360,7 @@ def render_scene(scene: Scene) -> tuple[str, int]:
     if not moved:
         note.append(f"{BASE_LABEL}와 선택이 같습니다. 이 변수로는 고른 페르소나의 선택이 바뀌지 않았습니다.")
     if scene.hidden:
-        note.append(f"견줄 수 없는 방문 {scene.hidden}건은 그리지 않았습니다 (저장된 답이 없는 조합).")
+        note.append(f"AI 답을 받지 못한 방문 {scene.hidden}건은 그림과 매출에서 뺐습니다.")
     note.append("모든 금액과 손님 수는 가상 값입니다. 페르소나에 마우스를 올리면 고른 이유가 보입니다.")
     outs = sum(t.move == "out" for t in scene.tokens)
     ins = sum(t.move == "in" for t in scene.tokens)
