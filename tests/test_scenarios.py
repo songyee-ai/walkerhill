@@ -145,7 +145,8 @@ def play_scenario(root: Path, scenario_id: str, pick, base: Played, *, now=None,
     requests = {}
     for persona_id in base.record.persona_ids:
         for condition_id in base.record.condition_ids:
-            request = request_for(root, scenario_id, persona_id, condition_id, venue_ids)
+            # 상황은 기준 실행의 달로 돈다 (T112).
+            request = request_for(root, scenario_id, persona_id, condition_id, venue_ids, month=base.record.month)
             if request is None:
                 continue
             visit_id = f"{persona_id}__{condition_id}"
@@ -819,6 +820,53 @@ def test_latest_finished_baseline_run_is_found(example_copy):
     assert latest_baseline_run(example_copy, "private") is None
 
 
+def test_latest_baseline_run_can_be_picked_by_its_month(example_copy):
+    year = play(example_copy, pick_geumryong)
+    december = play(example_copy, pick_geumryong, now=NOW + timedelta(hours=1), month=12)
+    # 달을 주지 않으면 달을 가리지 않고 가장 새것이다. 주면 실행의 달이 같은 것 가운데 가장 새것이고, None 은 일 년 전체로 돌린 실행이다.
+    assert latest_baseline_run(example_copy, "sample") == december.run_dir.name
+    assert latest_baseline_run(example_copy, "sample", 12) == december.run_dir.name
+    assert latest_baseline_run(example_copy, "sample", None) == year.run_dir.name
+    assert latest_baseline_run(example_copy, "sample", 7) is None
+    edit(december.run_dir / "run.json", lambda d: d.update(status="failed"))
+    assert latest_baseline_run(example_copy, "sample") == year.run_dir.name
+    assert latest_baseline_run(example_copy, "sample", 12) is None
+    # 달 칸이 생기기 전의 실행 기록은 일 년 전체로 돌린 것으로 읽는다.
+    edit(year.run_dir / "run.json", lambda d: d.pop("month"))
+    assert latest_baseline_run(example_copy, "sample", None) == year.run_dir.name
+
+
+def test_scenario_runs_in_the_month_of_its_baseline_run(example_copy):
+    """상황은 기준 실행의 달로 돈다. 달이 다르면 후보와 요청이 달라져 차이에 상황의 변경이 아닌 것이 섞인다."""
+    base = play(example_copy, pick_geumryong, month=12)
+    year = play(example_copy, pick_geumryong, now=NOW + timedelta(minutes=30))
+
+    # 달을 적지 않으면 기준 실행의 달을 따른다.
+    played = play_scenario(example_copy, PRICE_UP, pick_geumryong, base)
+    assert played.record.month == 12 and played.record.counts.failed == 0
+    assert [entry.request.condition.month for entry in played.saved.values()] == [12]
+    assert played.violations() == []
+    # 같은 달을 적어도 되고, 다른 달을 적으면 돌리지 않는다.
+    same = run_scenario(example_copy, PRICE_UP, weights_from=base.run_dir.name, month=12)
+    assert read_model(same / "run.json", RunRecord).month == 12
+    with pytest.raises(ValueError, match=r"달\(12월\)과 다른 달\(7월\)을 주었다"):
+        run_scenario(example_copy, PRICE_UP, weights_from=base.run_dir.name, month=7, now=NOW + timedelta(hours=3))
+    # 일 년 전체로 돌린 기준 실행에 달을 얹을 수도 없다.
+    with pytest.raises(ValueError, match=r"달\(일 년 전체\)과 다른 달\(12월\)을 주었다"):
+        run_scenario(example_copy, PRICE_UP, weights_from=year.run_dir.name, month=12, now=NOW + timedelta(hours=3))
+    no_format_errors(example_copy)
+
+    # 손으로 고친 실행 기록은 형식 검사가 막는다: 상황의 달이 기준 실행과 다르다, 달을 준 실행에 보정의 대조 결과가 있다.
+    edit(same / "run.json", lambda d: d.update(month=None))
+    assert any("month 가 weights_from 의 실행과 다르다" in str(p) for p in check(example_copy, strict=True))
+    edit(same / "run.json", lambda d: d.update(month=12))
+    calibration = load_json(EXAMPLE_ROOT / "engine" / "samples" / "runs" / BASELINE_RUN / "calibration.json")
+    save_json(base.run_dir / "calibration.json", dict(calibration, run_id=base.run_dir.name))
+    found = [str(p) for p in check(example_copy, strict=True)]
+    assert any("달을 주지 않고 돌린 기준 실행에만 둔다" in p for p in found)
+    assert not any("run_id 가 실행 기록과 다르다" in p for p in found)
+
+
 # ── 방문 조건의 달과 상황 ───────────────────────────────────────────────
 
 
@@ -980,4 +1028,61 @@ def test_command_runs_a_scenario_on_the_latest_finished_baseline_run(example_cop
     assert command(example_copy, "--scenario", PRICE_UP, *two_venues, "--baseline", failed_base.run_id) == cli.EXIT_FAILED
     assert "실패한 방문이 1건 있어" in capsys.readouterr().err
     assert command(example_copy, "--scenario", PRICE_UP, "--baseline", "20200101-000000-baseline") == cli.EXIT_FAILED
+    no_format_errors(example_copy)
+
+
+def test_command_takes_the_month_of_the_run(example_copy, clean_env, capsys):
+    """`--month` 는 실행의 달이다. 상황에 적으면 그 달로 돌린 가장 새 기준 실행을 고른다 (T112)."""
+    runs = example_copy / "engine" / "samples" / "runs"
+    kept = example_copy.parent / "kept"
+    kept.mkdir()
+    for name in (BASELINE_RUN, COMPETITOR_RUN):
+        shutil.move(runs / name, kept / name)
+    clean_env.setattr(cli, "datetime", Clock())  # 부를 때마다 5분씩 가는 시계
+    two_venues = ("--venues", "geumryong", "examplehotel-chinese")
+    one_visit = ("--personas", ELDERS, "--conditions", DINNER, *two_venues)
+
+    def last() -> RunRecord:
+        return read_model(sorted(runs.iterdir())[-1] / "run.json", RunRecord)
+
+    # 달을 적지 않으면 일 년 전체다. 예시 묶음의 저장된 응답이 그대로 재생된다 (요청이 달라지지 않았다).
+    assert command(example_copy, *one_visit, "--answers", str(kept / BASELINE_RUN / "llm")) == cli.EXIT_OK
+    assert "달 일 년 전체" in capsys.readouterr().out
+    year = last()
+    assert (year.month, year.counts.failed) == (None, 0)
+
+    # 12월로는 끝까지 돈 기준 실행이 아직 없다.
+    assert command(example_copy, "--scenario", PRICE_UP, *two_venues, "--month", "12") == cli.EXIT_FAILED
+    assert "12월로 끝까지 돈 기준 실행이 없다" in capsys.readouterr().err
+    assert last() == year
+
+    # 12월의 요청은 일 년 전체의 요청과 달라, 저장된 응답이 없어 방문이 실패로 남는다 (재생만 했다).
+    assert command(example_copy, *one_visit, "--month", "12", "--answers", str(kept / BASELINE_RUN / "llm")) == cli.EXIT_OK
+    assert "달 12월" in capsys.readouterr().out
+    december = last()
+    assert (december.month, december.counts.failed) == (12, 1)
+
+    # 상황은 달이 같은 가장 새 기준 실행을 고른다. 12월을 적으면 12월 실행을 고르고, 그 실행에 실패가 있어 멈춘다.
+    assert command(example_copy, "--scenario", PRICE_UP, *two_venues, "--month", "12") == cli.EXIT_FAILED
+    assert f"기준 실행 '{december.run_id}' 에 실패한 방문이 1건 있어" in capsys.readouterr().err
+    # 달을 적지 않으면 더 새 12월 실행이 있어도 일 년 전체로 돌린 실행을 고른다. 적지 않은 달이 조용히 따라오지 않는다.
+    assert command(example_copy, "--scenario", PRICE_UP, *two_venues) == cli.EXIT_OK
+    said = capsys.readouterr().out
+    assert f"기준 실행 {year.run_id}" in said and "달 일 년 전체" in said
+    assert (last().month, last().weights_from) == (None, year.run_id)
+    # 일 년 전체로 돌린 기준 실행이 없으면 12월 실행으로 넘어가지 않고 멈춘다.
+    hidden = example_copy.parent / "hidden"
+    shutil.move(runs / year.run_id, hidden)
+    assert command(example_copy, "--scenario", COMPETITOR_DISCOUNT, *two_venues) == cli.EXIT_FAILED
+    assert "일 년 전체로 끝까지 돈 기준 실행이 없다" in capsys.readouterr().err
+    shutil.move(hidden, runs / year.run_id)
+    # 기준 실행을 직접 가리켜도 달이 다르면 돌리지 않는다.
+    assert command(example_copy, "--scenario", PRICE_UP, *two_venues, "--baseline", year.run_id, "--month", "12") == cli.EXIT_FAILED
+    assert "달(일 년 전체)과 다른 달(12월)을 주었다" in capsys.readouterr().err
+    assert command(example_copy, "--scenario", PRICE_UP, *two_venues, "--baseline", year.run_id) == cli.EXIT_OK
+    assert last().month is None
+
+    # 1 ~ 12 가 아닌 달은 명령이 받지 않는다.
+    with pytest.raises(SystemExit):
+        command(example_copy, *one_visit, "--month", "13")
     no_format_errors(example_copy)

@@ -18,7 +18,7 @@ from engine.formats.io import read_csv, read_model
 from engine.formats.run import LEDGER_COLUMNS, RunRecord
 from engine.formats.scenario import BASELINE_ID
 from engine.llm import LlmFatal, make_provider, settings_from_env
-from engine.runner import latest_baseline_run, run, runs_folder
+from engine.runner import latest_baseline_run, month_label, run, runs_folder
 
 EXIT_OK, EXIT_FAILED, EXIT_STOPPED_BY_LIMIT = 0, 1, 2
 
@@ -51,6 +51,14 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--personas", nargs="+", metavar="ID", help="돌릴 페르소나. 적지 않으면 모두")
     parser.add_argument("--conditions", nargs="+", metavar="ID", help="돌릴 방문 조건. 적지 않으면 묶음의 모든 조건")
     parser.add_argument("--venues", nargs="+", metavar="ID", help="읽을 업장. 적지 않으면 모두")
+    parser.add_argument(
+        "--month",
+        type=int,
+        choices=range(1, 13),
+        metavar="1~12",
+        help="실행의 달. 묶음의 조건을 모두 그 달의 방문으로 돌린다. 적지 않으면 일 년 전체로 본다. "
+        "기준이 아닌 상황은 달이 같은 가장 새 기준 실행을 고른다 (--baseline 으로 가리키면 그 실행의 달을 따른다)",
+    )
     parser.add_argument("--answers", type=Path, action="append", default=[], metavar="폴더", help="저장된 응답을 더 찾을 폴더")
     parser.add_argument("--replay-only", action="store_true", help="LLM 을 부르지 않고 저장된 응답만 재생한다 (키가 없어도 된다)")
     parser.add_argument("--limit", type=int, metavar="N", help="새로 부를 수 있는 횟수. 적지 않으면 LLM_CALL_LIMIT")
@@ -77,7 +85,14 @@ def main(argv: list[str] | None = None) -> int:
             raise LlmFatal("--limit 은 0 이상의 정수다")
         weights_from = args.baseline
         if weights_from is None and args.scenario != BASELINE_ID:
-            weights_from = latest_baseline_run(root, args.data)
+            # 달이 같은 기준 실행만 고른다. 달을 적지 않았으면 일 년 전체로 돌린 것이다 (적지 않은 달이 조용히 따라오지 않게 한다).
+            weights_from = latest_baseline_run(root, args.data, args.month)
+            if weights_from is None:
+                how = "" if args.month is None else f" --month {args.month} 로"
+                raise ValueError(
+                    f"{month_label(args.month)}로 끝까지 돈 기준 실행이 없다. 기준 상황을{how} 먼저 끝까지 돌린다 "
+                    "(다른 달로 돌린 기준 실행을 쓰려면 --month 나 --baseline 으로 가리킨다)"
+                )
         run_dir = run(
             root,
             data_mode=args.data,
@@ -94,6 +109,7 @@ def main(argv: list[str] | None = None) -> int:
             llm=provider,
             call_limit=call_limit,
             base_profile_mode=args.base_profile,
+            month=args.month,
         )
     except (LlmFatal, FileNotFoundError, FileExistsError, ValueError) as exc:
         print(f"돌리지 못했다: {exc}", file=sys.stderr)
@@ -104,6 +120,7 @@ def main(argv: list[str] | None = None) -> int:
     if record.weights_from is not None:
         print(f"상황 {record.scenario_id} · 페르소나, 방문 조건, 가중치는 기준 실행 {record.weights_from} 의 것")
     print(f"공급자 {record.llm.provider} · 모델 {record.llm.model} · 프롬프트 {record.llm.prompt_version}")
+    print(f"달 {month_label(record.month)}")
     print(
         f"기본 데이터의 요약 {record.base_profile_mode} · "
         f"가격을 집계 파일로 채운 상품 {len(record.filled_products)}개 · 채우지 못해 뺀 상품 {len(record.skipped_products)}개"
