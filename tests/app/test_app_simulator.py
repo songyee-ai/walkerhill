@@ -119,7 +119,7 @@ def test_simulator_tab_renders_with_month_and_weather_marked_next_step():
     # 계절은 엔진의 달로 넘기고 (T112), 날씨는 11-17 회의 ④대로 "다음 단계"로 막아 둔다.
     app = AppTest.from_file(str(REPO_ROOT / "app" / "main.py"), default_timeout=60).run()
     assert not app.exception
-    assert [t.label for t in app.tabs] == ["시뮬레이터", "상세 분석"]  # 탭 이름 (T204)
+    assert [t.label for t in app.tabs] == ["시뮬레이터", "상세 분석", "근거 보기"]  # 탭 이름 (T204, T22)
     assert app.selectbox(key="sim_weather").disabled
     start = next(s for s in app.selectbox if s.key.startswith("sim_month_") and "end" not in s.key)
     if not start.disabled:  # 팀 자료가 다 올라와 있으면 기간을 고를 수 있다
