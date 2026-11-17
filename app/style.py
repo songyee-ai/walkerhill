@@ -18,9 +18,12 @@ CSS = """
 .stApp h1 { font-size:1.6rem !important; font-weight:800 !important; letter-spacing:-.02em; padding:.2rem 0 0 !important; }
 [data-testid="stCaptionContainer"] { font-size:.8rem; }
 
-/* 탭 */
-[data-testid="stTabs"] [role="tablist"] { gap:4px; }
-[data-testid="stTab"] p { font-size:.92rem; }
+/* 탭: 글자끼리 붙어 보이지 않게 탭마다 안쪽 여백과 사이 간격을 둔다 (11-17, T204) */
+[data-testid="stTabs"] [role="tablist"] { gap:6px; border-bottom:1px solid rgba(148,163,184,.25); margin-bottom:1rem; }
+[data-testid="stTab"] { padding:0 18px !important; border-radius:10px 10px 0 0; transition:background-color .15s; }
+[data-testid="stTab"]:hover { background-color:rgba(148,163,184,.10); }
+[data-testid="stTab"][aria-selected="true"] { background-color:rgba(99,102,241,.10); }
+[data-testid="stTab"] p { font-size:.95rem; }
 [data-testid="stTab"][aria-selected="true"], [data-testid="stTab"][aria-selected="true"] p { color:#6366f1 !important; font-weight:700; }
 [data-testid="stTabs"] .react-aria-SelectionIndicator { background-color:#6366f1 !important; border-color:#6366f1 !important; }
 

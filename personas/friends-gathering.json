@@ -1,0 +1,159 @@
+{
+  "format_version": 1,
+  "persona_id": "friends-gathering",
+  "name": "친구·동료 모임",
+  "customer_group": "친구·모임",
+  "share_in_group": {
+    "value": 1.0,
+    "grade": "assumption",
+    "basis": "이 고객군에는 페르소나를 한 명만 둔다 (PRD 6.4절)"
+  },
+  "visit": {
+    "purposes": [
+      "모임",
+      "일상 외식"
+    ],
+    "party": {
+      "label": "친구",
+      "adults": 4,
+      "children": 0
+    },
+    "occasions": [
+      "meal",
+      "dessert"
+    ],
+    "meals": [
+      "lunch",
+      "dinner"
+    ],
+    "day_types": [
+      "weekday",
+      "weekend"
+    ]
+  },
+  "budget": {
+    "basis": "per_person",
+    "typical": 120000,
+    "max": 210000
+  },
+  "preferences": {
+    "cuisines_like": [
+      "뷔페",
+      "피자·파스타",
+      "디저트"
+    ],
+    "cuisines_avoid": [],
+    "dietary": [],
+    "atmosphere": {
+      "전망": 3,
+      "조용함": 2,
+      "격식": 1
+    },
+    "needs": [
+      "창가·강 전망 자리",
+      "여럿이 앉는 넓은 자리",
+      "이야기를 나눌 수 있는 조용함"
+    ]
+  },
+  "buying": {
+    "price_sensitivity": "mid",
+    "promo_response": "송년 모임처럼 날짜가 정해진 자리는 예약 할인을 챙기고, 할인 폭이 줄면 아쉬워한다",
+    "reservation": "연말이나 꽃 피는 철의 모임은 한두 달 앞서 전화로 창가 자리를 맞춰 예약한다",
+    "wait_tolerance": "low"
+  },
+  "revisit": {
+    "returns_for": [
+      "분위기·전망",
+      "서비스",
+      "맛",
+      "메뉴 다양성"
+    ],
+    "leaves_for": [
+      "가격",
+      "맛 기대 이하",
+      "소음",
+      "혼잡·좌석 간격"
+    ]
+  },
+  "compares_with": [
+    "shilla-parkview",
+    "parnas-mercato521"
+  ],
+  "evidence": {
+    "share_in_group": {
+      "grade": "assumption",
+      "refs": [],
+      "note": "한 명만 둔 고객군은 몫이 1이다"
+    },
+    "visit": {
+      "grade": "review",
+      "refs": [
+        "R-pavilion-2011",
+        "R-pavilion-0134",
+        "R-pizzahill-2037",
+        "R-pizzahill-3026",
+        "R-pizzahill-2020",
+        "R-thebuffet-2017",
+        "R-thebuffet-2034",
+        "R-thebuffet-3014",
+        "R-thebuffet-3018",
+        "R-thebuffet-3022"
+      ],
+      "note": "송년·신년 모임, 생일, 결혼 소식을 전하는 자리, 동창 모임이 많다. 동행은 친구가 가장 많고 동료·지인도 있다. 평일 점심이 가장 많다. 넷은 넷·여섯이 함께 온 글에서 정한 설계 가정이다"
+    },
+    "budget": {
+      "grade": "assumption",
+      "refs": [
+        "thebuffet:S1",
+        "pizzahill:S2",
+        "R-pizzahill-2037"
+      ],
+      "note": "공식 가격으로 정함. 여섯 명용 세트를 나눈 값부터 더뷔페 저녁 성인 요금까지가 들어오도록 둠"
+    },
+    "preferences": {
+      "grade": "review",
+      "refs": [
+        "R-pavilion-2011",
+        "R-pavilion-3007",
+        "R-pizzahill-2039",
+        "R-pizzahill-3026",
+        "R-thebuffet-0031",
+        "R-thebuffet-2019",
+        "R-thebuffet-2034",
+        "R-thebuffet-0193"
+      ],
+      "note": "강 전망과 창가 자리를 보고 고른 글이 가장 많다. 넓은 테이블, 조용히 이야기할 수 있는지, 메뉴 가짓수를 든다. 공연 소리 때문에 이야기하기 힘들었다는 불만이 있다"
+    },
+    "buying": {
+      "grade": "review",
+      "refs": [
+        "R-pizzahill-2003",
+        "R-pizzahill-2037",
+        "R-pizzahill-3026",
+        "R-thebuffet-2034",
+        "R-thebuffet-3014",
+        "R-thebuffet-2037"
+      ],
+      "note": "한두 달 앞 예약, 전화로 창가 배정 확인, 예약 할인을 받은 글과 할인 폭이 줄어 아쉽다는 글이 있다. 음식 줄이 길어 짜증 났다는 글이 있다"
+    },
+    "revisit": {
+      "grade": "review",
+      "refs": [
+        "R-pavilion-0166",
+        "R-pavilion-3007",
+        "R-pizzahill-0004",
+        "R-thebuffet-0193",
+        "R-thebuffet-2036"
+      ],
+      "note": "다시 오겠다는 글은 전망·친절·음식을 들고, 다시 오지 않겠다는 글은 시끄러움과 느끼한 디저트를 든다. 값을 걸린 점으로 든 글이 많다"
+    },
+    "compares_with": {
+      "grade": "review",
+      "refs": [
+        "R-thebuffet-2036",
+        "parnas-mercato521:S1"
+      ],
+      "note": "더뷔페와 신라 더 파크뷰를 견준 글이 있다. 피자힐의 경쟁 업장(파르나스 메르카토521)은 업장 데이터 담당이 정한 것을 그대로 둔 설계 가정이다"
+    }
+  }
+}
