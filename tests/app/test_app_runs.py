@@ -190,3 +190,11 @@ def test_ai_menu_offers_only_the_ai_this_pc_can_call(tmp_path: Path):
     assert ai_env(tmp_path, "openai") == {"LLM_PROVIDER": "openai-compatible", "LLM_MODEL": "gpt-test"}
     assert ai_env(tmp_path, "claude") == {"LLM_PROVIDER": "claude-code", "LLM_MODEL": "claude-test"}
     assert ai_env(tmp_path, "nothing") is None
+
+
+def test_month_goes_to_the_engine_only_when_chosen():
+    """화면의 계절(달)은 엔진의 --month 로 넘긴다 (T112). 고르지 않으면 적지 않아 저장된 답이 그대로 재생된다."""
+    args = (EXAMPLE, REPO_ROOT, "sample", "baseline", "p2", ["family-elders"], ["meal-dinner-weekend"], [], False)
+    assert "--month" not in engine_command(*args)
+    tail = _tail(engine_command(*args, month=12))
+    assert tail[tail.index("--month") + 1] == "12"

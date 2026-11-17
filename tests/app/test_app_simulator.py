@@ -115,12 +115,16 @@ def test_new_scenario_without_saved_answers_is_reported_not_hidden(tmp_path: Pat
     assert all(v.diff == 0 for v in comparison.venues)
 
 
-def test_simulator_tab_renders_with_season_and_weather_marked_pending():
+def test_simulator_tab_renders_with_month_and_weather_marked_next_step():
+    # 계절은 엔진의 달로 넘기고 (T112), 날씨는 11-17 회의 ④대로 "다음 단계"로 막아 둔다.
     app = AppTest.from_file(str(REPO_ROOT / "app" / "main.py"), default_timeout=60).run()
     assert not app.exception
-    app.selectbox(key="sim_weather").set_value("비").run()
-    assert not app.exception
-    assert any("반영되지 않습니다" in c.value for c in app.caption)
+    assert app.selectbox(key="sim_weather").disabled
+    month = next(s for s in app.selectbox if s.key.startswith("sim_month_"))
+    if not month.disabled:  # 팀 자료가 다 올라와 있으면 달을 고를 수 있다
+        month.set_value(12).run()
+        assert not app.exception
+        assert any("그 달에 파는 메뉴" in c.value for c in app.caption)
     assert any(b.label == "기본 시나리오와 비교하기" for b in app.button)
 
 

@@ -183,6 +183,7 @@ def engine_command(
     venue_ids: list[str],
     call_llm: bool,
     baseline_run: str | None = None,
+    month: int | None = None,
 ) -> list[str]:
     """README 와 같은 명령. 기준이 아닌 상황은 기준 실행의 페르소나와 조건으로 돌아 `--personas`, `--conditions` 를 적지 않는다.
 
@@ -200,6 +201,9 @@ def engine_command(
             command += ["--conditions", *condition_ids]
     if venue_ids:
         command += ["--venues", *venue_ids]
+    # 실행의 달 (T112). 주지 않으면 일 년 전체로 돌고 요청이 달이 생기기 전과 같아 저장된 답이 그대로 재생된다.
+    if month is not None:
+        command += ["--month", str(month)]
     if not call_llm:
         command.append("--replay-only")
     return command
@@ -275,22 +279,36 @@ def simulate(
     prompt: str | None = None,
     is_example: bool = False,
     llm_env: dict[str, str] | None = None,
+    month: int | None = None,
 ) -> Simulation:
     """같은 페르소나·방문 조건·업장으로 기준과 상황을 차례로 돌린다 (PRD 7.2절: 상황은 기준의 가중치로 돈다).
 
     기준을 매번 새로 돌리는 것은, 고른 페르소나와 조건이 바뀌어도 늘 같은 것끼리 견주게 하려는 것이다.
     저장된 답을 재생하면 몇 초면 끝난다. 판을 주지 않으면 그 자료에 있는 판에서 `default_prompt` 로 고른다.
     `llm_env` 는 화면에서 고른 AI 의 공급자와 모델이다 (`ai_env`). 두 실행에 같은 것을 넘겨 같은 모델로 돌린다.
+    `month` 는 실행의 달이다 (T112). 엔진은 기준과 상황의 달이 같아야 돌므로 두 실행에 같은 달을 넘긴다.
     """
     if prompt is None:
         prompt = default_prompt(prompt_versions(root))
-    base_cmd = engine_command(root, repo_root, data_mode, "baseline", prompt, persona_ids, condition_ids, venue_ids, call_llm)
+    base_cmd = engine_command(
+        root, repo_root, data_mode, "baseline", prompt, persona_ids, condition_ids, venue_ids, call_llm, month=month
+    )
     env = replay_env(is_example, call_llm) or llm_env
     baseline = run_engine(base_cmd, repo_root, env_overrides=env)
     if baseline.run_dir is None or baseline.exit_code != 0:
         return Simulation(baseline, None)
     scen_cmd = engine_command(
-        root, repo_root, data_mode, scenario_id, prompt, [], [], venue_ids, call_llm, baseline_run=baseline.run_dir.name
+        root,
+        repo_root,
+        data_mode,
+        scenario_id,
+        prompt,
+        [],
+        [],
+        venue_ids,
+        call_llm,
+        baseline_run=baseline.run_dir.name,
+        month=month,
     )
     return Simulation(baseline, run_engine(scen_cmd, repo_root, env_overrides=env))
 
