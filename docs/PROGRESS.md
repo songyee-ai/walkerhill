@@ -84,6 +84,7 @@
 | T112 | 실행의 달: 계절을 엔진이 받게 하기 (`--month`) | songyee-ai | 완료, 11-17, 묶음의 조건을 한 달의 방문으로 돌리게 했고 테스트 전체와 구독으로 부른 12월 방문 1건이 통과했다. |
 | T301 | 구글 리뷰 수집 부탁 (출처 더하기) | borigunbbang | 진행 중, 11-16, hojitea-ui 가 20% 묶음을 확인했고 borigunbbang 의 PC 에서 지웠으며 모은 두 사람의 지우기가 남았다. |
 | T302 | 호텔 뷔페·빙수 가격 기사 정리 (경쟁 업장 근거 더하기) | borigunbbang | 진행 중, 11-16, 기사 9건의 가격을 정리해 "알릴 것"으로 넘겼고 hojitea-ui 의 확인이 남았다. |
+| T303 | `main` 시연 확인과 worktree 에서 깨지는 테스트 알리기 | borigunbbang | 완료, 11-17, 엔진 담당이 T111 로 고친 것을 worktree 에서 테스트 전체가 통과하는 것으로 확인했다. |
 | T401 | `main` 첫 시연을 업장 데이터 눈으로 보기 | hojitea-ui | 진행 중, 11-16, 찾은 것 다섯을 적었고, 업장 데이터 몫 둘을 정해 피자힐 정의를 고쳤다. |
 
 T03 ~ T24 는 11-13 에 팀장이 낸 제안이다. 팀이 확인하면 이 줄을 지운다. 유닛을 나눈 기준과 순서는 아래 "유닛의 순서"에 있다.
@@ -1509,6 +1510,24 @@ worktree 의 맨 위 `.git` 은 폴더가 아니라 파일이다. 형식 검사�
   [쿠키뉴스 07-12](https://www.kukinews.com/article/view/kuk202607100102)
 - 한계: 호텔 중식·한식·일식 코스 가격을 견준 기사는 찾지 못했다. 금룡·온달·모에기의 경쟁 업장 가격은 지금처럼 공식 메뉴판만 근거다.
 
+### T303 `main` 시연 확인과 worktree 에서 깨지는 테스트 알리기
+
+담당 borigunbbang · 기한 11-17 · 기다리는 것 없음 (고치는 사람은 songyee-ai)
+
+계획에 없던 작업이다 (11-16). 원격 `main` 을 받아 시연할 수 있는지 보다가, `git worktree` 로 받은 폴더에서만 테스트 1건이 실패하는 것을 찾았다.
+`tools/` 와 `tests/` 는 엔진 담당의 폴더라 고치지 않고 "알릴 것"으로 넘긴다.
+
+완료 조건
+- [x] `main` 의 화면이 키 없이 끝까지 뜬다 (11-16, macOS, `main` `bf21f7c` 를 일반 클론으로 받아 ruff·형식 검사·pytest 통과. README 의 예시 사본으로 기준·상황을 `--replay-only` 로 돌려 실패 0건. 화면의 "예시로 연습"에서 두 탭이 끝까지 뜨고 브라우저 콘솔 오류 없음)
+- [x] worktree 에서 실패하는 것을 develop 에서도 재현했다 (11-16, macOS, `develop` `dd54f62` 를 `git worktree add` 로 받아 `test_checker_walks_exactly_the_files_git_can_upload` 만 실패. 일반 클론은 통과)
+- [x] songyee-ai 가 "알릴 것"에서 받아 고칠지 정했다 (11-17, songyee-ai 가 T111 로 고침)
+- [x] 고친 것이 worktree 에서 통과한다 (11-17, macOS, `develop` `2bdef20` 을 임시 `git worktree add` 로 받아 ruff·형식 검사 오류 0건, pytest 전체 통과. 테스트 수는 "실측 기록". 임시 worktree 는 확인 뒤 지움)
+
+경위
+- 11-16: 형식 검사 주의 1건(고객군 '가족·친족' 의 몫 합 0.75)은 페르소나를 다 만들지 않아서 나는 것이라 T17 에서 채운다. 견줄 수 없는 방문이 -100% 로 보이는 표시는 T109 에서 이미 화면 담당에게 넘겼다.
+- 원인: worktree 에서는 맨 위의 `.git` 이 폴더가 아니라 파일이다. 형식 검사의 `_walk` 는 `.git` 을 폴더일 때만 건너뛰어(`ignored_by_git` 의 이름 목록), 깃이 절대 올리지 않는 `.git` 파일을 훑는다.
+  자동 검사(일반 클론)에는 영향이 없고, worktree 로 일하는 PC(Claude Code 의 worktree 세션 포함)에서만 로컬 pytest 가 1건 실패한다.
+
 ### T401 `main` 첫 시연을 업장 데이터 눈으로 보기
 
 담당 hojitea-ui · 기한 11-17 · 기다리는 것 없음
@@ -1947,13 +1966,18 @@ worktree 의 맨 위 `.git` 은 폴더가 아니라 파일이다. 형식 검사�
   지금은 그대로 돌지만, 적힌 날짜가 지나 있어 Streamlit 판이 오르면 그 부분이 깨질 수 있습니다. 시연 전에 바꿀지 봐 주세요.
 - [ ] songyee-ai ← hojitea-ui (11-17): 피자힐 업장 정의(`data/venues/pizzahill.json`)를 고쳤습니다 (T401). 6인 세트(`seis-set`)를 더하고,
   세이스 피자 단품은 주문에 더하는 상품으로 바꿨습니다. 질문이 달라지므로 **보정·시연 답을 받기 전에** 이 변경이 든 develop 을 받아 주세요.
+- [ ] songyee-ai ← borigunbbang (11-16): `git worktree` 로 받은 폴더에서 `tests/test_check_rules.py::test_checker_walks_exactly_the_files_git_can_upload` 가 실패합니다 (T303).
+  worktree 의 맨 위 `.git` 은 파일인데, `tools/check_formats.py` 의 `_walk` 가 `.git` 을 폴더일 때만 건너뛰어 그 파일을 훑습니다 ("Extra items in the left set: '.git'").
+  자동 검사에는 영향이 없고, Claude Code 의 worktree 세션처럼 worktree 로 일할 때 로컬 pytest 가 1건 실패합니다. 이름이 `.git` 이면 파일이어도 건너뛰기를 제안합니다.
+  본 방법: `develop` `dd54f62` 를 `git worktree add` 로 받아 pytest (macOS). 같은 커밋의 일반 클론은 통과.
 - [ ] wilstein91 ← songyee-ai (11-16): 요청하신 테마 색을 공통 틀 `.streamlit/config.toml` 에 넣었습니다 (T110). 적은 모양이 요청과 다릅니다.
   `[theme]` 한 칸에 적으면 어두운 화면 설정에서도 밝은 테마로 떠서, 같은 색(`#4f46e5`)을 `[theme.light]` 와 `[theme.dark]` 두 칸에 적었습니다 (둘 다 띄워 견줌. Streamlit 1.66.0).
   고른 라디오 버튼의 점이 밝은·어두운 화면에서 모두 indigo 로 나옵니다. 어두운 화면에서 다른 색이 낫다면 `[theme.dark]` 의 값을 알려 주세요.
   화면을 띄워 둔 PC 는 서버를 껐다 다시 띄워야 반영됩니다. `address` 는 그대로입니다.
-- [ ] borigunbbang ← songyee-ai (11-17): PR #87 에 적어 주신, `git worktree` 폴더에서만 실패하는 테스트를 고쳤습니다 (T111). 형식 검사가 파일로 된 `.git` 도 건너뜁니다.
+- [x] borigunbbang ← songyee-ai (11-17): PR #87 에 적어 주신, `git worktree` 폴더에서만 실패하는 테스트를 고쳤습니다 (T111). 형식 검사가 파일로 된 `.git` 도 건너뜁니다.
   이 PC 의 임시 worktree 에서 고치기 전의 실패와 고친 뒤의 통과를 모두 봤습니다. `develop` 을 받은 뒤 그 worktree 에서 다시 돌려 확인해 주세요.
   PR #87 에 적으신 팀장 앞 알림 줄은 그 PR 이 합쳐지면 체크하겠습니다.
+  (확인: borigunbbang 11-17, macOS 에서 `develop` `2bdef20` 을 임시 worktree 로 받아 고치기 전에 실패하던 테스트와 테스트 전체가 통과. T303)
 - [ ] songyee-ai ← hojitea-ui (11-16): 경쟁 업장 포시즌스 마루(`data/venues/fourseasons-maru.json`)에 빙수 두 가지를 더했습니다 (T14, 공식 보도자료, 파는 달 5 ~ 9월).
   업장 정의가 바뀌어 질문이 달라지므로, 보정·시연 답을 받기 전에 develop 을 받아 주세요.
   방문 조건에 달을 주면(회의 안건 ④) 5 ~ 9월 밖에서는 후보에서 빠지지만, 달 없이 돌리면 디저트 조건의 후보에 빙수가 더해져 결과가 달라질 수 있습니다.
@@ -2025,3 +2049,5 @@ worktree 의 맨 위 `.git` 은 폴더가 아니라 파일이다. 형식 검사�
 - 11-17, 윈도우 11 + 데스크톱 앱에 든 Claude Code (구독 로그인, 공급자 `claude-code`, 모델 `claude-sonnet-5-5`, 프롬프트 p2, 가상 예시 값): T112 의 실제 호출.
   `--personas family-parents --conditions meal-dinner-weekend --month 12` 로 방문 1건을 새로 불러 실패 0건, 어긋난 답 0건이었다.
   받은 답의 입력 토큰은 28,900, 출력 토큰은 2,422 였다. 요청과 실행 기록에 12월이 실린 것을 실행 폴더의 파일로 확인했다. 걸린 시간은 재지 않았다.
+- 11-17, macOS 27.0.1 + Python 3.13.16 + uv 0.13.0: T303 의 확인으로 `develop` 의 `2bdef20` (T111 까지 합친 것)을 임시 `git worktree` 폴더로 받아 `uv run python -m pytest` 로 테스트 680개가 모두 통과했고 42초쯤 걸렸다.
+  같은 커밋을 담은 일반 폴더에서도 680개가 모두 통과했고 41초쯤 걸렸다. 실제 LLM 은 부르지 않았다.
