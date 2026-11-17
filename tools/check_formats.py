@@ -68,8 +68,11 @@ SHARE_TOLERANCE = 1e-6
 # 깃이 무시하지 않는 것을 건너뛰면, 올라가는 파일인데 검사하지 않는 구멍이 생긴다.
 
 PRIVATE_DIR = "private"
+# 깃 자신의 것. .gitignore 에 적지 않아도 깃은 이 이름을 올리지 않는다. 보통은 폴더이고,
+# `git worktree` 로 받은 폴더에서는 파일이다. 그래서 폴더 이름 목록에 두지 않고 따로 본다 (2026-11-17).
+GIT_OWN = ".git"
 IGNORED_DIR_NAMES = frozenset(
-    {".git", ".venv", "venv", "__pycache__", ".pytest_cache", ".ruff_cache", ".omc", ".vscode", ".idea", "dist", "build"}
+    {".venv", "venv", "__pycache__", ".pytest_cache", ".ruff_cache", ".omc", ".vscode", ".idea", "dist", "build"}
 )
 IGNORED_FILE_NAMES = frozenset({".DS_Store", "Thumbs.db", "desktop.ini"})
 IGNORED_SUFFIXES = (".pyc", ".log")
@@ -85,6 +88,8 @@ def ignored_by_git(parts: tuple[str, ...], is_dir: bool, at_repo_root: bool = Tr
     그곳의 실행 폴더는 예시로 올리는 파일이라 무시하지 않는다.
     """
     name = parts[-1]
+    if name == GIT_OWN:
+        return True
     if parts[0] == PRIVATE_DIR and len(parts) > 1:
         # 맨 위의 private/ 는 안내 파일만 빼고 모두 무시한다. 더 깊은 곳의 private/ 는 무시하지 않는다.
         return parts != (PRIVATE_DIR, README)
