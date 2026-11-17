@@ -1,0 +1,4 @@
+﻿review_id,venue_id,source_kind,posted_ym,customer_group,purpose,party,adults,children,occasion,meal,day_type,stay,ordered,paid_total,reasons_chosen,pain_points,compared_with,would_return,summary,labeler,labeled_on
+R-moegi-3001,moegi,map,2020-08,미식 방문,,,,,meal,lunch,weekday,,이름:스시오마카세,,,,,,셰프와 서버가 친절했고 최근 다녀 본 스시 오마카세 가운데 가장 좋았다고 했다.,borigunbbang,2026-11-17
+R-moegi-3002,moegi,map,2020-01,미식 방문,,,,,meal,lunch,weekend,,이름:점심 도시락,,,맛 기대 이하,shilla-ariake,yes,"오마카세에 앞서 맛을 보려고 점심 도시락을 시켰는데 회와 참치는 좋았으나 대부분 너무 달았고, 녹차는 다른 호텔 일식당보다 낫다고 했다.",borigunbbang,2026-11-17
+R-moegi-3003,moegi,map,,미식 방문,,,3,,meal,lunch,,,이름:가이세키 코스,,,가격;맛 기대 이하,이름:이즈미,,세 명이 점심 가이세키 코스를 먹었는데 값에 비해 수준이 크게 떨어진다며 강하게 비추천하고 철판에 집중하라고 했다.,borigunbbang,2026-11-17
