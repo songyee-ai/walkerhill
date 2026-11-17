@@ -1,0 +1,167 @@
+﻿review_id,venue_id,source_kind,posted_ym,customer_group,purpose,party,adults,children,occasion,meal,day_type,stay,ordered,paid_total,reasons_chosen,pain_points,compared_with,would_return,summary,labeler,labeled_on
+R-pizzahill-0001,pizzahill,map,2024-09,가족·친족,가족 행사,부모와 성인 자녀,,,,lunch,weekday,,이름:샐러드;이름:전복 스파게티,,,,,,부모님을 모시고 예약해 찾았고 샐러드와 파스타가 입에 맞아 부모님이 만족하셨다. 식사 뒤 주변을 걷기에도 좋다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0002,pizzahill,map,2025-10,커플·기념일,,부부·연인,,,,lunch,weekday,,,,,,,,전망 좋은 자리를 마련해 준 데 고마워하며 식사가 즐거웠다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0003,pizzahill,map,2024-09,친구·모임,,친구,,,,dinner,weekday,,이름:4인 패키지,,,,,,글쓴이가 어머니 생신을 맞아 어머니와 그 친구들이 먹을 세트를 대신 예약해 드렸다. 평소 단품보다 파스타를 더 먹을 수 있어 만족하셨다고 전했다.,borigunbbang,2026-11-17
+R-pizzahill-0004,pizzahill,map,2025-12,친구·모임,모임,동료·거래처,,,,lunch,weekend,,,,분위기·전망,,,yes,전망을 보고 예약했는데 음식 맛이 기대 이상이었다. 오가는 길도 좋아 다시 가고 싶다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0005,pizzahill,map,2023-10,,,,,,,dinner,weekday,guest,이름:콰트로피자;이름:문어샐러드,,혜택·할인,,,yes,호텔 투숙객 혜택으로 피자와 유료 샐러드를 포장해 갔다. 피자 양이 많다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0006,pizzahill,map,2025-10,가족·친족,가족 행사,부모와 성인 자녀,,,,lunch,weekend,,,,,,,,예전 방문이 좋았던 기억으로 부모님 생신 자리에 다시 찾았다. 부모님이 만족했고 직원이 친절했다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0007,pizzahill,map,2024-03,가족·친족,,부모와 성인 자녀,,,,lunch,weekend,,,,,,,,벚꽃은 졌지만 전망이 훌륭했고 응대도 친절했다고 칭찬했다.,borigunbbang,2026-11-17
+R-pizzahill-0008,pizzahill,map,2025-06,가족·친족,가족 행사,부모와 성인 자녀,,,,dinner,weekday,,,,,,,,분위기와 음식이 대체로 좋았고 경치 덕에 이야기 나누기 편했다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0009,pizzahill,map,2025-07,커플·기념일,,부부·연인,,,,lunch,weekend,,,,,,,,전망이 좋고 음식이 신선하고 맛있었다는 짧은 칭찬이다.,borigunbbang,2026-11-17
+R-pizzahill-0010,pizzahill,map,2024-06,친구·모임,모임,친구,,,,lunch,weekday,,,,,,,,,borigunbbang,2026-11-17
+R-pizzahill-0011,pizzahill,map,2026-08,가족·친족,,아이 동반 가족,,,,dinner,weekend,,이름:피자,,,맛 기대 이하,,yes,여러 번 찾은 단골인데 이번 피자는 예전만 못해 실망했다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0012,pizzahill,map,2026-04,친구·모임,모임,동료·거래처,,,,lunch,weekday,,,,,가격;혼잡·좌석 간격,,,실내가 어수선해 치른 값에 비해 만족스럽지 않았다는 불만이다.,borigunbbang,2026-11-17
+R-pizzahill-0013,pizzahill,map,2024-12,커플·기념일,,부부·연인,,,,lunch,weekday,,이름:하프앤하프;이름:해산물,,,,,,반반 피자를 큰 크기로 시켜 해산물 맛을 골랐고 재료가 푸짐하고 담백했다고 했다. 유료 회원 할인과 예약 앱 할인이 같아 앱 쪽이 낫다고 덧붙였다.,borigunbbang,2026-11-17
+R-pizzahill-0014,pizzahill,map,2023-11,,,,,,,lunch,weekday,,,,,,,yes,분위기와 맛이 좋았고 창밖 경치가 으뜸이지만 날씨가 흐려 아쉬웠다. 특별한 날 다시 오겠다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0015,pizzahill,map,2025-05,가족·친족,가족 행사,아이 동반 가족,,,,dinner,weekday,,,,,,,,,borigunbbang,2026-11-17
+R-pizzahill-0016,pizzahill,map,2024-04,가족·친족,가족 행사,부모와 성인 자녀,,,,lunch,weekday,,,,,맛 기대 이하;혼잡·좌석 간격,,yes,벚꽃철이라 평일 낮에도 붐볐고 음식 맛이 평소보다 못했다. 직원 응대와 전망은 여전히 좋았다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0018,pizzahill,map,2025-07,가족·친족,여행·호캉스,부모와 성인 자녀,,,,dinner,weekday,,이름:피자,,,,,,치즈가 넉넉한 피자 맛을 칭찬했다.,borigunbbang,2026-11-17
+R-pizzahill-0019,pizzahill,map,2024-05,커플·기념일,,부부·연인,,,,dinner,weekday,,,,,,,,날씨와 분위기가 좋았다는 짧은 평이다.,borigunbbang,2026-11-17
+R-pizzahill-0020,pizzahill,map,2023-11,커플·기념일,,부부·연인,,,,lunch,weekday,,이름:페페로니;이름:게살파스타;이름:샐러드,,,맛 기대 이하,,yes,"직원 응대와 무료 주차, 음식의 신선함은 좋았지만 시설이 낡고 구석이 지저분했다고 지적했다. 게 파스타는 쓴맛이 강해 조금 아쉬웠고 다른 메뉴를 먹으러 다시 오고 싶다고 했다.",borigunbbang,2026-11-17
+R-pizzahill-0021,pizzahill,map,2024-04,가족·친족,가족 행사,3대 가족,,,,lunch,weekday,,,,,가격;서비스,,no,한산한 날이었는데도 직원들이 허둥대고 접시를 제때 바꿔 주지 않았다. 값에 비해 응대가 아쉬워 한동안 오지 않겠다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0022,pizzahill,map,2025-03,친구·모임,모임,동료·거래처,,,,dinner,weekday,,이름:피자,,,,,,도우가 고소해 피자를 맛있게 먹었고 벚꽃철에 오면 더 좋겠다고 했다. 사진 찍는 곳은 조명이 강해 배경이 잘 안 나왔다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0023,pizzahill,map,2023-12,커플·기념일,,부부·연인,,,,lunch,weekend,,,,,,,,"미리 예약하면 주차와 친절, 전망, 피자를 모두 즐길 수 있다고 했다. 성탄 전날 다녀왔다.",borigunbbang,2026-11-17
+R-pizzahill-0024,pizzahill,map,2025-04,가족·친족,가족 행사,아이 동반 가족,,,,lunch,weekend,,,,,서비스,,,창가로 옮겨 달라는 요청을 딱딱하게 거절당했고 반반 주문 안내도 자기 테이블만 받지 못했다. 경치 말고는 나쁜 기억만 남았다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0026,pizzahill,map,2023-10,,,,,,,lunch,weekend,,이름:피자,,,,,,"비 오던 날이라 실내가 쌀쌀했으며, 먹는 도중 피자를 데워 줘서 좋았다고 했다.",borigunbbang,2026-11-17
+R-pizzahill-0027,pizzahill,map,2025-12,친구·모임,모임,친구,,,,lunch,weekday,,,,,,,,친구들과 즐겁게 보냈다는 짧은 평이다.,borigunbbang,2026-11-17
+R-pizzahill-0028,pizzahill,map,2026-05,커플·기념일,모임,부부·연인,,,,dinner,weekend,,,,,,,,종종 들르는 곳이라는 짧은 글이다.,borigunbbang,2026-11-17
+R-pizzahill-0029,pizzahill,map,2024-05,친구·모임,모임,친구,,,,dinner,weekday,,,,,,,yes,"음식 구성과 구이 메뉴, 여러 술을 즐길 수 있어 좋았고 작은 행사도 있었다. 해마다 오겠다고 했다.",borigunbbang,2026-11-17
+R-pizzahill-0030,pizzahill,map,2024-12,친구·모임,모임,동료·거래처,,,,lunch,weekday,,,,,,,,연말 모임 장소로 한 번쯤 와 볼 만하다고 추천했다.,borigunbbang,2026-11-17
+R-pizzahill-0031,pizzahill,map,2023-10,,,,,,,dinner,weekday,,이름:피자;이름:와인;이름:스파게피;이름:필라프,,,,,yes,"야간 경치와 피자, 와인, 파스타, 볶음밥이 모두 흡족했다. 이용 시간이 짧아 서둘러 먹어야 하는 점이 흠이라고 했다.",borigunbbang,2026-11-17
+R-pizzahill-0032,pizzahill,map,2025-09,친구·모임,모임,친구,,,,lunch,weekend,,,,,,,yes,해마다 찾는데 올해는 장소가 덜 어수선해 더 즐거웠다. 화장실이 모자라 개선을 바란다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0033,pizzahill,map,2024-10,가족·친족,가족 행사,부모와 성인 자녀,,,,dinner,weekend,,이름:피자;이름:파스타,,,서비스,,yes,아버지가 피자를 좋아해 가족이 함께 왔고 맛은 늘 그렇듯 훌륭했다. 음식을 나르던 직원들의 말투가 퉁명스러워 아쉬웠다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0034,pizzahill,map,2026-04,친구·모임,모임,친구,,,,lunch,weekend,,,,,,,,행사가 즐거웠고 가을에도 열리면 좋겠다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0035,pizzahill,map,2023-12,가족·친족,,아이 동반 가족,,,,dinner,weekday,,,,,,,,성탄 분위기를 내기에 좋았다는 짧은 평이다.,borigunbbang,2026-11-17
+R-pizzahill-0036,pizzahill,map,2026-04,커플·기념일,,부부·연인,,,,lunch,weekend,,,,,,,yes,와인 행사에 다녀왔는데 행사 규모가 해마다 줄어드는 느낌이라고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0037,pizzahill,map,2024-01,친구·모임,모임,친구,,,,lunch,weekend,,이름:피자,,,,,,여러 메뉴를 함께 나눠 먹기 좋았고 맛이 아주 특별하진 않았지만 응대가 친절했다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0038,pizzahill,map,2024-02,가족·친족,가족 행사,3대 가족,,,,dinner,weekend,guest,,,,,,,같은 단지 호텔에 머물며 셔틀을 타고 가서 포장 주문을 받아 왔고 30분이 채 안 걸렸다. 연휴처럼 붐빌 때 쓸 만한 방법이라고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0039,pizzahill,map,2025-04,커플·기념일,,부부·연인,,,,lunch,weekend,,,,,혼잡·좌석 간격,,,매장이 몹시 붐비고 어수선했다는 한 줄 불만이다.,borigunbbang,2026-11-17
+R-pizzahill-0040,pizzahill,map,2026-08,,,,,,,lunch,weekday,,이름:피자;이름:파스타,,,맛 기대 이하,,,전망 속에서 식사했고 피자는 무난했지만 마늘 파스타가 특히 맛있었다고 추천했다.,borigunbbang,2026-11-17
+R-pizzahill-0041,pizzahill,map,2023-08,,,,,,,lunch,weekday,,이름:피자;이름:파스타,,,,,,평일 낮이라 한가롭게 강을 보며 먹었고 직원과 음식 모두 만족스러웠다. 값은 나가지만 특별한 날에 알맞고 투숙객에게는 차량 픽업이 있다고 알렸다.,borigunbbang,2026-11-17
+R-pizzahill-0043,pizzahill,map,2024-10,가족·친족,일상 외식,아이 동반 가족,,,,lunch,weekday,,,,,,,yes,,borigunbbang,2026-11-17
+R-pizzahill-0044,pizzahill,map,2025-05,가족·친족,가족 행사,3대 가족,,,,dinner,weekend,,,,,,,,,borigunbbang,2026-11-17
+R-pizzahill-0045,pizzahill,map,2024-09,가족·친족,가족 행사,부모와 성인 자녀,,,,lunch,weekend,,이름:샐러드,,,,,,가족 다섯 명이 모였고 두 달 앞서 예약해 창가 자리를 얻었다. 피자보다 경치를 즐기는 곳이라 평하며 호텔 와인 가게에서 사 온 와인은 반입료가 없다고 귀띔했다.,borigunbbang,2026-11-17
+R-pizzahill-0046,pizzahill,map,2026-08,친구·모임,모임,동료·거래처,,,,lunch,weekday,,,,,,,,"전망 좋은 자리와 맑은 하늘, 식사에 고마움을 전했다.",borigunbbang,2026-11-17
+R-pizzahill-0047,pizzahill,map,2025-10,커플·기념일,,부부·연인,,,,dinner,weekend,,,,,,,,매우 좋았다는 짧은 평이다.,borigunbbang,2026-11-17
+R-pizzahill-0049,pizzahill,map,2024-11,가족·친족,모임,아이 동반 가족,,,,lunch,weekend,,,,,,,,딸과 딸 친구네 가족이 함께 연말 모임을 했다. 미리 예약해 좋은 자리에 앉았고 아이도 무척 즐거워했다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0050,pizzahill,map,2024-02,가족·친족,가족 행사,부모와 성인 자녀,,,,dinner,weekday,,,,,가격,,,"피자 값으로는 지나치게 비싸지만 응대와 강 경치, 맛이 그 값을 한다고 평했다.",borigunbbang,2026-11-17
+R-pizzahill-0051,pizzahill,map,2024-07,,,,,,,lunch,weekday,,,,,,,yes,기념일에 찾기 알맞다는 짧은 추천이다.,borigunbbang,2026-11-17
+R-pizzahill-0052,pizzahill,map,2026-02,친구·모임,모임,동료·거래처,,,,dinner,weekday,,,,,,,,,borigunbbang,2026-11-17
+R-pizzahill-0053,pizzahill,map,2024-04,친구·모임,모임,동료·거래처,,,,lunch,weekend,,,,,,,yes,즐거운 모임이었고 단풍철에 한 번 더 오겠다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0054,pizzahill,map,2023-07,가족·친족,가족 행사,,,,,lunch,weekend,,,,,,,,생일을 맞아 가족이 모였고 직원 응대와 넉넉한 주차 시간이 좋았다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0055,pizzahill,map,2025-06,가족·친족,가족 행사,3대 가족,,,,dinner,weekday,,,,,,,,맛있고 값에 비해 만족스럽다며 추천했다.,borigunbbang,2026-11-17
+R-pizzahill-0056,pizzahill,map,2023-11,친구·모임,모임,친구,,,,lunch,weekday,,,,,,,yes,정해진 이용 시간이 짧았다는 불만이다.,borigunbbang,2026-11-17
+R-pizzahill-0057,pizzahill,map,2025-08,가족·친족,,부모와 성인 자녀,,,,lunch,weekday,,,,,가격,,,오랜만에 왔는데 맛이나 분위기는 변함없었지만 값이 꽤 올랐다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0058,pizzahill,map,2024-07,친구·모임,모임,친구,,,,lunch,weekend,,이름:피자;이름:해산물 샐러드;이름:로제파스타,,,대기,,yes,예약했지만 앞 손님이 늦게 나가 15분을 기다렸다. 해산물 샐러드가 신선했고 로제 파스타가 짜지 않고 진해 좋았다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0059,pizzahill,map,2024-09,친구·모임,모임,친구,,,,lunch,weekday,,이름:피자,,,,,,피자가 맛있다는 짧은 칭찬이다.,borigunbbang,2026-11-17
+R-pizzahill-0060,pizzahill,map,2024-12,가족·친족,가족 행사,부모와 성인 자녀,,,,lunch,weekday,,,,,,,,미리 예약해 경치가 가장 좋은 자리에서 맛있게 먹었다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0062,pizzahill,map,2024-12,커플·기념일,기념일,부부·연인,,,,lunch,weekday,,이름:피자,,,,,,성탄절을 맞아 데이트로 찾았고 전망과 피자가 좋았다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0063,pizzahill,map,2025-08,가족·친족,,부모와 성인 자녀,,,,lunch,weekend,,이름:피자;이름:파스타;이름:리조또,,,,,,"딸 부부와 함께 와서 경치와 네 가지 맛의 피자를 즐겼다. 파스타, 리조또 역시 풍미가 남달랐다고 했다.",borigunbbang,2026-11-17
+R-pizzahill-0064,pizzahill,map,2024-10,친구·모임,모임,동료·거래처,,,,lunch,weekend,,이름:와인,,,,,,연계 행사로 수입사 매대에서 와인을 사서 곁들였고 경치와 음식 모두 만족스러웠다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0065,pizzahill,map,2026-01,친구·모임,모임,,,,,lunch,weekday,,,,,,,,전망과 응대를 칭찬한 짧은 평이다.,borigunbbang,2026-11-17
+R-pizzahill-0066,pizzahill,map,2023-08,,,,,,,dinner,weekend,,이름:4인세트,,,,,,미리 예약해 창가에 앉았고 네 명용 세트에 음료 하나를 더해 다섯 명이 넉넉히 먹었다. 기대보다 음식이 모두 맛있었다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0067,pizzahill,map,2024-01,커플·기념일,기념일,부부·연인,,,,dinner,weekday,,,,,,,,,borigunbbang,2026-11-17
+R-pizzahill-0068,pizzahill,map,2026-05,친구·모임,모임,친구,,,,lunch,weekend,,,,,,,,날씨 덕에 만족스러웠고 쿠폰으로 사 먹은 음식이 예상보다 맛있었다. 참여한 수입사도 다양해 좋았다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0069,pizzahill,map,2024-12,커플·기념일,기념일,동료·거래처,,,,dinner,weekday,,이름:피자,,,,,,기념일에 찾았는데 경치가 아주 예뻤고 음식도 맛있었다. 양이 많아 남은 피자를 싸 갈 정도였고 직원도 친절했다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0070,pizzahill,map,2023-09,친구·모임,,친구,,,,lunch,weekend,,,,,,,,좋은 시간이었다는 짧은 평이다.,borigunbbang,2026-11-17
+R-pizzahill-0071,pizzahill,map,2024-04,가족·친족,,아이 동반 가족,,,,lunch,weekend,,,,,,,yes,와인 행사에 아이와 함께 올 수 있어 좋았고 마침 벚꽃이 활짝 피어 더 즐거웠다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0073,pizzahill,map,2023-12,친구·모임,모임,친구,,,,dinner,weekday,,,,,,,,친구들과 모아 둔 돈으로 연말 모임을 했다. 야경과 맛이 좋고 고를 수 있는 메뉴가 많았다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0075,pizzahill,map,2025-03,가족·친족,여행·호캉스,아이 동반 가족,,,,lunch,weekday,,,,,,,yes,"경치와 맛, 응대가 모두 좋았다. 다음에는 아이들 없이 편하게 와서 더 즐기겠다고 했다.",borigunbbang,2026-11-17
+R-pizzahill-0076,pizzahill,map,2024-06,가족·친족,가족 행사,부모와 성인 자녀,,,,lunch,weekend,,,,,서비스,,,값은 있지만 특별한 날에 어울리고 주차가 편하다. 다만 호텔 수준의 응대로는 부족하다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0078,pizzahill,map,2023-08,,,,,,,lunch,weekday,,이름:세트메뉴,,,,,yes,"일정 때문에 예약을 급히 바꿨는데도 좋은 자리를 받아 고마웠다. 세트 구성과 맛, 주차, 직원 모두 만족해 다시 오겠다고 했다.",borigunbbang,2026-11-17
+R-pizzahill-0079,pizzahill,map,2026-04,커플·기념일,,부부·연인,,,,dinner,weekend,,couple-set,,,,,,둘이서 세트를 시켰는데 양이 많아 피자 일부를 포장해 갔다. 직원이 물을 자주 채워 주었고 무엇보다 경치가 훌륭했다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0080,pizzahill,map,2026-10,커플·기념일,기념일,부부·연인,,,,lunch,weekend,,,,,,,,요청한 사항을 잘 들어주었고 친절했으며 음식이 맛있었다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0081,pizzahill,map,2023-08,친구·모임,모임,동료·거래처,,,,lunch,weekday,,,,,,,,"전망과 친절, 맛 모두 좋았다는 짧은 평이다.",borigunbbang,2026-11-17
+R-pizzahill-0082,pizzahill,map,2023-06,,,,,,,lunch,weekday,,,,,맛 기대 이하,,,맛은 평범했지만 경치가 좋고 직원이 매우 친절했다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0083,pizzahill,map,2024-04,커플·기념일,,부부·연인,,,,lunch,weekend,,,,,,,,,borigunbbang,2026-11-17
+R-pizzahill-0084,pizzahill,map,2023-10,,,,,,,dinner,weekday,,,,,,,yes,경치와 맛이 좋았고 다음에는 주말에 느긋하게 다시 오고 싶다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0085,pizzahill,map,2024-01,가족·친족,가족 행사,부모와 성인 자녀,,,,lunch,weekend,,,,,,,,,borigunbbang,2026-11-17
+R-pizzahill-0086,pizzahill,map,2025-07,커플·기념일,,부부·연인,,,,lunch,weekend,,이름:피자,,,가격,,,피자가 맛있지만 값어치에는 못 미친다며 그래도 한 번은 먹어 볼 만하다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0087,pizzahill,map,2024-05,친구·모임,모임,동료·거래처,,,,lunch,weekday,,이름:4인셋트,,,,,,오랜만에 찾은 곳인데 경치가 무척 좋았고 함께 간 일행 모두 만족했다. 네 명용 세트로 다섯 명이 먹어도 넉넉했다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0088,pizzahill,map,2026-02,가족·친족,가족 행사,부모와 성인 자녀,,,,dinner,weekday,,,,,,,yes,,borigunbbang,2026-11-17
+R-pizzahill-0090,pizzahill,map,2023-09,친구·모임,모임,동료·거래처,,,,dinner,weekend,,,,,,,yes,좋은 사람들과 즐거운 시간이었다는 짧은 평이다.,borigunbbang,2026-11-17
+R-pizzahill-0091,pizzahill,map,2025-09,커플·기념일,,부부·연인,,,,lunch,weekday,,couple-set,,,양,,,둘이서 세트를 시켰는데 샐러드와 파스타는 훌륭했지만 피자 양이 적어 아쉬웠다. 건물은 낡았어도 경치 덕에 만족했다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0092,pizzahill,map,2023-10,,,,,,,dinner,weekend,,,,,,,yes,맛과 응대 모두 기대만큼 좋았다는 짧은 평이다.,borigunbbang,2026-11-17
+R-pizzahill-0093,pizzahill,map,2023-12,커플·기념일,기념일,부부·연인,,,,lunch,weekday,,,,,가격,,no,"연인의 생일을 맞아 왔는데, 맛 자체는 나쁘지 않았지만 값에 비해 특별하지 않았다. 직원 응대는 좋았으나 다시 올 생각은 없다고 했다.",borigunbbang,2026-11-17
+R-pizzahill-0094,pizzahill,map,2026-07,비즈니스·접대,기념일,동료·거래처,,,,lunch,weekday,,,,,,,,생일을 맞아 방문했고 음식 맛과 생일 챙김에 고마움을 표했다.,borigunbbang,2026-11-17
+R-pizzahill-0095,pizzahill,map,2023-12,비즈니스·접대,업무상 식사,동료·거래처,,,,lunch,weekday,,,,,,,,직장 회식으로 이용했다는 한 단어 후기다.,borigunbbang,2026-11-17
+R-pizzahill-0096,pizzahill,map,2023-11,가족·친족,가족 행사,,,,,dinner,weekday,,이름:피자,,,,,,"딸의 생일에 저녁으로 찾았고 친절한 응대와 창가 좌석, 새우 피자 맛을 칭찬했다.",borigunbbang,2026-11-17
+R-pizzahill-0097,pizzahill,map,2024-01,친구·모임,모임,,,,,lunch,weekday,,,,,,,,"음식 간과 맛, 맑은 날의 전망에 만족했다.",borigunbbang,2026-11-17
+R-pizzahill-0098,pizzahill,map,2023-09,,,,,,,lunch,weekend,,,,,가격,,,좋아하는 곳이지만 비싸서 자주 오지는 못한다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0099,pizzahill,map,2025-10,가족·친족,가족 행사,아이 동반 가족,,,,dinner,weekday,,,,,,,,,borigunbbang,2026-11-17
+R-pizzahill-0100,pizzahill,map,2023-12,가족·친족,가족 행사,아이 동반 가족,,,,dinner,weekend,,이름:피자,,분위기·전망,혼잡·좌석 간격,,,"아이가 원해 성탄절 저녁에 예약해 왔고, 실내가 붐벼 산만했지만 음식과 피자 데워 주는 응대는 좋았다고 했다.",borigunbbang,2026-11-17
+R-pizzahill-0101,pizzahill,map,2025-02,가족·친족,가족 행사,부모와 성인 자녀,,,,lunch,weekend,,,,,,,,한 단어로 좋았다고만 남겼다.,borigunbbang,2026-11-17
+R-pizzahill-0102,pizzahill,map,2023-07,커플·기념일,기념일,,,,,dinner,weekday,,,,,가격,,,기념일에 방문해 창가 자리를 받았고 값은 높지만 맛있다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0103,pizzahill,map,2023-07,,,,2,,,lunch,weekend,,이름:라지,,,,,,큰 사이즈 한 판으로 두 사람이 배불렀고 치즈가 넉넉하다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0104,pizzahill,map,2024-04,,일상 외식,,,,,lunch,weekend,,,,,,,,야외 행사에서 다양한 와인과 공연을 즐긴 이야기다.,borigunbbang,2026-11-17
+R-pizzahill-0105,pizzahill,map,2025-06,커플·기념일,,부부·연인,,,,dinner,weekday,,,,,,,,"강 전망과 분위기, 친절한 응대가 좋았고 값에 걸맞은 만족이라고 했다.",borigunbbang,2026-11-17
+R-pizzahill-0106,pizzahill,map,2023-11,,,,,,,lunch,weekday,,,,,,,yes,맛있다는 짧은 칭찬이다.,borigunbbang,2026-11-17
+R-pizzahill-0107,pizzahill,map,2023-12,,,,,,,lunch,weekend,,이름:에이드,,,,,,"전망과 음료, 친절을 짧게 칭찬했다.",borigunbbang,2026-11-17
+R-pizzahill-0109,pizzahill,map,2025-01,가족·친족,가족 행사,아이 동반 가족,,,,dinner,weekend,,이름:마르게리타;이름:토마토;이름:봉골레;이름:샐러드,,,,,,"기본 피자와 파스타 두 가지, 샐러드를 먹었는데 모두 맛있었고 직원들이 잘 챙겨 줬다고 했다.",borigunbbang,2026-11-17
+R-pizzahill-0110,pizzahill,map,2024-06,친구·모임,모임,친구,,,,lunch,weekend,,,,,,,yes,주말 점심에 지인들과 창가에서 즐겁게 보냈고 다음엔 가족과 오겠다고 했으나 화장실 청결은 아쉬웠다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0111,pizzahill,map,2026-04,가족·친족,가족 행사,부모와 성인 자녀,,,,lunch,weekend,,,,,,,yes,,borigunbbang,2026-11-17
+R-pizzahill-0112,pizzahill,map,2024-10,가족·친족,가족 행사,부모와 성인 자녀,,,,dinner,weekday,,,,,,,,아버지 생신을 맞아 방문했고 부모님이 모두 만족했다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0113,pizzahill,map,2023-11,커플·기념일,,부부·연인,,,,lunch,weekday,,,,,,,,자주 오는데 한산하고 맛있고 친절하다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0114,pizzahill,map,2024-08,가족·친족,,아이 동반 가족,,,,dinner,weekday,,이름:세트 메뉴,,,,,,좋은 자리에서 전망을 즐겼고 어린 딸도 맛있어했으며 세트 중 샐러드가 특히 좋았다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0115,pizzahill,map,2024-01,가족·친족,가족 행사,아이 동반 가족,,,,dinner,weekday,,,,,,,,"자녀 졸업을 기념해 왔고 순한 음식과 서비스, 전망에 만족했다.",borigunbbang,2026-11-17
+R-pizzahill-0116,pizzahill,map,2024-01,가족·친족,가족 행사,3대 가족,,,,lunch,weekday,,,,,,,,,borigunbbang,2026-11-17
+R-pizzahill-0117,pizzahill,map,2024-06,커플·기념일,기념일,부부·연인,,,,lunch,weekend,,,,,,,,피자를 좋아하는 배우자의 생일에 찾아 좋은 자리에서 전망을 함께 즐겼다.,borigunbbang,2026-11-17
+R-pizzahill-0118,pizzahill,map,2024-12,,집에서 먹을 것 구매,,,,,dinner,weekday,,,,주차·접근,,,,집이 가까워 포장해 갔고 여러 종류를 맛볼 수 있어 좋았다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0119,pizzahill,map,2025-08,가족·친족,가족 행사,부모와 성인 자녀,,,,dinner,weekday,,,,분위기·전망,서비스,,,친족 행사를 위해 앞서 예약해 할인을 받았으나 당일 더 큰 할인이 있다는 걸 알고 불만이었고 응대 품격도 예전만 못했다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0120,pizzahill,map,2024-10,커플·기념일,,부부·연인,,,,lunch,weekend,,,,,,,yes,매우 좋았고 다시 오고 싶다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0121,pizzahill,map,2024-09,가족·친족,가족 행사,아이 동반 가족,,,,dinner,weekday,,이름:세트메뉴,,,서비스,,yes,세트 요리가 너무 빠르게 연달아 나온다며 간격을 두도록 요청하라고 권했다.,borigunbbang,2026-11-17
+R-pizzahill-0122,pizzahill,map,2024-03,커플·기념일,,부부·연인,,,,lunch,weekend,,,,,,,yes,해마다 다시 오고 싶은 행사였다는 짧은 후기다.,borigunbbang,2026-11-17
+R-pizzahill-0123,pizzahill,map,2024-08,가족·친족,가족 행사,부모와 성인 자녀,3,,,lunch,weekday,,이름:콰트로 피자;이름:파스타,,맛,양,,yes,"지인 추천으로 아버지 생일에 전날 예약해 왔고, 세 명에게 큰 피자는 양이 많았지만 창가 전망과 담백한 맛에 만족했다.",borigunbbang,2026-11-17
+R-pizzahill-0124,pizzahill,map,2026-01,가족·친족,가족 행사,3대 가족,,,,lunch,weekend,,이름:알리오올리오,,,맛 기대 이하;혼잡·좌석 간격,,,부모님과 아이를 데리고 가족 모임으로 오기 좋았으나 산만했고 일부 파스타는 아쉬웠다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0125,pizzahill,map,2026-09,커플·기념일,,부부·연인,,,,lunch,weekend,,,,,맛 기대 이하;혼잡·좌석 간격,,,맛은 보통이고 전망도 잘 못 봤으며 공간이 좁고 이용 시간 제한 탓에 서둘러 먹고 나왔다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0126,pizzahill,map,2025-10,커플·기념일,,부부·연인,,,,dinner,weekday,,,,,가격,,,"날씨 탓에 경치는 아쉬웠고, 요리는 좋았으나 값에 비해서는 별로라고 했다.",borigunbbang,2026-11-17
+R-pizzahill-0127,pizzahill,map,2024-02,친구·모임,모임,친구,,,,lunch,weekday,,,,,,,,맛은 말할 필요도 없다며 칭찬했다.,borigunbbang,2026-11-17
+R-pizzahill-0128,pizzahill,map,2024-02,비즈니스·접대,업무상 식사,동료·거래처,,,,lunch,weekend,,,,,,,,"중요한 날마다 예약해 찾는 곳으로 맛과 전망, 분위기가 늘 좋은 기억을 남긴다고 했다.",borigunbbang,2026-11-17
+R-pizzahill-0129,pizzahill,map,2024-08,가족·친족,가족 행사,아이 동반 가족,,,,lunch,weekday,,,,,,,,전망과 음식이 좋았다는 짧은 후기다.,borigunbbang,2026-11-17
+R-pizzahill-0130,pizzahill,map,2025-05,친구·모임,,친구,,,,lunch,weekday,,이름:피자,,,,,,전망 좋은 곳에서 먹은 피자를 칭찬했다.,borigunbbang,2026-11-17
+R-pizzahill-0131,pizzahill,map,2024-03,친구·모임,모임,친구,,,,lunch,weekend,,,,,,,,여러 와인을 맛볼 수 있어 좋았다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0132,pizzahill,map,2024-04,친구·모임,일상 외식,친구,,,,lunch,weekend,,,,,,,,,borigunbbang,2026-11-17
+R-pizzahill-0133,pizzahill,map,2026-07,친구·모임,,친구,,,,lunch,weekday,,이름:피자,,,,,,변함없는 고소한 치즈 맛과 편한 소화를 칭찬하며 아끼는 식당이라고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0134,pizzahill,map,2025-12,가족·친족,가족 행사,부모와 성인 자녀,,,,lunch,weekend,,이름:피자,,분위기·전망,가격;맛 기대 이하;서비스;혼잡·좌석 간격,,,"전망 때문에 부모님과 왔으나 날씨로 거의 안 보였고, 값에 비해 평범한 맛과 빽빽한 좌석, 피자 데우기 안내 부재가 아쉬웠다고 했다.",borigunbbang,2026-11-17
+R-pizzahill-0136,pizzahill,map,2024-01,커플·기념일,,부부·연인,,,,lunch,weekday,,이름:피자,,,,,,전망과 피자가 좋았다는 짧은 후기다.,borigunbbang,2026-11-17
+R-pizzahill-0137,pizzahill,map,2025-07,가족·친족,가족 행사,3대 가족,,,,lunch,weekend,,,,,서비스;혼잡·좌석 간격,,yes,직원 수에 비해 돌봄 받는 느낌이 적고 예전보다 산만해 호텔다운 서비스가 아쉬웠다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0138,pizzahill,map,2024-08,가족·친족,가족 행사,아이 동반 가족,,,,dinner,weekday,,이름:콰트로 피자,,,,,,네 가지 맛 피자가 아주 맛있었다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0139,pizzahill,map,2023-12,가족·친족,가족 행사,부모와 성인 자녀,,,,dinner,weekday,,이름:피자,,,,,yes,생일 자리로 와서 특별한 피자와 함께 즐거웠다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0140,pizzahill,map,2024-11,친구·모임,모임,친구,4,,,dinner,weekend,,이름:콰트로세트,,,,,,"세트를 예약해 여성 네 명이 왔고 일찍 입장시켜 준 응대와 신선하고 푸짐한 음식, 남은 피자 포장에 만족했다.",borigunbbang,2026-11-17
+R-pizzahill-0141,pizzahill,map,2026-03,커플·기념일,일상 외식,부부·연인,,,,lunch,weekend,,,,맛,소음;혼잡·좌석 간격,,no,예전 맛을 기억해 왔지만 좁고 붐비며 시끄러워 다시는 못 오겠다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0142,pizzahill,map,2025-05,가족·친족,가족 행사,아이 동반 가족,,,,dinner,weekday,,이름:크림파스타,,,,,,자녀 생일에 예약해 왔고 전망과 깔끔한 맛이 좋았으나 크림 파스타는 조금 아쉬웠다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0143,pizzahill,map,2024-12,커플·기념일,,부부·연인,,,,dinner,weekend,,이름:살몬샐러드,,,,,,경치가 좋고 연어를 올린 샐러드가 가장 맛있었다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0144,pizzahill,map,2024-12,친구·모임,,친구,,,,lunch,weekend,,,,,,,,친절한 서비스 덕에 기분 좋게 다녀왔다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0145,pizzahill,map,2023-12,가족·친족,가족 행사,아이 동반 가족,,,,dinner,weekday,,,,,,,,전망이 좋고 세 사람 식사로 양이 알맞았다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0146,pizzahill,map,2023-09,친구·모임,모임,친구,,,,lunch,weekday,,,,평판·브랜드,가격,,,지인들과 생일 자리를 가졌고 전망은 좋았으며 호텔 가격대라 다소 비싸도 뜻깊은 자리에 어울린다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0147,pizzahill,map,2026-03,가족·친족,가족 행사,아이 동반 가족,,,,lunch,weekend,,,,,,,yes,"날씨와 강 전망이 좋았고 음식 맛과 양, 친절한 응대에 만족했다.",borigunbbang,2026-11-17
+R-pizzahill-0148,pizzahill,map,2026-02,친구·모임,모임,동료·거래처,,,,dinner,weekend,,,,,,,,특별한 피자를 원해 모임 장소로 골랐고 모두 만족했으며 양도 넉넉했다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0150,pizzahill,map,2026-10,가족·친족,가족 행사,아이 동반 가족,,,,dinner,weekend,,,,,,,,야경과 음식이 좋았다는 짧은 후기다.,borigunbbang,2026-11-17
+R-pizzahill-0151,pizzahill,map,2025-04,친구·모임,모임,친구,,,,dinner,weekend,,,,,가격,,,피자 본연의 풍미가 좋아 추천하지만 값 대비 만족은 높지 않아 특별한 날에 어울린다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0152,pizzahill,map,2025-08,가족·친족,가족 행사,부모와 성인 자녀,,,,lunch,weekend,,이름:피자,,,,,,가족 모임 장소로 좋고 전망과 피자가 훌륭했다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0153,pizzahill,map,2023-12,가족·친족,가족 행사,부모와 성인 자녀,,,,lunch,weekend,,이름:피자,,,,,yes,가족 모임 때마다 오는 곳으로 짜지 않은 피자와 서비스가 좋다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0154,pizzahill,map,2024-08,가족·친족,일상 외식,아이 동반 가족,,,,lunch,weekday,,이름:해산물 피자,,,메뉴 구성,,,바다 재료를 올린 피자를 최고로 꼽으며 과거 메뉴들이 다시 나오길 바랐다.,borigunbbang,2026-11-17
+R-pizzahill-0155,pizzahill,map,2026-10,커플·기념일,,부부·연인,,,,dinner,weekend,,,,,서비스,,,안내 직원의 무성의한 태도와 호출해도 오지 않는 직원 등 응대가 같은 호텔의 다른 곳보다 못하다고 지적했다.,borigunbbang,2026-11-17
+R-pizzahill-0156,pizzahill,map,2024-11,커플·기념일,집에서 먹을 것 구매,부부·연인,,,,dinner,weekend,,,,,,,,포장해 갔는데 매장에서 먹는 편이 더 맛날 것 같다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0157,pizzahill,map,2024-04,친구·모임,,친구,,,,lunch,weekend,,,,,혼잡·좌석 간격,,yes,와인 행사가 붐볐으나 좋은 날씨 덕에 만족했고 내년에도 가겠다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0158,pizzahill,map,2025-05,가족·친족,,부모와 성인 자녀,,,,lunch,weekday,,이름:한우불고기피자;이름:전복리조또,,,,,,숲 전망 자리가 새로웠고 늘 먹는 불고기 피자와 전복 리조또가 맛있었다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0160,pizzahill,map,2023-08,,,,,,,lunch,weekday,,이름:피자;이름:파스타,,,,,,"피자와 파스타, 전망까지 모두 좋았다고 했다.",borigunbbang,2026-11-17
+R-pizzahill-0161,pizzahill,map,2024-12,친구·모임,여행·호캉스,친구,,,,dinner,weekday,,couple-set,,,,,,2인 세트를 예약해 갔고 분위기와 음식이 좋아 추천한다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0162,pizzahill,map,2024-04,친구·모임,,친구,,,,lunch,weekend,,이름:찹스테이크;이름:아이스크림,,,대기;혼잡·좌석 간격,,,야외 행사에서 자리가 없어 바닥에 앉았고 와인은 오래 기다려야 했으며 푸드트럭 음식을 사 먹었다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0163,pizzahill,map,2026-10,친구·모임,일상 외식,친구,,,,lunch,weekday,,,,,,,yes,"음식과 친절, 전망이 모두 좋았고 단풍철에 다시 가고 싶다고 했다.",borigunbbang,2026-11-17
+R-pizzahill-0164,pizzahill,map,2023-08,친구·모임,모임,동료·거래처,,,,lunch,weekday,,,,,가격,,,오랜만에 왔는데 전망과 맛은 그대로지만 값이 매우 비싸다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0166,pizzahill,map,2025-12,가족·친족,가족 행사,아이 동반 가족,,,,dinner,weekday,,,,,,,,물을 채워 준 직원의 세심한 배려가 좋았다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0167,pizzahill,map,2023-12,커플·기념일,기념일,부부·연인,,,,lunch,weekend,,,,,예약이 어려움,,yes,연말마다 오는 곳인데 예약을 못 했지만 대기가 짧아 성탄절을 즐겁게 보냈다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0168,pizzahill,map,2025-07,커플·기념일,,부부·연인,,,,dinner,weekend,,,,,소음,,,붐벼서 시끄러웠지만 치즈가 맛있었다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0169,pizzahill,map,2025-09,커플·기념일,,부부·연인,,,,lunch,weekend,,이름:와인,,,,,,"가을 와인 행사에 다녀왔고 값과 날씨, 경치가 좋았으며 와인도 사 왔다고 했다.",borigunbbang,2026-11-17
+R-pizzahill-0170,pizzahill,map,2024-02,친구·모임,모임,친구,,,,lunch,weekday,,,,,,,,함께 간 친구들이 좋아했다는 짧은 후기다.,borigunbbang,2026-11-17
+R-pizzahill-0173,pizzahill,map,2023-10,가족·친족,,,,,,lunch,weekend,,이름:피자;이름:파스타;이름:해산물 샐러드,,,,,,"가을 주말에 가족과 낮에 나들이로 왔고 파스타와 샐러드, 특히 전망이 훌륭했으며 직원도 친절했다고 했다.",borigunbbang,2026-11-17
+R-pizzahill-0174,pizzahill,map,2024-10,친구·모임,모임,친구,,,,lunch,weekend,,,,,,,yes,와인 행사가 아주 좋았고 내년에도 가겠다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0175,pizzahill,map,2024-12,커플·기념일,,부부·연인,,,,dinner,weekend,,,,,,,,,borigunbbang,2026-11-17
+R-pizzahill-0176,pizzahill,map,2024-05,커플·기념일,기념일,부부·연인,,,,dinner,weekday,,,,,메뉴 구성,,,날씨가 좋아 야외에서 즐겁게 먹었지만 피자 선택지가 더 많았으면 한다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0177,pizzahill,map,2024-03,친구·모임,모임,친구,,,,lunch,weekend,,,,,,,yes,추웠지만 뜻깊은 날이었고 다시 가고 싶다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0178,pizzahill,map,2024-12,커플·기념일,기념일,부부·연인,,,,dinner,weekend,,,,,,,,잘 먹고 즐거웠다는 감사 인사다.,borigunbbang,2026-11-17
+R-pizzahill-0179,pizzahill,map,2025-04,가족·친족,,부모와 성인 자녀,,,,lunch,weekday,,,,,,,,해마다 봄이면 가족과 찾는데 늘 맛있다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0180,pizzahill,map,2025-01,친구·모임,모임,동료·거래처,,,,dinner,weekday,,,,,,,yes,직장 동료들과 새해 모임으로 왔고 언제나 응대와 분위기가 좋아 다음엔 가족과 오겠다고 했다.,borigunbbang,2026-11-17
+R-pizzahill-0182,pizzahill,map,2024-04,친구·모임,,친구,,,,lunch,weekend,,,,,,,,즐겁게 보냈다는 짧은 후기다.,borigunbbang,2026-11-17
+R-pizzahill-0183,pizzahill,map,2025-01,커플·기념일,,부부·연인,,,,dinner,weekend,,,,,,,,음식과 강 전망이 좋아 데이트 장소로 좋다고 했다.,borigunbbang,2026-11-17
