@@ -258,10 +258,12 @@ def variable_panel(repo_root: Path) -> Inputs:
     months = months_between(start, end)
     st.selectbox("날씨", ["다음 단계에서 넣습니다"], key="sim_weather", disabled=True, help=WEATHER_NOTE)
     if months:
-        st.caption(
-            f"{months_text(months)}을 달마다 돌려 달 평균으로 보입니다. 처음 해 보는 조합이면 달 수만큼 시간이 더 걸립니다. "
-            + SEASON_NOTE
+        how = (
+            f"{months_text(months)}로 돌립니다. "
+            if len(months) == 1
+            else f"{months_text(months)}을 달마다 돌려 달 평균으로 보입니다. 처음 해 보는 조합이면 달 수만큼 시간이 더 걸립니다. "
         )
+        st.caption(how + SEASON_NOTE)
 
     _section(4, "적용할 변수")
     change = st.selectbox("변수 종류", CHANGE_KINDS, key="sim_change")

@@ -256,9 +256,10 @@ body { background:transparent; color:var(--ink); line-height:1.45; font-size:13p
 .scene { position:relative; }
 .zone { position:absolute; left:2px; font-size:11px; font-weight:700; letter-spacing:.08em; color:var(--muted); text-transform:uppercase; }
 .store { position:absolute; padding:0 5px; container-type:inline-size; }
-/* 칸이 좁으면(창이 좁을 때) 아이콘을 감춰 이름과 값이 들어갈 자리를 먼저 둔다 (T204). 값의 "(가상)" 은 늘 보인다 */
+/* 칸이 좁으면(창이 좁을 때) 아이콘과 손님 줄의 변화 표시를 감춰 이름·값·페르소나가 겹치지 않게 한다 (T204).
+   값의 "(가상)" 은 늘 보이고, 변화는 위의 합계 칸과 "숫자와 카드로 자세히 보기"에 있다 */
 @container (max-width:170px) { .store .pic { display:none; } .store .top { padding:0 10px; } .store .val { font-size:11.5px; }
-  .store .lane .d { right:6px; font-size:10px; padding:1px 5px; } .store .lane .d.flat { display:none; } }
+  .store .lane .d { display:none; } }
 .card { background:var(--bg); border:1px solid var(--line); border-radius:11px; box-shadow:var(--shadow); overflow:hidden;
   transition:border-color .5s, box-shadow .5s; }
 .top { height:__CARD_TOP__px; display:flex; align-items:center; gap:10px; padding:0 12px; }
