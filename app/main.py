@@ -19,7 +19,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from app import simulator, style  # noqa: E402
+from app import evidence, simulator, style  # noqa: E402
 from app.compare import venue_names  # noqa: E402
 from app.results import (  # noqa: E402
     RunSource,
@@ -291,9 +291,12 @@ def detail_view() -> None:
         money_table(visit_table(run))
 
 
-# 탭 이름 (11-17, T204): 첫 탭은 결과를 견주는 시뮬레이터, 둘째 탭은 실행 하나의 선택과 이유를 보는 상세 분석.
-tab_sim, tab_detail = st.tabs(["시뮬레이터", "상세 분석"])
+# 탭 이름 (11-17, T204): 첫 탭은 결과를 견주는 시뮬레이터, 둘째 탭은 실행 하나의 선택과 이유를 보는 상세 분석,
+# 셋째 탭은 값마다 근거 등급과 출처를 보는 근거 보기 (11-17, T22).
+tab_sim, tab_detail, tab_evidence = st.tabs(["시뮬레이터", "상세 분석", "근거 보기"])
 with tab_sim:
     simulator.render(REPO_ROOT)
 with tab_detail:
     detail_view()
+with tab_evidence:
+    evidence.render(REPO_ROOT)
