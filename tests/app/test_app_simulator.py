@@ -121,12 +121,15 @@ def test_simulator_tab_renders_with_month_and_weather_marked_next_step():
     assert not app.exception
     assert [t.label for t in app.tabs] == ["시뮬레이터", "상세 분석"]  # 탭 이름 (T204)
     assert app.selectbox(key="sim_weather").disabled
-    month = next(s for s in app.selectbox if s.key.startswith("sim_month_"))
-    if not month.disabled:  # 팀 자료가 다 올라와 있으면 달을 고를 수 있다
-        month.set_value(12).run()
+    start = next(s for s in app.selectbox if s.key.startswith("sim_month_") and "end" not in s.key)
+    if not start.disabled:  # 팀 자료가 다 올라와 있으면 기간을 고를 수 있다
+        start.set_value(11).run()
         assert not app.exception
+        end = next(s for s in app.selectbox if s.key.startswith("sim_month_end_"))
+        end.set_value(2).run()
+        assert not app.exception
+        assert any("11월 ~ 2월 (4개월)" in c.value for c in app.caption)  # 해를 넘기는 기간
         assert any("그 달에 파는 메뉴" in c.value for c in app.caption)
-        assert any("12월로 계산" in c.value for c in app.caption)  # 계절은 대표 달 하나로 돈다
     assert any(b.label == "기본 시나리오와 비교하기" for b in app.button)
 
 
@@ -135,3 +138,31 @@ def test_names_come_from_definition_files_when_no_answer_was_saved(tmp_path: Pat
     names = names_from_files(_copy(tmp_path))
     assert names["family-elders"] != "family-elders"
     assert names["meal-dinner-weekend"] == "식사 · 저녁 · 주말"
+
+
+def test_months_between_wraps_the_year():
+    # 기간은 해를 넘길 수 있다 (11월 ~ 2월). 시작이 없으면 일 년 전체로 돈다 (11-17).
+    from app.simulator import months_between, months_text
+
+    assert months_between(None, 5) == []
+    assert months_between(3, 5) == [3, 4, 5]
+    assert months_between(11, 2) == [11, 12, 1, 2]
+    assert months_between(12, 12) == [12]
+    assert months_text([11, 12, 1, 2]) == "11월 ~ 2월 (4개월)"
+    assert months_text([]) == "일 년 전체"
+
+
+def test_months_are_averaged_not_added(tmp_path: Path):
+    # 달마다의 비교를 합칠 때 매출은 더하지 않고 평균한다. 엔진은 달마다 일 년 합계에 맞추기 때문이다 (FORMATS 10.1절).
+    from app.compare import combine_months
+
+    root = _copy(tmp_path)
+    result = simulate(
+        root, REPO_ROOT, "sample", "competitor-chinese-discount",
+        ["family-elders"], ["meal-dinner-weekend"], list(EXAMPLE_VENUES), False, is_example=True,
+    )  # fmt: skip
+    one = compare(load_run(result.baseline.run_dir), load_run(result.scenario.run_dir))
+    both = combine_months([(11, one), (12, one)])
+    assert both.total_before == one.total_before and both.total_after == one.total_after
+    assert [m.condition for m in both.moves] == [f"{one.moves[0].condition} · 11월", f"{one.moves[0].condition} · 12월"]
+    assert sum(m.represented for m in both.moves) == one.moves[0].represented

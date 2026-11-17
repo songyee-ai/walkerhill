@@ -13,7 +13,7 @@ import streamlit as st
 import streamlit.components.v1 as components
 
 from app.board import WALKERHILL_NAMES, pct_change, venue_cards
-from app.compare import Comparison, compare, summary_groups
+from app.compare import Comparison, combine_months, compare, summary_groups
 from app.icons import as_img, persona_icon
 from app.results import load_run, names_from_files, visit_view, won
 from app.runs import (
@@ -39,16 +39,13 @@ from app.street import AFTER_LABEL, BASE_LABEL, render_scene, scene_from_compari
 from app.validation import LIMITS_SOURCE, VALIDATION_LIMITS, limits_not_in, load_validation, validation_rows
 from engine.formats import KO
 
-# 계절은 기간(석 달)으로 고르고, 엔진의 "실행의 달"(--month, T112)에는 그 계절의 대표 달 하나를 넘긴다 (11-17, 화면 담당 결정).
-# 엔진은 달 하나를 받는다. 대표 달은 가운데 달이고, 겨울만 12월이다: 시연 시나리오 셋(T20)이 모두 12월이라 1월로 돌리면
-# 연말 코스(11~12월)가 후보에서 빠진다.
-SEASON_MONTH = {"봄 (3~5월)": 4, "여름 (6~8월)": 7, "가을 (9~11월)": 10, "겨울 (12~2월)": 12}
-MONTH_SEASON = {month: season for season, month in SEASON_MONTH.items()}
-MONTHS: list[int | None] = [None, *SEASON_MONTH.values()]
+# 기간은 "X월 ~ Y월"로 고른다 (11-17, 화면 담당 결정). 엔진의 "실행의 달"(--month, T112)은 달 하나를 받으므로
+# 기간의 달마다 기본 시나리오와 변수 적용 후를 돌리고, 결과는 달 평균으로 합친다 (app/compare.py 의 combine_months).
+MONTHS = list(range(1, 13))
 # 달을 줘도 바뀌는 것은 그 달에 파는 메뉴와 AI 의 판단뿐이다. 가중치는 일 년 합계에 맞춘다 (FORMATS.md 10.1절 "실행의 달").
 SEASON_NOTE = (
-    "계절은 그 달에 파는 메뉴와 AI 의 판단으로만 반영됩니다. 계절에 따른 매출 변동은 아직 넣지 않았습니다 "
-    "(매출 합계는 일 년 기준이라, 달이 다른 결과끼리 합계를 견주지 마세요)."
+    "달은 그 달에 파는 메뉴와 AI 의 판단으로만 반영됩니다. 달에 따른 매출 변동은 아직 넣지 않았습니다 "
+    "(매출 합계는 일 년 기준이라, 기간이 다른 결과끼리 합계를 견주지 마세요)."
 )
 # 11-17 회의 ④: 날씨는 근거 자료가 없어 이번에 넣지 않고 "다음 단계"로 둔다.
 WEATHER_NOTE = "날씨는 다음 단계에서 넣습니다. 날씨와 매출을 같은 날짜로 묶은 자료가 있어야 근거 있게 반영할 수 있습니다."
@@ -56,14 +53,18 @@ WEATHER_NOTE = "날씨는 다음 단계에서 넣습니다. 날씨와 매출을 
 PRICE_NOTE = "기본 시나리오의 가격은 10~11월 공식 가격입니다. 12월 요금 같은 달별 가격은 '적용할 변수'로 얹습니다."
 
 
-def season_text(month: int | None) -> str:
-    """계절 고르기 칸에 보일 말."""
-    return "정하지 않음 (일 년 전체)" if month is None else MONTH_SEASON[month]
+def months_between(start: int | None, end: int | None) -> list[int]:
+    """시작 달부터 끝 달까지 (해를 넘겨도 된다. 예: 11월 ~ 2월). 시작이 없으면 일 년 전체라 빈 목록이다."""
+    if start is None:
+        return []
+    end = start if end is None else end
+    return [(start - 1 + i) % 12 + 1 for i in range((end - start) % 12 + 1)]
 
 
-def month_text(month: int | None) -> str:
-    """고른 것과 결과에 보일 말. 어느 달로 계산했는지 함께 적는다."""
-    return "일 년 전체" if month is None else f"{MONTH_SEASON[month].split(' ')[0]} ({month}월로 계산)"
+def months_text(months: list[int]) -> str:
+    if not months:
+        return "일 년 전체"
+    return f"{months[0]}월" if len(months) == 1 else f"{months[0]}월 ~ {months[-1]}월 ({len(months)}개월)"
 
 CHANGE_KINDS = ["준비된 상황", "경쟁 호텔이 할인한다", "우리 가격을 바꾼다", "우리 한정 메뉴를 더한다"]
 
@@ -166,7 +167,7 @@ class Inputs:
     days: list[str]
     whens: list[str]
     condition_ids: list[str]
-    month: int | None
+    months: list[int]
     scenario: object
     scenario_id: str | None
     data_mode: str
@@ -235,19 +236,31 @@ def variable_panel(repo_root: Path) -> Inputs:
     days = st.pills("요일", list(DAY_TO_CODE), selection_mode="multi", default=["주말"], key="sim_days") or []
     whens = st.pills("때", list(WHEN_TO_CONDITION), selection_mode="multi", default=["저녁"], key="sim_whens") or []
     # 예시 묶음의 저장된 답은 달 없이 받은 것이라, 달을 주면 재생되지 않는다. 예시에서는 고르지 않게 한다.
-    month = st.selectbox(
-        "계절",
-        MONTHS,
-        format_func=season_text,
+    example_help = "예시 자료는 달 없이 받아 둔 답이라 고를 수 없습니다." if root.is_example else None
+    left, right = st.columns(2)
+    start = left.selectbox(
+        "기간 시작",
+        [None, *MONTHS],
+        format_func=lambda m: "일 년 전체" if m is None else f"{m}월",
         key=f"sim_month_{root.is_example}",
         disabled=root.is_example,
-        help="예시 자료는 달 없이 받아 둔 답이라 고를 수 없습니다." if root.is_example else None,
+        help=example_help,
     )
+    end = right.selectbox(
+        "기간 끝",
+        MONTHS,
+        index=(start or 1) - 1,
+        format_func=lambda m: f"{m}월",
+        key=f"sim_month_end_{root.is_example}_{start}",
+        disabled=root.is_example or start is None,
+        help=example_help,
+    )
+    months = months_between(start, end)
     st.selectbox("날씨", ["다음 단계에서 넣습니다"], key="sim_weather", disabled=True, help=WEATHER_NOTE)
-    if month is not None:
+    if months:
         st.caption(
-            f"엔진은 달 하나로 돌려 {MONTH_SEASON[month].split(' ')[0]}은 {month}월로 계산합니다 "
-            "(봄 4월, 여름 7월, 가을 10월, 겨울 12월). " + SEASON_NOTE
+            f"{months_text(months)}을 달마다 돌려 달 평균으로 보입니다. 처음 해 보는 조합이면 달 수만큼 시간이 더 걸립니다. "
+            + SEASON_NOTE
         )
 
     _section(4, "적용할 변수")
@@ -328,7 +341,7 @@ def variable_panel(repo_root: Path) -> Inputs:
 
     go = st.button(f"{BASE_LABEL}와 비교하기", type="primary", key="sim_go", width="stretch", disabled=bool(found.missing))
     return Inputs(
-        root, catalog, allowed, cards, personas, days, whens, condition_ids, month,
+        root, catalog, allowed, cards, personas, days, whens, condition_ids, months,
         scenario, scenario_id, data_mode, call_llm, llm_env, go, list(found.missing), ai_problem,
     )  # fmt: skip
 
@@ -336,8 +349,8 @@ def variable_panel(repo_root: Path) -> Inputs:
 def _chips(inputs: Inputs) -> str:
     names = {c["id"]: c["name"] for c in inputs.cards}
     when = " · ".join(inputs.days + inputs.whens) or "요일·때 없음"
-    if inputs.month is not None:
-        when += f" · {month_text(inputs.month)}"
+    if inputs.months:
+        when += f" · {months_text(inputs.months)}"
     who = ", ".join(names.get(p, p) for p in inputs.personas) or "페르소나 없음"
     if inputs.scenario is not None:
         change = inputs.scenario.name
@@ -384,22 +397,27 @@ def render(repo_root: Path) -> None:
             else:
                 if inputs.scenario is not None:
                     write_scenario(inputs.root.path, inputs.scenario)
-                with st.spinner(f"{BASE_LABEL}와 {AFTER_LABEL}를 차례로 돌리는 중입니다…"):
-                    result = simulate(
-                        inputs.root.path,
-                        repo_root,
-                        inputs.data_mode,
-                        inputs.scenario_id,
-                        inputs.personas,
-                        inputs.condition_ids,
-                        list(inputs.allowed) if inputs.root.is_example else [],
-                        inputs.call_llm,
-                        is_example=inputs.root.is_example,
-                        llm_env=inputs.llm_env,
-                        month=inputs.month,
-                    )
+                results = []
+                # 기간이면 달마다 기본 시나리오와 변수 적용 후를 돌린다. 엔진은 같은 달의 기준과 상황끼리만 견준다.
+                for month in inputs.months or [None]:
+                    where = "" if month is None else f"{month}월: "
+                    with st.spinner(f"{where}{BASE_LABEL}와 {AFTER_LABEL}를 차례로 돌리는 중입니다…"):
+                        result = simulate(
+                            inputs.root.path,
+                            repo_root,
+                            inputs.data_mode,
+                            inputs.scenario_id,
+                            inputs.personas,
+                            inputs.condition_ids,
+                            list(inputs.allowed) if inputs.root.is_example else [],
+                            inputs.call_llm,
+                            is_example=inputs.root.is_example,
+                            llm_env=inputs.llm_env,
+                            month=month,
+                        )
+                    results.append((month, result))
                 st.session_state["sim_result"] = (
-                    result, inputs.root.path, inputs.data_mode, inputs.month, list(inputs.allowed),
+                    results, inputs.root.path, inputs.data_mode, list(inputs.months), list(inputs.allowed),
                 )  # fmt: skip
 
         saved = st.session_state.get("sim_result")
@@ -413,22 +431,46 @@ def render(repo_root: Path) -> None:
 
 
 def show_result(saved: tuple) -> None:
-    result, sim_root, sim_mode, sim_month, sim_allowed = saved
+    results, sim_root, sim_mode, sim_months, sim_allowed = saved
     # 엔진이 남긴 말은 고쳐 쓰지 않고 그대로 보여 준다 (팀장 요청, 11-16).
-    outputs = [(BASE_LABEL, result.baseline)] + ([(AFTER_LABEL, result.scenario)] if result.scenario else [])
-    failed = not result.ok or any(o.exit_code != 0 for _, o in outputs)
-    if not result.ok:
+    outputs = []
+    for month, result in results:
+        where = "" if month is None else f" ({month}월)"
+        outputs.append((BASE_LABEL + where, result.baseline))
+        if result.scenario:
+            outputs.append((AFTER_LABEL + where, result.scenario))
+    failed = any(not r.ok for _, r in results) or any(o.exit_code != 0 for _, o in outputs)
+    bad = [m for m, r in results if not r.ok]
+    if bad and len(bad) == len(results):
         st.error("비교할 결과를 만들지 못했습니다. 아래 '엔진이 남긴 말'을 보세요.")
-    notes = [PRICE_NOTE] + ([f"{month_text(sim_month)}: {SEASON_NOTE}"] if sim_month is not None else [])
+    elif bad:
+        st.warning(f"{', '.join(f'{m}월' for m in bad)}은 결과를 만들지 못해 빼고 보입니다. 아래 '엔진이 남긴 말'을 보세요.")
+    notes = [PRICE_NOTE]
+    if sim_months:
+        notes.append(f"{months_text(sim_months)}: 달마다 돌려 매출과 손님 수는 달 평균으로 보입니다. {SEASON_NOTE}")
     st.caption("  \n".join(notes))
-    if result.ok:
-        comparison = compare(
-            load_run(result.baseline.run_dir),
-            load_run(result.scenario.run_dir),
-            summary_groups(sim_root, sim_mode),
-            names_from_files(sim_root),
+    per_month = [
+        (
+            month,
+            compare(
+                load_run(r.baseline.run_dir),
+                load_run(r.scenario.run_dir),
+                summary_groups(sim_root, sim_mode),
+                names_from_files(sim_root),
+            ),
         )
-        show_comparison(comparison, venue_catalog(sim_root), scenario_name(sim_root, comparison.scen.record.scenario_id), sim_allowed)
+        for month, r in results
+        if r.ok
+    ]
+    if per_month:
+        comparison = combine_months(per_month)
+        show_comparison(
+            comparison,
+            venue_catalog(sim_root),
+            scenario_name(sim_root, comparison.scen.record.scenario_id),
+            sim_allowed,
+            per_month if len(per_month) > 1 else None,
+        )
     with st.expander("엔진이 남긴 말", expanded=failed):
         for label, outcome in outputs:
             run_id = f" · 실행 `{outcome.run_dir.name}`" if outcome.run_dir else ""
@@ -463,7 +505,11 @@ def badge(move: str) -> str:
 
 
 def show_comparison(
-    comparison: Comparison, catalog: dict[str, VenueInfo], scenario_name: str = "", allowed: list[str] | None = None
+    comparison: Comparison,
+    catalog: dict[str, VenueInfo],
+    scenario_name: str = "",
+    allowed: list[str] | None = None,
+    per_month: list[tuple[int, Comparison]] | None = None,
 ) -> None:
     names = {v.venue_id: v.name for v in catalog.values()} | comparison.names
     record = comparison.scen.record
@@ -488,7 +534,12 @@ def show_comparison(
         show_validation(comparison.base.run_dir, names)
 
     with st.expander("한 사람씩 자세히 보기"):
-        _show_person(comparison)
+        if per_month:
+            # 기간이면 달을 먼저 고른다. 방문의 자세한 답은 그 달의 실행에 있다.
+            pick = st.selectbox("달", [m for m, _ in per_month], format_func=lambda m: f"{m}월", key="sim_detail_month")
+            _show_person(dict(per_month)[pick])
+        else:
+            _show_person(comparison)
 
 
 def _show_cards(comparison: Comparison, catalog: dict[str, VenueInfo], names: dict[str, str], allowed: list[str] | None) -> None:
