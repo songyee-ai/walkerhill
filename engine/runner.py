@@ -64,6 +64,9 @@ class CallLimitReached(Exception):
 # 호출이 연달아 이만큼 실패하면 실행을 멈춘다. 닿지 않는 주소나 멈춘 공급자를 상한까지 계속 부르지 않으려는 것이다.
 MAX_FAILED_CALLS_IN_A_ROW = 3
 
+# `latest_baseline_run` 에 달을 가리지 않고 찾으라고 줄 때의 값. None 은 "일 년 전체로 돌린 실행"이라 따로 둔다.
+ANY_MONTH = "any"
+
 
 @dataclass
 class LlmSession:
@@ -216,9 +219,11 @@ def load_inputs(
     )
 
 
-def latest_baseline_run(root: Path, data_mode: str) -> str | None:
+def latest_baseline_run(root: Path, data_mode: str, month: int | None | str = ANY_MONTH) -> str | None:
     """끝까지 돈 기준 실행 가운데 가장 새것의 `run_id`. 없으면 None. 같은 `data_mode` 의 실행만 본다.
 
+    `month` 를 주면 실행의 달이 그것과 같은 기준 실행만 본다: 1 ~ 12 는 그 달로 돌린 실행, None 은 일 년 전체로 돌린 실행.
+    주지 않으면(`ANY_MONTH`) 달을 가리지 않는다.
     실패한 방문이 있는 실행도 고른다. 그 실행으로 상황을 돌리면 `baseline_record` 가 막는다 (docs/FORMATS.md 10.1절).
     화면에서 쓸 기준 실행을 미리 보여 줄 때는 `counts.failed` 도 함께 본다.
     """
@@ -228,9 +233,14 @@ def latest_baseline_run(root: Path, data_mode: str) -> str | None:
             record = read_model(run_dir / "run.json", RunRecord)
         except (OSError, ValueError):
             continue
-        if record.scenario_id == BASELINE_ID and record.status == "ok":
+        if record.scenario_id == BASELINE_ID and record.status == "ok" and month in (ANY_MONTH, record.month):
             return record.run_id
     return None
+
+
+def month_label(month: int | None) -> str:
+    """실행의 달을 사람이 읽는 글로 (실행 기록의 `month`)."""
+    return "일 년 전체" if month is None else f"{month}월"
 
 
 def baseline_record(root: Path, data_mode: str, run_id: str | None) -> RunRecord:
@@ -440,6 +450,7 @@ def run(
     llm: Provider | None = None,
     call_limit: int | None = None,
     base_profile_mode: str | None = None,
+    month: int | None = None,
 ) -> Path:
     """상황 하나를 돌려 실행 폴더(`run.json`, `ledger.csv`, `llm/`, `llm_rejected/`)를 쓰고 그 경로를 돌려준다.
 
@@ -453,6 +464,10 @@ def run(
       그 실행 뒤에 입력(업장 정의, 페르소나, 조건 묶음, 값 목록, 집계 파일, 프롬프트)이나 공급자·모델이 달라졌으면 돌리지 않는다.
       상황 사이의 차이에 상황의 변경만 남게 하려는 것이다 (docs/PRD.md 7.2절).
     - `base_profile_mode`: 기본 데이터의 요약을 LLM 에 어떻게 보낼지. 주지 않으면 기본 데이터로 돌릴 때 `bucketed`, 가상 예시로 돌릴 때 `none` 이다.
+    - `month`: 실행의 달 (1 ~ 12). 주면 묶음의 조건을 모두 그 달의 방문으로 돌린다: 그 달에 팔지 않는 업장과 상품은 후보에서 빠지고,
+      요청의 `condition.month` 에 그 달이 실린다. 주지 않으면 일 년 전체로 본다. 가중치는 달을 줘도 집계 파일의 일 년 합계에 맞춘다:
+      고객군 배수를 이 실행의 원장으로 맞추므로 고객군의 가상 매출 합은 달과 상관없이 같다 (docs/FORMATS.md 10.1절의 "실행의 달").
+      기준이 아닌 상황은 기준 실행의 달을 따른다. 다른 달을 따로 주면 돌리지 않는다.
     - `llm`: 저장된 응답이 없는 방문에서 부를 공급자. 주지 않으면 부르지 않고 그 방문을 실패로 남긴다 (재생만).
       `provider` 와 `model` 은 `llm` 이 실제로 부르는 곳과 같아야 한다 (요청의 해시와 실행 기록에 들어간다).
     - `call_limit`: 이 실행에서 새로 부를 수 있는 횟수. 주지 않으면 `DEFAULT_CALL_LIMIT` 이다.
@@ -466,6 +481,9 @@ def run(
     private_root = (root / "private").resolve()
     if data_mode == "sample" and any(folder.resolve().is_relative_to(private_root) for folder in answers):
         raise ValueError("가상 예시로 돌릴 때는 private/ 아래의 저장된 응답을 쓰지 않는다")
+    # bool 은 int 라서 True 가 1월로 읽히지 않게 따로 막는다.
+    if month is not None and (isinstance(month, bool) or not isinstance(month, int) or not 1 <= month <= 12):
+        raise ValueError(f"month 는 1 ~ 12 의 정수다: {month!r}")
     base: RunRecord | None = None
     if scenario_id == BASELINE_ID:
         if weights_from is not None:
@@ -483,6 +501,13 @@ def run(
                 f"기준 실행의 base_profile_mode 는 {base.base_profile_mode} 다. 상황은 기준 실행과 같은 방식으로 돌린다"
             )
         base_profile_mode = base.base_profile_mode
+        # 달이 다르면 후보와 요청이 달라져, 상황의 변경이 아닌 것이 차이에 섞인다.
+        if month is not None and month != base.month:
+            raise ValueError(
+                f"기준 실행 '{base.run_id}' 의 달({month_label(base.month)})과 다른 달({month_label(month)})을 주었다. "
+                "상황은 기준 실행과 같은 달로 돌린다. 다른 달로 보려면 기준 상황을 그 달로 먼저 돌린다"
+            )
+        month = base.month
     if base_profile_mode is None:
         base_profile_mode = default_base_profile_mode(data_mode)
     inputs = load_inputs(root, data_mode, scenario_id, venue_ids, persona_ids, base_profile_mode)
@@ -537,7 +562,7 @@ def run(
                     run_id=run_id,
                     inputs=inputs,
                     persona=persona,
-                    condition=run_condition(condition, persona),
+                    condition=run_condition(condition, persona, month),
                     # 가중치를 맞추는 중이면 0 으로 적어 두고, 다 돈 뒤에 reweigh 로 채운다.
                     represented=0.0 if weights is None else represented(weights, persona, condition.condition_id),
                     prompt_version=prompt_version,
@@ -581,6 +606,7 @@ def run(
                 "scenario_id": scenario_id,
                 "persona_ids": [p.persona_id for p in personas],
                 "condition_ids": condition_ids,
+                "month": month,
                 "llm": {
                     "provider": provider,
                     "model": model,

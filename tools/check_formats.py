@@ -734,8 +734,11 @@ class Checker:
                     self.error(path, f"weights_from 의 실행 '{record.weights_from}' 가 없다")
                 elif base.scenario_id != BASELINE_ID:
                     self.error(path, f"weights_from 의 실행 '{record.weights_from}' 는 기준 상황이 아니다")
-                elif base.weights != record.weights:
-                    self.error(path, "weights 가 weights_from 의 실행과 다르다 (가중치는 기준 상황에서 한 번 정하고 그대로 쓴다)")
+                else:
+                    if base.weights != record.weights:
+                        self.error(path, "weights 가 weights_from 의 실행과 다르다 (가중치는 기준 상황에서 한 번 정하고 그대로 쓴다)")
+                    if base.month != record.month:
+                        self.error(path, "month 가 weights_from 의 실행과 다르다 (상황은 기준 실행과 같은 달로 돌린다)")
             stems, saved = self._check_saved_responses(run_dir, record)
             rejected = self._check_rejected_responses(run_dir, record, stems)
             self._check_ledger(run_dir, record, stems, saved, rejected)
@@ -866,6 +869,9 @@ class Checker:
                 self.error(path, "provider 나 model 이 실행 기록과 다르다")
             if entry.request.scenario_id != record.scenario_id:
                 self.error(path, "요청의 scenario_id 가 실행 기록과 다르다")
+            condition = entry.request.condition
+            if not condition.condition_id.startswith(MANUAL_CONDITION_PREFIX) and condition.month != record.month:
+                self.error(path, "요청의 달(condition.month)이 실행 기록의 month 와 다르다")
             if path.stem in stems:
                 self.error(path, f"같은 요청의 응답이 llm/{path.name} 에도 있다. 한 요청의 답은 통과했거나 어긋났거나 둘 중 하나다")
         return rejected
@@ -943,7 +949,7 @@ class Checker:
                         bad(f"reason_labels 의 '{label}' 가 값 목록에 없다")
 
         for visit_rows in visits.values():
-            self._check_visit(path, visit_rows, saved)
+            self._check_visit(path, visit_rows, saved, record.month)
 
         # 어긋난 응답은 실패한 방문에서만 나온다. 원장에 그 방문의 실패한 줄이 있고, 그 줄이 파일과 같은 말을 해야 한다.
         failed_rows = {row.request_hash: row for rows_ in visits.values() for _, row in rows_ if row.status == "failed"}
@@ -983,8 +989,10 @@ class Checker:
                     f"빠진 방문 {len(missing)}건, 실행 기록에 없는 방문 {len(extra)}건",
                 )
 
-    def _check_visit(self, path: Path, rows: list[tuple[int, LedgerRow]], saved: dict[str, SavedResponse]) -> None:
-        """한 방문의 줄들이 앞뒤가 맞는지, 저장된 응답과 같은지 본다.
+    def _check_visit(
+        self, path: Path, rows: list[tuple[int, LedgerRow]], saved: dict[str, SavedResponse], month: int | None
+    ) -> None:
+        """한 방문의 줄들이 앞뒤가 맞는지, 저장된 응답과 같은지 본다. `month` 는 실행 기록의 달이다.
 
         원장은 저장된 응답에서 만든 것이라, 누가 어느 조건에서 무엇을 골랐는지가 응답과 같아야 한다.
         금액을 업장 정의의 가격과 프로모션으로 다시 계산하는 것은 엔진의 몫이라 여기서는 하지 않는다.
@@ -1016,6 +1024,9 @@ class Checker:
             bad("한 방문에서 고른 줄들의 counted_share 가 서로 다르다")
         else:
             share = picked[0].counted_share
+            # 달을 주고 돌린 실행의 방문은 그 달의 방문이라 몫이 늘 1 이다 (10.1절의 "실행의 달").
+            if month is not None and not first.condition_id.startswith(MANUAL_CONDITION_PREFIX) and share <= 1 - SHARE_TOLERANCE:
+                bad("달을 주고 돌린 실행의 방문인데 고른 줄의 counted_share 가 1 이 아니다")
             if share > 1 - SHARE_TOLERANCE:
                 if nothing:
                     bad("일 년 내내 파는 곳을 고른 방문인데 '이용하지 않음' 줄이 더 있다")
@@ -1037,6 +1048,9 @@ class Checker:
             bad("저장된 응답의 요청은 다른 페르소나의 것이다")
         if request.condition.condition_id != first.condition_id:
             bad("저장된 응답의 요청은 다른 조건의 것이다")
+        # 묶음의 조건은 실행의 달로 돌린다 (10.1절의 month). 화면에서 직접 넣은 조건(manual-)은 달을 사람이 넣는다.
+        if not first.condition_id.startswith(MANUAL_CONDITION_PREFIX) and request.condition.month != month:
+            bad("저장된 응답의 요청의 달(condition.month)이 실행 기록의 month 와 다르다")
 
         choice = response.choice
         if choice.venue_id is None:
@@ -1099,6 +1113,8 @@ class Checker:
             return
         if record.scenario_id != BASELINE_ID:
             self.error(path, "보정의 대조 결과는 기준 상황의 실행에만 둔다")
+        if record.month is not None:
+            self.error(path, "보정의 대조 결과는 달을 주지 않고 돌린 기준 실행에만 둔다 (10.1절의 '실행의 달')")
         if calibration.run_id != record.run_id:
             self.error(path, "run_id 가 실행 기록과 다르다")
         groups = set(calibration.groups) | set(calibration.uncovered_groups)

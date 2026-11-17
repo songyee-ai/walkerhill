@@ -110,11 +110,11 @@ class Played:
         return [row for row in self.rows if row.visit_id == f"{persona_id}__{condition_id}"]
 
     def violations(self) -> list[str]:
-        return violations(self.rows, self.venues, self.saved, self.personas, self.bundle)
+        return violations(self.rows, self.venues, self.saved, self.personas, self.bundle, month=self.record.month)
 
 
-def requests_in(root: Path, persona_ids, condition_ids, venue_ids=None) -> dict[str, ChoiceRequest]:
-    """엔진이 방문마다 만들 요청. 후보가 없는 방문은 들어 있지 않다."""
+def requests_in(root: Path, persona_ids, condition_ids, venue_ids=None, month=None) -> dict[str, ChoiceRequest]:
+    """엔진이 방문마다 만들 요청. 후보가 없는 방문은 들어 있지 않다. `month` 는 실행의 달이다."""
     inputs = load_inputs(root, "sample", venue_ids=venue_ids, persona_ids=persona_ids)
     found = {}
     for persona in inputs.personas.values():
@@ -123,7 +123,7 @@ def requests_in(root: Path, persona_ids, condition_ids, venue_ids=None) -> dict[
                 prompt_version="p1",
                 scenario_id="baseline",
                 persona=inputs.persona_json[persona.persona_id],
-                condition=run_condition(inputs.conditions.condition(condition_id), persona),
+                condition=run_condition(inputs.conditions.condition(condition_id), persona, month),
                 venues=list(inputs.venues.values()),
                 vocab=inputs.vocab,
             )
@@ -156,12 +156,12 @@ def no_sales(root: Path) -> None:
 
 
 def play(
-    root: Path, pick, persona_ids=("family-elders",), condition_ids=(DINNER,), venue_ids=None, now=NOW, weights=None
+    root: Path, pick, persona_ids=("family-elders",), condition_ids=(DINNER,), venue_ids=None, now=NOW, weights=None, month=None
 ) -> Played:
     """`pick(visit_id, request)` 이 돌려준 답을 정해 둔 답으로 써 두고 엔진을 돌린다. None 을 돌려주면 답을 두지 않는다."""
     persona_ids, condition_ids = list(persona_ids), list(condition_ids)
     answers = root.parent / f"answers-{now:%H%M%S}"
-    requests = requests_in(root, persona_ids, condition_ids, venue_ids)
+    requests = requests_in(root, persona_ids, condition_ids, venue_ids, month)
     for visit_id, request in requests.items():
         response = pick(visit_id, request)
         if response is not None:
@@ -179,6 +179,7 @@ def play(
         condition_ids=condition_ids,
         weights=weights,
         engine_commit="0000000",
+        month=month,
     )
     return Played(root, run_dir, requests)
 
@@ -515,6 +516,7 @@ def audit(played: Played, *, venue=None, venue_id="geumryong", saved=None, perso
         played.saved if saved is None else saved,
         played.personas if personas is None else personas,
         played.bundle if bundle is None else bundle,
+        month=played.record.month,
     )
     return sorted(text.split(" — ")[1].split(":")[0] for text in found)
 
@@ -1211,6 +1213,109 @@ def test_visit_with_a_month_is_counted_whole(example_copy):
     assert (may.product_id, may.counted_share, may.status) == ("course-a", 1.0, "ok")
     (july,) = visit(7)
     assert (july.product_id, july.counted_share) == ("course-b", 1.0)  # 7월에는 코스 A 를 팔지 않는다
+
+
+# ── 실행의 달 (T112) ────────────────────────────────────────────────────
+
+
+def test_run_with_a_month_runs_the_bundle_conditions_in_that_month(example_copy):
+    """실행에 달을 주면 묶음의 조건이 그 달의 방문이 된다: 그 달에 팔지 않는 상품은 후보에서 빠지고 몫은 1 이다."""
+    edit(venue_file(example_copy, "geumryong"), lambda d: product_of(d, "course-a").update(months=[4, 5, 6]))
+    visit_id = f"family-elders__{DINNER}"
+
+    july = play(example_copy, pick_geumryong, month=7)
+    (row,) = july.visit("family-elders", DINNER)
+    assert (row.product_id, row.counted_share) == ("course-b", 1.0)  # 7월에는 코스 A 를 팔지 않는다
+    assert july.record.month == 7
+    assert load_json(july.run_dir / "run.json")["month"] == 7
+    assert [entry.request.condition.month for entry in july.saved.values()] == [7]
+    assert july.violations() == []
+
+    # 달을 주지 않으면 일 년 전체로 본다. 일부 달에만 파는 상품도 후보에 있고 몫으로 센다.
+    year = play(example_copy, pick_geumryong, now=NOW + timedelta(hours=1))
+    bought, gap = year.visit("family-elders", DINNER)
+    assert (bought.product_id, bought.counted_share, gap.counted_share) == ("course-a", 0.25, 0.75)
+    assert year.record.month is None
+    assert load_json(year.run_dir / "run.json")["month"] is None
+    assert year.violations() == []
+    # 달이 요청에 실리므로 달이 다르면 저장된 응답도 따로다.
+    assert july.requests[visit_id].condition.month == 7 and year.requests[visit_id].condition.month is None
+    assert row.request_hash != bought.request_hash
+    assert check(example_copy, strict=True) == []
+
+    # 일 년 전체로 돌린 실행의 기록에 손으로 달을 적으면 형식 검사가 막는다: 요청의 달이 다르고, 달을 준 실행인데 몫이 1 이 아니다.
+    edit(year.run_dir / "run.json", lambda d: d.update(month=5))
+    found = [str(problem) for problem in check(example_copy, strict=True)]
+    assert any("실행 기록의 month 와 다르다" in problem for problem in found)
+    assert any("counted_share 가 1 이 아니다" in problem for problem in found)
+
+
+def test_group_multiplier_is_fitted_again_on_the_run_with_a_month(example_copy):
+    """달을 준 기준 실행도 고객군 배수를 그 실행의 원장으로 맞춘다. 그래서 고객군의 워커힐 가상 매출 합은 어느 달이든 일 년 합계와 같다.
+
+    묶음의 비율은 집계 파일의 일 년 합계에서 내 달과 상관없다. 달끼리 매출의 합을 견줄 수 없다는 것을 문서에 적어 두었다
+    (docs/FORMATS.md 10.1절의 "실행의 달").
+    """
+    edit(venue_file(example_copy, "geumryong"), lambda d: product_of(d, "course-a").update(months=[4, 5, 6]))
+    group = "가족·친족"
+    year = play(example_copy, pick_geumryong)
+    may = play(example_copy, pick_geumryong, now=NOW + timedelta(hours=1), month=5)
+    july = play(example_copy, pick_geumryong, now=NOW + timedelta(hours=2), month=7)
+
+    def total(played: Played) -> float:
+        return sum(row.weighted_revenue for row in played.rows)
+
+    assert [r.product_id for r in may.rows] == ["course-a"] and [r.product_id for r in july.rows] == ["course-b"]
+    assert total(year) > 0
+    assert total(may) == pytest.approx(total(year), abs=1) and total(july) == pytest.approx(total(year), abs=1)
+    assert may.record.weights.condition_ratio == july.record.weights.condition_ratio == year.record.weights.condition_ratio
+    multipliers = [p.record.weights.group_multiplier[group] for p in (year, may, july)]
+    # 일 년 전체로는 코스 A 의 몫이 석 달 ÷ 열두 달이라, 5월로 돌리면 배수가 4분의 1 이다. 7월에는 다른 상품을 골라 또 다르다.
+    assert multipliers[1] == pytest.approx(multipliers[0] / 4)
+    assert multipliers[2] not in (pytest.approx(multipliers[0]), pytest.approx(multipliers[1]))
+
+
+def test_audit_and_format_check_compare_the_month_with_the_run_record(example_copy):
+    """따로 확인하는 코드와 형식 검사는 요청의 달을 묶음이 아니라 실행 기록의 달과 견준다."""
+    july = play(example_copy, pick_geumryong, month=7)
+    assert july.violations() == []
+    assert check(example_copy, strict=True) == []
+
+    # 다른 달의 실행으로 보면 요청의 달이 어긋난 것으로 나온다. 실행의 달은 꼭 주어야 한다.
+    for other in (None, 8):
+        found = violations(july.rows, july.venues, july.saved, july.personas, july.bundle, month=other)
+        assert found == [f"family-elders__{DINNER} — 조건 불일치: 요청의 month 가 실행의 달과 다르다"]
+    with pytest.raises(TypeError):
+        violations(july.rows, july.venues, july.saved, july.personas, july.bundle)
+    # 실행 기록의 달을 손으로 고치면 형식 검사가 막는다.
+    edit(july.run_dir / "run.json", lambda d: d.update(month=8))
+    assert any("실행 기록의 month 와 다르다" in str(problem) for problem in check(example_copy, strict=True))
+
+
+@pytest.mark.parametrize("month", [0, 13, -1, True, 12.0, "12"])
+def test_month_must_be_one_of_the_twelve(example_copy, month):
+    with pytest.raises(ValueError, match="month 는 1 ~ 12 의 정수다"):
+        run(
+            example_copy,
+            data_mode="sample",
+            now=NOW,
+            provider=PROVIDER,
+            model=MODEL,
+            prompt_version="p1",
+            answers=[],
+            persona_ids=["family-elders"],
+            condition_ids=[DINNER],
+            engine_commit="0000000",
+            month=month,
+        )
+    assert not list((example_copy / "engine" / "samples" / "runs").glob("20261118-*"))  # 실행 폴더를 만들지 않았다
+
+
+def test_run_record_written_before_the_month_is_read_as_the_whole_year():
+    """달 칸이 생기기 전에 돌린 실행 기록에는 `month` 가 없다. 달을 주지 않고 돌린 것이라 null 로 읽는다."""
+    data = load_json(EXAMPLE_ROOT / "engine" / "samples" / "runs" / BASELINE_RUN / "run.json")
+    assert data.pop("month") is None  # 예시 묶음의 실행 기록에는 칸이 있다
+    assert RunRecord.model_validate(data).month is None
 
 
 # ── 다시 계산하는 검사가 요청을 믿지 않는가 ────────────────────────────
