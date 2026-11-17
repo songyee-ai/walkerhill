@@ -26,11 +26,44 @@
       "price_basis": "unknown",
       "grade": "official",
       "source_id": null
+    },
+    {
+      "product_id": "jeju-apple-mango-bingsu",
+      "name": "제주 애플 망고 빙수",
+      "occasion": "dessert",
+      "slots": [{"meal": null, "day_type": "all"}],
+      "months": [5, 6, 7, 8, 9],
+      "audience": "all",
+      "unit": "개",
+      "serves": 2,
+      "qty_rule": "per_serves",
+      "qty_max": null,
+      "price": 149000,
+      "price_basis": "unknown",
+      "grade": "official",
+      "source_id": "S2"
+    },
+    {
+      "product_id": "classic-bingsu",
+      "name": "클래식 빙수",
+      "occasion": "dessert",
+      "slots": [{"meal": null, "day_type": "all"}],
+      "months": [5, 6, 7, 8, 9],
+      "audience": "all",
+      "unit": "개",
+      "serves": 2,
+      "qty_rule": "per_serves",
+      "qty_max": null,
+      "price": 99000,
+      "price_basis": "unknown",
+      "grade": "official",
+      "source_id": "S2"
     }
   ],
   "promotions": [],
   "sources": [
-    {"source_id": "S1", "title": "포시즌스 호텔 서울 보도자료 — 가을 애프터눈 티 (2026-09-29)", "url": "https://press.fourseasons.com/kr/seoul/hotel-news/2026/autumn-afternoon-tea", "checked_on": "2026-11-13"}
+    {"source_id": "S1", "title": "포시즌스 호텔 서울 보도자료 — 가을 애프터눈 티 (2026-09-29)", "url": "https://press.fourseasons.com/kr/seoul/hotel-news/2026/autumn-afternoon-tea", "checked_on": "2026-11-13"},
+    {"source_id": "S2", "title": "포시즌스 호텔 서울 보도자료 — 마루 빙수 (2026-04-27, 판매 05-01 ~ 09-30)", "url": "https://press.fourseasons.com/kr/seoul/hotel-news/2026/seasonal-bingsu/", "checked_on": "2026-11-16"}
   ],
   "default_source_id": "S1"
 }
