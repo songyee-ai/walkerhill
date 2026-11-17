@@ -166,3 +166,62 @@ def test_months_are_averaged_not_added(tmp_path: Path):
     assert both.total_before == one.total_before and both.total_after == one.total_after
     assert [m.condition for m in both.moves] == [f"{one.moves[0].condition} · 11월", f"{one.moves[0].condition} · 12월"]
     assert sum(m.represented for m in both.moves) == one.moves[0].represented
+
+
+def _one_month(tmp_path: Path):
+    root = _copy(tmp_path)
+    result = simulate(
+        root, REPO_ROOT, "sample", "competitor-chinese-discount",
+        ["family-elders"], ["meal-dinner-weekend"], list(EXAMPLE_VENUES), False, is_example=True,
+    )  # fmt: skip
+    return compare(load_run(result.baseline.run_dir), load_run(result.scenario.run_dir))
+
+
+def test_venue_change_rate_comes_from_averaged_amounts(tmp_path: Path):
+    # 업장별 변화율은 달마다의 비율을 평균하지 않고, 금액을 평균한 뒤에 낸다 (11-17 팀장 요청).
+    from dataclasses import replace
+
+    from app.board import pct_change
+    from app.compare import VenueChange, combine_months
+
+    one = _one_month(tmp_path)
+    nov = replace(one, venues=[VenueChange("geumryong", "금룡", 100, 50)])
+    dec = replace(one, venues=[VenueChange("geumryong", "금룡", 300, 300)])
+    [venue] = combine_months([(11, nov), (12, dec)]).venues
+    assert (venue.before, venue.after) == (200, 175)
+    assert pct_change(venue.before, venue.after) == pct_change(200, 175) != pct_change(1, 0.75 - 0.5)
+
+
+def test_zero_multiplier_groups_are_reported_with_their_month(tmp_path: Path):
+    # 그 달에 워커힐을 고른 방문이 없는 고객군은 배수가 0 이다. 평균이 낮아지므로 화면에 달과 함께 알린다 (11-17 팀장 요청).
+    from dataclasses import replace
+
+    from app.compare import zero_groups
+
+    one = _one_month(tmp_path)
+    assert zero_groups([(11, one)]) == {}
+    weights = one.base.record.weights
+    [group] = list(weights.group_multiplier)[:1]
+    record = one.base.record.model_copy(
+        update={"weights": weights.model_copy(update={"group_multiplier": {**weights.group_multiplier, group: 0.0}})}
+    )
+    zero = replace(one, base=replace(one.base, record=record))
+    assert zero_groups([(11, one), (12, zero)]) == {group: [12]}
+    assert zero_groups([(None, zero)]) == {group: [None]}
+
+
+def test_one_persona_by_default_and_a_button_for_all():
+    # 1명 기본 (11-17 팀장과 정함). "모두" 버튼으로 한 번에 고르고, 결과에는 누구의 결과인지 적는다.
+    from app.simulator import persona_scope
+
+    app = AppTest.from_file(str(REPO_ROOT / "app" / "main.py"), default_timeout=60).run()
+    assert not app.exception
+    picked = next(m for m in app.multiselect if m.key.startswith("sim_personas_"))
+    assert len(picked.value) == 1
+    button = next(b for b in app.button if b.key and b.key.startswith("sim_all_"))
+    button.click().run()
+    assert not app.exception
+    picked = next(m for m in app.multiselect if m.key.startswith("sim_personas_"))
+    assert len(picked.value) == len(picked.options) > 1
+    assert persona_scope(1, 6) == "고른 페르소나 1명만"
+    assert persona_scope(6, 6) == "페르소나 6명 모두"

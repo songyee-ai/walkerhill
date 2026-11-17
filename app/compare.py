@@ -223,6 +223,20 @@ def combine_months(per_month: list[tuple[int, "Comparison"]]) -> "Comparison":
     )
 
 
+def zero_groups(per_month: list[tuple[int | None, "Comparison"]]) -> dict[str, list[int | None]]:
+    """고객군 배수가 0 인 고객군과 그 달 (팀장 요청, 11-17).
+
+    그 달에 워커힐 업장을 고른 방문이 없는 고객군은 배수를 맞출 수 없어 0 이고, 그 실행에서 그 고객군의 가상 매출은 0 이다
+    (FORMATS.md 10.1절 "실행의 달"). 기간의 달 평균에 0 이 섞이면 평균이 낮아지므로 화면에 알린다. 달 없이 돌렸으면 달은 None 이다.
+    """
+    found: dict[str, list[int | None]] = {}
+    for month, comparison in per_month:
+        for group, value in comparison.base.record.weights.group_multiplier.items():
+            if value == 0:
+                found.setdefault(group, []).append(month)
+    return found
+
+
 def summary_groups(root: Path, data_mode: str) -> list[str]:
     """집계 파일에 있는 고객군. 페르소나가 없는 고객군을 "다루지 않은 고객군"으로 보여 주려고 읽는다 (PRD 4절)."""
     path = root / ("data/samples/base_summary.csv" if data_mode == "sample" else "private/base/summary.csv")
