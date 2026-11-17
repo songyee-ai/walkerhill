@@ -5,6 +5,7 @@
 금액은 원장에서만 가져온다. 저장된 응답에서는 업장과 상품의 이름, 고르지 않은 업장과 그 이유, 방문 조건만 가져온다.
 """
 
+import json
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -77,15 +78,43 @@ def won(amount: int | float) -> str:
 
 def condition_label(condition: RunCondition) -> str:
     """방문 조건을 한국어로 적는다. 예: "식사 · 저녁 · 주말"."""
-    parts = [KO["occasion"][condition.occasion]]
-    if condition.meal:
-        parts.append(KO["meal"][condition.meal])
-    parts.append(KO["day_type"][condition.day_type])
-    if condition.stay:
-        parts.append(KO["stay"][condition.stay])
-    if condition.month:
-        parts.append(f"{condition.month}월")
+    return _condition_label(condition.occasion, condition.meal, condition.day_type, condition.stay, condition.month)
+
+
+def _condition_label(occasion: str, meal: str | None, day_type: str, stay: str | None, month: int | None) -> str:
+    parts = [KO["occasion"][occasion]]
+    if meal:
+        parts.append(KO["meal"][meal])
+    parts.append(KO["day_type"][day_type])
+    if stay:
+        parts.append(KO["stay"][stay])
+    if month:
+        parts.append(f"{month}월")
     return " · ".join(parts)
+
+
+def names_from_files(root: Path) -> dict[str, str]:
+    """페르소나와 방문 조건의 이름을 자료 폴더의 정의 파일에서 읽는다 (식별자 → 이름).
+
+    AI 답을 받지 못한 방문은 저장된 응답에 이름이 없어, 이것이 없으면 화면에 식별자가 그대로 나온다 (11-16, T109).
+    """
+    names: dict[str, str] = {}
+    for path in sorted((root / "personas").glob("*.json")):
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        if isinstance(data, dict) and isinstance(data.get("persona_id"), str) and isinstance(data.get("name"), str):
+            names[data["persona_id"]] = data["name"]
+    bundle = root / "engine" / "conditions.json"
+    try:
+        conditions = json.loads(bundle.read_text(encoding="utf-8")).get("conditions", []) if bundle.is_file() else []
+        for c in conditions:
+            label = _condition_label(c["occasion"], c.get("meal"), c["day_type"], c.get("stay"), c.get("month"))
+            names[c["condition_id"]] = label
+    except (OSError, ValueError, KeyError, TypeError):
+        pass
+    return names
 
 
 def party_label(condition: RunCondition) -> str:
