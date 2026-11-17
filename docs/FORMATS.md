@@ -1207,15 +1207,46 @@ run_id,scenario_id,visit_id,persona_id,customer_group,condition_id,choice_kind,v
       "enough": true,
       "venue_match": 8,
       "venue_match_baseline": 7,
-      "reason_match": 9,
-      "reason_match_baseline": 6
+      "reason_n": 6,
+      "reason_enough": true,
+      "reason_match": 4,
+      "reason_match_baseline": 3
     },
-    "thebuffet": {"n": 3, "enough": false, "venue_match": null, "venue_match_baseline": null, "reason_match": null, "reason_match_baseline": null}
+    "pizzahill": {
+      "n": 9,
+      "enough": true,
+      "venue_match": 5,
+      "venue_match_baseline": 6,
+      "reason_n": 2,
+      "reason_enough": false,
+      "reason_match": null,
+      "reason_match_baseline": null
+    },
+    "thebuffet": {
+      "n": 3, "enough": false, "venue_match": null, "venue_match_baseline": null,
+      "reason_n": 1, "reason_enough": false, "reason_match": null, "reason_match_baseline": null
+    }
+  },
+  "total": {
+    "n": 24,
+    "venue_match": 15,
+    "venue_match_baseline": 14,
+    "reason_n": 9,
+    "reason_match": 5,
+    "reason_match_baseline": 4
   }
 }
 ```
 
-값은 비율이 아니라 건수다 (`n` 건 가운데 몇 건). `enough` 가 `false` 인 업장은 화면에 "검증 건수 부족"으로 보여 준다.
+값은 비율이 아니라 건수다. 업장 일치는 `n` 건 가운데 몇 건, 이유 일치는 `reason_n` 건 가운데 몇 건이다 (11-17, T117).
+
+- `n`: 그 업장의 떼어 둔 후기 가운데 돌린 것 (`skipped` 가 빈 후기). `enough` 는 `n` 이 `min_reviews` 이상인가다.
+  `enough` 가 `false` 면 `venue_match`, `venue_match_baseline` 은 `null` 이고 화면에 "검증 건수 부족"으로 보여 준다.
+- `reason_n`: `n` 건 가운데 고른 이유 라벨(`reasons_chosen`)이 있는 후기. 이유 일치는 이 후기로만 잰다 (PRD 6.6절). `reason_enough` 는 `reason_n` 이 `min_reviews` 이상인가다.
+  `reason_enough` 가 `false` 면 `reason_match`, `reason_match_baseline` 은 `null` 이다. 업장 일치는 잴 수 있어도 이유 일치는 "검증 건수 부족"일 수 있다 (위의 `pizzahill`).
+- `total`: 모든 업장을 합친 건수. 검증 건수가 모자란 업장의 후기도 들어간다. 그래서 `total` 의 일치 건수는 업장에 적힌 건수의 합보다 클 수 있다.
+  다만 건수가 `null` 인 업장의 분모(`n` 또는 `reason_n`)를 더한 것보다 클 수는 없다. `n`, `reason_n` 은 업장들의 합과 같다.
+  업장마다 이유 일치의 건수가 모자라도 `total` 로는 견줄 수 있다. `total` 에도 5건 기준은 같다: `total` 의 `reason_n` 이 `min_reviews` 보다 작으면 합친 이유 일치도 "검증 건수 부족"으로 보인다.
 
 **후기 한 건마다의 결과** `validation_reviews.csv`
 
@@ -1225,9 +1256,9 @@ run_id,scenario_id,visit_id,persona_id,customer_group,condition_id,choice_kind,v
 | `persona_id` | 돌린 페르소나. 그 고객군에 페르소나가 둘이면 후기의 `purpose`, `party` 가 더 많이 겹치는 쪽, 같으면 몫이 큰 쪽 (PRD 6.6절). 후기에 비어 있는 칸은 겹치지 않는 것으로 센다 |
 | `occasion`, `meal`, `day_type` | 돌린 조건. 후기에 끼니나 요일이 비어 있으면 그 페르소나의 `visit.meals`, `visit.day_types` 의 첫 값을 쓴다 |
 | `chosen_venue_id` | 페르소나가 고른 곳. "이용하지 않음"이면 빈 칸 |
-| `venue_match`, `reason_match` | 업장이 같은가, 이유 라벨이 하나 이상 겹치는가 (`Y`, `N`) |
-| `baseline_venue_id`, `baseline_venue_match`, `baseline_reason_match` | 단순 기준이 고른 곳과 그 결과 |
-| `skipped` | 돌리지 못한 이유. 고객군이 비어 있거나 그 고객군에 페르소나가 없으면 적는다. 이런 후기는 `n` 에서 뺀다 |
+| `venue_match`, `reason_match` | 업장이 같은가, 이유 라벨이 하나 이상 겹치는가 (`Y`, `N`). 후기에 고른 이유 라벨이 없으면 `reason_match` 는 빈 칸이다 (11-17, T117) |
+| `baseline_venue_id`, `baseline_venue_match`, `baseline_reason_match` | 단순 기준이 고른 곳과 그 결과. 후기에 고른 이유 라벨이 없으면 `baseline_reason_match` 는 빈 칸이다 |
+| `skipped` | 돌리지 못한 이유. 고객군이 비어 있거나 그 고객군에 페르소나가 없으면 적는다. 이런 후기는 `n` 에서 빼고, 돌린 결과의 칸(`persona_id` 부터 `baseline_reason_match` 까지)은 모두 빈 칸이다 |
 
 ## 11. 형식이 맞는지 볼 것
 
