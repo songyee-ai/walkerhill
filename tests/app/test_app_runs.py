@@ -20,8 +20,10 @@ from app.runs import (  # noqa: E402
     engine_command,
     key_ready,
     make_example_copy,
+    most_calls,
     replay_env,
     run_engine,
+    summary_check,
 )
 
 EXAMPLE = REPO_ROOT / EXAMPLE_SOURCE
@@ -190,6 +192,35 @@ def test_ai_menu_offers_only_the_ai_this_pc_can_call(tmp_path: Path):
     assert ai_env(tmp_path, "openai") == {"LLM_PROVIDER": "openai-compatible", "LLM_MODEL": "gpt-test"}
     assert ai_env(tmp_path, "claude") == {"LLM_PROVIDER": "claude-code", "LLM_MODEL": "claude-test"}
     assert ai_env(tmp_path, "nothing") is None
+
+
+def test_summary_check_matches_the_engine_receiver(tmp_path: Path, monkeypatch):
+    """기본 데이터의 요약을 보내도 되는가 (T115): `.env` 의 BASE_PROFILE_CONFIRMED_FOR 와 엔진의 receiver_of 를 견준다."""
+    monkeypatch.delenv("BASE_PROFILE_CONFIRMED_FOR", raising=False)
+    program = tmp_path / "claude.exe"
+    program.write_text("", encoding="utf-8")
+    lines = ["LLM_PROVIDER=claude-code", "LLM_MODEL=claude-test", f"CLAUDE_CODE_PATH={program}", "LLM_BASE_URL=https://api.openai.com/v1"]
+    base = "\n".join([*lines, ""])
+    env = tmp_path / ".env"
+    env.write_text(base, encoding="utf-8")
+    claude = {"LLM_PROVIDER": "claude-code", "LLM_MODEL": "claude-test"}
+    openai = {"LLM_PROVIDER": "openai-compatible", "LLM_MODEL": "gpt-test"}
+    assert summary_check(tmp_path, claude) == (False, "claude-code")  # 비어 있으면 확인 전
+    env.write_text(base + "BASE_PROFILE_CONFIRMED_FOR=claude-code\n", encoding="utf-8")
+    assert summary_check(tmp_path, claude) == (True, "claude-code")
+    # 확인 값은 하나라 다른 받는 곳(OpenAI)은 따로 확인해야 한다. OpenAI 는 주소의 호스트까지가 이름이다
+    assert summary_check(tmp_path, openai) == (False, "openai-compatible:api.openai.com")
+    # 엔진처럼 이미 있는 환경 변수가 .env 보다 먼저다
+    monkeypatch.setenv("BASE_PROFILE_CONFIRMED_FOR", "openai-compatible:api.openai.com")
+    assert summary_check(tmp_path, openai) == (True, "openai-compatible:api.openai.com")
+    assert summary_check(tmp_path, claude)[0] is False
+
+
+def test_most_calls_counts_both_runs_and_every_month():
+    """버튼을 누르기 전에 보이는 예상 호출 수: 페르소나 × 방문 조건 × 기본·변수 2번 × 달 수."""
+    assert most_calls(1, 2, 0) == 4  # 일 년 전체는 한 번
+    assert most_calls(6, 2, 1) == 24
+    assert most_calls(6, 2, 4) == 96
 
 
 def test_month_goes_to_the_engine_only_when_chosen():

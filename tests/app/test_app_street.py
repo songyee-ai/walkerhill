@@ -80,7 +80,18 @@ def test_every_amount_says_virtual():
     html, _ = render_scene(_example_scene())
     values = re.findall(r'class="(?:before|after)-v">([^<]+)<', html)
     assert values and all(v.endswith("(가상)") for v in values)
-    assert re.search(r"워커힐 가상 매출.*?\(가상\)<span", html)  # 맨 위의 워커힐 가상 매출
+    assert re.search(r"워커힐 가상 매출.*?\(가상 · 일 년 규모\)</small>", html)  # 맨 위의 워커힐 가상 매출
+
+
+def test_headline_is_the_change_and_amounts_are_year_scale():
+    """머리 숫자는 변화율이고, 금액은 "일 년 규모"라고 적는다 (11-17 팀장 요청: 기간을 골라도 그 기간의 매출이 아니다)."""
+    scene = _example_scene()
+    scene.scope = "고른 페르소나 1명만"
+    html, _ = render_scene(scene)
+    head = re.search(r'<div class="kpi">(.*?)</div></div>', html).group(1)
+    assert "고른 페르소나 1명만" in head
+    assert re.search(r'<span class="chg (up|down|flat)">([+-]\d+%|변화 없음|새로 생김)</span>', head)
+    assert "일 년 규모" in head
 
 
 def test_names_and_reasons_are_escaped():
