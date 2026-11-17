@@ -5,7 +5,7 @@
 
 돌릴 자료는 두 가지다.
 - 저장소: `data/`, `personas/`, `scenarios/`, `engine/conditions.json`. 페르소나와 프롬프트가 올라와야 돈다.
-- 예시 사본: `tests/fixtures/example` 을 깃이 무시하는 `private/try-example` 에 베낀 것. 저장된 답이 들어 있어 키 없이 돈다.
+- 예시 사본: `tests/fixtures/example` 을 깃이 무시하는 `private/try-example` 에 베낀 것. 저장된 답이 들어 있어 AI 를 부르지 않고 돈다.
 """
 
 import json
@@ -20,7 +20,8 @@ from urllib.parse import urlsplit
 
 from dotenv import dotenv_values
 
-from engine.llm import LOCAL_HOSTS, LlmFatal, make_provider, settings_from_env
+from engine.llm import LOCAL_HOSTS, LlmFatal, make_provider, receiver_of, settings_from_env
+from engine.runner import BASE_PROFILE_CONFIRMED_ENV
 
 EXAMPLE_SOURCE = Path("tests") / "fixtures" / "example"
 EXAMPLE_COPY = Path("private") / "try-example"
@@ -51,7 +52,7 @@ class DataRoot:
 def data_roots(repo_root: Path) -> list[DataRoot]:
     return [
         DataRoot("저장소의 자료", repo_root, False),
-        DataRoot(f"예시 사본 ({EXAMPLE_COPY.as_posix()}, 키 없이 연습)", repo_root / EXAMPLE_COPY, True),
+        DataRoot(f"예시 사본 ({EXAMPLE_COPY.as_posix()}, 저장된 답으로 연습)", repo_root / EXAMPLE_COPY, True),
     ]
 
 
@@ -170,6 +171,30 @@ def _env_ready(env: dict[str, str]) -> bool:
     if settings.provider == "claude-code":
         return True  # 자기 Claude 구독으로 로그인한 Claude Code 를 부른다 (T104). 실행 파일은 위에서 찾았다
     return bool(env.get("LLM_API_KEY")) or urlsplit(env.get("LLM_BASE_URL", "")).hostname in LOCAL_HOSTS
+
+
+def summary_check(repo_root: Path, llm_env: dict[str, str] | None = None) -> tuple[bool, str]:
+    """(확인됐나, 받는 곳의 이름). 기본 데이터의 요약을 이 AI 로 보내도 된다고 이 PC 에서 확인했는가 (T115).
+
+    엔진과 같은 두 값을 견준다: `.env` 의 `BASE_PROFILE_CONFIRMED_FOR` 와 `engine.llm.receiver_of` (팀장 요청, 11-17).
+    엔진처럼 이미 있는 환경 변수가 `.env` 보다 먼저다. `llm_env` 는 화면에서 고른 AI 의 공급자와 모델이다 (`ai_env`).
+    설정을 읽지 못하면 확인되지 않은 것으로 본다.
+    """
+    env = (_read_env(repo_root) or {}) | (llm_env or {})
+    try:
+        receiver = receiver_of(settings_from_env(env), env)
+    except LlmFatal:
+        return False, env.get("LLM_PROVIDER", "")
+    confirmed = os.environ[BASE_PROFILE_CONFIRMED_ENV] if BASE_PROFILE_CONFIRMED_ENV in os.environ else env.get(BASE_PROFILE_CONFIRMED_ENV, "")
+    return confirmed.strip() == receiver, receiver
+
+
+def most_calls(personas: int, conditions: int, months: int) -> int:
+    """비교 한 번에 AI 를 부를 수 있는 가장 많은 수. 방문마다 기본 시나리오와 변수 적용 후로 두 번, 기간이면 달마다다.
+
+    해 본 조합은 저장된 답을 불러와 실제로 부르는 수는 이보다 적다 (엔진이 방문마다 저장된 답을 먼저 찾는다).
+    """
+    return personas * conditions * 2 * max(months, 1)
 
 
 def engine_command(
