@@ -1,0 +1,191 @@
+﻿review_id,venue_id,source_kind,posted_ym,customer_group,purpose,party,adults,children,occasion,meal,day_type,stay,ordered,paid_total,reasons_chosen,pain_points,compared_with,would_return,summary,labeler,labeled_on
+R-thebuffet-0001,thebuffet,map,2026-07,친구·모임,모임,,,,meal,lunch,weekday,,,,,,,yes,"지인 모임으로 찾았고 음식 맛과 높은 천장의 시원한 공간, 직원 응대에 만족했다.",borigunbbang,2026-11-17
+R-thebuffet-0002,thebuffet,map,2025-11,커플·기념일,기념일,부부·연인,,,meal,dinner,weekday,,,,,,,,"결혼기념일에 부부가 방문했다. 요청한 창가석 배정과 주방의 기념 장식, 참치 특수부위 제공 등 세심한 응대에 크게 만족했다.",borigunbbang,2026-11-17
+R-thebuffet-0003,thebuffet,map,2025-04,커플·기념일,기념일,부부·연인,,,meal,dinner,weekday,,,,,,,,오랜만의 방문에 만족했고 직원 친절을 좋게 평가했다.,borigunbbang,2026-11-17
+R-thebuffet-0004,thebuffet,map,2025-07,가족·친족,가족 행사,부모와 성인 자녀,,,meal,dinner,weekend,,,,,,,,뷔페치고 쾌적한 분위기와 담당 서버의 서비스를 칭찬했다.,borigunbbang,2026-11-17
+R-thebuffet-0005,thebuffet,map,2025-08,커플·기념일,,부부·연인,,,meal,lunch,weekday,,,,,,,yes,,borigunbbang,2026-11-17
+R-thebuffet-0006,thebuffet,map,2025-03,커플·기념일,,부부·연인,,,meal,dinner,weekday,,,,,,,yes,"생일에 방문해 대게, 양갈비, 꼬리곰탕을 즐겼고 직원 친절과 문구 장식 서비스에 만족했다.",borigunbbang,2026-11-17
+R-thebuffet-0007,thebuffet,map,2025-12,비즈니스·접대,업무상 식사,동료·거래처,,,meal,dinner,weekday,,,,,,,,회사 회식으로 이용했다는 한 단어 후기다.,borigunbbang,2026-11-17
+R-thebuffet-0008,thebuffet,map,2025-01,가족·친족,가족 행사,부모와 성인 자녀,,,meal,lunch,weekday,,,,평판·브랜드,,,,"어머니 생신에 방문해 예약 할인과 창가석을 받았고, 양갈비와 자리 주문 곰탕·커피에 만족했다.",borigunbbang,2026-11-17
+R-thebuffet-0009,thebuffet,map,2026-04,,,,,,meal,lunch,weekday,,,,,메뉴 구성,,yes,"자주 오는 손님으로 스테이크, 전복, 새우튀김, 홍어무침 등을 칭찬했고 수육 추가와 회 세트 구성 개선을 제안했다.",borigunbbang,2026-11-17
+R-thebuffet-0010,thebuffet,map,2025-11,커플·기념일,기념일,부부·연인,,,meal,dinner,weekend,,,,,서비스,,yes,남편 생일에 방문해 음식과 친절에 만족했지만 약속된 기념사진 촬영을 직원이 잊어 아쉬워했다.,borigunbbang,2026-11-17
+R-thebuffet-0011,thebuffet,map,2024-12,가족·친족,가족 행사,부모와 성인 자녀,,,meal,lunch,weekend,,,,,,,,"연말 가족 모임을 겸해 어머니 팔순을 기념했고 음식과 과일, 디저트에 만족했다.",borigunbbang,2026-11-17
+R-thebuffet-0012,thebuffet,map,2024-12,커플·기념일,,부부·연인,,,meal,lunch,weekday,,,,,,,yes,음식과 직원 친절 모두 최고라며 재이용 뜻을 밝혔다.,borigunbbang,2026-11-17
+R-thebuffet-0013,thebuffet,map,2025-11,가족·친족,가족 행사,부모와 성인 자녀,,,meal,lunch,weekday,,weekday-lunch-adult,,,,,,"평일 낮에 어머니 생신을 기념했고, 생일 디저트 장식과 연말 장식, 붐비지 않은 분위기에 만족했다.",borigunbbang,2026-11-17
+R-thebuffet-0014,thebuffet,map,2024-11,커플·기념일,기념일,부부·연인,,,meal,dinner,weekday,,,,,가격;맛 기대 이하,,no,값에 비해 아쉬웠고 대게와 랍스터가 해동품 같았다며 재방문 뜻이 없다고 했다. 김치류와 직원은 좋게 봤다.,borigunbbang,2026-11-17
+R-thebuffet-0015,thebuffet,map,2025-12,,,,,,meal,lunch,weekday,,,,,메뉴 구성,,yes,"기본기가 탄탄하다며 양갈비, LA갈비, 한식과 무료 탄산을 좋게 봤으나 밥에서 이물이 나온 점을 아쉬워했다.",borigunbbang,2026-11-17
+R-thebuffet-0016,thebuffet,map,2025-03,친구·모임,모임,친구,,,meal,dinner,weekday,,,,,,,,"친구의 첫 휴가를 기념해 방문했고 전망, 인테리어, 꼬리곰탕·LA갈비, 직원 친절을 칭찬했다.",borigunbbang,2026-11-17
+R-thebuffet-0017,thebuffet,map,2025-03,가족·친족,가족 행사,3대 가족,,,meal,lunch,weekend,,,,,,,yes,양고기 맛과 직원 친절을 칭찬한 짧은 후기다.,borigunbbang,2026-11-17
+R-thebuffet-0018,thebuffet,map,2025-09,가족·친족,가족 행사,아이 동반 가족,,,meal,lunch,weekend,,,,,맛 기대 이하;메뉴 구성,,,"가족 생일로 찾아 분위기와 청결, 전망은 좋았지만 숙성 해산물이 질기거나 퍽퍽했고 메뉴가 명성에 못 미친다고 느꼈다.",borigunbbang,2026-11-17
+R-thebuffet-0019,thebuffet,map,2025-03,가족·친족,가족 행사,부부·연인,,,meal,lunch,weekend,,,,분위기·전망,가격,,,여러 가족 경사를 겸해 예약 방문했다. 값어치는 높지 않다고 보지만 전망 값으로 여기고 찾는다고 했다.,borigunbbang,2026-11-17
+R-thebuffet-0020,thebuffet,map,2026-05,비즈니스·접대,,동료·거래처,,,meal,dinner,weekend,,,,,,,,특정 직원의 외모를 칭찬한 짧은 후기다.,borigunbbang,2026-11-17
+R-thebuffet-0021,thebuffet,map,2024-10,가족·친족,가족 행사,3대 가족,,,meal,dinner,weekday,,,,,,,,가족 행사로 예약했고 맛과 깔끔함에 만족했다.,borigunbbang,2026-11-17
+R-thebuffet-0022,thebuffet,map,2024-12,커플·기념일,,부부·연인,,,meal,dinner,weekday,,,,,,,yes,서비스가 친절해 다시 가고 싶다고 했다.,borigunbbang,2026-11-17
+R-thebuffet-0023,thebuffet,map,2026-01,친구·모임,모임,동료·거래처,,,meal,lunch,weekend,,,,,,,yes,시간이 모자랄 만큼 다양한 음식을 즐겁게 먹었고 재방문 의사가 매우 높다고 했다.,borigunbbang,2026-11-17
+R-thebuffet-0024,thebuffet,map,2025-07,커플·기념일,기념일,부부·연인,,,meal,lunch,weekday,,,,,,,,전반적으로 만족했다는 짧은 후기다.,borigunbbang,2026-11-17
+R-thebuffet-0025,thebuffet,map,2026-01,친구·모임,모임,친구,,,meal,lunch,weekday,,,,,,,,두 달쯤 앞서 예약했고 전망 좋은 자리에서 즐겁게 식사했다.,borigunbbang,2026-11-17
+R-thebuffet-0026,thebuffet,map,2025-05,가족·친족,가족 행사,부모와 성인 자녀,,,meal,dinner,weekend,,,,,,,,"아버지 칠순에 방문해 샴페인 제공과 사진 촬영 등 응대에 감동했고 양갈비와 곰탕, 디저트를 칭찬했다.",borigunbbang,2026-11-17
+R-thebuffet-0027,thebuffet,map,2025-10,커플·기념일,기념일,부부·연인,,,meal,dinner,weekday,,,,,,,,직원 친절과 단품 요리 수준의 맛을 칭찬했다.,borigunbbang,2026-11-17
+R-thebuffet-0028,thebuffet,map,2026-01,,,,,,meal,dinner,weekday,,,,,주차·접근,,,호텔에서 지하 주차장으로 가는 승강기를 찾기 어려웠다며 안내 표지를 요청했다.,borigunbbang,2026-11-17
+R-thebuffet-0029,thebuffet,map,2024-12,커플·기념일,,부부·연인,,,meal,lunch,weekend,,,,,,,yes,"대게와 참치 뱃살의 품질, 특수부위를 따로 챙겨 준 응대, 신선한 딸기를 칭찬했다.",borigunbbang,2026-11-17
+R-thebuffet-0030,thebuffet,map,2026-05,가족·친족,가족 행사,부부·연인,,,meal,lunch,weekday,,,,,대기,,,귀국한 아들의 생일에 예약 없이 기다려 입장했다. 지배인이 생일 케이크와 가족사진을 챙겨 줘 감동했다.,borigunbbang,2026-11-17
+R-thebuffet-0031,thebuffet,map,2025-05,친구·모임,,친구,,,meal,lunch,weekday,,,,분위기·전망,,,,"언니 생일 장소를 찾다 전망을 보고 골랐다. 창가석은 아니었지만 밝은 공간, 넓은 테이블, 과일과 무료 탄산에 만족했다.",borigunbbang,2026-11-17
+R-thebuffet-0032,thebuffet,map,2026-02,커플·기념일,기념일,,,,meal,lunch,weekend,,,,,,,,기념일마다 종종 찾는 곳으로 양갈비 맛과 전망을 칭찬했다.,borigunbbang,2026-11-17
+R-thebuffet-0033,thebuffet,map,2025-02,가족·친족,가족 행사,부모와 성인 자녀,,,meal,lunch,weekend,,,,,,,yes,"부모님 생신에 모시고 가 직원 안내와 음식, 서비스에 크게 만족했다.",borigunbbang,2026-11-17
+R-thebuffet-0034,thebuffet,map,2025-12,커플·기념일,기념일,부부·연인,,,meal,lunch,weekend,,,,,,,yes,남편과 10주년을 기념해 방문했다. 비 때문에 전망은 흐렸지만 분위기와 음식에 만족했다.,borigunbbang,2026-11-17
+R-thebuffet-0035,thebuffet,map,2025-11,가족·친족,,부모와 성인 자녀,,,meal,dinner,weekday,,,,,,,,,borigunbbang,2026-11-17
+R-thebuffet-0036,thebuffet,map,2025-03,가족·친족,가족 행사,부모와 성인 자녀,,,meal,lunch,weekend,,peak-adult,,,,,,"아버지 칠순으로 주말 낮에 방문했고 통창 너머 한강 전망, 직원 응대, 신선한 음식에 만족했다.",borigunbbang,2026-11-17
+R-thebuffet-0037,thebuffet,map,2024-11,가족·친족,가족 행사,부모와 성인 자녀,,,meal,lunch,weekday,,,,,,,,한강을 내려다보며 가족과 식사하기 좋은 곳이라고 평했다.,borigunbbang,2026-11-17
+R-thebuffet-0038,thebuffet,map,2026-04,비즈니스·접대,,동료·거래처,,,meal,lunch,weekday,,,,평판·브랜드,맛 기대 이하,,yes,"좋은 평을 보고 기대했지만 양고기와 LA갈비, 대게가 실망스러웠고 비슷한 값의 다른 호텔 뷔페보다 못하다고 했다. 망고와 스테이크는 무난했다.",borigunbbang,2026-11-17
+R-thebuffet-0039,thebuffet,map,2024-12,친구·모임,모임,동료·거래처,,,meal,lunch,weekend,,,,,,,,"지인들과 모여 전망과 고기·갑각류 요리, 곰탕을 즐겼고 예약 할인과 창가석 배정에 만족했다.",borigunbbang,2026-11-17
+R-thebuffet-0040,thebuffet,map,2026-07,가족·친족,가족 행사,부모와 성인 자녀,,,meal,lunch,weekend,,,,,,,yes,특히 한식과 꼬리곰탕·웰컴 수프가 좋았다고 했다.,borigunbbang,2026-11-17
+R-thebuffet-0041,thebuffet,map,2026-01,가족·친족,가족 행사,부모와 성인 자녀,,,meal,dinner,weekend,,,,,,,,가족끼리 모이려고 예약해 음식과 분위기에 만족했다.,borigunbbang,2026-11-17
+R-thebuffet-0043,thebuffet,map,2025-06,가족·친족,가족 행사,부모와 성인 자녀,,,meal,lunch,weekend,,,,,,,,아버지 칠순으로 별실을 예약해 이용했고 쾌적함과 다양한 음식에 만족했다.,borigunbbang,2026-11-17
+R-thebuffet-0044,thebuffet,map,2025-10,가족·친족,가족 행사,아이 동반 가족,,,meal,lunch,weekend,,,,,,,,,borigunbbang,2026-11-17
+R-thebuffet-0045,thebuffet,map,2026-05,친구·모임,여행·호캉스,친구,,,meal,dinner,weekend,,,,,,,yes,친구들과 늦은 시간대에 대게를 실컷 먹었고 다음엔 가족과 오고 싶다고 했다.,borigunbbang,2026-11-17
+R-thebuffet-0046,thebuffet,map,2025-05,가족·친족,가족 행사,부모와 성인 자녀,,,meal,dinner,weekday,,peak-adult,,평판·브랜드,,,,"새 단장 뒤 평이 좋아 부모님 생신에 찾았다. 직원들의 사진 촬영, 미역국과 디저트 준비, 음료 서빙에 감동했다.",borigunbbang,2026-11-17
+R-thebuffet-0047,thebuffet,map,2025-07,,,,,,meal,lunch,weekend,,,,,,,yes,"한강 전망과 다양한 음식, 친절한 서비스를 칭찬했다.",borigunbbang,2026-11-17
+R-thebuffet-0048,thebuffet,map,2025-05,가족·친족,가족 행사,아이 동반 가족,,,meal,lunch,weekday,,,,,,,,아기를 세심히 배려해 준다고 했다.,borigunbbang,2026-11-17
+R-thebuffet-0049,thebuffet,map,2024-10,친구·모임,모임,동료·거래처,,,meal,dinner,weekday,,,,,맛 기대 이하,,,"기분 내기 좋은 곳으로, 맛은 기대만 못했지만 모인 자리의 분위기를 살려 줬다고 했다.",borigunbbang,2026-11-17
+R-thebuffet-0050,thebuffet,map,2026-01,커플·기념일,,부부·연인,,,meal,lunch,weekday,,,,,,,yes,최고라는 한마디 후기다.,borigunbbang,2026-11-17
+R-thebuffet-0051,thebuffet,map,2026-07,가족·친족,가족 행사,부모와 성인 자녀,,,meal,lunch,weekday,,,,,맛 기대 이하,,yes,"대기 공간 관리, 자리 안내, 빠른 접시 정리, 셰프들의 인사를 칭찬했고 전복죽의 비린 맛만 개선을 바랐다.",borigunbbang,2026-11-17
+R-thebuffet-0052,thebuffet,map,2026-01,커플·기념일,,부부·연인,,,meal,dinner,weekday,,,,,,,,직원 친절과 음식 맛을 칭찬했다.,borigunbbang,2026-11-17
+R-thebuffet-0053,thebuffet,map,2025-08,커플·기념일,기념일,부부·연인,,,meal,dinner,weekday,,,,,,,,,borigunbbang,2026-11-17
+R-thebuffet-0054,thebuffet,map,2024-12,가족·친족,가족 행사,아이 동반 가족,,,meal,dinner,weekday,,,,,,,,그저 그렇다는 짧은 평이다.,borigunbbang,2026-11-17
+R-thebuffet-0055,thebuffet,map,2025-05,커플·기념일,여행·호캉스,부부·연인,,,meal,dinner,weekday,,,,,,,,,borigunbbang,2026-11-17
+R-thebuffet-0056,thebuffet,map,2025-04,커플·기념일,,부부·연인,,,meal,lunch,weekday,,,,,,,,가 본 호텔 뷔페 중 가장 맛있었고 높은 천장과 넓은 공간이 좋다고 추천했다.,borigunbbang,2026-11-17
+R-thebuffet-0057,thebuffet,map,2025-04,가족·친족,가족 행사,아이 동반 가족,,,meal,dinner,weekday,,,,,가격,,,"가족 모임으로 오랜만에 찾아 음식, 청결, 서비스에 만족했지만 오른 가격이 부담스럽다고 했다.",borigunbbang,2026-11-17
+R-thebuffet-0058,thebuffet,map,2025-02,가족·친족,가족 행사,부모와 성인 자녀,,,meal,lunch,weekend,,,,,맛 기대 이하,,,어머니 생신에 방문했다. 바뀐 구조가 어수선하게 느껴졌고 대게 손질이 아쉬웠으나 디저트와 과일은 좋았다.,borigunbbang,2026-11-17
+R-thebuffet-0059,thebuffet,map,2026-05,커플·기념일,,부부·연인,,,meal,dinner,weekday,,,,,,,,"음식, 전망, 직원, 시설 모두 마음에 든다고 했다.",borigunbbang,2026-11-17
+R-thebuffet-0060,thebuffet,map,2025-03,친구·모임,,친구,,,meal,lunch,weekday,,,,,메뉴 구성,,,당근 주스를 즉석에서 짜 주길 바란다는 아쉬움만 적었다.,borigunbbang,2026-11-17
+R-thebuffet-0061,thebuffet,map,2026-06,커플·기념일,,부부·연인,,,meal,dinner,weekday,,,,,,,yes,올 때마다 만족한다며 서울에서 손꼽는 뷔페로 꼽고 전망을 가장 큰 장점으로 들었다.,borigunbbang,2026-11-17
+R-thebuffet-0062,thebuffet,map,2025-12,,,,,,meal,lunch,weekday,,,,맛,,,yes,맛있다는 소문을 듣고 찾았고 실제로 맛있어 특별한 날 다시 오고 싶다고 했다.,borigunbbang,2026-11-17
+R-thebuffet-0063,thebuffet,map,2025-02,친구·모임,모임,,,,meal,lunch,weekend,,,,,,,,새 단장 뒤 더 좋아졌고 전망과 깔끔한 음식이 좋아 추천한다고 했다.,borigunbbang,2026-11-17
+R-thebuffet-0064,thebuffet,map,2024-10,가족·친족,가족 행사,부모와 성인 자녀,,,meal,lunch,weekend,,,,,,,,"어머니 칠순에 방문해 한강 전망과 인테리어, 음식, 주차 요원부터 요리사까지의 친절에 만족했다.",borigunbbang,2026-11-17
+R-thebuffet-0065,thebuffet,map,2025-04,가족·친족,가족 행사,부모와 성인 자녀,,,meal,dinner,weekend,,,,,,,,편하게 잘 먹었다는 짧은 후기다.,borigunbbang,2026-11-17
+R-thebuffet-0066,thebuffet,map,2026-05,가족·친족,가족 행사,부모와 성인 자녀,,,meal,lunch,weekday,,,,,,,yes,어머니 생신으로 예약 방문했고 입맛에 맞는 음식과 기념하기 좋은 자리 배정에 만족했다.,borigunbbang,2026-11-17
+R-thebuffet-0067,thebuffet,map,2025-04,커플·기념일,기념일,부부·연인,,,meal,dinner,weekday,,,,,,,,"기념일에 방문해 조용한 자리 안내, 케이크 장식과 사진 촬영에 만족했고 꼬리곰탕과 제철 과일을 칭찬했다.",borigunbbang,2026-11-17
+R-thebuffet-0068,thebuffet,map,2026-08,커플·기념일,기념일,부부·연인,,,meal,dinner,weekday,,,,기념일 응대;주차·접근,,shilla-parkview,yes,결혼기념일에 집과 가깝고 무료 촛불 행사가 있어 골랐다. 창가석 요청 응대와 음식 품질에 크게 만족했고 남편은 경쟁 호텔보다 낫다고 했다.,borigunbbang,2026-11-17
+R-thebuffet-0069,thebuffet,map,2025-09,가족·친족,,부모와 성인 자녀,,,meal,lunch,weekend,,,,,주차·접근,,,음식과 전망에 만족했고 부모님도 좋아했지만 주차 공간을 찾는 데 애먹었다고 했다.,borigunbbang,2026-11-17
+R-thebuffet-0070,thebuffet,map,2025-12,커플·기념일,,부부·연인,,,meal,lunch,weekday,,,,,,,yes,공간과 음식 품질을 칭찬했다.,borigunbbang,2026-11-17
+R-thebuffet-0071,thebuffet,map,2025-08,가족·친족,가족 행사,부모와 성인 자녀,,,meal,lunch,weekend,,,,,,,,오랜만에 낮 식사를 했고 직원 친절과 음식에 만족했다.,borigunbbang,2026-11-17
+R-thebuffet-0072,thebuffet,map,2026-01,가족·친족,가족 행사,아이 동반 가족,,,meal,lunch,weekday,,,,,,,yes,친정어머니 생신과 아들 생일로 두 번 찾았고 탁 트인 한강 전망과 한산한 분위기를 좋게 봤다.,borigunbbang,2026-11-17
+R-thebuffet-0073,thebuffet,map,2025-04,커플·기념일,,부부·연인,,,meal,dinner,weekend,,,,,,,,전망이 좋은 자리에서 한 식사에 만족했다.,borigunbbang,2026-11-17
+R-thebuffet-0074,thebuffet,map,2025-01,커플·기념일,,부부·연인,,,meal,dinner,weekend,,,,,,,,회 코너 직원들에게 고마움을 전했다.,borigunbbang,2026-11-17
+R-thebuffet-0075,thebuffet,map,2026-08,가족·친족,가족 행사,,,,meal,lunch,weekend,,,,,,,,가족 모두 만족했다는 짧은 후기다.,borigunbbang,2026-11-17
+R-thebuffet-0076,thebuffet,map,2024-12,친구·모임,모임,친구,,,meal,lunch,weekend,,,,,,,,한두 가지를 빼면 모두 맛있었고 전망과 친절을 고려하면 가격만큼 만족스럽다고 했다.,borigunbbang,2026-11-17
+R-thebuffet-0077,thebuffet,map,2026-05,가족·친족,모임,부모와 성인 자녀,,,meal,lunch,weekday,,,,,,,,음식이 맛있다는 짧은 후기다.,borigunbbang,2026-11-17
+R-thebuffet-0078,thebuffet,map,2025-02,친구·모임,모임,친구,,,meal,lunch,weekend,,,,,,,yes,모임 회비로 비싼 식사를 해 보자며 찾았고 값만큼 맛있었다고 했다.,borigunbbang,2026-11-17
+R-thebuffet-0079,thebuffet,map,2024-10,,,,,,meal,dinner,weekend,,,,,맛 기대 이하;메뉴 구성,,,"전망, 좌석, 회는 좋았지만 고기류 냄새와 부실한 디저트, 맛없는 케이크를 지적했다.",borigunbbang,2026-11-17
+R-thebuffet-0080,thebuffet,map,2024-10,가족·친족,가족 행사,아이 동반 가족,,,meal,lunch,weekend,,,,,,,,가족의 특별한 날에 추천한다는 짧은 후기다.,borigunbbang,2026-11-17
+R-thebuffet-0081,thebuffet,map,2025-03,가족·친족,가족 행사,부모와 성인 자녀,,,meal,lunch,weekday,,,,,,,,졸업을 기념해 가족과 방문했고 창가석 배정에 고마워했다.,borigunbbang,2026-11-17
+R-thebuffet-0082,thebuffet,map,2025-04,가족·친족,가족 행사,아이 동반 가족,,,meal,lunch,weekend,,,,,,,,아들들의 시험 종료와 생일을 겸해 주말 나들이로 찾았고 맑은 날 전망과 식후 산책이 좋았다고 했다.,borigunbbang,2026-11-17
+R-thebuffet-0083,thebuffet,map,2025-11,커플·기념일,기념일,,,,meal,dinner,weekend,,,,,서비스,,,음식과 친절은 좋았지만 예약 때 결혼기념일을 적었는데도 생일과 달리 문구 장식 서비스를 받지 못해 의아해했다.,borigunbbang,2026-11-17
+R-thebuffet-0084,thebuffet,map,2024-11,커플·기념일,,부부·연인,,,meal,lunch,weekend,,,,,,,yes,"생일에 뷔페를 좋아해 찾았고 이전 뒤 더 좋아진 전망과 시설, 음식, 빠른 자리 준비에 만족했다.",borigunbbang,2026-11-17
+R-thebuffet-0085,thebuffet,map,2026-07,커플·기념일,,부부·연인,,,meal,dinner,weekend,,,,,,,yes,양고기와 회가 특히 맛있었다며 다시 가고 싶다고 했다.,borigunbbang,2026-11-17
+R-thebuffet-0086,thebuffet,map,2024-12,가족·친족,일상 외식,아이 동반 가족,,,meal,dinner,weekend,,peak-adult,,,,,yes,"연말에 아내, 아이와 저녁을 먹었고 정성스러운 음식과 커피를 쏟았을 때의 빠른 응대에 만족했다.",borigunbbang,2026-11-17
+R-thebuffet-0087,thebuffet,map,2025-11,친구·모임,모임,동료·거래처,,,meal,dinner,weekday,,,,,,,,여럿이 모이기에 알맞은 곳이라는 짧은 평이다.,borigunbbang,2026-11-17
+R-thebuffet-0088,thebuffet,map,2025-12,친구·모임,모임,친구,,,meal,lunch,weekday,,,,,,,,생일인 친구와 갔는데 미역국 반상과 셰프 손글씨 카드를 따로 챙겨 줘 감동했다.,borigunbbang,2026-11-17
+R-thebuffet-0089,thebuffet,map,2025-01,친구·모임,모임,동료·거래처,,,meal,lunch,weekend,,,,,,,,오랜만에 지인들과 모여 전망과 맛 모두 완벽했다고 했다.,borigunbbang,2026-11-17
+R-thebuffet-0091,thebuffet,map,2025-04,친구·모임,모임,친구,,,meal,lunch,weekday,,,,,,,yes,평일 가격이 주말보다 낮다는 점과 맛을 언급했다.,borigunbbang,2026-11-17
+R-thebuffet-0092,thebuffet,map,2025-04,비즈니스·접대,업무상 식사,동료·거래처,,,meal,dinner,weekday,,,,,,,,,borigunbbang,2026-11-17
+R-thebuffet-0093,thebuffet,map,2025-12,가족·친족,가족 행사,부모와 성인 자녀,,,meal,dinner,weekday,,,,평판·브랜드,가격;맛 기대 이하,,,주변 추천으로 크게 기대했지만 맛은 자기 기준 80점 정도였고 서비스는 좋았다. 형편이 넉넉한 사람에게 권한다고 했다.,borigunbbang,2026-11-17
+R-thebuffet-0094,thebuffet,map,2025-04,커플·기념일,,부부·연인,,,meal,lunch,weekday,,,,,,,yes,전망이 좋아 다시 오겠다고 했다.,borigunbbang,2026-11-17
+R-thebuffet-0095,thebuffet,map,2025-05,가족·친족,기념일,부부·연인,,,meal,dinner,weekday,,,,,,,,오랜만에 가족 식사를 했고 음식과 직원 친절에 만족했다.,borigunbbang,2026-11-17
+R-thebuffet-0096,thebuffet,map,2025-11,친구·모임,,친구,,,meal,lunch,weekday,,,,,,,,,borigunbbang,2026-11-17
+R-thebuffet-0097,thebuffet,map,2025-06,가족·친족,가족 행사,부모와 성인 자녀,,,meal,dinner,weekend,,,,,,,yes,아버지 팔순으로 예약해 음식에 만족했고 아버지도 기뻐했다.,borigunbbang,2026-11-17
+R-thebuffet-0098,thebuffet,map,2026-01,커플·기념일,,부부·연인,,,meal,dinner,weekday,,,,,,,,생일을 챙겨 준 데 고마움을 전했다.,borigunbbang,2026-11-17
+R-thebuffet-0099,thebuffet,map,2024-10,친구·모임,모임,동료·거래처,,,meal,lunch,weekend,,weekday-lunch-adult,,,,,,평일 낮 방문이 주말보다 한산해 좋았다고 했다.,borigunbbang,2026-11-17
+R-thebuffet-0100,thebuffet,map,2024-12,가족·친족,가족 행사,,,,meal,lunch,weekend,,,,,,,,가족과 즐거운 시간을 보냈고 전망과 맛이 좋아 특별한 날에 어울린다고 했다.,borigunbbang,2026-11-17
+R-thebuffet-0101,thebuffet,map,2026-07,가족·친족,가족 행사,부모와 성인 자녀,,,meal,lunch,weekday,,,,,,,,친절과 전망을 칭찬한 짧은 후기다.,borigunbbang,2026-11-17
+R-thebuffet-0102,thebuffet,map,2025-04,가족·친족,가족 행사,3대 가족,,,meal,lunch,weekend,,,,,,,,아기가 쓸 집게와 가위를 미리 준비해 줘 편했다고 했다.,borigunbbang,2026-11-17
+R-thebuffet-0103,thebuffet,map,2026-07,커플·기념일,,부부·연인,,,meal,lunch,weekday,,weekday-lunch-adult,,,,,,평일 점심인데도 자리가 꽉 찼지만 주차가 넉넉하고 층고와 음식 코너 이동이 편했다고 함. 집에서 멀어 자주 오지 못하는 점을 아쉬워함.,borigunbbang,2026-11-17
+R-thebuffet-0104,thebuffet,map,2025-05,가족·친족,가족 행사,아이 동반 가족,,,meal,dinner,weekday,,,,,,,,"분위기와 음식의 질, 맛을 가장 좋게 평가함.",borigunbbang,2026-11-17
+R-thebuffet-0105,thebuffet,map,2026-09,가족·친족,가족 행사,부모와 성인 자녀,,,meal,lunch,weekend,,,,,,,,강 전망과 함께 근사하게 먹을 수 있는 곳이라고 평함.,borigunbbang,2026-11-17
+R-thebuffet-0106,thebuffet,map,2025-02,가족·친족,가족 행사,부모와 성인 자녀,,,meal,lunch,weekday,,,,혜택·할인,,,,"어머니 환갑을 맞아 가족이 함께 갔고, 특정 예약 경로의 할인 때문에 예약했다고 밝힘. 모처럼 음식을 즐겼다고 함.",borigunbbang,2026-11-17
+R-thebuffet-0107,thebuffet,map,2024-10,친구·모임,모임,친구,,,meal,lunch,weekday,,,,,,,yes,친구들과 평일 낮에 식사하고 근처를 걸으며 가을을 즐김. 내년에 다시 가겠다고 함.,borigunbbang,2026-11-17
+R-thebuffet-0108,thebuffet,map,2024-11,커플·기념일,기념일,부부·연인,,,meal,dinner,weekday,,,,,,,,음식이 신선하고 직원이 친절했으며 생일을 챙겨 준 데 감사함. 가 본 호텔 뷔페 가운데 가장 좋았다고 평함.,borigunbbang,2026-11-17
+R-thebuffet-0109,thebuffet,map,2025-02,친구·모임,모임,친구,,,meal,lunch,weekday,,,,,,,,전망과 음식 맛을 칭찬함.,borigunbbang,2026-11-17
+R-thebuffet-0110,thebuffet,map,2025-11,가족·친족,가족 행사,부모와 성인 자녀,,,meal,dinner,weekend,,,,,,,yes,"밤의 강 풍경과 음식, 분위기에 전반적으로 만족함.",borigunbbang,2026-11-17
+R-thebuffet-0111,thebuffet,map,2025-06,가족·친족,가족 행사,3대 가족,,,meal,lunch,weekday,,,,,서비스,,,"할머니 팔순 잔치 전에 미리 맛보러 갔다가 전망과 음식, 응대가 좋아 그 자리에서 잔치를 예약함. 잔치 당일 여러 번 확인한 창가 자리 대신 전망이 안 보이는 자리를 받아 실망했다고 함.",borigunbbang,2026-11-17
+R-thebuffet-0112,thebuffet,map,2026-07,친구·모임,모임,동료·거래처,,,meal,dinner,weekday,,,,,,,,,borigunbbang,2026-11-17
+R-thebuffet-0113,thebuffet,map,2025-03,가족·친족,가족 행사,3대 가족,,,meal,lunch,weekend,,,,,,,,아버지 팔순을 맞아 사전 예약으로 가족 식사를 했으며 부모가 무척 기뻐했다고 함.,borigunbbang,2026-11-17
+R-thebuffet-0114,thebuffet,map,2025-09,가족·친족,가족 행사,부모와 성인 자녀,,,meal,lunch,weekend,,,,,,,,"직원들이 타 호텔 뷔페보다 친절하다고 했고, 꼬리곰탕과 자리에서 받는 음료 서비스를 좋게 봤다.",borigunbbang,2026-11-17
+R-thebuffet-0115,thebuffet,map,2025-05,친구·모임,여행·호캉스,친구,,,meal,lunch,weekend,guest,,,,,,yes,"친구와 호텔에 묵으며 식사했고, 해산물을 즐기는 것을 눈여겨본 셰프가 특별 요리를 내준 데 크게 만족함. 가져간 와인 관리 등 세심한 응대도 칭찬함.",borigunbbang,2026-11-17
+R-thebuffet-0116,thebuffet,map,2026-04,가족·친족,가족 행사,부모와 성인 자녀,,,meal,lunch,weekend,,,,,,,,아버지 팔순으로 방문했고 음식이 아주 맛있었다고 함. 축하 문구 요청을 직원이 챙겨 준 데 감사함.,borigunbbang,2026-11-17
+R-thebuffet-0117,thebuffet,map,2026-11,가족·친족,가족 행사,부부·연인,2,,meal,lunch,weekday,,,,,,,yes,"글쓴이가 부모의 생신 식사를 마련해 부모 두 사람만 다녀왔고, 축하 문구 접시와 친절한 응대에 부모가 매우 만족함. 글쓴이도 곧 가 보겠다고 함.",borigunbbang,2026-11-17
+R-thebuffet-0118,thebuffet,map,2025-03,커플·기념일,기념일,부부·연인,,,meal,lunch,weekday,,,,,,,yes,결혼기념일이라고 적어 두었더니 특별한 서비스를 받았고 음식과 한강 전망에 만족함. 봄에 남편 생일로 다시 오겠다고 함.,borigunbbang,2026-11-17
+R-thebuffet-0119,thebuffet,map,2026-02,가족·친족,,부모와 성인 자녀,,,meal,lunch,weekday,,,,,맛 기대 이하,shilla-parkview,yes,좌석과 음식 코너의 거리와 배치가 좋았고 양갈비와 갈비찜을 높이 평가하며 경쟁 호텔 뷔페와 견줘 양고기가 더 낫다고 함. 방어회는 숙성이 지나쳤지만 철이 끝나 이해한다고 함.,borigunbbang,2026-11-17
+R-thebuffet-0120,thebuffet,map,2026-06,커플·기념일,기념일,부부·연인,,,meal,lunch,weekend,,,,,,,,금방 배가 불러 아쉬웠지만 디저트까지 잘 먹었다고 함.,borigunbbang,2026-11-17
+R-thebuffet-0121,thebuffet,map,2026-09,가족·친족,가족 행사,부모와 성인 자녀,,,meal,lunch,weekday,,weekday-lunch-adult,,,,,,"평일 점심에도 자리가 가득 찼다고 하며, 예약 할인을 받고 즐겁게 식사함.",borigunbbang,2026-11-17
+R-thebuffet-0122,thebuffet,map,2025-03,가족·친족,가족 행사,부모와 성인 자녀,,,meal,lunch,weekday,,,,,대기;맛 기대 이하;메뉴 구성,,,"직원 친절과 음식 맛을 칭찬했지만 입장 시 자리 안내가 늦은 점, 디저트 종류, 장어의 짠맛을 아쉬워함.",borigunbbang,2026-11-17
+R-thebuffet-0123,thebuffet,map,2025-08,가족·친족,가족 행사,부모와 성인 자녀,,,meal,dinner,weekend,,,,,,,,"직원들이 바빠도 예의 바르게 응대한다고 칭찬하고, 한식·중식·일식·양식 코너별 음식의 장점을 자세히 소개함.",borigunbbang,2026-11-17
+R-thebuffet-0124,thebuffet,map,2025-12,커플·기념일,기념일,부부·연인,,,meal,dinner,weekday,,,,,메뉴 구성,,,랍스터에 곁들이는 소스가 바뀐 것을 아쉬워하며 이전 소스로 되돌려 달라고 요청함.,borigunbbang,2026-11-17
+R-thebuffet-0125,thebuffet,map,2024-11,비즈니스·접대,업무상 식사,동료·거래처,,,meal,lunch,weekday,,,,,,,,전망이 좋고 양고기 요리를 가장 칭찬함.,borigunbbang,2026-11-17
+R-thebuffet-0127,thebuffet,map,2025-03,,,,,,meal,dinner,weekend,,,,,,,yes,다음에 또 오고 싶다는 짧은 글.,borigunbbang,2026-11-17
+R-thebuffet-0128,thebuffet,map,2026-08,가족·친족,가족 행사,부모와 성인 자녀,,,meal,lunch,weekday,,,,,,,yes,부모 생신 식사로 예약하며 남긴 메모에 맞춰 생일상을 차려 줘 감동함. 부모도 다음 생일에 또 오고 싶어 한다고 함.,borigunbbang,2026-11-17
+R-thebuffet-0129,thebuffet,map,2026-01,가족·친족,가족 행사,부모와 성인 자녀,,,meal,dinner,weekend,,,,,,,,,borigunbbang,2026-11-17
+R-thebuffet-0130,thebuffet,map,2025-11,커플·기념일,기념일,부부·연인,,,meal,dinner,weekday,,peak-adult,,,,,yes,"기념일 저녁 식사로 한강 전망, 넓은 테이블 간격, 친절한 직원, 해산물과 한식, 고기, 디저트에 두루 만족함. 값은 높지만 특별한 날에는 그만한 가치가 있다고 봄.",borigunbbang,2026-11-17
+R-thebuffet-0131,thebuffet,map,2024-11,친구·모임,모임,동료·거래처,,,meal,lunch,weekend,,,,,,,yes,"아는 사람들과 친목을 위해 찾았고 연말 분위기와 한강 전망, 음식에 만족함. 두 시간이 생각보다 짧게 느껴졌다고 함.",borigunbbang,2026-11-17
+R-thebuffet-0132,thebuffet,map,2026-10,가족·친족,가족 행사,아이 동반 가족,,,meal,dinner,weekday,,,,,맛 기대 이하;혼잡·좌석 간격,,,고기 등 주요 요리는 맛있었지만 케이크와 빙과류 디저트는 실망스러웠다고 함. 옆 자리와 너무 가까워 어수선하고 서둘러 먹고 나가야 하는 분위기였다고 지적함.,borigunbbang,2026-11-17
+R-thebuffet-0133,thebuffet,map,2026-04,가족·친족,가족 행사,부모와 성인 자녀,,,meal,lunch,weekday,,,,,서비스,,,전반적으로 만족했지만 참치를 담당한 직원의 태도가 딱딱해 더 달라고 하기 어려웠다고 아쉬워함.,borigunbbang,2026-11-17
+R-thebuffet-0134,thebuffet,map,2025-07,커플·기념일,,부부·연인,,,meal,lunch,weekday,,,,,,,yes,"생일 기념으로 갔다가 미역국과 회, 손글씨 카드로 축하를 받아 감동함. 서비스와 음식 모두 좋아 다시 오겠다고 함.",borigunbbang,2026-11-17
+R-thebuffet-0135,thebuffet,map,2025-01,가족·친족,가족 행사,부모와 성인 자녀,,,meal,dinner,weekend,,,,,,,yes,호텔 뷔페 가운데 음식이 가장 맛있었다며 꼭 다시 오겠다고 함.,borigunbbang,2026-11-17
+R-thebuffet-0136,thebuffet,map,2026-08,가족·친족,가족 행사,부모와 성인 자녀,,,meal,dinner,weekend,,,,,,,,새 단장 뒤 처음 가 봤는데 이전보다 전반적인 품질이 나아져 만족함.,borigunbbang,2026-11-17
+R-thebuffet-0137,thebuffet,map,2026-01,가족·친족,가족 행사,부모와 성인 자녀,,,meal,lunch,weekday,,,,,,,,어머니 생신 식사로 갔고 실내 온도가 알맞고 좌석이 넉넉해 어른들이 편했다고 함. 생일 축하상을 별도로 마련해 줘 특별했다고 함.,borigunbbang,2026-11-17
+R-thebuffet-0138,thebuffet,map,2026-08,커플·기념일,,부부·연인,,,meal,lunch,weekend,,,,,,,,음식과 서비스에 만족했고 주차 건물이 생각보다 가까워 가족 외식 장소로 알맞았다고 함.,borigunbbang,2026-11-17
+R-thebuffet-0139,thebuffet,map,2025-02,가족·친족,가족 행사,부모와 성인 자녀,,,meal,lunch,weekend,,,,,,,yes,가족의 생일을 맞아 찾았고 딸기 디저트와 얼어붙은 한강 풍경을 즐김.,borigunbbang,2026-11-17
+R-thebuffet-0141,thebuffet,map,2026-06,친구·모임,일상 외식,동료·거래처,,,meal,dinner,weekday,,,,,가격;맛 기대 이하,,,통창 자리의 개방감이 좋았고 과일이 바뀐 것도 반겼지만 질긴 광어회를 지적함. 그 돈이면 산지 직송이 낫겠다면서도 취향이 다른 사람들이 모여 분위기 내기에는 알맞다고 봄.,borigunbbang,2026-11-17
+R-thebuffet-0142,thebuffet,map,2025-09,가족·친족,가족 행사,부모와 성인 자녀,,,meal,dinner,weekday,,,,,,,yes,기념일에 원하는 음식을 실컷 먹었고 직원이 무척 친절했다고 함.,borigunbbang,2026-11-17
+R-thebuffet-0143,thebuffet,map,2024-10,친구·모임,모임,친구,,,meal,lunch,weekend,,,,,,,yes,일반 예약이었는데도 전망 좋은 창가로 안내받아 고마워함. 음식이 다양하고 맛있어 다음에는 부모와 오겠다고 함.,borigunbbang,2026-11-17
+R-thebuffet-0145,thebuffet,map,2024-11,가족·친족,가족 행사,부모와 성인 자녀,,,meal,dinner,weekend,,,,,,,,환갑 잔치로 가까운 가족이 모여 식사했고 전화 예약 때 친절했던 직원에게 감사함.,borigunbbang,2026-11-17
+R-thebuffet-0146,thebuffet,map,2025-01,가족·친족,가족 행사,부모와 성인 자녀,,,meal,dinner,weekday,,,,,,,,맛있다는 뜻의 말장난 한 줄.,borigunbbang,2026-11-17
+R-thebuffet-0148,thebuffet,map,2025-03,커플·기념일,,부부·연인,,,meal,lunch,weekend,,,,,대기;메뉴 구성,,yes,"양갈비 맛이 예전 방식으로 돌아와 반가워했고 랍스터와 커피, 초콜릿을 칭찬함. 줄을 서야 하는 점을 말하고 차 종류와 초콜릿, 젤라토 구성에 대한 바람을 적음.",borigunbbang,2026-11-17
+R-thebuffet-0149,thebuffet,map,2026-04,커플·기념일,기념일,,,,meal,lunch,weekday,,,,,,,,"재료가 싱싱하고 담음새가 아름다우며, 친절한 직원과 전망 덕분에 기념일을 잘 보냈다고 함.",borigunbbang,2026-11-17
+R-thebuffet-0150,thebuffet,map,2025-03,친구·모임,모임,친구,,,meal,dinner,weekday,,,,,예약이 어려움,,,서울 최고의 뷔페라며 예약은 다소 어렵지만 맛과 메뉴가 알차다고 추천함.,borigunbbang,2026-11-17
+R-thebuffet-0151,thebuffet,map,2025-05,,,,,,meal,dinner,weekday,,,,,맛 기대 이하;서비스,,yes,"음식 맛과 질, 회를 썰어 준 직원의 친절을 높이 평가함. 다만 망고가 지나치게 익었고 디저트 코너 직원의 응대가 불친절했다고 지적함.",borigunbbang,2026-11-17
+R-thebuffet-0152,thebuffet,map,2025-11,가족·친족,기념일,아이 동반 가족,,,meal,lunch,weekend,,,,,,,yes,결혼기념일 식사로 창가 자리와 축하 문구 서비스를 받아 만족함. 해마다 여러 고급 호텔을 다니는데 일식 코너가 가장 뛰어나다고 평함.,borigunbbang,2026-11-17
+R-thebuffet-0153,thebuffet,map,2026-02,비즈니스·접대,,동료·거래처,,,meal,lunch,weekday,,,,,메뉴 구성,,,아끼는 동생과 함께 맛있게 먹었지만 지난해 있던 파스타가 빠져 아쉬웠다고 함.,borigunbbang,2026-11-17
+R-thebuffet-0154,thebuffet,map,2025-09,커플·기념일,기념일,부부·연인,,,meal,dinner,weekend,,,,,,,,식당이 다른 건물로 옮겨 공간이 넓어지고 좋아졌지만 예전 느낌은 덜하다고 함.,borigunbbang,2026-11-17
+R-thebuffet-0155,thebuffet,map,2025-01,가족·친족,가족 행사,부모와 성인 자녀,,,meal,dinner,weekday,,,,,,,,"음식, 특히 회가 훌륭했고 직원이 친절해 호텔 뷔페 중 가장 만족스럽다고 함.",borigunbbang,2026-11-17
+R-thebuffet-0156,thebuffet,map,2025-11,비즈니스·접대,업무상 식사,동료·거래처,,,meal,lunch,weekday,,,,,,,yes,회사 단체 식사였다는 한 단어 글.,borigunbbang,2026-11-17
+R-thebuffet-0157,thebuffet,map,2025-10,커플·기념일,,부부·연인,,,meal,lunch,weekday,,,,,,,yes,서울 호텔 가운데 맛이 가장 뛰어나다고 보고 여러 번 와도 매번 만족한다고 함.,borigunbbang,2026-11-17
+R-thebuffet-0158,thebuffet,map,2026-01,커플·기념일,,부부·연인,,,meal,lunch,weekday,,,,,,shilla-parkview,,경쟁 호텔 뷔페보다 값이 싸고 신선하며 맛있다고 비교함.,borigunbbang,2026-11-17
+R-thebuffet-0159,thebuffet,map,2025-09,커플·기념일,,부부·연인,,,meal,lunch,weekend,,,,,,,yes,별 이모지만 남긴 글.,borigunbbang,2026-11-17
+R-thebuffet-0160,thebuffet,map,2026-04,비즈니스·접대,업무상 식사,동료·거래처,,,meal,lunch,weekday,,,,,,,yes,회사 단체 식사였다는 한 단어 글.,borigunbbang,2026-11-17
+R-thebuffet-0161,thebuffet,map,2026-08,가족·친족,가족 행사,부모와 성인 자녀,,,meal,dinner,weekday,,,,,,,,어머니 환갑을 맞아 가족이 식사했고 값어치를 한다고 평함. 메뉴가 많고 직원이 친절했다고 함.,borigunbbang,2026-11-17
+R-thebuffet-0162,thebuffet,map,2025-03,,,,,,meal,lunch,weekday,,,,,,,yes,"올 때마다 만족한다며 이번에는 스테이크 소스와 새우튀김, 광어회가 기억에 남는다고 함.",borigunbbang,2026-11-17
+R-thebuffet-0163,thebuffet,map,2025-01,가족·친족,가족 행사,부모와 성인 자녀,,,meal,dinner,weekday,,,,,,,,회가 부드럽고 새 단장 뒤 더 맛있어졌다는 일행의 말을 전함.,borigunbbang,2026-11-17
+R-thebuffet-0164,thebuffet,map,2025-04,가족·친족,가족 행사,아이 동반 가족,,,meal,dinner,weekday,,,,,,,,가끔 가족끼리 모일 때 이용하며 청결하고 음식이 훌륭하다고 함.,borigunbbang,2026-11-17
+R-thebuffet-0165,thebuffet,map,2025-02,가족·친족,가족 행사,부모와 성인 자녀,,,meal,lunch,weekend,,,,,,,,남편 생일에 가족과 갔고 요청해 둔 축하 문구 서비스를 받으며 배불리 먹었다고 함.,borigunbbang,2026-11-17
+R-thebuffet-0166,thebuffet,map,2025-02,가족·친족,가족 행사,아이 동반 가족,,,meal,dinner,weekday,,,,,,,,음식과 친절에 감동했고 기념일을 잘 챙겨 줘 고맙다고 함. 여러 번 가 본 곳이라고 함.,borigunbbang,2026-11-17
+R-thebuffet-0167,thebuffet,map,2024-12,친구·모임,모임,친구,,,meal,dinner,weekend,,,,,,,,연말 모임으로 갔고 정돈되어 있고 직원이 상냥했다고 함. 양갈비와 독특한 초콜릿을 칭찬함.,borigunbbang,2026-11-17
+R-thebuffet-0168,thebuffet,map,2025-02,친구·모임,모임,친구,,,meal,lunch,weekday,,,,,,,yes,"새 단장 뒤 음식 품질과 인테리어, 전망이 모두 좋아져 다시 가고 싶다고 함.",borigunbbang,2026-11-17
+R-thebuffet-0169,thebuffet,map,2024-12,가족·친족,가족 행사,부모와 성인 자녀,,,meal,lunch,weekend,,,,,,,yes,연말에 부모 생신을 겸한 가족 식사로 갔고 요청대로 창가 자리와 작은 축하 행사를 받아 감사함. 가족이 만족해 내년에도 오겠다고 함.,borigunbbang,2026-11-17
+R-thebuffet-0170,thebuffet,map,2026-03,커플·기념일,,부부·연인,,,meal,dinner,weekday,,,,,맛 기대 이하,이름:플레이버즈,yes,"여러 호텔 뷔페 가운데 손꼽히는 곳으로 평하며 일식과 곰탕, 디저트를 칭찬함. 음식에서 이물이 나왔지만 즉시 새로 만들어 준 대응에 오히려 신뢰가 생겼고, 한식과 김치는 약했다고 함.",borigunbbang,2026-11-17
+R-thebuffet-0171,thebuffet,map,2025-09,커플·기념일,,부부·연인,,,meal,dinner,weekday,,,,,,,yes,재료가 신선하고 회와 고기 종류가 많아 만족해 다시 오고 싶다고 함.,borigunbbang,2026-11-17
+R-thebuffet-0172,thebuffet,map,2024-12,친구·모임,,친구,,,meal,lunch,weekend,,,,,맛 기대 이하,,,처음 방문 뒤 매달 찾았는데 이번에는 양고기 질과 조리가 달라져 퍽퍽하고 풍미가 떨어졌다고 실망함. 다른 뷔페와 다른 장점이 사라졌다고 아쉬워함.,borigunbbang,2026-11-17
+R-thebuffet-0173,thebuffet,map,2025-07,가족·친족,일상 외식,부모와 성인 자녀,,,meal,lunch,weekday,,,,,,,,음식이 하나하나 맛있고 친절해 크게 만족함.,borigunbbang,2026-11-17
+R-thebuffet-0174,thebuffet,map,2025-03,친구·모임,,친구,,,meal,lunch,weekday,,,,,,,yes,"실내 장식과 분위기, 직원의 친절, 신선한 음식을 칭찬하며 다시 오고 싶다고 함.",borigunbbang,2026-11-17
+R-thebuffet-0175,thebuffet,map,2025-02,커플·기념일,기념일,부부·연인,,,meal,dinner,weekday,,,,,,,yes,한 해를 돌아볼 때 떠오를 만큼 좋은 식사였고 요리사와 직원이 친절했다고 함. 내년에도 연인과 다시 오고 싶어 함.,borigunbbang,2026-11-17
+R-thebuffet-0176,thebuffet,map,2026-06,가족·친족,,부모와 성인 자녀,,,meal,lunch,weekday,,,,,,,yes,오랜만에 왔는데 여전히 맛있고 메뉴가 늘어난 듯하며 민트 차를 다시 주문할 수 있어 좋았다고 함.,borigunbbang,2026-11-17
+R-thebuffet-0177,thebuffet,map,2025-07,가족·친족,가족 행사,부모와 성인 자녀,,,meal,lunch,weekend,,,,,,,,꼭 가 보고 싶던 곳이었고 맛있었지만 많이 먹지 못해 아쉬웠다고 함.,borigunbbang,2026-11-17
+R-thebuffet-0178,thebuffet,map,2024-10,가족·친족,,아이 동반 가족,,,meal,lunch,weekend,,,,,,,yes,"맛과 직원 친절, 전망이 좋아 유쾌하게 먹었고 다시 가겠다고 함.",borigunbbang,2026-11-17
+R-thebuffet-0179,thebuffet,map,2026-08,가족·친족,일상 외식,아이 동반 가족,,,meal,dinner,weekday,,,,,,,,음식이 신선하고 품질이 남다르며 직원 덕분에 대접받는 느낌이었다고 함.,borigunbbang,2026-11-17
+R-thebuffet-0180,thebuffet,map,2025-09,가족·친족,가족 행사,부모와 성인 자녀,,,meal,lunch,weekend,,,,,,,,분위기가 좋으며 일식 코너에 정성을 많이 쏟는다고 평함.,borigunbbang,2026-11-17
+R-thebuffet-0182,thebuffet,map,2026-03,친구·모임,모임,친구,,,meal,dinner,weekday,,,,,,,,전망과 음식 모두 훌륭한 최고의 뷔페라고 평함.,borigunbbang,2026-11-17
+R-thebuffet-0183,thebuffet,map,2026-02,가족·친족,가족 행사,아이 동반 가족,,,meal,dinner,weekend,,,,,,,yes,"직원이 친절하고 음식, 특히 양고기가 기억에 남을 만큼 맛있었다고 함.",borigunbbang,2026-11-17
+R-thebuffet-0184,thebuffet,map,2025-06,커플·기념일,,부부·연인,,,meal,lunch,weekend,,,,,,,yes,"코너 구성과 실내, 한강 전망이 뛰어나 호텔 뷔페 중 최상급이라고 평함. 다음에는 가족과 다시 오고 싶다고 함.",borigunbbang,2026-11-17
+R-thebuffet-0185,thebuffet,map,2025-08,가족·친족,모임,부모와 성인 자녀,,,meal,lunch,weekday,,,,,,,,음식 품질과 메뉴 구성이 좋고 주차가 편하다고 함.,borigunbbang,2026-11-17
+R-thebuffet-0186,thebuffet,map,2025-05,친구·모임,모임,동료·거래처,,,meal,lunch,weekday,,,,,,,yes,"새 단장 뒤 고급스러워지고 음식, 특히 초밥 쪽이 만족스럽다고 함.",borigunbbang,2026-11-17
+R-thebuffet-0187,thebuffet,map,2025-03,친구·모임,,친구,,,meal,dinner,weekend,,,,,,,yes,고마운 친구에게 한턱내는 자리였고 친구도 만족했다고 함. 고기 요리를 먹으러 다시 가고 싶어 함.,borigunbbang,2026-11-17
+R-thebuffet-0188,thebuffet,map,2025-06,가족·친족,가족 행사,아이 동반 가족,,,meal,lunch,weekend,,,,,,,,"생일 기념으로 갔고 음식, 한강 전망, 직원 친절 모두 좋았다고 함.",borigunbbang,2026-11-17
+R-thebuffet-0189,thebuffet,map,2025-08,커플·기념일,,부부·연인,,,meal,lunch,weekend,,,,,,,,직원 응대와 서비스가 친절하고 분위기가 깔끔하다고 함.,borigunbbang,2026-11-17
+R-thebuffet-0190,thebuffet,map,2026-01,커플·기념일,기념일,부부·연인,,,meal,lunch,weekday,,,,,,,,"결혼기념일 식사를 한 달 앞서 예약했고 환대와 한강 전망, 정성스러운 음식에 만족함. 나올 때 기념 촬영을 해 준 서비스를 칭찬함.",borigunbbang,2026-11-17
+R-thebuffet-0191,thebuffet,map,2026-05,가족·친족,가족 행사,아이 동반 가족,,,meal,dinner,weekday,,,,,,,yes,오랜만에 왔는데 스테이크가 부드럽고 모두 친절했지만 냉방 때문에 실내가 너무 추웠다고 함.,borigunbbang,2026-11-17
+R-thebuffet-0192,thebuffet,map,2025-08,가족·친족,가족 행사,아이 동반 가족,,,meal,lunch,weekday,,,,,,,,"늦게 도착해 창가에 앉지 못한 것은 유감이었으나 음식과 쾌적한 실내, 빠른 응대에 만족함.",borigunbbang,2026-11-17
+R-thebuffet-0193,thebuffet,map,2025-07,친구·모임,모임,동료·거래처,,,meal,lunch,weekday,,,,서비스,,,yes,한식부터 디저트까지 폭넓은 메뉴 구성을 칭찬하고 함께 간 가족도 편히 먹었다고 함. 직원의 친절이 다시 찾게 만드는 이유라고 함.,borigunbbang,2026-11-17
+R-thebuffet-0194,thebuffet,map,2024-11,친구·모임,모임,친구,,,meal,lunch,weekend,,,,,,,,한강 전망과 음식 맛을 칭찬함.,borigunbbang,2026-11-17
+R-thebuffet-0195,thebuffet,map,2025-08,가족·친족,가족 행사,,,,meal,dinner,weekend,,,,,,,,예전 모임 때 마음에 들어 가족 모임으로 다시 왔고 창가 전망과 음식을 칭찬함. 그릴 코너가 고기를 조금씩 구워 줘 식지 않은 채로 먹을 수 있었다고 함.,borigunbbang,2026-11-17
+R-thebuffet-0196,thebuffet,map,2025-09,비즈니스·접대,,동료·거래처,,,meal,lunch,weekday,,,,,,,,"테라스 예약이었지만 자리가 남아 홀로 옮겨 준 서비스와 직원 친절, 음식 맛을 칭찬함.",borigunbbang,2026-11-17
+R-thebuffet-0197,thebuffet,map,2025-06,비즈니스·접대,업무상 식사,동료·거래처,,,meal,dinner,weekday,,,,,,,,회사 단체 식사였다는 한 단어 글.,borigunbbang,2026-11-17
