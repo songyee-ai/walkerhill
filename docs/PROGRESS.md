@@ -2539,6 +2539,9 @@ REVIEW_RULES 12절의 페르소나 담당 몫 넷은 모두 동의해(T101 알�
     받은 자료에도, 과제를 준 쪽이 과제를 설명할 때에도 밖의 서비스로 보내는 것을 막는 조건이 없었습니다.
     보내는 것은 고객군마다 업장·이용 상황·요일의 높음·보통·낮음과 업장별 상위 상품 셋의 순서이고 수치는 없습니다.
     `MEETING_1117.md` ③ 의 확인 둘 가운데 1 이 끝났습니다. 2 (답을 받는 계정의 학습 설정)는 팀장 몫입니다.
+  - hojitea-ui (11-17): ⑤ 팀 설정으로 한 번 끝까지 돌렸습니다. 윈도우 11, 데스크톱 앱의 `claude.exe` (`CLAUDE_CODE_PATH`), `.env` 는 `.env.example` 을 다시 베낌.
+    `uv run python -m engine --data sample --personas gourmet-explorer --conditions meal-dinner-weekend` → 공급자 `claude-code` · 모델 `claude-opus-5-5` · 프롬프트 p3,
+    방문 1건 (실패 0건) · 새로 부름 1번 · 38초쯤. 실행 폴더는 깃이 무시합니다.
   (확인: borigunbbang 11-17, macOS. `.env` 를 다시 베끼고 공급자 `claude-code`, 모델 `claude-opus-5-5`, 프롬프트 p3 으로 가상 예시 값의 방문 2건을 새로 불러 실패 0건으로 끝까지 돌았습니다.
   `family-parents` × 주말 저녁 `--month 12` 1건과 `gourmet-explorer` × 주말 디저트 1건이고, 고른 이유가 모두 값 목록에서 나왔습니다. 입력은 호출 하나에 1만 2천 ~ 1만 7천 토큰이었습니다)
 - [ ] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-17): **기본 데이터의 요약은 이제 엔진이 확인 전에 막습니다** (T115). 가상 예시 값(`--data sample`)으로 돌릴 때는 달라지는 것이 없습니다.
