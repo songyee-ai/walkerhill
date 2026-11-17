@@ -10,7 +10,7 @@ from datetime import timedelta
 import pytest
 
 import engine.calibration as tool
-from engine.calibration import MAX_DIFF_PP, calibrate, compare
+from engine.calibration import DIFF_MIN_PERSONAS, MAX_DIFF_PP, calibrate, compare
 from engine.formats import Calibration, read_model
 from engine.formats.io import read_csv
 from engine.formats.run import LEDGER_COLUMNS, LedgerRow
@@ -72,7 +72,8 @@ def both(root, pick=pick_by_persona, **more):
 def test_compare_gives_the_example_in_the_format_doc(doc):
     """가상 3 : 7, 기본 1 : 3 이면 문서의 예시(10.4절)와 같은 결과가 나온다."""
     found = compare({"geumryong": 30, "thebuffet": 70}, {"geumryong": 25, "thebuffet": 75}, ["geumryong", "thebuffet"])
-    assert found == doc.calibration["groups"][GROUP]
+    # 페르소나 수(`personas`)는 대조 명령이 저장소의 페르소나를 세어 붙인다. 한 고객군의 견줌에는 없다.
+    assert found == {key: value for key, value in doc.calibration["groups"][GROUP].items() if key != "personas"}
 
 
 def test_compare_needs_the_same_top_venue_and_small_differences():
@@ -102,6 +103,17 @@ def test_compare_decides_by_the_numbers_it_writes():
     # 차이가 0 으로 반올림될 때 −0.0 을 적지 않는다.
     close = compare({"a": 1, "b": 3}, {"a": 1, "b": 3.0000000001}, venues)
     assert [str(entry["diff_pp"]) for entry in close["venues"].values()] == ["0.0", "0.0"]
+
+
+def test_compare_without_differences_needs_only_the_same_top_venue():
+    """페르소나가 한 명인 고객군(11-17 에 고친 기준)은 차이를 적기만 하고 가장 큰 업장이 같은지만 본다."""
+    venues = ["a", "b"]
+    far = compare({"a": 100}, {"a": 60, "b": 40}, venues, check_diffs=False)
+    assert (far["pass"], far["venues"]["a"]["diff_pp"], far["venues"]["b"]["diff_pp"]) == (True, 40.0, -40.0)
+    assert compare({"a": 100}, {"a": 60, "b": 40}, venues)["pass"] is False  # 차이를 보면 미달이다
+    flipped = compare({"b": 100}, {"a": 60, "b": 40}, venues, check_diffs=False)
+    assert (flipped["top_sim"], flipped["top_base"], flipped["pass"]) == ("b", "a", False)
+    assert compare({}, {"a": 1}, venues, check_diffs=False)["pass"] is False  # 견줄 수 없으면 여전히 미달이다
 
 
 @pytest.mark.parametrize(("sim", "base"), [({}, {"a": 1}), ({"a": 1}, {}), ({"a": 0}, {"a": 1}), ({}, {})])
@@ -160,8 +172,9 @@ def test_calibration_compares_the_ledger_with_the_summary(example_copy):
     assert read_model(path, Calibration) == result
     assert result.run_id == played.run_dir.name
     assert not_run == {}  # 저장소의 페르소나를 모두 돌렸다
-    assert result.criteria.model_dump() == {"top_venue_must_match": True, "max_diff_pp": 15}
+    assert result.criteria.model_dump() == {"top_venue_must_match": True, "max_diff_pp": 15, "diff_min_personas": 2}
     assert list(result.groups) == [GROUP]
+    assert result.groups[GROUP].personas == 2  # 저장소의 가족·친족 페르소나는 둘이라 차이도 본다
     assert result.uncovered_groups == [OTHER]  # 집계 파일에 매출이 있는데 페르소나가 없다
 
     found = load_json(path)["groups"][GROUP]
@@ -286,6 +299,51 @@ def test_calibration_is_refused_when_an_input_changed_after_the_run(example_copy
     write_summary(example_copy, *SUMMARY[:2])
     with pytest.raises(ValueError, match="summary"):
         calibrate(example_copy, "sample")
+
+
+def test_group_with_one_persona_is_judged_by_its_top_venue_only(example_copy, capsys):
+    """페르소나가 한 명인 고객군은 업장별 차이가 15%p 를 넘어도 가장 큰 업장이 같으면 통과다 (PRD 6.5절, 11-17 에 고침)."""
+    assert DIFF_MIN_PERSONAS == 2
+    # 둘째 고객군은 더뷔페 6 : 금룡 4 로 썼다. 그 고객군의 한 명은 더뷔페만 골라 더뷔페 +40%p 가 된다.
+    ready(
+        example_copy,
+        *SUMMARY[:2],
+        line("thebuffet", "dinner-adult", "dinner", "weekend", 600, 100000, group=OTHER),
+        line("geumryong", "course-a", "dinner", "weekend", 400, 100000, group=OTHER),
+    )
+    persona_like(example_copy, ELDERS, "couple", OTHER)
+    played = play(example_copy, pick_by_persona, persona_ids=(ELDERS, KIDS, "couple"), condition_ids=(DINNER,))
+
+    path, result, not_run = calibrate(example_copy, "sample")
+    assert not_run == {}
+    one = result.groups[OTHER]
+    assert (one.personas, one.top_sim, one.top_base, one.venues["thebuffet"].diff_pp, one.passed) == (1, "thebuffet", "thebuffet", 40.0, True)
+    # 페르소나가 둘인 고객군은 그대로 두 가지를 모두 본다.
+    family = result.groups[GROUP]
+    assert (family.personas, family.passed) == (2, False)
+    assert result.passed is False and result.uncovered_groups == []
+    assert [str(problem) for problem in check(example_copy, strict=True)] == []
+
+    assert tool.main(["--data", "sample", "--root", str(example_copy), "--run", played.run_dir.name]) == tool.EXIT_OK
+    said = capsys.readouterr().out
+    assert "페르소나가 한 명인 고객군은 가장 큰 업장만" in said
+    assert f"- {OTHER}: 통과 · 가장 큰 업장 가상 thebuffet / 기본 thebuffet · 가장 큰 차이 geumryong -40.00%p (페르소나 1명이라 차이는 보지 않음)" in said
+    assert path.is_file()
+
+
+def test_old_calibration_file_without_the_new_fields_still_reads():
+    """11-17 의 첫 대조 결과처럼 새 칸이 없는 파일도 읽힌다. 모든 고객군의 차이를 본 것으로 둔다."""
+    old = Calibration.model_validate(
+        {
+            "format_version": 1,
+            "run_id": "20261117-101500-baseline",
+            "criteria": {"top_venue_must_match": True, "max_diff_pp": 15},
+            "groups": {GROUP: {"venues": {}, "top_sim": None, "top_base": None, "pass": False}},
+            "uncovered_groups": [],
+            "pass": False,
+        }
+    )
+    assert old.criteria.diff_min_personas == 1 and old.groups[GROUP].personas is None
 
 
 def test_group_with_a_persona_that_was_not_run_does_not_pass(example_copy, capsys):

@@ -311,12 +311,16 @@ class GroupCalibration(FormatModel):
     venues: dict[str, VenueShare]
     top_sim: Id | None
     top_base: Id | None
+    # 저장소에 있는 그 고객군의 페르소나 수 (11-17, T119). 첫 대조의 옛 파일에는 없어 모르는 것(None)으로 읽는다.
+    personas: int | None = Field(default=None, ge=0)
     passed: bool = Field(alias="pass")
 
 
 class CalibrationCriteria(FormatModel):
     top_venue_must_match: bool
     max_diff_pp: float = Field(ge=0)
+    # 업장별 차이는 페르소나가 이 수 이상인 고객군에만 본다 (11-17, T119). 옛 파일에는 없어 1(모든 고객군)로 읽는다.
+    diff_min_personas: int = Field(default=1, ge=1)
 
 
 class Calibration(FormatModel):
