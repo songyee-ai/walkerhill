@@ -67,6 +67,10 @@ MAX_FAILED_CALLS_IN_A_ROW = 3
 # `latest_baseline_run` 에 달을 가리지 않고 찾으라고 줄 때의 값. None 은 "일 년 전체로 돌린 실행"이라 따로 둔다.
 ANY_MONTH = "any"
 
+# 기본 데이터의 요약을 그곳으로 보내도 된다고 확인했음을 적는 환경 변수 (`.env`). 값은 확인한 받는 곳의 이름이다 (`engine.llm.receiver_of`).
+# 받는 곳의 이름을 적게 해서, 받는 회사나 주소가 바뀌면 다시 확인하게 한다 (CLAUDE.md 의 "스택", docs/MEETING_1117.md ③).
+BASE_PROFILE_CONFIRMED_ENV = "BASE_PROFILE_CONFIRMED_FOR"
+
 
 @dataclass
 class LlmSession:
@@ -451,6 +455,8 @@ def run(
     call_limit: int | None = None,
     base_profile_mode: str | None = None,
     month: int | None = None,
+    base_profile_confirmed_for: str | None = None,
+    receiver: str | None = None,
 ) -> Path:
     """상황 하나를 돌려 실행 폴더(`run.json`, `ledger.csv`, `llm/`, `llm_rejected/`)를 쓰고 그 경로를 돌려준다.
 
@@ -464,6 +470,12 @@ def run(
       그 실행 뒤에 입력(업장 정의, 페르소나, 조건 묶음, 값 목록, 집계 파일, 프롬프트)이나 공급자·모델이 달라졌으면 돌리지 않는다.
       상황 사이의 차이에 상황의 변경만 남게 하려는 것이다 (docs/PRD.md 7.2절).
     - `base_profile_mode`: 기본 데이터의 요약을 LLM 에 어떻게 보낼지. 주지 않으면 기본 데이터로 돌릴 때 `bucketed`, 가상 예시로 돌릴 때 `none` 이다.
+    - `base_profile_confirmed_for`: 기본 데이터의 요약을 보내도 된다고 확인한 받는 곳의 이름 (`.env` 의 `BASE_PROFILE_CONFIRMED_FOR`).
+      기본 데이터로 돌리면서 요약을 보내고(`bucketed`, `raw`) LLM 을 부를 수 있게 돌리는데(`llm` 을 줌) 이 값이 `receiver` 와 다르면,
+      실행 폴더를 만들기 전에 `ValueError` 로 멈춘다. 요약을 보내지 않거나(`none`) 재생만 하면(`llm` 없음) 보지 않는다.
+      `llm` 을 주면 저장된 답이 모두 있어 실제로는 부르지 않게 될 실행도 본다 (돌려 보기 전에는 알 수 없다). 그때는 재생만 하게 돌린다.
+    - `receiver`: `llm` 이 요청을 보내는 곳의 이름 (`engine.llm.receiver_of`). 주지 않으면 `provider` 다.
+      주소로 받는 곳이 갈리는 공급자(`openai-compatible`)는 주소의 호스트까지 든 이름을 준다.
     - `month`: 실행의 달 (1 ~ 12). 주면 묶음의 조건을 모두 그 달의 방문으로 돌린다: 그 달에 팔지 않는 업장과 상품은 후보에서 빠지고,
       요청의 `condition.month` 에 그 달이 실린다. 주지 않으면 일 년 전체로 본다. 가중치는 달을 줘도 집계 파일의 일 년 합계에 맞춘다:
       고객군 배수를 이 실행의 원장으로 맞추므로 고객군의 가상 매출 합은 달과 상관없이 같다 (docs/FORMATS.md 10.1절의 "실행의 달").
@@ -510,6 +522,16 @@ def run(
         month = base.month
     if base_profile_mode is None:
         base_profile_mode = default_base_profile_mode(data_mode)
+    # 기본 데이터의 요약이 밖의 LLM 으로 나가는 실행은, 그 공급자로 보내도 된다고 확인한 PC 에서만 돌린다.
+    # 재생만 하는 실행(llm 없음)은 아무것도 보내지 않는다. 가상 예시는 요약을 보내지 않는다 (load_inputs 가 막는다).
+    sent_to = receiver or provider
+    if data_mode == "private" and base_profile_mode != "none" and llm is not None and base_profile_confirmed_for != sent_to:
+        raise ValueError(
+            f"기본 데이터의 요약을 '{sent_to}' 로 보내도 되는지 아직 확인되지 않았다 (base_profile_mode 는 {base_profile_mode}). "
+            "두 가지를 확인한다: 자료를 준 쪽이 그곳으로 보내는 것을 막지 않았는가, 답을 받는 계정이 보낸 것을 모델 학습에 쓰지 않게 돼 있는가. "
+            f"확인했으면 이 PC 의 .env 에 {BASE_PROFILE_CONFIRMED_ENV}={sent_to} 를 적는다. "
+            "확인 전에는 요약을 보내지 않고 돌린다: --base-profile none (CLAUDE.md 의 \"스택\")"
+        )
     inputs = load_inputs(root, data_mode, scenario_id, venue_ids, persona_ids, base_profile_mode)
     if not inputs.personas:
         raise ValueError("돌릴 페르소나가 없다")

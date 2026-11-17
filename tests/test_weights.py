@@ -52,7 +52,7 @@ from tests.test_engine import (
     product_of,
     venue_file,
 )
-from tests.test_llm import Fake
+from tests.test_llm import Clock, Fake
 from tests.test_scenarios import COMPETITOR_DISCOUNT, LLM_ENV, run_scenario, write_scenario
 from tools.check_formats import check
 
@@ -156,6 +156,8 @@ def private_run(root: Path, *, now=NOW, persona_ids=(ELDERS,), condition_ids=(DI
         engine_commit="0000000",
         llm=Fake(),
         call_limit=50,
+        # 기본 데이터의 요약을 이 공급자로 보내도 된다고 확인한 PC 로 본다 (T115). 확인이 없을 때는 테스트가 따로 준다.
+        base_profile_confirmed_for=PROVIDER,
     )
     return run(root, **(settings | more))
 
@@ -674,6 +676,96 @@ def test_scenario_follows_the_base_profile_mode_of_its_baseline(example_copy):
                     persona_ids=None, condition_ids=None)
     again = private_run(example_copy, now=later, scenario_id=COMPETITOR_DISCOUNT, weights_from=base.name, persona_ids=None, condition_ids=None)
     assert load_json(again / "run.json")["base_profile_mode"] == "raw"
+
+
+# ── 기본 데이터의 요약은 확인한 공급자로만 보낸다 (T115) ────────────────
+
+
+def test_base_profile_is_not_sent_until_the_provider_is_confirmed(example_copy):
+    """기본 데이터의 요약이 밖의 LLM 으로 나가는 실행은, 그 공급자로 보내도 된다고 확인한 PC 에서만 돈다.
+
+    확인은 공급자의 이름으로 적는다. 다른 공급자의 확인은 통하지 않는다 (받는 회사가 바뀌면 다시 확인한다).
+    """
+    to_private(example_copy)
+    runs = example_copy / "private" / "runs"
+    for confirmed in (None, "", "another-provider"):
+        for mode in (None, "bucketed", "raw"):
+            with pytest.raises(ValueError, match="아직 확인되지 않았다") as stopped:
+                private_run(example_copy, base_profile_mode=mode, base_profile_confirmed_for=confirmed)
+            # 무엇을 하면 되는지 알려 준다: 확인한 뒤 적을 것과, 확인 전에 돌리는 법.
+            assert f"BASE_PROFILE_CONFIRMED_FOR={PROVIDER}" in str(stopped.value) and "--base-profile none" in str(stopped.value)
+    assert not runs.exists()  # 실행 폴더를 만들지 않았고 LLM 도 부르지 않았다
+
+    # 요약을 보내지 않으면 확인이 없어도 돈다.
+    none = private_run(example_copy, base_profile_mode="none", base_profile_confirmed_for=None)
+    (saved,) = (none / "llm").iterdir()
+    assert "base_profile" not in load_json(saved)["request"]["persona"]
+    # 재생만 하면(LLM 을 주지 않음) 아무것도 나가지 않으므로 막지 않는다. 저장된 답이 없어 방문은 실패로 남는다.
+    replay = private_run(example_copy, now=NOW + timedelta(hours=1), llm=None, base_profile_confirmed_for=None)
+    record = load_json(replay / "run.json")
+    assert (record["base_profile_mode"], record["llm"]["calls_new"], record["counts"]["failed"]) == ("bucketed", 0, 1)
+
+    # 확인한 공급자면 요약을 보낸다.
+    base = private_run(example_copy, now=NOW + timedelta(hours=2), base_profile_confirmed_for=PROVIDER)
+    (saved,) = (base / "llm").iterdir()
+    assert "base_profile" in load_json(saved)["request"]["persona"]
+    # 상황은 기준 실행의 방식을 따르므로, 기준 실행이 요약을 보냈으면 상황도 확인이 있어야 돈다.
+    scenario = dict(scenario_id=COMPETITOR_DISCOUNT, weights_from=base.name, persona_ids=None, condition_ids=None)
+    with pytest.raises(ValueError, match="아직 확인되지 않았다"):
+        private_run(example_copy, now=NOW + timedelta(hours=3), base_profile_confirmed_for=None, **scenario)
+    assert private_run(example_copy, now=NOW + timedelta(hours=3), **scenario).is_dir()
+
+    # 주소로 받는 곳이 갈리는 공급자는 받는 곳의 이름(주소의 호스트까지)으로 견준다. 공급자의 이름만 적은 확인은 통하지 않는다.
+    elsewhere = dict(now=NOW + timedelta(hours=4), receiver=f"{PROVIDER}:host-a.example.test")
+    for confirmed in (PROVIDER, f"{PROVIDER}:host-b.example.test"):
+        with pytest.raises(ValueError, match=f"BASE_PROFILE_CONFIRMED_FOR={PROVIDER}:host-a.example.test"):
+            private_run(example_copy, base_profile_confirmed_for=confirmed, **elsewhere)
+    assert private_run(example_copy, base_profile_confirmed_for=f"{PROVIDER}:host-a.example.test", **elsewhere).is_dir()
+
+    # 가상 예시로 돌릴 때는 요약이 없어 확인을 보지 않는다.
+    sample = private_run(example_copy, data_mode="sample", now=NOW + timedelta(hours=5), base_profile_confirmed_for=None)
+    assert load_json(sample / "run.json")["base_profile_mode"] == "none"
+
+
+def test_command_reads_the_confirmation_from_the_environment(example_copy, quiet_env, capsys):
+    """명령은 확인한 공급자를 `.env` 의 `BASE_PROFILE_CONFIRMED_FOR` 에서 읽는다."""
+    to_private(example_copy)
+    runs = example_copy / "private" / "runs"
+    quiet_env.setenv("LLM_PROVIDER", "openai-compatible")
+    quiet_env.setenv("LLM_MODEL", "some-model")
+    quiet_env.setenv("LLM_BASE_URL", "https://LLM.example.test:8443/v1")
+    here = "openai-compatible:llm.example.test"  # 받는 곳의 이름: 공급자와 주소의 호스트 (포트와 경로는 뺀다)
+    quiet_env.setattr(cli, "make_provider", lambda settings: Fake())
+    quiet_env.setattr(cli, "datetime", Clock())  # 부를 때마다 5분씩 가는 시계
+    private = ["--data", "private", "--root", str(example_copy), *EXAMPLE_PROMPT, "--personas", ELDERS, "--conditions", DINNER]
+
+    # 적혀 있지 않거나, 다른 공급자나 다른 주소가 적혀 있거나, 주소 없이 공급자의 이름만 적혀 있으면 멈추고 실행 폴더를 만들지 않는다.
+    for written in (None, "claude-code", "openai-compatible", "openai-compatible:other.example.test"):
+        if written:
+            quiet_env.setenv("BASE_PROFILE_CONFIRMED_FOR", written)
+        assert cli.main(private) == cli.EXIT_FAILED
+        said = capsys.readouterr().err
+        assert "아직 확인되지 않았다" in said and f"BASE_PROFILE_CONFIRMED_FOR={here}" in said
+    assert not runs.exists()
+
+    # 확인 전에도 요약을 보내지 않거나 재생만 하면 돈다.
+    assert cli.main([*private, "--base-profile", "none"]) == cli.EXIT_OK
+    assert cli.main([*private, "--replay-only"]) == cli.EXIT_OK
+    capsys.readouterr()
+
+    # 지금 받는 곳의 이름을 적으면 요약을 보낸다. 앞뒤의 빈칸은 봐준다.
+    quiet_env.setenv("BASE_PROFILE_CONFIRMED_FOR", f" {here} ")
+    assert cli.main(private) == cli.EXIT_OK
+    assert "기본 데이터의 요약 bucketed" in capsys.readouterr().out
+    records = [load_json(path / "run.json") for path in sorted(runs.iterdir())]
+    assert [r["base_profile_mode"] for r in records] == ["none", "bucketed", "bucketed"]
+    assert [r["llm"]["calls_new"] for r in records] == [1, 0, 1]
+
+    # 주소를 다른 곳으로 바꾸면 적어 둔 확인이 맞지 않아 다시 멈춘다.
+    quiet_env.setenv("LLM_BASE_URL", "https://other.example.test/v1")
+    assert cli.main(private) == cli.EXIT_FAILED
+    assert "BASE_PROFILE_CONFIRMED_FOR=openai-compatible:other.example.test" in capsys.readouterr().err
+    assert len(list(runs.iterdir())) == 3
 
 
 # ── 기준 실행 뒤에 집계 파일이 바뀌면 ────────────────────────────────────

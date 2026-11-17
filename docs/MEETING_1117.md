@@ -124,6 +124,7 @@ docs/REVIEW_RULES.md, docs/FORMATS.md)도 필요한 만큼 읽어 줘.
 자료를 준 쪽의 조건은 hojitea-ui 가 회의에서 말로 알리고, 키 주인 계정의 데이터 설정은 팀장이 확인한다.
 
 **바꾼 것 (11-17, T114):** 받는 회사가 OpenAI 에서 Anthropic 으로 바뀌어 두 가지를 다시 확인한다. 확인할 때까지는 `--base-profile none` 으로 돌린다.
+둘 다 확인하면 답을 받는 PC(팀장)의 `.env` 에 `BASE_PROFILE_CONFIRMED_FOR=claude-code` 를 적는다. 적혀 있지 않으면 엔진이 요약을 보내는 실행을 멈춘다 (11-17, T115).
 1. 기본 데이터를 준 쪽이 밖의 서비스(이번에는 Anthropic)로 보내는 것을 막지 않았는가. hojitea-ui 가 확인해 "알릴 것"에 통과 여부만 적는다.
 2. 답을 받는 계정(팀장)의 Claude 개인정보 설정에서 "모델 학습에 사용"이 꺼져 있는가. 개인 구독은 Claude Code 로 보낸 것도 이 설정이 켜져 있으면 학습에 쓰이고 5년 보관되며,
    끄면 30일 보관된다 (Anthropic 공식 문서: <https://code.claude.com/docs/en/data-usage>, 11-17 에 확인). OpenAI API 처럼 "기본으로 학습에 쓰지 않는다"가 아니다.
