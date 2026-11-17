@@ -1090,6 +1090,8 @@ PRD 9절의 화면 구성을 화면 담당이 정한 것이다 (11-16). 전문 �
 - 판 이름은 한 곳(`DEFAULT_PROMPT`)에만 둔다. 고르는 순서는 p2 → p1 → 첫 판이다. 간편 시뮬레이터는 판을 고르는 칸이 없어, 판을 주지 않으면 그 자료에 있는 판에서 고른다.
 - 11-16, 윈도우 11: `ruff check` 통과, `tests/app` 모두 통과. 전체 pytest 에서는 `test_checker_walks_exactly_the_files_git_can_upload` 하나가 실패했는데,
   이 PC 에만 있는 깃에 올리지 않은 파일(`.claude/launch.json`)을 잡은 것이라 이 변경과 상관없다.
+- 11-17: 엔진 명령의 기본 판이 p3 이 되어(T113) 화면도 p3 으로 바꿨다 (팀장·borigunbbang 요청, "알릴 것"). 고르는 순서는 p3 → p1 → 첫 판이다.
+  `tests/app/test_app_runs.py` 가 저장소 자료에서 p3 을 고르는지 본다. 화면에서 p3 으로 AI 를 불러 보지는 않았다.
 
 ### T22 근거 보기 화면
 
@@ -2115,8 +2117,9 @@ REVIEW_RULES 12절의 페르소나 담당 몫 넷은 모두 동의해(T101 알�
   본 방법: 가상 예시 값, `claude-code` + `claude-sonnet-5-5` 로 기준 2건과 달(12월·5월)을 넣은 요청 2건이 모두 검사를 통과 (macOS). OpenAI 로는 부르지 못했습니다.
   (확인: songyee-ai 11-17, 엔진 명령의 기본 판과 README 를 p3 으로 바꿨습니다 (T113). 팀장 구독(`claude-code`)으로 `--prompt` 없이 12월 방문 1건을 불러
   실행 기록에 p3 이 남고 실패 없이 끝난 것을 봤습니다. 이유 문장에 "연말"이 나왔습니다. OpenAI 로는 아직 부르지 못했습니다 (T103))
-- [ ] wilstein91 ← borigunbbang (11-17): 프롬프트 새 판 `p3` 을 올렸습니다 (T304). 화면의 기본 프롬프트(`app/runs.py` 의 `DEFAULT_PROMPT`)를 `p3` 로 바꿔 주세요.
+- [x] wilstein91 ← borigunbbang (11-17): 프롬프트 새 판 `p3` 을 올렸습니다 (T304). 화면의 기본 프롬프트(`app/runs.py` 의 `DEFAULT_PROMPT`)를 `p3` 로 바꿔 주세요.
   요청하신 계절의 뜻은 p3 의 "달" 절에 적었습니다 (위 11-16 줄의 답). 날씨는 회의에서 빠져 적지 않았습니다.
+  (확인: wilstein91 11-17, 화면의 `DEFAULT_PROMPT` 를 p3 으로 바꿈. T203 의 경위)
 - [ ] hojitea-ui ← borigunbbang (11-17): 값 목록 `pain_points` 에 "이용 시간 제한"을 더했습니다 (T304, `data/evidence/vocab.json`). 떼어 둔 후기 7건의 라벨을 이 값으로 고쳐 주세요 (`MEETING_1117.md` 바.).
 - [ ] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-17): **엔진 명령의 기본 프롬프트가 p3 으로 바뀌었습니다** (T113). `--prompt` 를 적지 않으면 p3 으로 돕니다.
   p2 로 받아 둔 답은 판이 달라 재생되지 않습니다. 그 답을 재생하려면 `--prompt p2` 를 적어 주세요. 예시 사본은 그대로 `--prompt p1` 입니다.
@@ -2126,6 +2129,7 @@ REVIEW_RULES 12절의 페르소나 담당 몫 넷은 모두 동의해(T101 알�
   borigunbbang: `personas/README.md` 의 "엔진과 화면의 기본값은 아직 `p2` 라 p3 은 `--prompt p3` 로 고른다"가 엔진 쪽은 맞지 않게 됐습니다. 담당 폴더라 고치지 않았습니다.
   그리고 p3 의 "달" 절에 "그 달의 요금과 혜택은 금액에 들어 있다"는 문장이 있는데, 엔진은 달에 따라 가격을 바꾸지 않습니다 (업장 정의의 가격은 하나이고, 달마다 다른 요금은 상황으로 얹습니다. `FORMATS.md` 10.1절의 "실행의 달").
   기간이 있는 프로모션은 달에 맞춰 적용됩니다. "달 때문에 가격을 다시 생각하지 않는다"는 지시로는 맞게 작동하니, 다음 판을 낼 때 문장을 다듬을지 봐 주세요.
+  (확인: wilstein91 11-17, 화면의 기본 판을 p3 으로 바꾸고 `tests/app/test_app_runs.py` 의 단언도 고침. T203 의 경위)
 - [ ] songyee-ai ← wilstein91 (11-17): 간편 시뮬레이터에 AI 메뉴(Claude 구독 / OpenAI 키)를 넣었습니다 (T202). 공통 틀 두 가지를 부탁드립니다.
   ① 화면이 그 AI 의 모델 이름을 `.env` 의 `CLAUDE_MODEL`, `OPENAI_MODEL` 에서 먼저 읽습니다 (없으면 `LLM_PROVIDER` 가 같은 쪽일 때의 `LLM_MODEL`).
   `.env.example` 에 두 이름을 더해 주세요 (값은 비워 두고, 팀이 정한 판 이름을 적는 칸이라고 설명). 엔진은 그대로이고 화면만 읽습니다.

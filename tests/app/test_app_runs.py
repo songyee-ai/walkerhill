@@ -164,13 +164,13 @@ def test_key_ready_for_claude_code_needs_the_program_and_the_model(tmp_path: Pat
     assert not key_ready(tmp_path)  # 실행 파일이 없다
 
 
-def test_default_prompt_is_p2_and_falls_back_to_p1_for_the_example():
-    # 팀 자료는 엔진 명령과 같은 p2 로 처음 고른다 (T108). 예시 묶음에는 p1 만 있어 p1 로 돌아야 저장된 답이 재생된다.
-    assert DEFAULT_PROMPT == "p2"
-    assert default_prompt(["p1", "p2"]) == "p2"
+def test_default_prompt_is_p3_and_falls_back_to_p1_for_the_example():
+    # 팀 자료는 엔진 명령과 같은 판으로 처음 고른다 (T108, 11-17 T113 으로 p3). 예시 묶음에는 p1 만 있어 p1 로 돌아야 저장된 답이 재생된다.
+    assert DEFAULT_PROMPT == "p3"
+    assert default_prompt(["p1", "p2", "p3"]) == "p3"
     assert default_prompt(choices(EXAMPLE).prompts) == "p1"
-    assert default_prompt(["p3"]) == "p3"
-    assert default_prompt(choices(REPO_ROOT).prompts) == "p2"
+    assert default_prompt(["p4"]) == "p4"
+    assert default_prompt(choices(REPO_ROOT).prompts) == "p3"
 
 
 def test_ai_menu_offers_only_the_ai_this_pc_can_call(tmp_path: Path):

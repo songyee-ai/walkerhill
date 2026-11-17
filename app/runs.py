@@ -28,8 +28,8 @@ EXAMPLE_COPY = Path("private") / "try-example"
 EXAMPLE_VENUES = ("geumryong", "examplehotel-chinese")
 # 화면이 기다리는 가장 긴 시간(초). 넘으면 멈추고 알린다. 엔진의 호출 상한과 별개다.
 RUN_TIMEOUT = 600
-# 화면이 처음 고르는 프롬프트의 판. 엔진 명령의 기본값과 같게 둔다 (T108). 예시 묶음에는 p1 만 있어 그때는 p1 로 돈다.
-DEFAULT_PROMPT = "p2"
+# 화면이 처음 고르는 프롬프트의 판. 엔진 명령의 기본값과 같게 둔다 (T108, 11-17 T113 으로 p3). 예시 묶음에는 p1 만 있어 그때는 p1 로 돈다.
+DEFAULT_PROMPT = "p3"
 
 # 예시의 저장된 답을 받은 공급자와 모델. 저장된 답은 공급자·모델이 같아야 재생되므로(FORMATS 10절),
 # 예시를 재생만 할 때는 이 PC 의 .env 가 다른 공급자를 가리켜도 이 값으로 돌린다.
