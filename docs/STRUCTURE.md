@@ -13,6 +13,7 @@
 | `private/` | 각자 (깃에 올라가지 않음) | 내부 자료와 실행 결과(저장된 LLM 응답, 소비 원장, 기본 데이터 집계 파일, 대조 결과), 페르소나 정의의 비공개 층, 후기 주소 목록. 안내 파일 `README.md` 만 저장소에 있다 |
 | `engine/` | songyee-ai | 형식 약속을 코드로 옮긴 모델(`engine/formats/`), 후보 추리기와 검사 규칙, 방문 조건 묶음과 가중 합산(`engine/weights.py`), 소비 원장, LLM 연결(`engine/llm.py`), 실행기와 실행하는 명령(`python -m engine`), 가상 예시 값으로 만든 저장 응답 |
 | `tools/` | songyee-ai | 개발할 때 쓰는 도구. 형식 검사 도구(`tools/check_formats.py`) |
+| `tools/venue_data/` | hojitea-ui | 기본 데이터에서 집계 파일을 만드는 스크립트와 가상 예시 값을 만드는 스크립트. 코드만 두고 기본 데이터, 집계 결과, 바꾸는 표는 `private/` 에 둔다 (11-17 에 내줌. 기본 데이터를 가진 사람이 같은 집계를 다시 만들 수 있게 한다) |
 | `tests/` | songyee-ai | 테스트와 예시 파일 한 벌(`tests/fixtures/example/`). 다른 영역은 자기 테스트를 `tests/<자기 폴더 이름>/` 아래에 새 파일로 더한다 (예: `tests/app/`). 테스트에 쓸 예시 파일을 더할 때는 `tests/fixtures/<이름>/` 아래에 저장소와 같은 폴더 모양으로 둔다. 그 묶음도 저장소와 같은 형식 검사를 받는다 (`tests/fixtures/example/` 을 베껴서 고치면 된다) |
 | `data/venues/`, `data/samples/`, `data/evidence/extra/` | hojitea-ui | 워커힐 8개 업장과 경쟁 업장의 정의 파일 (이용 상황, 상품과 가격, 판매 단위, 운영 정보, 출처), 가상 예시 값 |
 | `data/evidence/`, `personas/` | borigunbbang | 후기를 요약하고 라벨을 붙인 결과, 라벨 값 목록, 페르소나 정의의 공개 층, LLM 프롬프트(`personas/prompts/`) |
