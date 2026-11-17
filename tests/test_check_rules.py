@@ -989,7 +989,8 @@ def test_checker_skips_exactly_what_git_ignores():
     lines = (REPO_ROOT / ".gitignore").read_text(encoding="utf-8").splitlines()
     patterns = {line.strip() for line in lines if line.strip() and not line.startswith("#")}
     plain_dirs = {p for p in patterns if p.endswith("/") and "*" not in p}
-    assert {p.rstrip("/") for p in plain_dirs} | {".git"} == set(IGNORED_DIR_NAMES)
+    # `.git` 은 .gitignore 에 없어도 깃이 올리지 않는다. 폴더 이름 목록이 아니라 `ignored_by_git` 이 따로 본다 (아래의 목록).
+    assert {p.rstrip("/") for p in plain_dirs} == set(IGNORED_DIR_NAMES)
     assert patterns - plain_dirs == {
         ".env",
         ".env.*",
@@ -1023,8 +1024,17 @@ def test_checker_skips_exactly_what_git_ignores():
         (("engine", "samples", "runs", "20261116-140616-ui-competitor-a-d30", "run.json"), False),
         (("engine", "samples", "runs", "20261116-140429-baseline"), True),
         (("engine", "samples", "runs", "20261116-140429-baseline", "llm", "a.json"), False),
+        # 깃은 `.git` 을 폴더든 파일이든 올리지 않는다 (`git worktree` 로 받은 폴더에서는 파일이다).
+        ((".git",), True),
+        ((".git",), False),
+        (("docs", ".git"), True),
+        (("docs", ".git"), False),
     ]
     kept = [
+        # 이름이 `.git` 으로 시작할 뿐인 것은 깃이 올린다.
+        ((".gitignore",), False),
+        ((".github",), True),
+        ((".github", "workflows", "check.yml"), False),
         (("scenarios", "baseline.json"), False),
         (("engine", "samples", "runs", "notes-ui-x.txt"), False),
         (("engine", "samples", "runs", ".gitkeep"), False),
@@ -1055,6 +1065,19 @@ def test_sample_runs_are_checked_only_outside_a_git_repo(example_copy):
     (example_copy / ".git").mkdir()
     problems = check(example_copy)
     assert not found(problems, "engine/samples/runs/"), messages(problems)
+
+
+def test_git_file_of_a_worktree_is_not_walked(example_copy):
+    """`git worktree` 로 받은 폴더는 맨 위의 `.git` 이 폴더가 아니라 파일이다. 깃은 그것도 올리지 않으므로 훑지 않는다.
+
+    훑으면 worktree 에서만 아래의 "깃에 직접 물어 견주는" 테스트가 실패한다 (2026-11-16, 페르소나 담당이 찾음).
+    """
+    write(example_copy, ".git", "gitdir: /somewhere/.git/worktrees/copy\n")
+    checker = Checker(example_copy)
+    assert checker.at_repo_root
+    walked = {p.relative_to(example_copy).as_posix() for p in checker._walk(example_copy)}
+    assert ".git" not in walked
+    assert walked, "다른 파일은 그대로 훑는다"
 
 
 def test_checker_walks_exactly_the_files_git_can_upload():
