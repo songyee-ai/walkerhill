@@ -50,7 +50,7 @@ from tools.check_formats import check
 ELDERS, KIDS = "family-elders", "family-kids"
 PRICE_UP = "geumryong-course-price-up"
 COMPETITOR_DISCOUNT = "competitor-chinese-discount"
-LLM_ENV = ("LLM_PROVIDER", "LLM_MODEL", "LLM_CALL_LIMIT", "LLM_BASE_URL", "LLM_API_KEY")
+LLM_ENV = ("LLM_PROVIDER", "LLM_MODEL", "LLM_CALL_LIMIT", "LLM_BASE_URL", "LLM_API_KEY", "BASE_PROFILE_CONFIRMED_FOR")
 
 
 # ── 도우미 ──────────────────────────────────────────────────────────────

@@ -1,0 +1,172 @@
+{
+  "format_version": 1,
+  "persona_id": "gourmet-explorer",
+  "name": "호텔 다이닝을 찾아다니는 미식가",
+  "customer_group": "미식 방문",
+  "share_in_group": {
+    "value": 1.0,
+    "grade": "assumption",
+    "basis": "이 고객군에는 페르소나를 한 명만 둔다 (PRD 6.4절)"
+  },
+  "visit": {
+    "purposes": [
+      "일상 외식",
+      "모임",
+      "휴식·티타임"
+    ],
+    "party": {
+      "label": "친구",
+      "adults": 2,
+      "children": 0
+    },
+    "occasions": [
+      "meal",
+      "dessert"
+    ],
+    "meals": [
+      "lunch",
+      "dinner"
+    ],
+    "day_types": [
+      "weekday",
+      "weekend"
+    ]
+  },
+  "budget": {
+    "basis": "per_person",
+    "typical": 150000,
+    "max": 230000
+  },
+  "preferences": {
+    "cuisines_like": [
+      "일식 코스·오마카세",
+      "한우 구이",
+      "해산물 뷔페",
+      "시즌 디저트(딸기·빙수·애프터눈티)"
+    ],
+    "cuisines_avoid": [],
+    "dietary": [],
+    "atmosphere": {
+      "전망": 1,
+      "조용함": 2,
+      "격식": 2
+    },
+    "needs": [
+      "시즌 한정 메뉴",
+      "재료의 신선도와 품질",
+      "셰프 특선·즉석 요리"
+    ]
+  },
+  "buying": {
+    "price_sensitivity": "mid",
+    "promo_response": "할인보다 값에 걸맞은 맛인지를 먼저 따지지만, 할인·적립이 막혀 있으면 값이 더 비싸게 느낀다",
+    "reservation": "시즌 메뉴가 나오면 찾아가고, 점심으로 먼저 맛을 본 뒤 저녁 코스를 정하기도 한다",
+    "wait_tolerance": "mid"
+  },
+  "revisit": {
+    "returns_for": [
+      "맛",
+      "시즌 메뉴",
+      "가격 대비 만족",
+      "서비스"
+    ],
+    "leaves_for": [
+      "맛 기대 이하",
+      "가격",
+      "메뉴 구성",
+      "양"
+    ]
+  },
+  "compares_with": [
+    "shilla-parkview",
+    "shilla-ariake",
+    "fourseasons-maru"
+  ],
+  "evidence": {
+    "share_in_group": {
+      "grade": "assumption",
+      "refs": [],
+      "note": "한 명만 둔 고객군은 몫이 1이다"
+    },
+    "visit": {
+      "grade": "review",
+      "refs": [
+        "R-thebuffet-3051",
+        "R-thebuffet-3052",
+        "R-thebuffet-3053",
+        "R-pavilion-3008",
+        "R-pavilion-3015",
+        "R-pavilion-3016",
+        "R-pavilion-3017",
+        "R-pavilion-3018",
+        "R-myongwolgwan-3002",
+        "R-myongwolgwan-3004",
+        "R-moegi-3001",
+        "R-moegi-3002",
+        "R-moegi-3003"
+      ],
+      "note": "여러 호텔 뷔페·애프터눈티·딸기 디저트를 다니며 견주거나, 빙수·생갈비·오마카세 같은 특정 메뉴를 먹으러 일부러 온 후기다. 동행은 친구가 가장 많고 부부·연인, 혼자도 있다. 점심이 많다. 근거는 모두 일부러 골라 붙인 후기(3001 ~)다. 미식 방문에 맞는 방문 목적이 값 목록에 없어 목적은 후기에 붙은 값을 그대로 둠"
+    },
+    "budget": {
+      "grade": "assumption",
+      "refs": [
+        "moegi:S2",
+        "myongwolgwan:S2",
+        "thebuffet:S1",
+        "pavilion:S2",
+        "R-pavilion-3008"
+      ],
+      "note": "후기에 낸 금액이 하나뿐이라 공식 가격으로 정함. 평소는 일식·한식 코스와 뷔페 저녁 요금 사이, max 는 모에기 저녁 코스가 들어오도록 둠"
+    },
+    "preferences": {
+      "grade": "review",
+      "refs": [
+        "R-thebuffet-3052",
+        "R-thebuffet-3053",
+        "R-thebuffet-3054",
+        "R-thebuffet-3055",
+        "R-pavilion-3016",
+        "R-pavilion-3017",
+        "R-pavilion-3018",
+        "R-myongwolgwan-3001",
+        "R-myongwolgwan-3002",
+        "R-myongwolgwan-3003",
+        "R-moegi-3001"
+      ],
+      "note": "회·참치·대게 같은 해산물의 신선도, 셰프의 특별 요리, 딸기 철 디저트와 빙수, 한우 부위를 견주는 글이 많다. 전망보다 음식 이야기가 앞선다"
+    },
+    "buying": {
+      "grade": "review",
+      "refs": [
+        "R-thebuffet-3051",
+        "R-pavilion-3008",
+        "R-moegi-3002",
+        "R-moegi-3003",
+        "R-myongwolgwan-3002"
+      ],
+      "note": "값과 품질을 함께 보는 글이 많다 (값에 비해 낫다, 값에 비해 수준이 떨어진다). 할인·적립이 막혀 비싸게 느꼈다는 글, 점심으로 먼저 맛보고 오마카세를 정하려는 글이 있다. 기다림은 후기에 없어 중간으로 둔 설계 가정이다"
+    },
+    "revisit": {
+      "grade": "review",
+      "refs": [
+        "R-thebuffet-3052",
+        "R-thebuffet-3056",
+        "R-pavilion-3016",
+        "R-pavilion-3019",
+        "R-moegi-3002",
+        "R-moegi-3003",
+        "R-myongwolgwan-3002"
+      ],
+      "note": "다시 오겠다는 글은 맛·친절·시즌 메뉴를 들고, 아쉬운 점은 맛의 수준, 값, 양이다"
+    },
+    "compares_with": {
+      "grade": "review",
+      "refs": [
+        "R-thebuffet-3052",
+        "R-moegi-3002",
+        "fourseasons-maru:S1"
+      ],
+      "note": "더뷔페와 신라 더 파크뷰, 모에기와 신라 아리아께를 견준 글이 있다. 더파빌리온의 경쟁 업장(포시즌스 마루)은 업장 데이터 담당이 정한 것을 그대로 둔 설계 가정이다"
+    }
+  }
+}

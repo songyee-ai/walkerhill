@@ -894,7 +894,7 @@ customer_group,venue_id,product_id,occasion,meal,day_type,month,unit,quantity,pa
 | `scenario_id`, `persona_ids`, `condition_ids` | 무엇을 돌렸나 |
 | `month` | 실행의 달 (1 ~ 12). 묶음의 조건을 모두 그 달의 방문으로 돌렸다. 일 년 전체로 돌렸으면 `null` 이다. 명령의 `--month` 로 준다. 기준이 아닌 상황은 기준 실행의 값을 따른다 (아래 "실행의 달") |
 | `llm` | `provider`, `model`, `prompt_version`, `calls_new` (새로 부른 수), `calls_replayed` (저장된 응답을 재생한 수), `call_limit`, `stopped_by_limit` |
-| `base_profile_mode` | 기본 데이터의 요약(5절의 `base_profile`)을 LLM 에 어떻게 보냈나: `none` 보내지 않음, `bucketed` 범주로 바꿔 보냄, `raw` 그대로 보냄. 기본 데이터로 돌릴 때의 기본값은 `bucketed` 다 (11-13 결정). 가상 예시로 돌릴 때는 늘 `none` 이다. 명령의 `--base-profile` 로 바꾼다. 기준이 아닌 상황은 기준 실행의 값을 따른다 |
+| `base_profile_mode` | 기본 데이터의 요약(5절의 `base_profile`)을 LLM 에 어떻게 보냈나: `none` 보내지 않음, `bucketed` 범주로 바꿔 보냄, `raw` 그대로 보냄. 기본 데이터로 돌릴 때의 기본값은 `bucketed` 다 (11-13 결정). 가상 예시로 돌릴 때는 늘 `none` 이다. 명령의 `--base-profile` 로 바꾼다. 기준이 아닌 상황은 기준 실행의 값을 따른다 요약을 보내는 실행(`bucketed`, `raw`)은 그 공급자로 보내도 된다고 확인한 PC 에서만 돈다 (아래 "요약을 보내기 전의 확인") |
 | `inputs` | 입력 파일들의 해시. 같은 입력인지 견줄 때 쓴다. 읽은 것만 적는다: `venues`, `personas`, `conditions`, `scenario`, `vocab`, 집계 파일 `summary` (늘 읽는다), LLM 을 부를 수 있게 돌렸으면 프롬프트 파일의 `prompt` (재생만 하는 실행은 프롬프트를 읽지 않는다) |
 | `weights` | `group_multiplier` 고객군 배수, `persona_weight` 페르소나의 가중치, `condition_ratio` 고객군마다 묶음의 비율, `grades` 각 값의 근거 등급. 등급은 값마다 적는다 (고객군 배수는 고객군마다, 가중치는 페르소나마다, 묶음의 비율은 고객군과 조건마다). 내는 법은 아래 "가중치를 내는 법" |
 | `filled_products` | 가격이 비어 있어 집계 파일로 단가를 채운 상품의 목록 (3절). `<venue_id>:<product_id>` 로 적는다. 채운 단가는 적지 않는다 |
@@ -908,6 +908,20 @@ customer_group,venue_id,product_id,occasion,meal,day_type,month,unit,quantity,pa
 - 기준이 아닌 상황의 `weights` 는 `weights_from` 에 적은 기준 상황의 값과 같다. 가중치는 기준 상황에서 한 번 정하고 그대로 쓴다 (PRD 7.2절).
 - T11(11-15) 전에 돌린 실행 기록은 등급의 모양과 `filled_products` 가 달라 읽히지 않는다. 기준 상황부터 다시 돌린다.
 - `month` 가 생기기 전(T112, 11-17)에 돌린 실행 기록에는 이 칸이 없다. 달을 주지 않고 돌린 것이라 `null` 로 읽는다. 다시 돌리지 않아도 된다.
+
+**요약을 보내기 전의 확인** (11-17 에 넣음, T115) — 기본 데이터의 요약이 밖의 LLM 으로 나가는 실행을 엔진이 가려 막는다.
+
+- 기본 데이터로 돌리면서(`data_mode` 가 `private`) 요약을 보내고(`base_profile_mode` 가 `bucketed` 나 `raw`) LLM 을 부를 수 있게 돌리면,
+  엔진은 `.env` 의 `BASE_PROFILE_CONFIRMED_FOR` 가 지금 받는 곳의 이름과 같은지 본다. 다르거나 비어 있으면 실행 폴더를 만들지 않고 멈추며 이유와 적을 값을 알린다.
+- **받는 곳의 이름** (`engine.llm.receiver_of`): `anthropic` 과 `claude-code` 는 받는 회사가 하나라 공급자의 이름 그대로다.
+  `openai-compatible` 은 주소(`LLM_BASE_URL`)에 따라 받는 곳이 달라 `openai-compatible:<주소의 호스트>` 다 (예: `openai-compatible:api.openai.com`). 포트와 경로는 보지 않는다.
+- 보지 않는 때: 요약을 보내지 않는 실행(`none`), 재생만 하는 실행(`--replay-only`. 아무것도 나가지 않는다), 가상 예시로 돌리는 실행(요약이 없다).
+- LLM 을 부를 수 있게 돌리면, 저장된 답이 모두 있어 실제로는 부르지 않게 될 실행도 본다. 돌려 보기 전에는 부를지 알 수 없기 때문이다. 그때는 `--replay-only` 로 돌린다.
+- 기준이 아닌 상황은 기준 실행의 `base_profile_mode` 를 따르므로, 기준 실행이 요약을 보냈으면 상황도 같은 확인이 있어야 돈다.
+- 값이 받는 곳의 이름인 까닭: 확인은 받는 회사마다 따로다. 공급자나 주소를 바꾸면 적어 둔 값이 맞지 않아 다시 확인하게 된다.
+  모델만 바꾼 것은 가리지 않는다 (같은 회사의 같은 계정으로 간다).
+- 이 값은 실행 기록에 남지 않는다. 그 PC 에서 확인했다는 표시일 뿐이고, 무엇을 확인하는지는 `CLAUDE.md` 의 "스택"과 `MEETING_1117.md` ③ 에 있다.
+- 형식 검사는 이 값을 보지 않는다. 기본 데이터로 돌린 실행은 `private/` 에만 있어 형식 검사의 범위 밖이다.
 
 **실행의 달** (11-17 에 넣음, T112. 계절을 넣기로 한 것은 11-16, `MEETING_1117.md` ④) — 계절을 보려고 실행 하나를 한 달의 방문으로 돌린다.
 
