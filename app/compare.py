@@ -4,7 +4,7 @@
 그래서 방문(페르소나 × 방문 조건)마다 두 실행의 선택을 그대로 견줄 수 있다. 금액은 원장에서만 낸다.
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 
 from app.results import LoadedRun, condition_names, load_run, persona_names, visit_view
@@ -180,6 +180,61 @@ def compare(
         shares_after["walkerhill_total"],
         uncovered,
     )
+
+
+def combine_months(per_month: list[tuple[int, "Comparison"]]) -> "Comparison":
+    """기간의 달마다 낸 비교를 하나로 합친다 (11-17, 화면의 "X월 ~ Y월").
+
+    엔진은 달 하나로 돌고, 달을 줘도 가중치는 일 년 합계에 맞춘다 (FORMATS.md 10.1절 "실행의 달").
+    그래서 달마다의 매출을 더하지 않고 **달 평균**을 낸다. 같은 달의 기준과 상황끼리만 견준 값을 평균하므로
+    "달이 다른 실행끼리 합계를 견주지 않는다"는 엔진 담당의 당부를 지킨다. 방문은 달을 붙여 모두 보이고,
+    손님 수가 달 수만큼 불지 않게 방문이 대표하는 손님 수도 달 수로 나눈다.
+    """
+    if len(per_month) == 1:
+        return per_month[0][1]
+    n = len(per_month)
+    moves = [
+        replace(m, condition=m.condition if f"{month}월" in m.condition else f"{m.condition} · {month}월", represented=m.represented / n)
+        for month, comparison in per_month
+        for m in comparison.moves
+    ]
+    before: dict[str, int] = {}
+    after: dict[str, int] = {}
+    names: dict[str, str] = {}
+    for _, comparison in per_month:
+        names |= comparison.names
+        for change in comparison.venues:
+            before[change.venue_id] = before.get(change.venue_id, 0) + change.before
+            after[change.venue_id] = after.get(change.venue_id, 0) + change.after
+    venues = [
+        VenueChange(venue_id, names.get(venue_id, venue_id), round(before[venue_id] / n), round(after.get(venue_id, 0) / n))
+        for venue_id in sorted(before)
+    ]
+    first = per_month[0][1]
+    return Comparison(
+        first.base,
+        first.scen,
+        moves,
+        venues,
+        names,
+        round(sum(c.total_before for _, c in per_month) / n),
+        round(sum(c.total_after for _, c in per_month) / n),
+        first.uncovered_groups,
+    )
+
+
+def zero_groups(per_month: list[tuple[int | None, "Comparison"]]) -> dict[str, list[int | None]]:
+    """고객군 배수가 0 인 고객군과 그 달 (팀장 요청, 11-17).
+
+    그 달에 워커힐 업장을 고른 방문이 없는 고객군은 배수를 맞출 수 없어 0 이고, 그 실행에서 그 고객군의 가상 매출은 0 이다
+    (FORMATS.md 10.1절 "실행의 달"). 기간의 달 평균에 0 이 섞이면 평균이 낮아지므로 화면에 알린다. 달 없이 돌렸으면 달은 None 이다.
+    """
+    found: dict[str, list[int | None]] = {}
+    for month, comparison in per_month:
+        for group, value in comparison.base.record.weights.group_multiplier.items():
+            if value == 0:
+                found.setdefault(group, []).append(month)
+    return found
 
 
 def summary_groups(root: Path, data_mode: str) -> list[str]:

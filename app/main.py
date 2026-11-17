@@ -2,7 +2,7 @@
 
 1. 돌리기 — 조건을 골라 엔진을 돌린다 (app/runs.py. README 와 같은 `python -m engine` 명령이다).
 2. 결과 보기 — 엔진이 쓴 실행 폴더를 읽어, 고른 페르소나와 방문 조건의 결과를 보여 준다 (app/results.py).
-키와 기본 데이터가 없어도 돈다 (저장된 답을 재생하고, 실행 폴더가 없으면 저장소의 예시 실행을 보여 준다).
+AI 설정과 기본 데이터가 없어도 돈다 (저장된 답을 재생하고, 실행 폴더가 없으면 저장소의 예시 실행을 보여 준다).
 
 띄우는 법 (저장소 맨 위에서):
 
@@ -45,6 +45,7 @@ from app.runs import (  # noqa: E402
     make_example_copy,
     replay_env,
     run_engine,
+    summary_check,
 )
 from engine.formats import KO  # noqa: E402
 
@@ -104,14 +105,23 @@ def run_panel() -> None:
             help="기준 상황을 일부 업장으로 돌렸으면 다른 상황도 같은 업장으로 돌립니다. 예시의 저장된 답은 두 업장으로 받은 것입니다.",
         )
         ready = key_ready(REPO_ROOT)
+        # 기본 데이터의 요약은 받는 곳으로 보내도 된다고 확인한 PC 에서만 AI 를 새로 부른다 (T115). 시뮬레이터 탭과 같다.
+        confirmed, receiver = summary_check(REPO_ROOT) if data_mode == "private" else (True, "")
         call_llm = st.checkbox(
             "AI 를 새로 부르기",
             value=False,
-            disabled=not ready,
-            help="끄면 앞서 저장된 답만 재생합니다 (키가 필요 없고 바로 끝납니다). 저장된 답이 없는 방문은 실패로 남습니다.",
+            disabled=not (ready and confirmed),
+            help="끄면 앞서 저장된 답만 재생합니다 (AI 를 부르지 않아 바로 끝납니다). 저장된 답이 없는 방문은 실패로 남습니다.",
         )
         if not ready:
-            st.caption("이 PC 에 .env 의 키가 없어 저장된 답 재생으로만 돌립니다.")
+            st.caption(
+                "이 PC 에서는 AI 를 부를 준비가 안 돼 저장된 답 재생으로만 돌립니다 "
+                "(.env 의 공급자·모델, 그리고 Claude 구독이면 `claude auth login`, OpenAI 면 키가 있어야 합니다)."
+            )
+        elif not confirmed:
+            st.caption(
+                f"기본 데이터의 요약을 `{receiver}` 로 보내도 되는지 이 PC 에서 확인되지 않아 저장된 답 재생으로만 돌립니다 (T115)."
+            )
 
         if st.button("돌리기", type="primary"):
             command = engine_command(

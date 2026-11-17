@@ -52,6 +52,8 @@ class Scene:
     total_before: int
     total_after: int
     hidden: int = 0  # AI 답을 받지 못해 그리지 않은 방문 수
+    # 누구의 결과인가 (예: "고른 페르소나 1명만"). 머리 숫자 위에 적는다 (11-17 팀장 요청)
+    scope: str = ""
 
 
 NONE_KEY = "none"
@@ -74,6 +76,7 @@ def scene_from_comparison(
     walkerhill: list[str],
     competitors: list[str],
     title: str = "",
+    scope: str = "",
 ) -> Scene:
     """비교 결과를 거리 그림으로 바꾼다. `walkerhill`, `competitors` 의 업장은 손님이 없어도 가게를 둔다."""
     cards = {place_key(c.place): c for c in venue_cards(comparison, names, walkerhill)}
@@ -106,7 +109,7 @@ def scene_from_comparison(
         if m.move != "failed"
     ]
     hidden = sum(1 for m in comparison.moves if m.move == "failed")
-    return Scene(title, stores, tokens, comparison.total_before, comparison.total_after, hidden)
+    return Scene(title, stores, tokens, comparison.total_before, comparison.total_after, hidden, scope)
 
 
 # ── 그리기 ──
@@ -239,6 +242,7 @@ body { background:transparent; color:var(--ink); line-height:1.45; font-size:13p
 .kpi .k { font-size:12px; color:var(--sub); line-height:1.35; }
 .kpi .v { font-size:22px; font-weight:700; letter-spacing:-.02em; margin-top:2px; font-variant-numeric:tabular-nums; display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; }
 .kpi .v small { font-size:13px; font-weight:500; color:var(--muted); }
+.kpi .v .chg.up { color:var(--up); } .kpi .v .chg.down { color:var(--down); } .kpi .v .chg.flat { color:var(--sub); }
 .pill { display:inline-block; font-size:11.5px; font-weight:600; padding:2px 8px; border-radius:999px; }
 .pill.up { background:var(--up-soft); color:var(--up); } .pill.down { background:var(--down-soft); color:var(--down); }
 .pill.flat { background:var(--rival-soft); color:var(--sub); }
@@ -256,9 +260,10 @@ body { background:transparent; color:var(--ink); line-height:1.45; font-size:13p
 .scene { position:relative; }
 .zone { position:absolute; left:2px; font-size:11px; font-weight:700; letter-spacing:.08em; color:var(--muted); text-transform:uppercase; }
 .store { position:absolute; padding:0 5px; container-type:inline-size; }
-/* 칸이 좁으면(창이 좁을 때) 아이콘을 감춰 이름과 값이 들어갈 자리를 먼저 둔다 (T204). 값의 "(가상)" 은 늘 보인다 */
+/* 칸이 좁으면(창이 좁을 때) 아이콘과 손님 줄의 변화 표시를 감춰 이름·값·페르소나가 겹치지 않게 한다 (T204).
+   값의 "(가상)" 은 늘 보이고, 변화는 위의 합계 칸과 "숫자와 카드로 자세히 보기"에 있다 */
 @container (max-width:170px) { .store .pic { display:none; } .store .top { padding:0 10px; } .store .val { font-size:11.5px; }
-  .store .lane .d { right:6px; font-size:10px; padding:1px 5px; } .store .lane .d.flat { display:none; } }
+  .store .lane .d { display:none; } }
 .card { background:var(--bg); border:1px solid var(--line); border-radius:11px; box-shadow:var(--shadow); overflow:hidden;
   transition:border-color .5s, box-shadow .5s; }
 .top { height:__CARD_TOP__px; display:flex; align-items:center; gap:10px; padding:0 12px; }
@@ -346,7 +351,10 @@ def render_scene(scene: Scene) -> tuple[str, int]:
 
     diff = scene.total_after - scene.total_before
     total = Store("total", "", "walkerhill", "", "", scene.total_before, scene.total_after, "won")
-    t_text, t_kind = delta_text(total)
+    _, t_kind = delta_text(total)
+    # 머리 숫자는 변화율이다. 금액은 일 년 합계에 맞춘 가상 값이라 기간을 골라도 "그 기간의 매출"이 아니다 (11-17 팀장 요청)
+    t_pct = pct_change(scene.total_before, scene.total_after) if diff else "변화 없음"
+    scope = f"{escape(scene.scope)} · " if scene.scope else ""
     moved = [t for t in scene.tokens if t.before != t.after]
     names = {s.key: s.name for s in scene.stores}
     people: dict[str, str] = {}
@@ -364,15 +372,18 @@ def render_scene(scene: Scene) -> tuple[str, int]:
         note.append(f"{BASE_LABEL}와 선택이 같습니다. 이 변수로는 고른 페르소나의 선택이 바뀌지 않았습니다.")
     if scene.hidden:
         note.append(f"AI 답을 받지 못한 방문 {scene.hidden}건은 그림과 매출에서 뺐습니다.")
-    note.append("모든 금액과 손님 수는 가상 값입니다. 페르소나에 마우스를 올리면 고른 이유가 보입니다.")
+    note.append(
+        "모든 금액과 손님 수는 가상 값입니다. 금액은 기본 데이터의 일 년 매출 규모에 맞춘 값이라, 기간을 골라도 그 기간의 매출이 아닙니다. "
+        "페르소나에 마우스를 올리면 고른 이유가 보입니다."
+    )
     outs = sum(t.move == "out" for t in scene.tokens)
     ins = sum(t.move == "in" for t in scene.tokens)
 
     body = (
         '<div class="wrap" id="root"><div class="kpis">'
-        f'<div class="kpi"><div class="k">워커힐 가상 매출 · {escape(scene.title)}</div>'
-        f'<div class="v"><small>{escape(money(scene.total_before))} →</small>{escape(money(scene.total_after))} (가상)'
-        f'<span class="pill {t_kind if diff else "flat"}">{escape(t_text)}</span></div></div>'
+        f'<div class="kpi"><div class="k">워커힐 가상 매출 변화 · {scope}{escape(scene.title)}</div>'
+        f'<div class="v"><span class="chg {t_kind if diff else "flat"}">{escape(t_pct)}</span>'
+        f"<small>{escape(money(scene.total_before))} → {escape(money(scene.total_after))} (가상 · 일 년 규모)</small></div></div>"
         f'<div class="kpi"><div class="k">워커힐 밖으로 나간 방문</div><div class="v">{outs}건</div></div>'
         f'<div class="kpi"><div class="k">워커힐로 들어온 방문</div><div class="v">{ins}건</div></div></div>'
         '<div class="bar"><div class="seg">'

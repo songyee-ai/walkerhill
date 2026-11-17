@@ -13,7 +13,7 @@ import streamlit as st
 import streamlit.components.v1 as components
 
 from app.board import WALKERHILL_NAMES, pct_change, venue_cards
-from app.compare import Comparison, compare, summary_groups
+from app.compare import Comparison, combine_months, compare, summary_groups, zero_groups
 from app.icons import as_img, persona_icon
 from app.results import load_run, names_from_files, visit_view, won
 from app.runs import (
@@ -24,7 +24,9 @@ from app.runs import (
     data_roots,
     has_private_summary,
     make_example_copy,
+    most_calls,
     simulate,
+    summary_check,
 )
 from app.scenario_builder import (
     DAY_TYPES,
@@ -39,31 +41,35 @@ from app.street import AFTER_LABEL, BASE_LABEL, render_scene, scene_from_compari
 from app.validation import LIMITS_SOURCE, VALIDATION_LIMITS, limits_not_in, load_validation, validation_rows
 from engine.formats import KO
 
-# 계절은 기간(석 달)으로 고르고, 엔진의 "실행의 달"(--month, T112)에는 그 계절의 대표 달 하나를 넘긴다 (11-17, 화면 담당 결정).
-# 엔진은 달 하나를 받는다. 대표 달은 가운데 달이고, 겨울만 12월이다: 시연 시나리오 셋(T20)이 모두 12월이라 1월로 돌리면
-# 연말 코스(11~12월)가 후보에서 빠진다.
-SEASON_MONTH = {"봄 (3~5월)": 4, "여름 (6~8월)": 7, "가을 (9~11월)": 10, "겨울 (12~2월)": 12}
-MONTH_SEASON = {month: season for season, month in SEASON_MONTH.items()}
-MONTHS: list[int | None] = [None, *SEASON_MONTH.values()]
+# 기간은 "X월 ~ Y월"로 고른다 (11-17, 화면 담당 결정). 엔진의 "실행의 달"(--month, T112)은 달 하나를 받으므로
+# 기간의 달마다 기본 시나리오와 변수 적용 후를 돌리고, 결과는 달 평균으로 합친다 (app/compare.py 의 combine_months).
+MONTHS = list(range(1, 13))
 # 달을 줘도 바뀌는 것은 그 달에 파는 메뉴와 AI 의 판단뿐이다. 가중치는 일 년 합계에 맞춘다 (FORMATS.md 10.1절 "실행의 달").
 SEASON_NOTE = (
-    "계절은 그 달에 파는 메뉴와 AI 의 판단으로만 반영됩니다. 계절에 따른 매출 변동은 아직 넣지 않았습니다 "
-    "(매출 합계는 일 년 기준이라, 달이 다른 결과끼리 합계를 견주지 마세요)."
+    "달은 그 달에 파는 메뉴와 AI 의 판단으로만 반영됩니다. 달에 따른 매출 변동은 아직 넣지 않았습니다 "
+    "(매출 합계는 일 년 기준이라, 기간이 다른 결과끼리 합계를 견주지 마세요)."
 )
 # 11-17 회의 ④: 날씨는 근거 자료가 없어 이번에 넣지 않고 "다음 단계"로 둔다.
 WEATHER_NOTE = "날씨는 다음 단계에서 넣습니다. 날씨와 매출을 같은 날짜로 묶은 자료가 있어야 근거 있게 반영할 수 있습니다."
 # 11-17 회의 ④: 기준 실행의 가격은 10~11월 공식 가격이고, 12월 요금 같은 것은 상황으로 얹는다.
 PRICE_NOTE = "기본 시나리오의 가격은 10~11월 공식 가격입니다. 12월 요금 같은 달별 가격은 '적용할 변수'로 얹습니다."
+# 처음 고르는 페르소나 (11-17 팀장과 정함: 1명 기본, AI 호출을 줄인다. 시연은 "모두"를 눌러 저장된 답으로 재생한다).
+# 앞에서부터 그 자료에 있는 것 하나를 고른다. 없으면 첫 페르소나.
+DEFAULT_PERSONAS = ("family-parents", "family-elders")
 
 
-def season_text(month: int | None) -> str:
-    """계절 고르기 칸에 보일 말."""
-    return "정하지 않음 (일 년 전체)" if month is None else MONTH_SEASON[month]
+def months_between(start: int | None, end: int | None) -> list[int]:
+    """시작 달부터 끝 달까지 (해를 넘겨도 된다. 예: 11월 ~ 2월). 시작이 없으면 일 년 전체라 빈 목록이다."""
+    if start is None:
+        return []
+    end = start if end is None else end
+    return [(start - 1 + i) % 12 + 1 for i in range((end - start) % 12 + 1)]
 
 
-def month_text(month: int | None) -> str:
-    """고른 것과 결과에 보일 말. 어느 달로 계산했는지 함께 적는다."""
-    return "일 년 전체" if month is None else f"{MONTH_SEASON[month].split(' ')[0]} ({month}월로 계산)"
+def months_text(months: list[int]) -> str:
+    if not months:
+        return "일 년 전체"
+    return f"{months[0]}월" if len(months) == 1 else f"{months[0]}월 ~ {months[-1]}월 ({len(months)}개월)"
 
 CHANGE_KINDS = ["준비된 상황", "경쟁 호텔이 할인한다", "우리 가격을 바꾼다", "우리 한정 메뉴를 더한다"]
 
@@ -166,7 +172,7 @@ class Inputs:
     days: list[str]
     whens: list[str]
     condition_ids: list[str]
-    month: int | None
+    months: list[int]
     scenario: object
     scenario_id: str | None
     data_mode: str
@@ -175,6 +181,10 @@ class Inputs:
     go: bool
     missing: list[str]
     ai_problem: str | None = None
+    # 기본 데이터의 요약을 보내도 된다고 확인되지 않아 재생만 할 때, 그 받는 곳의 이름 (T115)
+    replay_only: str | None = None
+    # 그 자료의 페르소나 수. 고른 것이 그보다 적으면 "고른 페르소나만의 결과"라고 적는다
+    all_personas: int = 0
 
     @property
     def problems(self) -> list[str]:
@@ -219,36 +229,59 @@ def variable_panel(repo_root: Path) -> Inputs:
 
     _section(2, "누가")
     names = {c["id"]: c["name"] for c in cards}
-    default = ["family-elders"] if root.is_example and "family-elders" in names else list(names)
+    default = next(([p] for p in DEFAULT_PERSONAS if p in names), list(names)[:1])
+    persona_key = f"sim_personas_{root.is_example}"
     personas = st.multiselect(
         "페르소나",
         list(names),
         default=default,
         format_func=lambda i: names[i],
         placeholder="페르소나를 고르세요",
-        key=f"sim_personas_{root.is_example}",
+        key=persona_key,
         label_visibility="collapsed",
         disabled=not cards,
     )
+    if len(names) > 1:
+        st.button(
+            f"{len(names)}명 모두 고르기",
+            key=f"sim_all_{root.is_example}",
+            disabled=len(personas) == len(names),
+            on_click=lambda: st.session_state.update({persona_key: list(names)}),
+            help="AI 를 부를 수 있는 호출 수는 맨 아래 버튼 위에 보입니다.",
+        )
 
     _section(3, "언제")
     days = st.pills("요일", list(DAY_TO_CODE), selection_mode="multi", default=["주말"], key="sim_days") or []
     whens = st.pills("때", list(WHEN_TO_CONDITION), selection_mode="multi", default=["저녁"], key="sim_whens") or []
     # 예시 묶음의 저장된 답은 달 없이 받은 것이라, 달을 주면 재생되지 않는다. 예시에서는 고르지 않게 한다.
-    month = st.selectbox(
-        "계절",
-        MONTHS,
-        format_func=season_text,
+    example_help = "예시 자료는 달 없이 받아 둔 답이라 고를 수 없습니다." if root.is_example else None
+    left, right = st.columns(2)
+    start = left.selectbox(
+        "기간 시작",
+        [None, *MONTHS],
+        format_func=lambda m: "일 년 전체" if m is None else f"{m}월",
         key=f"sim_month_{root.is_example}",
         disabled=root.is_example,
-        help="예시 자료는 달 없이 받아 둔 답이라 고를 수 없습니다." if root.is_example else None,
+        help=example_help,
     )
+    end = right.selectbox(
+        "기간 끝",
+        MONTHS,
+        index=(start or 1) - 1,
+        format_func=lambda m: f"{m}월",
+        key=f"sim_month_end_{root.is_example}_{start}",
+        disabled=root.is_example or start is None,
+        help=example_help,
+    )
+    months = months_between(start, end)
     st.selectbox("날씨", ["다음 단계에서 넣습니다"], key="sim_weather", disabled=True, help=WEATHER_NOTE)
-    if month is not None:
-        st.caption(
-            f"엔진은 달 하나로 돌려 {MONTH_SEASON[month].split(' ')[0]}은 {month}월로 계산합니다 "
-            "(봄 4월, 여름 7월, 가을 10월, 겨울 12월). " + SEASON_NOTE
+    if months:
+        how = (
+            f"{months_text(months)}로 돌립니다. "
+            if len(months) == 1
+            else f"{months_text(months)}을 달마다 돌려 달 평균으로 보입니다. 처음 해 보는 조합이면 달 수만큼 시간이 더 걸립니다. "
         )
+        st.caption(how + SEASON_NOTE)
 
     _section(4, "적용할 변수")
     change = st.selectbox("변수 종류", CHANGE_KINDS, key="sim_change")
@@ -314,6 +347,7 @@ def variable_panel(repo_root: Path) -> Inputs:
         if llm_env:
             st.caption(
                 f"모델 `{llm_env['LLM_MODEL']}` · 해 본 조합은 저장된 답을 불러오고, 처음 해 보는 조합만 AI 가 새로 답합니다."
+                + (f" {OPENAI_NOTE}" if pick == "openai" else "")
             )
         else:
             ai_problem = f"{AI_CHOICES[pick][0]}: 쓰려면 이 PC 의 `.env` 에 {AI_SETUP[pick]}"
@@ -326,18 +360,41 @@ def variable_panel(repo_root: Path) -> Inputs:
             st.caption("예시 자료는 미리 받아 둔 답으로만 돌립니다.")
         st.caption(f"고른 방문 조건: {', '.join(condition_ids) or '없음'} · 업장: {', '.join(allowed) if root.is_example else '모두'}")
 
+    # 기본 데이터의 요약은 받는 곳으로 보내도 된다고 확인한 PC 에서만 AI 를 새로 부른다 (T115, 11-17 팀장과 정함).
+    # 확인 전에는 `--base-profile none` 으로 바꿔 돌리지 않고 재생만 한다. 팀장 PC 에서 받은 답과 요청이 같아야 재생되기 때문이다.
+    replay_only = None
+    if data_mode == "private" and llm_env is not None:
+        confirmed, receiver = summary_check(repo_root, llm_env)
+        if not confirmed:
+            replay_only, call_llm = receiver, False
+            st.info(
+                f"기본 데이터의 요약을 `{receiver}` 로 보내도 되는지 이 PC 에서 확인되지 않아, AI 를 새로 부르지 않고 저장된 답만 재생합니다. "
+                "저장된 답이 없는 방문은 결과에서 빠지고 그 수를 보여 줍니다."
+            )
+    n_months = max(len(months), 1)
+    if call_llm and personas and condition_ids:
+        calls = most_calls(len(personas), len(condition_ids), n_months)
+        every = most_calls(len(names), len(condition_ids), n_months)
+        all_text = f" · {len(names)}명 모두면 최대 {every:,}번" if len(personas) < len(names) else ""
+        st.caption(
+            f"AI 호출 최대 {calls:,}번 (페르소나 {len(personas)}명 × 방문 조건 {len(condition_ids)}개 × 기본·변수 2번"
+            + (f" × {n_months}개월" if n_months > 1 else "")
+            + f"){all_text}. 해 본 조합은 저장된 답을 불러와 실제로는 더 적습니다."
+        )
+
     go = st.button(f"{BASE_LABEL}와 비교하기", type="primary", key="sim_go", width="stretch", disabled=bool(found.missing))
     return Inputs(
-        root, catalog, allowed, cards, personas, days, whens, condition_ids, month,
+        root, catalog, allowed, cards, personas, days, whens, condition_ids, months,
         scenario, scenario_id, data_mode, call_llm, llm_env, go, list(found.missing), ai_problem,
+        replay_only, len(names),
     )  # fmt: skip
 
 
 def _chips(inputs: Inputs) -> str:
     names = {c["id"]: c["name"] for c in inputs.cards}
     when = " · ".join(inputs.days + inputs.whens) or "요일·때 없음"
-    if inputs.month is not None:
-        when += f" · {month_text(inputs.month)}"
+    if inputs.months:
+        when += f" · {months_text(inputs.months)}"
     who = ", ".join(names.get(p, p) for p in inputs.personas) or "페르소나 없음"
     if inputs.scenario is not None:
         change = inputs.scenario.name
@@ -384,22 +441,28 @@ def render(repo_root: Path) -> None:
             else:
                 if inputs.scenario is not None:
                     write_scenario(inputs.root.path, inputs.scenario)
-                with st.spinner(f"{BASE_LABEL}와 {AFTER_LABEL}를 차례로 돌리는 중입니다…"):
-                    result = simulate(
-                        inputs.root.path,
-                        repo_root,
-                        inputs.data_mode,
-                        inputs.scenario_id,
-                        inputs.personas,
-                        inputs.condition_ids,
-                        list(inputs.allowed) if inputs.root.is_example else [],
-                        inputs.call_llm,
-                        is_example=inputs.root.is_example,
-                        llm_env=inputs.llm_env,
-                        month=inputs.month,
-                    )
+                results = []
+                # 기간이면 달마다 기본 시나리오와 변수 적용 후를 돌린다. 엔진은 같은 달의 기준과 상황끼리만 견준다.
+                for month in inputs.months or [None]:
+                    where = "" if month is None else f"{month}월: "
+                    with st.spinner(f"{where}{BASE_LABEL}와 {AFTER_LABEL}를 차례로 돌리는 중입니다…"):
+                        result = simulate(
+                            inputs.root.path,
+                            repo_root,
+                            inputs.data_mode,
+                            inputs.scenario_id,
+                            inputs.personas,
+                            inputs.condition_ids,
+                            list(inputs.allowed) if inputs.root.is_example else [],
+                            inputs.call_llm,
+                            is_example=inputs.root.is_example,
+                            llm_env=inputs.llm_env,
+                            month=month,
+                        )
+                    results.append((month, result))
                 st.session_state["sim_result"] = (
-                    result, inputs.root.path, inputs.data_mode, inputs.month, list(inputs.allowed),
+                    results, inputs.root.path, inputs.data_mode, list(inputs.months), list(inputs.allowed),
+                    inputs.replay_only, len(inputs.personas), inputs.all_personas,
                 )  # fmt: skip
 
         saved = st.session_state.get("sim_result")
@@ -413,22 +476,71 @@ def render(repo_root: Path) -> None:
 
 
 def show_result(saved: tuple) -> None:
-    result, sim_root, sim_mode, sim_month, sim_allowed = saved
+    results, sim_root, sim_mode, sim_months, sim_allowed, replay_only, n_chosen, n_all = saved
     # 엔진이 남긴 말은 고쳐 쓰지 않고 그대로 보여 준다 (팀장 요청, 11-16).
-    outputs = [(BASE_LABEL, result.baseline)] + ([(AFTER_LABEL, result.scenario)] if result.scenario else [])
-    failed = not result.ok or any(o.exit_code != 0 for _, o in outputs)
-    if not result.ok:
+    outputs = []
+    for month, result in results:
+        where = "" if month is None else f" ({month}월)"
+        outputs.append((BASE_LABEL + where, result.baseline))
+        if result.scenario:
+            outputs.append((AFTER_LABEL + where, result.scenario))
+    failed = any(not r.ok for _, r in results) or any(o.exit_code != 0 for _, o in outputs)
+    bad = [m for m, r in results if not r.ok]
+    if bad and len(bad) == len(results):
         st.error("비교할 결과를 만들지 못했습니다. 아래 '엔진이 남긴 말'을 보세요.")
-    notes = [PRICE_NOTE] + ([f"{month_text(sim_month)}: {SEASON_NOTE}"] if sim_month is not None else [])
-    st.caption("  \n".join(notes))
-    if result.ok:
-        comparison = compare(
-            load_run(result.baseline.run_dir),
-            load_run(result.scenario.run_dir),
-            summary_groups(sim_root, sim_mode),
-            names_from_files(sim_root),
+    elif bad:
+        st.warning(f"{', '.join(f'{m}월' for m in bad)}은 결과를 만들지 못해 빼고 보입니다. 아래 '엔진이 남긴 말'을 보세요.")
+    scope = persona_scope(n_chosen, n_all)
+    notes = [PRICE_NOTE]
+    if n_chosen < n_all:
+        notes.append(f"{scope}의 결과입니다. {ONE_PERSONA_NOTE}")
+    if sim_months:
+        notes.append(
+            f"{months_text(sim_months)}: 달마다 돌려 평균했습니다. 금액은 그 기간의 매출이 아니라 일 년 규모로 맞춘 가상 값이라, "
+            f"볼 것은 변화율입니다. {SEASON_NOTE}"
         )
-        show_comparison(comparison, venue_catalog(sim_root), scenario_name(sim_root, comparison.scen.record.scenario_id), sim_allowed)
+    st.caption("  \n".join(notes))
+    per_month = [
+        (
+            month,
+            compare(
+                load_run(r.baseline.run_dir),
+                load_run(r.scenario.run_dir),
+                summary_groups(sim_root, sim_mode),
+                names_from_files(sim_root),
+            ),
+        )
+        for month, r in results
+        if r.ok
+    ]
+    if replay_only:
+        missing = sum(c.count("failed") for _, c in per_month)
+        visits = sum(len(c.moves) for _, c in per_month)
+        st.info(
+            f"재생만 했습니다: 기본 데이터의 요약을 `{replay_only}` 로 보내도 되는지 이 PC 에서 확인되지 않아 AI 를 새로 부르지 않았습니다. "
+            f"저장된 답이 없는 방문 {missing}건 / 전체 {visits}건"
+            + (" — 그 방문은 매출과 그림에서 뺐습니다." if missing else ".")
+        )
+    zero = zero_groups(per_month)
+    if zero:
+        listed = ", ".join(
+            f"{group} ({', '.join('일 년 전체' if m is None else f'{m}월' for m in months)})" for group, months in zero.items()
+        )
+        st.warning(
+            f"워커힐 업장을 고른 방문이 없어 매출 규모를 맞추지 못한 고객군이 있습니다: {listed}. "
+            "그 달에는 이 고객군의 가상 매출이 0 으로 들어가"
+            + (" 달 평균이 그만큼 낮아집니다." if len(per_month) > 1 else " 합계에서 빠집니다.")
+        )
+    if per_month:
+        comparison = combine_months(per_month)
+        show_comparison(
+            comparison,
+            venue_catalog(sim_root),
+            scenario_name(sim_root, comparison.scen.record.scenario_id),
+            sim_allowed,
+            per_month if len(per_month) > 1 else None,
+            scope,
+        )
     with st.expander("엔진이 남긴 말", expanded=failed):
         for label, outcome in outputs:
             run_id = f" · 실행 `{outcome.run_dir.name}`" if outcome.run_dir else ""
@@ -450,8 +562,18 @@ MOVE_BADGE = {
 # 설정이 안 된 AI 를 골랐을 때 채울 것 (README 의 "시뮬레이션을 돌린다").
 AI_SETUP = {
     "claude": "`LLM_MODEL`(또는 `CLAUDE_MODEL`)을 적고, 터미널에서 `claude auth login` 을 한 번 하세요.",
-    "openai": "`OPENAI_MODEL`(팀이 정한 OpenAI 모델)과 `LLM_API_KEY`(자기 OpenAI 키)를 적으세요.",
+    "openai": "`OPENAI_MODEL`(쓸 OpenAI 모델)과 `LLM_API_KEY`(OpenAI 키)를 적으세요.",
 }
+# OpenAI 는 원청에 넘길 때 GPT 로 돌릴 수 있게 남긴 길이다 (11-17, 화면 담당). 팀의 보정·시연 답은 Claude 구독으로 받는다 (T114).
+OPENAI_NOTE = "OpenAI 로 받은 답은 팀의 보정·시연 답(Claude)과 모델이 달라 서로 재생되지 않습니다."
+# 고른 페르소나가 일부일 때 (11-17 팀장 요청). 고객군 배수는 고른 페르소나의 방문으로 맞추므로,
+# 한 고객군에서 한 명만 고르면 그 고객군의 매출 전체가 그 사람의 선택으로 나온다 (PRD 7.2절).
+ONE_PERSONA_NOTE = "한 고객군에서 한 명만 고르면 그 고객군의 매출 전체가 그 사람의 선택으로 나옵니다."
+
+
+def persona_scope(chosen: int, total: int) -> str:
+    """결과가 누구의 것인가. 머리 숫자 위와 안내에 적는다."""
+    return f"페르소나 {total}명 모두" if total and chosen >= total else f"고른 페르소나 {chosen}명만"
 
 # AI 답을 받지 못했을 때의 안내. 엔진은 받은 답을 저장해 두어, 다시 돌리면 빠진 방문만 다시 묻는다.
 RETRY_HINT = "다시 비교하면 빠진 방문만 AI 에게 다시 묻습니다. 계속 안 되면 아래 '엔진이 남긴 말'에서 이유를 보세요."
@@ -463,7 +585,12 @@ def badge(move: str) -> str:
 
 
 def show_comparison(
-    comparison: Comparison, catalog: dict[str, VenueInfo], scenario_name: str = "", allowed: list[str] | None = None
+    comparison: Comparison,
+    catalog: dict[str, VenueInfo],
+    scenario_name: str = "",
+    allowed: list[str] | None = None,
+    per_month: list[tuple[int, Comparison]] | None = None,
+    scope: str = "",
 ) -> None:
     names = {v.venue_id: v.name for v in catalog.values()} | comparison.names
     record = comparison.scen.record
@@ -477,6 +604,7 @@ def show_comparison(
         [v for v in shown if not catalog[v].is_competitor],
         [v for v in shown if catalog[v].is_competitor],
         scenario_name or record.scenario_id,
+        scope,
     )
     html, height = render_scene(scene)
     components.html(html, height=height, scrolling=False)
@@ -488,7 +616,12 @@ def show_comparison(
         show_validation(comparison.base.run_dir, names)
 
     with st.expander("한 사람씩 자세히 보기"):
-        _show_person(comparison)
+        if per_month:
+            # 기간이면 달을 먼저 고른다. 방문의 자세한 답은 그 달의 실행에 있다.
+            pick = st.selectbox("달", [m for m, _ in per_month], format_func=lambda m: f"{m}월", key="sim_detail_month")
+            _show_person(dict(per_month)[pick])
+        else:
+            _show_person(comparison)
 
 
 def _show_cards(comparison: Comparison, catalog: dict[str, VenueInfo], names: dict[str, str], allowed: list[str] | None) -> None:
@@ -496,11 +629,12 @@ def _show_cards(comparison: Comparison, catalog: dict[str, VenueInfo], names: di
     diff = comparison.total_after - comparison.total_before
     a, b, c = st.columns(3)
     a.metric(
-        "워커힐 가상 매출",
-        f"{comparison.total_after:,}원",
-        delta=f"{diff:+,}원 ({pct_change(comparison.total_before, comparison.total_after)})" if diff else "변화 없음",
+        "워커힐 가상 매출 변화",
+        pct_change(comparison.total_before, comparison.total_after) if diff else "변화 없음",
+        delta=f"{diff:+,}원 (가상 · 일 년 규모)" if diff else None,
         delta_color="normal" if diff else "off",
-        help=f"{BASE_LABEL} {won(comparison.total_before)} → {AFTER_LABEL} {won(comparison.total_after)}",
+        help=f"{BASE_LABEL} {won(comparison.total_before)} → {AFTER_LABEL} {won(comparison.total_after)}. "
+        "금액은 기본 데이터의 일 년 매출 규모에 맞춘 가상 값입니다.",
     )
     b.metric("워커힐 밖으로 나간 방문", f"{comparison.count('out')}건", delta=-comparison.count("out") or None)
     c.metric("워커힐로 들어온 방문", f"{comparison.count('in')}건", delta=comparison.count("in") or None)
