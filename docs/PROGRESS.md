@@ -1964,12 +1964,15 @@ worktree 의 맨 위 `.git` 은 폴더가 아니라 파일이다. 형식 검사�
 - [ ] wilstein91 ← hojitea-ui (11-16): `main` 을 시연하다 서버 창에서 본 경고입니다 (T401). 화면이 결과를 그릴 때마다
   "Please replace `st.components.v1.html` with `st.iframe`. `st.components.v1.html` will be removed after 2026-06-01." 이 나옵니다 (Streamlit 1.66.0, 윈도우 11, `app/simulator.py` 의 `components.html`).
   지금은 그대로 돌지만, 적힌 날짜가 지나 있어 Streamlit 판이 오르면 그 부분이 깨질 수 있습니다. 시연 전에 바꿀지 봐 주세요.
-- [ ] songyee-ai ← hojitea-ui (11-17): 피자힐 업장 정의(`data/venues/pizzahill.json`)를 고쳤습니다 (T401). 6인 세트(`seis-set`)를 더하고,
+- [x] songyee-ai ← hojitea-ui (11-17): 피자힐 업장 정의(`data/venues/pizzahill.json`)를 고쳤습니다 (T401). 6인 세트(`seis-set`)를 더하고,
   세이스 피자 단품은 주문에 더하는 상품으로 바꿨습니다. 질문이 달라지므로 **보정·시연 답을 받기 전에** 이 변경이 든 develop 을 받아 주세요.
-- [ ] songyee-ai ← borigunbbang (11-16): `git worktree` 로 받은 폴더에서 `tests/test_check_rules.py::test_checker_walks_exactly_the_files_git_can_upload` 가 실패합니다 (T303).
+  (확인: songyee-ai 11-17, 이 변경이 든 `develop` (`d89bfb8`)을 팀장 PC 에 받았습니다. 보정·시연 답은 아직 받지 않았고, 받을 때 이 업장 정의로 받습니다)
+- [x] songyee-ai ← borigunbbang (11-16): `git worktree` 로 받은 폴더에서 `tests/test_check_rules.py::test_checker_walks_exactly_the_files_git_can_upload` 가 실패합니다 (T303).
   worktree 의 맨 위 `.git` 은 파일인데, `tools/check_formats.py` 의 `_walk` 가 `.git` 을 폴더일 때만 건너뛰어 그 파일을 훑습니다 ("Extra items in the left set: '.git'").
   자동 검사에는 영향이 없고, Claude Code 의 worktree 세션처럼 worktree 로 일할 때 로컬 pytest 가 1건 실패합니다. 이름이 `.git` 이면 파일이어도 건너뛰기를 제안합니다.
   본 방법: `develop` `dd54f62` 를 `git worktree add` 로 받아 pytest (macOS). 같은 커밋의 일반 클론은 통과.
+  (확인: songyee-ai 11-17, T111 로 고쳤습니다 (PR #90). 형식 검사가 이름이 `.git` 이면 폴더든 파일이든 건너뜁니다.
+  borigunbbang 이 고친 것을 worktree 에서 다시 돌려 통과를 확인했습니다 (T303, 아래 11-17 줄))
 - [ ] wilstein91 ← songyee-ai (11-16): 요청하신 테마 색을 공통 틀 `.streamlit/config.toml` 에 넣었습니다 (T110). 적은 모양이 요청과 다릅니다.
   `[theme]` 한 칸에 적으면 어두운 화면 설정에서도 밝은 테마로 떠서, 같은 색(`#4f46e5`)을 `[theme.light]` 와 `[theme.dark]` 두 칸에 적었습니다 (둘 다 띄워 견줌. Streamlit 1.66.0).
   고른 라디오 버튼의 점이 밝은·어두운 화면에서 모두 indigo 로 나옵니다. 어두운 화면에서 다른 색이 낫다면 `[theme.dark]` 의 값을 알려 주세요.
@@ -1978,9 +1981,11 @@ worktree 의 맨 위 `.git` 은 폴더가 아니라 파일이다. 형식 검사�
   이 PC 의 임시 worktree 에서 고치기 전의 실패와 고친 뒤의 통과를 모두 봤습니다. `develop` 을 받은 뒤 그 worktree 에서 다시 돌려 확인해 주세요.
   PR #87 에 적으신 팀장 앞 알림 줄은 그 PR 이 합쳐지면 체크하겠습니다.
   (확인: borigunbbang 11-17, macOS 에서 `develop` `2bdef20` 을 임시 worktree 로 받아 고치기 전에 실패하던 테스트와 테스트 전체가 통과. T303)
-- [ ] songyee-ai ← hojitea-ui (11-16): 경쟁 업장 포시즌스 마루(`data/venues/fourseasons-maru.json`)에 빙수 두 가지를 더했습니다 (T14, 공식 보도자료, 파는 달 5 ~ 9월).
+- [x] songyee-ai ← hojitea-ui (11-16): 경쟁 업장 포시즌스 마루(`data/venues/fourseasons-maru.json`)에 빙수 두 가지를 더했습니다 (T14, 공식 보도자료, 파는 달 5 ~ 9월).
   업장 정의가 바뀌어 질문이 달라지므로, 보정·시연 답을 받기 전에 develop 을 받아 주세요.
   방문 조건에 달을 주면(회의 안건 ④) 5 ~ 9월 밖에서는 후보에서 빠지지만, 달 없이 돌리면 디저트 조건의 후보에 빙수가 더해져 결과가 달라질 수 있습니다.
+  (확인: songyee-ai 11-17, 이 변경이 든 `develop` (`d89bfb8`)을 팀장 PC 에 받았습니다. 보정·시연 답은 아직 받지 않았고, 받을 때 이 업장 정의로 받습니다.
+  달을 주는 실행은 T112 로 들어갔습니다 (`--month`). 달 없이 돌리는 기준 실행에서는 적어 주신 대로 빙수가 디저트 조건의 후보에 들고, 고르면 파는 달 수 ÷ 12 의 몫으로 셉니다 (`FORMATS.md` 10.2절))
 - [ ] wilstein91 ← songyee-ai (11-17): **엔진이 계절을 달로 받습니다** (T112). 명령에 `--month <1 ~ 12>` 를 적으면 묶음의 조건을 모두 그 달의 방문으로 돌립니다 (`engine.runner.run(month=...)` 도 같습니다).
   ① 화면의 계절(석 달)을 달 하나로 바꿔 넘겨 주세요. 계절마다 대표 달을 정하거나 달을 직접 고르게 하는 것은 화면에서 정하시면 됩니다. "정하지 않음"이면 `--month` 를 빼 주세요 (넣지 않으면 요청이 전과 같아 저장된 답이 그대로 재생됩니다).
   ② 기준 상황과 견줄 상황에 같은 `--month` 를 주세요. 상황은 기준 실행과 달이 같아야 하고, 다르면 엔진이 멈추고 이유를 알립니다.
