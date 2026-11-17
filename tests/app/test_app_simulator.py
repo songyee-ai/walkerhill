@@ -12,7 +12,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from app.compare import compare  # noqa: E402
-from app.results import load_run  # noqa: E402
+from app.results import load_run, names_from_files  # noqa: E402
 from app.runs import EXAMPLE_VENUES, simulate  # noqa: E402
 from app.scenario_builder import (  # noqa: E402
     UI_PREFIX,
@@ -98,7 +98,7 @@ def test_prepared_scenario_compares_without_a_key(tmp_path: Path):
 
 
 def test_new_scenario_without_saved_answers_is_reported_not_hidden(tmp_path: Path):
-    # 처음 해 보는 조합은 저장된 답이 없어 키 없이는 "견줄 수 없음"으로 남는다. 조용히 기준과 같다고 하지 않는다.
+    # 처음 해 보는 조합은 저장된 답이 없어 AI 없이는 "AI 답 못 받음"으로 남는다. 조용히 기준과 같다고 하지 않는다.
     root = _copy(tmp_path)
     scenario = our_limited_menu("geumryong", "금룡", "겨울 한정 코스", 120000, "저녁", "weekend")
     write_scenario(root, scenario)
@@ -110,12 +110,26 @@ def test_new_scenario_without_saved_answers_is_reported_not_hidden(tmp_path: Pat
     comparison = compare(load_run(result.baseline.run_dir), load_run(result.scenario.run_dir))
     assert [m.move for m in comparison.moves] == ["failed"]
     assert "저장된 응답이 없다" in comparison.moves[0].fail_reason
+    # 답을 못 받은 방문은 두 실행 모두에서 매출에 넣지 않는다. 넣으면 한쪽만 0원이 되어 -100% 로 보인다 (T109).
+    assert comparison.total_before == comparison.total_after
+    assert all(v.diff == 0 for v in comparison.venues)
 
 
-def test_simulator_tab_renders_with_season_and_weather_marked_pending():
+def test_simulator_tab_renders_with_month_and_weather_marked_next_step():
+    # 계절은 엔진의 달로 넘기고 (T112), 날씨는 11-17 회의 ④대로 "다음 단계"로 막아 둔다.
     app = AppTest.from_file(str(REPO_ROOT / "app" / "main.py"), default_timeout=60).run()
     assert not app.exception
-    app.selectbox(key="sim_weather").set_value("비").run()
-    assert not app.exception
-    assert any("반영되지 않습니다" in c.value for c in app.caption)
+    assert app.selectbox(key="sim_weather").disabled
+    month = next(s for s in app.selectbox if s.key.startswith("sim_month_"))
+    if not month.disabled:  # 팀 자료가 다 올라와 있으면 달을 고를 수 있다
+        month.set_value(12).run()
+        assert not app.exception
+        assert any("그 달에 파는 메뉴" in c.value for c in app.caption)
     assert any(b.label == "기본 시나리오와 비교하기" for b in app.button)
+
+
+def test_names_come_from_definition_files_when_no_answer_was_saved(tmp_path: Path):
+    # 기준과 상황 모두 AI 답이 없으면 저장된 응답에 이름이 없다. 그래도 식별자가 아니라 이름으로 보인다 (T109).
+    names = names_from_files(_copy(tmp_path))
+    assert names["family-elders"] != "family-elders"
+    assert names["meal-dinner-weekend"] == "식사 · 저녁 · 주말"

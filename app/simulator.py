@@ -15,13 +15,14 @@ import streamlit.components.v1 as components
 from app.board import WALKERHILL_NAMES, pct_change, venue_cards
 from app.compare import Comparison, compare, summary_groups
 from app.icons import as_img, persona_icon
-from app.results import load_run, visit_view, won
+from app.results import load_run, names_from_files, visit_view, won
 from app.runs import (
+    AI_CHOICES,
     EXAMPLE_VENUES,
+    ai_env,
     choices,
     data_roots,
     has_private_summary,
-    key_ready,
     make_example_copy,
     simulate,
 )
@@ -38,11 +39,22 @@ from app.street import AFTER_LABEL, BASE_LABEL, render_scene, scene_from_compari
 from app.validation import LIMITS_SOURCE, VALIDATION_LIMITS, limits_not_in, load_validation, validation_rows
 from engine.formats import KO
 
-# 엔진이 아직 받지 않는 요소. 고를 수는 있지만 결과에는 들어가지 않는다고 분명히 알린다.
-# 엔진(팀장)과 프롬프트(borigunbbang)가 받게 되면 여기서 빼고 엔진 명령에 넘긴다. (docs/PROGRESS.md "알릴 것" 11-16)
-SEASONS = ["정하지 않음", "봄 (3~5월)", "여름 (6~8월)", "가을 (9~11월)", "겨울 (12~2월)"]
-WEATHERS = ["정하지 않음", "맑음", "비", "눈", "폭염", "한파"]
-PENDING_NOTE = "엔진이 아직 이 값을 받지 않아 결과에는 반영되지 않습니다. 엔진과 프롬프트 담당께 요청해 두었습니다."
+# 계절은 엔진의 "실행의 달"(--month, T112)로 넘긴다. 엔진은 달 하나를 받으므로 달을 고르고 계절을 함께 적는다 (11-17).
+MONTH_SEASON = {12: "겨울", 1: "겨울", 2: "겨울", 3: "봄", 4: "봄", 5: "봄", 6: "여름", 7: "여름", 8: "여름", 9: "가을", 10: "가을", 11: "가을"}
+MONTHS: list[int | None] = [None, *range(1, 13)]
+# 달을 줘도 바뀌는 것은 그 달에 파는 메뉴와 AI 의 판단뿐이다. 가중치는 일 년 합계에 맞춘다 (FORMATS.md 10.1절 "실행의 달").
+SEASON_NOTE = (
+    "계절은 그 달에 파는 메뉴와 AI 의 판단으로만 반영됩니다. 계절에 따른 매출 변동은 아직 넣지 않았습니다 "
+    "(매출 합계는 일 년 기준이라, 달이 다른 결과끼리 합계를 견주지 마세요)."
+)
+# 11-17 회의 ④: 날씨는 근거 자료가 없어 이번에 넣지 않고 "다음 단계"로 둔다.
+WEATHER_NOTE = "날씨는 다음 단계에서 넣습니다. 날씨와 매출을 같은 날짜로 묶은 자료가 있어야 근거 있게 반영할 수 있습니다."
+# 11-17 회의 ④: 기준 실행의 가격은 10~11월 공식 가격이고, 12월 요금 같은 것은 상황으로 얹는다.
+PRICE_NOTE = "기본 시나리오의 가격은 10~11월 공식 가격입니다. 12월 요금 같은 달별 가격은 '적용할 변수'로 얹습니다."
+
+
+def month_text(month: int | None) -> str:
+    return "정하지 않음 (일 년 전체)" if month is None else f"{month}월 ({MONTH_SEASON[month]})"
 
 CHANGE_KINDS = ["준비된 상황", "경쟁 호텔이 할인한다", "우리 가격을 바꾼다", "우리 한정 메뉴를 더한다"]
 
@@ -145,14 +157,15 @@ class Inputs:
     days: list[str]
     whens: list[str]
     condition_ids: list[str]
-    season: str
-    weather: str
+    month: int | None
     scenario: object
     scenario_id: str | None
     data_mode: str
     call_llm: bool
+    llm_env: dict | None
     go: bool
     missing: list[str]
+    ai_problem: str | None = None
 
     @property
     def problems(self) -> list[str]:
@@ -163,6 +176,8 @@ class Inputs:
             found.append("요일과 때를 하나 이상 고르세요")
         if self.scenario_id is None:
             found.append("적용할 변수를 고르세요")
+        if self.ai_problem:
+            found.append(self.ai_problem)
         return found
 
 
@@ -210,11 +225,18 @@ def variable_panel(repo_root: Path) -> Inputs:
     _section(3, "언제")
     days = st.pills("요일", list(DAY_TO_CODE), selection_mode="multi", default=["주말"], key="sim_days") or []
     whens = st.pills("때", list(WHEN_TO_CONDITION), selection_mode="multi", default=["저녁"], key="sim_whens") or []
-    left, right = st.columns(2)
-    season = left.selectbox("계절", SEASONS, key="sim_season")
-    weather = right.selectbox("날씨", WEATHERS, key="sim_weather")
-    if season != SEASONS[0] or weather != WEATHERS[0]:
-        st.caption(f"계절·날씨: {PENDING_NOTE}")
+    # 예시 묶음의 저장된 답은 달 없이 받은 것이라, 달을 주면 재생되지 않는다. 예시에서는 고르지 않게 한다.
+    month = st.selectbox(
+        "계절 (달)",
+        MONTHS,
+        format_func=month_text,
+        key=f"sim_month_{root.is_example}",
+        disabled=root.is_example,
+        help="예시 자료는 달 없이 받아 둔 답이라 고를 수 없습니다." if root.is_example else None,
+    )
+    st.selectbox("날씨", ["다음 단계에서 넣습니다"], key="sim_weather", disabled=True, help=WEATHER_NOTE)
+    if month is not None:
+        st.caption(SEASON_NOTE)
 
     _section(4, "적용할 변수")
     change = st.selectbox("변수 종류", CHANGE_KINDS, key="sim_change")
@@ -258,25 +280,52 @@ def variable_panel(repo_root: Path) -> Inputs:
         scenario_id = scenario.scenario_id
 
     condition_ids = conditions_for(root.path, days, whens) if catalog else []
-    ready = key_ready(repo_root)
+    # 해 본 조합은 저장된 답을 불러오고, 처음 해 보는 조합만 AI 를 부른다 (엔진이 방문마다 그렇게 한다. README).
+    # 그래서 AI 를 부를 수 있으면 늘 켠다 (11-17, 화면 담당 결정). 예시 묶음은 다른 모델로 받은 답이라 재생만 한다.
+    llm_env = None
+    ai_problem = None
+    if not root.is_example:
+        _section(5, "AI")
+        ready = {key: ai_env(repo_root, key) for key in AI_CHOICES}
+        usable = [key for key, env in ready.items() if env]
+        # 두 가지를 늘 보이고, 설정이 된 것을 먼저 고른다. 설정이 안 된 것을 고르면 채울 것을 알리고 비교를 막는다.
+        pick = st.radio(
+            "AI",
+            list(AI_CHOICES),
+            index=list(AI_CHOICES).index(usable[0]) if usable else 0,
+            format_func=lambda k: AI_CHOICES[k][0] + ("" if ready[k] else " · 설정 필요"),
+            horizontal=True,
+            key="sim_ai",
+            label_visibility="collapsed",
+        )
+        llm_env = ready[pick]
+        if llm_env:
+            st.caption(
+                f"모델 `{llm_env['LLM_MODEL']}` · 해 본 조합은 저장된 답을 불러오고, 처음 해 보는 조합만 AI 가 새로 답합니다."
+            )
+        else:
+            ai_problem = f"{AI_CHOICES[pick][0]}: 쓰려면 이 PC 의 `.env` 에 {AI_SETUP[pick]}"
+            st.warning(ai_problem)
+    call_llm = llm_env is not None
     with st.expander("고급 설정"):
         modes = ["sample"] + (["private"] if has_private_summary(root.path) else [])
         data_mode = st.radio("값", modes, format_func=lambda m: {"sample": "가상 예시 값", "private": "기본 데이터 (이 PC 에만)"}[m], key="sim_mode")
-        call_llm = st.checkbox("AI 를 새로 부르기 (키 필요, 처음 해 보는 조합에 필요)", value=False, disabled=not ready, key="sim_llm")
-        if not ready:
-            st.caption("이 PC 에는 키가 없어 저장된 답만 재생합니다. 처음 해 보는 조합은 '견줄 수 없음'으로 나옵니다.")
+        if root.is_example:
+            st.caption("예시 자료는 미리 받아 둔 답으로만 돌립니다.")
         st.caption(f"고른 방문 조건: {', '.join(condition_ids) or '없음'} · 업장: {', '.join(allowed) if root.is_example else '모두'}")
 
     go = st.button(f"{BASE_LABEL}와 비교하기", type="primary", key="sim_go", width="stretch", disabled=bool(found.missing))
     return Inputs(
-        root, catalog, allowed, cards, personas, days, whens, condition_ids, season, weather,
-        scenario, scenario_id, data_mode, call_llm, go, list(found.missing),
+        root, catalog, allowed, cards, personas, days, whens, condition_ids, month,
+        scenario, scenario_id, data_mode, call_llm, llm_env, go, list(found.missing), ai_problem,
     )  # fmt: skip
 
 
 def _chips(inputs: Inputs) -> str:
     names = {c["id"]: c["name"] for c in inputs.cards}
     when = " · ".join(inputs.days + inputs.whens) or "요일·때 없음"
+    if inputs.month is not None:
+        when += f" · {month_text(inputs.month)}"
     who = ", ".join(names.get(p, p) for p in inputs.personas) or "페르소나 없음"
     if inputs.scenario is not None:
         change = inputs.scenario.name
@@ -332,9 +381,11 @@ def render(repo_root: Path) -> None:
                         list(inputs.allowed) if inputs.root.is_example else [],
                         inputs.call_llm,
                         is_example=inputs.root.is_example,
+                        llm_env=inputs.llm_env,
+                        month=inputs.month,
                     )
                 st.session_state["sim_result"] = (
-                    result, inputs.root.path, inputs.data_mode, inputs.season, inputs.weather, list(inputs.allowed),
+                    result, inputs.root.path, inputs.data_mode, inputs.month, list(inputs.allowed),
                 )  # fmt: skip
 
         saved = st.session_state.get("sim_result")
@@ -348,16 +399,21 @@ def render(repo_root: Path) -> None:
 
 
 def show_result(saved: tuple) -> None:
-    result, sim_root, sim_mode, sim_season, sim_weather, sim_allowed = saved
+    result, sim_root, sim_mode, sim_month, sim_allowed = saved
     # 엔진이 남긴 말은 고쳐 쓰지 않고 그대로 보여 준다 (팀장 요청, 11-16).
     outputs = [(BASE_LABEL, result.baseline)] + ([(AFTER_LABEL, result.scenario)] if result.scenario else [])
     failed = not result.ok or any(o.exit_code != 0 for _, o in outputs)
     if not result.ok:
         st.error("비교할 결과를 만들지 못했습니다. 아래 '엔진이 남긴 말'을 보세요.")
-    if sim_season != SEASONS[0] or sim_weather != WEATHERS[0]:
-        st.info(f"고른 계절·날씨({sim_season}, {sim_weather}): {PENDING_NOTE}")
+    notes = [PRICE_NOTE] + ([f"{month_text(sim_month)}: {SEASON_NOTE}"] if sim_month is not None else [])
+    st.caption("  \n".join(notes))
     if result.ok:
-        comparison = compare(load_run(result.baseline.run_dir), load_run(result.scenario.run_dir), summary_groups(sim_root, sim_mode))
+        comparison = compare(
+            load_run(result.baseline.run_dir),
+            load_run(result.scenario.run_dir),
+            summary_groups(sim_root, sim_mode),
+            names_from_files(sim_root),
+        )
         show_comparison(comparison, venue_catalog(sim_root), scenario_name(sim_root, comparison.scen.record.scenario_id), sim_allowed)
     with st.expander("엔진이 남긴 말", expanded=failed):
         for label, outcome in outputs:
@@ -373,8 +429,18 @@ MOVE_BADGE = {
     "inside": ("blue", "↔ 워커힐 안에서"),
     "other": ("violet", "↔ 밖에서 옮김"),
     "same": ("gray", "그대로"),
-    "failed": ("orange", "견줄 수 없음"),
+    "failed": ("orange", "AI 답 못 받음"),
 }
+
+
+# 설정이 안 된 AI 를 골랐을 때 채울 것 (README 의 "시뮬레이션을 돌린다").
+AI_SETUP = {
+    "claude": "`LLM_MODEL`(또는 `CLAUDE_MODEL`)을 적고, 터미널에서 `claude auth login` 을 한 번 하세요.",
+    "openai": "`OPENAI_MODEL`(팀이 정한 OpenAI 모델)과 `LLM_API_KEY`(자기 OpenAI 키)를 적으세요.",
+}
+
+# AI 답을 받지 못했을 때의 안내. 엔진은 받은 답을 저장해 두어, 다시 돌리면 빠진 방문만 다시 묻는다.
+RETRY_HINT = "다시 비교하면 빠진 방문만 AI 에게 다시 묻습니다. 계속 안 되면 아래 '엔진이 남긴 말'에서 이유를 보세요."
 
 
 def badge(move: str) -> str:
@@ -426,14 +492,12 @@ def _show_cards(comparison: Comparison, catalog: dict[str, VenueInfo], names: di
     c.metric("워커힐로 들어온 방문", f"{comparison.count('in')}건", delta=comparison.count("in") or None)
 
     changed = [m for m in comparison.moves if m.move not in ("same", "failed")]
-    if not changed:
-        st.info(f"{BASE_LABEL}와 선택이 같습니다. 이 변수로는 고른 페르소나의 선택이 바뀌지 않았습니다.")
     unknown = [m for m in comparison.moves if m.move == "failed"]
+    # 모든 방문이 답을 못 받았으면 "선택이 같다"고 하지 않는다 (11-16, T109 에서 찾음).
+    if not changed and len(unknown) < len(comparison.moves):
+        st.info(f"{BASE_LABEL}와 선택이 같습니다. 이 변수로는 고른 페르소나의 선택이 바뀌지 않았습니다.")
     if unknown:
-        st.warning(
-            f"견줄 수 없는 방문이 {len(unknown)}건 있습니다. 대개 처음 해 보는 조합이라 저장된 답이 없어서입니다 "
-            "(키가 있는 PC 에서 'AI 를 새로 부르기'로 돌리면 생깁니다)."
-        )
+        st.warning(f"AI 답을 받지 못한 방문 {len(unknown)}건은 매출과 이동에서 뺐습니다. {RETRY_HINT}")
 
     # 페르소나: 사람마다 기본 시나리오 → 변수 적용 후
     st.markdown("#### 페르소나는 어떻게 움직였나")
@@ -488,7 +552,7 @@ def _show_person(comparison: Comparison) -> None:
             st.markdown(f"**{title}**")
             view = visit_view(run, *pick)
             if view.failed_reason or not view.found:
-                st.write(f"견줄 수 없음: {view.failed_reason or '방문이 없음'}")
+                st.write(f"AI 답을 받지 못했습니다: {view.failed_reason or '이 실행에 없는 방문'}")
                 continue
             st.write(f"{view.venue or KO['choice_kind']['none']} — {won(view.total_paid)}")
             st.write(view.reason_text or "")
@@ -500,7 +564,7 @@ def _place(place, names: dict[str, str]) -> str:
     if place.kind == "none":
         return KO["choice_kind"]["none"]
     if place.kind == "failed":
-        return "견줄 수 없음"
+        return "AI 답 없음"
     return names.get(place.venue_id or "", place.venue_id or "")
 
 

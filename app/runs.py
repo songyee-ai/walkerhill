@@ -28,8 +28,8 @@ EXAMPLE_COPY = Path("private") / "try-example"
 EXAMPLE_VENUES = ("geumryong", "examplehotel-chinese")
 # 화면이 기다리는 가장 긴 시간(초). 넘으면 멈추고 알린다. 엔진의 호출 상한과 별개다.
 RUN_TIMEOUT = 600
-# 화면이 처음 고르는 프롬프트의 판. 엔진 명령의 기본값과 같게 둔다 (T108). 예시 묶음에는 p1 만 있어 그때는 p1 로 돈다.
-DEFAULT_PROMPT = "p2"
+# 화면이 처음 고르는 프롬프트의 판. 엔진 명령의 기본값과 같게 둔다 (T108, 11-17 T113 으로 p3). 예시 묶음에는 p1 만 있어 그때는 p1 로 돈다.
+DEFAULT_PROMPT = "p3"
 
 # 예시의 저장된 답을 받은 공급자와 모델. 저장된 답은 공급자·모델이 같아야 재생되므로(FORMATS 10절),
 # 예시를 재생만 할 때는 이 PC 의 .env 가 다른 공급자를 가리켜도 이 값으로 돌린다.
@@ -126,10 +126,40 @@ def key_ready(repo_root: Path) -> bool:
     `LLM_RESPONSE_FORMAT`)이면 켜지 않는다. 공급자를 만들어도 부르지는 않는다. `openai-compatible` 은 이 PC 의 주소(로컬 모델)가 아니면
     키(`LLM_API_KEY`)도 있어야 한다 (11-16, T103: 주소만 보고 켜져 부르는 순간 실패했다).
     """
+    env = _read_env(repo_root)
+    return env is not None and _env_ready(env)
+
+
+def _read_env(repo_root: Path) -> dict[str, str] | None:
     env_file = repo_root / ".env"
     if not env_file.is_file():
-        return False
-    env = {key: (value or "").strip() for key, value in dotenv_values(env_file).items()}
+        return None
+    return {key: (value or "").strip() for key, value in dotenv_values(env_file).items()}
+
+
+# 화면에서 고르는 AI 두 가지 (11-17, 화면 담당). 고른 것은 그 실행에만 넘기고 `.env` 는 고치지 않는다.
+# 모델 이름은 코드에 적지 않고 `.env` 에서 읽는다 (CLAUDE.md "스택"): 그 AI 의 모델 칸(`CLAUDE_MODEL`, `OPENAI_MODEL`)을
+# 먼저 보고, 없으면 `.env` 의 `LLM_PROVIDER` 가 그 AI 일 때의 `LLM_MODEL` 을 쓴다.
+AI_CHOICES = {
+    "claude": ("Claude (내 구독)", "claude-code", "CLAUDE_MODEL"),
+    "openai": ("OpenAI (API 키)", "openai-compatible", "OPENAI_MODEL"),
+}
+
+
+def ai_env(repo_root: Path, choice: str) -> dict[str, str] | None:
+    """고른 AI 로 엔진을 돌릴 공급자와 모델. 그 AI 를 부를 준비(모델, 키나 Claude Code)가 안 됐으면 None."""
+    env = _read_env(repo_root)
+    if env is None or choice not in AI_CHOICES:
+        return None
+    _, provider, model_key = AI_CHOICES[choice]
+    model = env.get(model_key) or (env.get("LLM_MODEL", "") if env.get("LLM_PROVIDER") == provider else "")
+    if not model:
+        return None
+    picked = {"LLM_PROVIDER": provider, "LLM_MODEL": model}
+    return picked if _env_ready(env | picked) else None
+
+
+def _env_ready(env: dict[str, str]) -> bool:
     try:
         settings = settings_from_env(env)
         if settings.provider == "anthropic":
@@ -153,6 +183,7 @@ def engine_command(
     venue_ids: list[str],
     call_llm: bool,
     baseline_run: str | None = None,
+    month: int | None = None,
 ) -> list[str]:
     """README 와 같은 명령. 기준이 아닌 상황은 기준 실행의 페르소나와 조건으로 돌아 `--personas`, `--conditions` 를 적지 않는다.
 
@@ -170,6 +201,9 @@ def engine_command(
             command += ["--conditions", *condition_ids]
     if venue_ids:
         command += ["--venues", *venue_ids]
+    # 실행의 달 (T112). 주지 않으면 일 년 전체로 돌고 요청이 달이 생기기 전과 같아 저장된 답이 그대로 재생된다.
+    if month is not None:
+        command += ["--month", str(month)]
     if not call_llm:
         command.append("--replay-only")
     return command
@@ -244,21 +278,37 @@ def simulate(
     call_llm: bool,
     prompt: str | None = None,
     is_example: bool = False,
+    llm_env: dict[str, str] | None = None,
+    month: int | None = None,
 ) -> Simulation:
     """같은 페르소나·방문 조건·업장으로 기준과 상황을 차례로 돌린다 (PRD 7.2절: 상황은 기준의 가중치로 돈다).
 
     기준을 매번 새로 돌리는 것은, 고른 페르소나와 조건이 바뀌어도 늘 같은 것끼리 견주게 하려는 것이다.
     저장된 답을 재생하면 몇 초면 끝난다. 판을 주지 않으면 그 자료에 있는 판에서 `default_prompt` 로 고른다.
+    `llm_env` 는 화면에서 고른 AI 의 공급자와 모델이다 (`ai_env`). 두 실행에 같은 것을 넘겨 같은 모델로 돌린다.
+    `month` 는 실행의 달이다 (T112). 엔진은 기준과 상황의 달이 같아야 돌므로 두 실행에 같은 달을 넘긴다.
     """
     if prompt is None:
         prompt = default_prompt(prompt_versions(root))
-    base_cmd = engine_command(root, repo_root, data_mode, "baseline", prompt, persona_ids, condition_ids, venue_ids, call_llm)
-    env = replay_env(is_example, call_llm)
+    base_cmd = engine_command(
+        root, repo_root, data_mode, "baseline", prompt, persona_ids, condition_ids, venue_ids, call_llm, month=month
+    )
+    env = replay_env(is_example, call_llm) or llm_env
     baseline = run_engine(base_cmd, repo_root, env_overrides=env)
     if baseline.run_dir is None or baseline.exit_code != 0:
         return Simulation(baseline, None)
     scen_cmd = engine_command(
-        root, repo_root, data_mode, scenario_id, prompt, [], [], venue_ids, call_llm, baseline_run=baseline.run_dir.name
+        root,
+        repo_root,
+        data_mode,
+        scenario_id,
+        prompt,
+        [],
+        [],
+        venue_ids,
+        call_llm,
+        baseline_run=baseline.run_dir.name,
+        month=month,
     )
     return Simulation(baseline, run_engine(scen_cmd, repo_root, env_overrides=env))
 
