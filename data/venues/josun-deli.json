@@ -34,7 +34,7 @@
       "price": 52000,
       "price_basis": "unknown",
       "grade": "assumption",
-      "source_id": null
+      "source_id": "S1"
     },
     {
       "product_id": "macaron-gift-set",
@@ -55,16 +55,22 @@
       "price": 35000,
       "price_basis": "unknown",
       "grade": "assumption",
-      "source_id": null
+      "source_id": "S2"
     }
   ],
   "promotions": [],
   "sources": [
     {
       "source_id": "S1",
-      "title": "컬리 — 조선델리 쿠키 선물세트 (판매 페이지, 시점 불명)",
-      "url": "https://www.kurly.com/goods/1001737667",
-      "checked_on": "2026-11-13"
+      "title": "컬리 — 조선델리 조선호텔 쿠키선물세트 448g (판매 페이지, 정가)",
+      "url": "https://www.kurly.com/goods/1000746926",
+      "checked_on": "2026-11-17"
+    },
+    {
+      "source_id": "S2",
+      "title": "컬리 — 조선델리 조선호텔 마카롱 기프트 세트 200g (판매 페이지, 할인 전 가격)",
+      "url": "https://www.kurly.com/goods/1000746950",
+      "checked_on": "2026-11-17"
     }
   ],
   "default_source_id": "S1"
