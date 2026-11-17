@@ -83,7 +83,7 @@
 | T111 | `git worktree` 폴더에서 깨지는 형식 검사 테스트 | songyee-ai | 완료, 11-17, 형식 검사가 파일로 된 `.git` 도 건너뛰게 고쳤고 worktree 와 일반 폴더에서 테스트 전체가 통과했다. |
 | T301 | 구글 리뷰 수집 부탁 (출처 더하기) | borigunbbang | 진행 중, 11-16, hojitea-ui 가 20% 묶음을 확인했고 borigunbbang 의 PC 에서 지웠으며 모은 두 사람의 지우기가 남았다. |
 | T302 | 호텔 뷔페·빙수 가격 기사 정리 (경쟁 업장 근거 더하기) | borigunbbang | 진행 중, 11-16, 기사 9건의 가격을 정리해 "알릴 것"으로 넘겼고 hojitea-ui 의 확인이 남았다. |
-| T303 | `main` 시연 확인과 worktree 에서 깨지는 테스트 알리기 | borigunbbang | 진행 중, 11-16, 키 없이 `main` 의 두 탭이 끝까지 뜨는 것을 봤고 worktree 에서 실패하는 테스트 1건을 엔진 담당에게 넘겼다. |
+| T303 | `main` 시연 확인과 worktree 에서 깨지는 테스트 알리기 | borigunbbang | 완료, 11-17, 엔진 담당이 T111 로 고친 것을 worktree 에서 테스트 전체가 통과하는 것으로 확인했다. |
 
 T03 ~ T24 는 11-13 에 팀장이 낸 제안이다. 팀이 확인하면 이 줄을 지운다. 유닛을 나눈 기준과 순서는 아래 "유닛의 순서"에 있다.
 
@@ -1467,7 +1467,8 @@ worktree 의 맨 위 `.git` 은 폴더가 아니라 파일이다. 형식 검사�
 완료 조건
 - [x] `main` 의 화면이 키 없이 끝까지 뜬다 (11-16, macOS, `main` `bf21f7c` 를 일반 클론으로 받아 ruff·형식 검사·pytest 통과. README 의 예시 사본으로 기준·상황을 `--replay-only` 로 돌려 실패 0건. 화면의 "예시로 연습"에서 두 탭이 끝까지 뜨고 브라우저 콘솔 오류 없음)
 - [x] worktree 에서 실패하는 것을 develop 에서도 재현했다 (11-16, macOS, `develop` `dd54f62` 를 `git worktree add` 로 받아 `test_checker_walks_exactly_the_files_git_can_upload` 만 실패. 일반 클론은 통과)
-- [ ] songyee-ai 가 "알릴 것"에서 받아 고칠지 정했다
+- [x] songyee-ai 가 "알릴 것"에서 받아 고칠지 정했다 (11-17, songyee-ai 가 T111 로 고침)
+- [x] 고친 것이 worktree 에서 통과한다 (11-17, macOS, `develop` `2bdef20` 을 임시 `git worktree add` 로 받아 ruff·형식 검사 오류 0건, pytest 전체 통과. 테스트 수는 "실측 기록". 임시 worktree 는 확인 뒤 지움)
 
 경위
 - 11-16: 형식 검사 주의 1건(고객군 '가족·친족' 의 몫 합 0.75)은 페르소나를 다 만들지 않아서 나는 것이라 T17 에서 채운다. 견줄 수 없는 방문이 -100% 로 보이는 표시는 T109 에서 이미 화면 담당에게 넘겼다.
@@ -1878,9 +1879,10 @@ worktree 의 맨 위 `.git` 은 폴더가 아니라 파일이다. 형식 검사�
   `[theme]` 한 칸에 적으면 어두운 화면 설정에서도 밝은 테마로 떠서, 같은 색(`#4f46e5`)을 `[theme.light]` 와 `[theme.dark]` 두 칸에 적었습니다 (둘 다 띄워 견줌. Streamlit 1.66.0).
   고른 라디오 버튼의 점이 밝은·어두운 화면에서 모두 indigo 로 나옵니다. 어두운 화면에서 다른 색이 낫다면 `[theme.dark]` 의 값을 알려 주세요.
   화면을 띄워 둔 PC 는 서버를 껐다 다시 띄워야 반영됩니다. `address` 는 그대로입니다.
-- [ ] borigunbbang ← songyee-ai (11-17): PR #87 에 적어 주신, `git worktree` 폴더에서만 실패하는 테스트를 고쳤습니다 (T111). 형식 검사가 파일로 된 `.git` 도 건너뜁니다.
+- [x] borigunbbang ← songyee-ai (11-17): PR #87 에 적어 주신, `git worktree` 폴더에서만 실패하는 테스트를 고쳤습니다 (T111). 형식 검사가 파일로 된 `.git` 도 건너뜁니다.
   이 PC 의 임시 worktree 에서 고치기 전의 실패와 고친 뒤의 통과를 모두 봤습니다. `develop` 을 받은 뒤 그 worktree 에서 다시 돌려 확인해 주세요.
   PR #87 에 적으신 팀장 앞 알림 줄은 그 PR 이 합쳐지면 체크하겠습니다.
+  (확인: borigunbbang 11-17, macOS 에서 `develop` `2bdef20` 을 임시 worktree 로 받아 고치기 전에 실패하던 테스트와 테스트 전체가 통과. T303)
 
 ## 실측 기록
 
@@ -1931,3 +1933,5 @@ worktree 의 맨 위 `.git` 은 폴더가 아니라 파일이다. 형식 검사�
 - 11-16, 같은 환경: T110 으로 `.streamlit/config.toml` 에 테마 색을 넣은 뒤 `uv run python -m pytest` 로 테스트 679개가 모두 통과했고 55초쯤 걸렸다. T110 은 테스트를 더하지 않았다.
 - 11-17, 윈도우 11 + Python 3.13.15 + uv 0.12.15: T111 의 테스트 하나를 더한 뒤 `uv run python -m pytest` 로 테스트 680개가 모두 통과했고 50초쯤 걸렸다.
   같은 PC 의 임시 `git worktree` 폴더에서도 680개가 모두 통과했고 49초쯤 걸렸다 (고치기 전에는 그 폴더에서 `test_checker_walks_exactly_the_files_git_can_upload` 가 실패했다). 실제 LLM 은 부르지 않았다.
+- 11-17, macOS 27.0.1 + Python 3.13.16 + uv 0.13.0: T303 의 확인으로 `develop` 의 `2bdef20` (T111 까지 합친 것)을 임시 `git worktree` 폴더로 받아 `uv run python -m pytest` 로 테스트 680개가 모두 통과했고 42초쯤 걸렸다.
+  같은 커밋을 담은 일반 폴더에서도 680개가 모두 통과했고 41초쯤 걸렸다. 실제 LLM 은 부르지 않았다.
