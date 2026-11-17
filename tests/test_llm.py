@@ -568,19 +568,38 @@ def test_settings_default_to_the_values_in_env_example():
     assert settings_from_env({"LLM_PROVIDER": "", "LLM_MODEL": " ", "LLM_CALL_LIMIT": ""}) == settings
 
 
-def test_env_example_copied_with_a_key_and_a_model_calls_openai():
-    """팀 설정(11-16): .env.example 을 베끼고 키와 모델만 넣으면 OpenAI 로 부른다. 키는 OpenAI 키 칸에 넣는다."""
+def test_env_example_copied_as_it_is_calls_claude_with_the_team_model(fake_claude, monkeypatch):
+    """팀 설정(11-17, T114): .env.example 을 그대로 베끼면 각자의 Claude 구독(`claude -p`)으로 팀이 정한 모델을 부른다. 키는 쓰지 않는다."""
+    _, _, executable = fake_claude
     example = (REPO_ROOT / ".env.example").read_text(encoding="utf-8")
     env = dict(re.findall(r"^([A-Z_]+)=(.*)$", example, re.M))
-    assert env["LLM_PROVIDER"] == "openai-compatible"
-    assert env["LLM_BASE_URL"] == "https://api.openai.com/v1"
+    assert env["LLM_PROVIDER"] == "claude-code"
+    # 팀이 정한 모델이 적혀 있다. 모두 같은 모델이어야 저장된 답을 서로 재생한다.
+    assert re.fullmatch(r"claude-[a-z0-9-]+", env["LLM_MODEL"])
     # 비밀값은 적혀 있지 않다.
     assert env["LLM_API_KEY"] == env["ANTHROPIC_API_KEY"] == ""
+    settings = settings_from_env(env)
+    assert (settings.provider, settings.model) == ("claude-code", env["LLM_MODEL"])
+    # 실행 파일의 경로를 비워 두면 PATH 의 claude 를 부른다. 테스트에서는 PATH 에 가짜 claude 가 있는 것으로 둔다.
+    assert env["CLAUDE_CODE_PATH"] == ""
+    monkeypatch.setattr(llm_module.shutil, "which", lambda name: executable if name == "claude" else None)
+    provider = make_provider(settings, env)
+    assert isinstance(provider, ClaudeCodeProvider)
+    assert (provider.model, provider.executable) == (env["LLM_MODEL"], executable)
+    # 화면의 AI 메뉴가 읽는 이름이 있다 (T202). 팀 설정에서는 비워 둔다 (비우면 LLM_MODEL 을 쓴다).
+    assert env["CLAUDE_MODEL"] == env["OPENAI_MODEL"] == ""
+
+
+def test_env_example_can_still_be_pointed_at_openai():
+    """팀 설정이 아닌 길: 공급자를 openai-compatible 로 바꾸고 키와 모델을 넣으면 적혀 있는 주소로 부른다 (그 답은 보정과 시연에 쓰지 않는다)."""
+    example = (REPO_ROOT / ".env.example").read_text(encoding="utf-8")
+    env = dict(re.findall(r"^([A-Z_]+)=(.*)$", example, re.M))
+    assert env["LLM_BASE_URL"] == "https://api.openai.com/v1"
     with pytest.raises(LlmFatal, match="LLM_MODEL"):
-        settings_from_env(env)  # 모델은 팀이 정해 각자 적는다
-    filled = {**env, "LLM_API_KEY": "test-key", "LLM_MODEL": "team-model"}
+        settings_from_env({**env, "LLM_PROVIDER": "openai-compatible", "LLM_MODEL": ""})  # 이 공급자는 모델을 꼭 적는다
+    filled = {**env, "LLM_PROVIDER": "openai-compatible", "LLM_API_KEY": "test-key", "LLM_MODEL": "other-model"}
     settings = settings_from_env(filled)
-    assert (settings.provider, settings.model) == ("openai-compatible", "team-model")
+    assert (settings.provider, settings.model) == ("openai-compatible", "other-model")
     provider = make_provider(settings, filled)
     assert isinstance(provider, OpenAICompatibleProvider)
     assert (provider.url, provider.api_key, provider.response_format) == (
@@ -914,7 +933,7 @@ def test_openai_compatible_usage_may_be_missing(stub):
     assert OpenAICompatibleProvider("local-model", stub.url, None).complete("s", "u") == LlmReply("{}", 0, 0)
 
 
-# ── Claude Code 명령 (T104, 개인 연습용) ─────────────────────────────────
+# ── Claude Code 명령 (T104. 11-17 부터 팀이 쓰는 공급자, T114) ─────────────────────────────────
 
 
 def claude_code_result(structured=None, **more) -> str:
