@@ -1,7 +1,7 @@
 """식당가 보기 (T21): 식당이 늘어선 거리 위에서 페르소나가 기본 시나리오 → 변수 적용 후로 옮겨 가는 모습을 그린다.
 
 11-16 결정(지도 대신 간소화한 식당가와 페르소나로 행동 변화를 눈에 띄게)을 그림으로 만든 것이다.
-새 패키지 없이 HTML·CSS 로 그리고, 화면에는 `streamlit.components.v1.html` 로 넣는다. 아이콘은 app/icons.py 의 픽토그램이다.
+새 패키지 없이 HTML·CSS 로 그리고, 화면에는 `st.iframe` 으로 넣는다 (11-17 T206 전에는 `streamlit.components.v1.html`). 아이콘은 app/icons.py 의 픽토그램이다.
 색과 간격은 Tailwind 의 기본 팔레트(slate, indigo, emerald, rose, amber)와 간격 단위를 따랐다. 밝은·어두운 화면 모두 맞춘다.
 무엇을 그릴지는 `scene_from_comparison` 이 정하고, `render_scene` 은 그리기만 한다 (테스트하기 쉽게 나눴다).
 """

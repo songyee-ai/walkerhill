@@ -99,7 +99,9 @@ Get-ChildItem "$env:LOCALAPPDATA\Claude-Data" -Recurse -Filter claude.exe -Error
     각자 시험할 때는 가상 예시 값(`--data sample`)을 `--personas`, `--conditions` 로 작게 돌린다.
   - 구독의 사용 한도는 자기 Claude Code 작업과 함께 쓴다. 호출 하나가 입력 1만 5천 ~ 3만 토큰이다 (T104·T114 실측).
     한도에 닿으면 엔진이 멈추고, 한도가 풀린 뒤 다시 돌리면 받은 답은 재생한다.
-  - 기본 데이터(`--data private`)로 부르기 전에, 답을 받는 계정의 Claude 개인정보 설정에서 "모델 학습에 사용"이 꺼져 있는지 확인한다.
+  - 기본 데이터(`--data private`)로 부르기 전에, 답을 받는 계정이 보낸 것을 모델 학습에 쓰지 않게 돼 있는지 확인한다.
+    요금제는 `& "<그 경로>" auth status` 의 `subscriptionType` 으로 본다. 팀 요금제(`team`)는 학습 스위치가 없고 조직 관리자에게 개발 파트너 프로그램 가입 여부만 묻는다.
+    개인 구독은 Claude 개인정보 설정에서 "모델 학습에 사용"을 끈다.
     확인하기 전에는 `--base-profile none` 으로 돌린다 (`CLAUDE.md` 의 "스택", `docs/MEETING_1117.md` ③).
     확인이 끝나면 답을 받는 PC 의 `.env` 에 `BASE_PROFILE_CONFIRMED_FOR=claude-code` 를 적는다. 적혀 있지 않으면 엔진은 기본 데이터의 요약을 보내는 실행을 멈추고 이유를 알린다 (T115).
     요약을 보내지 않거나(`--base-profile none`) 재생만 하면(`--replay-only`) 적혀 있지 않아도 돈다.
