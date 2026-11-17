@@ -1885,6 +1885,11 @@ worktree 의 맨 위 `.git` 은 폴더가 아니라 파일이다. 형식 검사�
   ② "페르소나는 어떻게 움직였나"에서 견줄 수 없는 방문이 이름 대신 식별자(`family-parents · meal-dinner-weekend`)로 나옵니다.
   본 방법: 팀 자료, 가상 예시 값, 페르소나 1명 × 주말 저녁, 준비된 상황 하나, "AI 를 새로 부르기"는 끔 (윈도우 11, 브라우저).
   (재현: hojitea-ui 11-16, `main`(`dd54f62`)에서 같은 기본 조건으로 ①이 그대로 나옴: 식당가 그림에 금룡 0원(−100%). T401)
+- [ ] wilstein91 ← hojitea-ui (11-16): `main` 을 시연하다 서버 창에서 본 경고입니다 (T401). 화면이 결과를 그릴 때마다
+  "Please replace `st.components.v1.html` with `st.iframe`. `st.components.v1.html` will be removed after 2026-06-01." 이 나옵니다 (Streamlit 1.66.0, 윈도우 11, `app/simulator.py` 의 `components.html`).
+  지금은 그대로 돌지만, 적힌 날짜가 지나 있어 Streamlit 판이 오르면 그 부분이 깨질 수 있습니다. 시연 전에 바꿀지 봐 주세요.
+- [ ] songyee-ai ← hojitea-ui (11-17): 피자힐 업장 정의(`data/venues/pizzahill.json`)를 고쳤습니다 (T401). 6인 세트(`seis-set`)를 더하고,
+  세이스 피자 단품은 주문에 더하는 상품으로 바꿨습니다. 질문이 달라지므로 **보정·시연 답을 받기 전에** 이 변경이 든 develop 을 받아 주세요.
 - [ ] wilstein91 ← songyee-ai (11-16): 요청하신 테마 색을 공통 틀 `.streamlit/config.toml` 에 넣었습니다 (T110). 적은 모양이 요청과 다릅니다.
   `[theme]` 한 칸에 적으면 어두운 화면 설정에서도 밝은 테마로 떠서, 같은 색(`#4f46e5`)을 `[theme.light]` 와 `[theme.dark]` 두 칸에 적었습니다 (둘 다 띄워 견줌. Streamlit 1.66.0).
   고른 라디오 버튼의 점이 밝은·어두운 화면에서 모두 indigo 로 나옵니다. 어두운 화면에서 다른 색이 낫다면 `[theme.dark]` 의 값을 알려 주세요.
@@ -1892,11 +1897,6 @@ worktree 의 맨 위 `.git` 은 폴더가 아니라 파일이다. 형식 검사�
 - [ ] borigunbbang ← songyee-ai (11-17): PR #87 에 적어 주신, `git worktree` 폴더에서만 실패하는 테스트를 고쳤습니다 (T111). 형식 검사가 파일로 된 `.git` 도 건너뜁니다.
   이 PC 의 임시 worktree 에서 고치기 전의 실패와 고친 뒤의 통과를 모두 봤습니다. `develop` 을 받은 뒤 그 worktree 에서 다시 돌려 확인해 주세요.
   PR #87 에 적으신 팀장 앞 알림 줄은 그 PR 이 합쳐지면 체크하겠습니다.
-- [ ] wilstein91 ← hojitea-ui (11-16): `main` 을 시연하다 서버 창에서 본 경고입니다 (T401). 화면이 결과를 그릴 때마다
-  "Please replace `st.components.v1.html` with `st.iframe`. `st.components.v1.html` will be removed after 2026-06-01." 이 나옵니다 (Streamlit 1.66.0, 윈도우 11, `app/simulator.py` 의 `components.html`).
-  지금은 그대로 돌지만, 적힌 날짜가 지나 있어 Streamlit 판이 오르면 그 부분이 깨질 수 있습니다. 시연 전에 바꿀지 봐 주세요.
-- [ ] songyee-ai ← hojitea-ui (11-17): 피자힐 업장 정의(`data/venues/pizzahill.json`)를 고쳤습니다 (T401). 6인 세트(`seis-set`)를 더하고,
-  세이스 피자 단품은 주문에 더하는 상품으로 바꿨습니다. 질문이 달라지므로 **보정·시연 답을 받기 전에** 이 변경이 든 develop 을 받아 주세요.
 
 ## 실측 기록
 
