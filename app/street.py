@@ -236,7 +236,7 @@ body { background:transparent; color:var(--ink); line-height:1.45; font-size:13p
 .kpis { display:grid; grid-template-columns:1.6fr 1fr 1fr; border:1px solid var(--line); border-radius:12px; overflow:hidden; margin-bottom:14px; }
 .kpi { padding:12px 16px; background:var(--panel); }
 .kpi + .kpi { border-left:1px solid var(--line); }
-.kpi .k { font-size:12px; color:var(--sub); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.kpi .k { font-size:12px; color:var(--sub); line-height:1.35; }
 .kpi .v { font-size:22px; font-weight:700; letter-spacing:-.02em; margin-top:2px; font-variant-numeric:tabular-nums; display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; }
 .kpi .v small { font-size:13px; font-weight:500; color:var(--muted); }
 .pill { display:inline-block; font-size:11.5px; font-weight:600; padding:2px 8px; border-radius:999px; }
@@ -255,7 +255,10 @@ body { background:transparent; color:var(--ink); line-height:1.45; font-size:13p
 .who span b { width:20px; height:20px; border-radius:50%; background:var(--accent-soft); color:var(--accent); display:inline-flex; align-items:center; justify-content:center; }
 .scene { position:relative; }
 .zone { position:absolute; left:2px; font-size:11px; font-weight:700; letter-spacing:.08em; color:var(--muted); text-transform:uppercase; }
-.store { position:absolute; padding:0 5px; }
+.store { position:absolute; padding:0 5px; container-type:inline-size; }
+/* 칸이 좁으면(창이 좁을 때) 아이콘을 감춰 이름과 값이 들어갈 자리를 먼저 둔다 (T204). 값의 "(가상)" 은 늘 보인다 */
+@container (max-width:170px) { .store .pic { display:none; } .store .top { padding:0 10px; } .store .val { font-size:11.5px; }
+  .store .lane .d { right:6px; font-size:10px; padding:1px 5px; } .store .lane .d.flat { display:none; } }
 .card { background:var(--bg); border:1px solid var(--line); border-radius:11px; box-shadow:var(--shadow); overflow:hidden;
   transition:border-color .5s, box-shadow .5s; }
 .top { height:__CARD_TOP__px; display:flex; align-items:center; gap:10px; padding:0 12px; }

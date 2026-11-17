@@ -119,12 +119,14 @@ def test_simulator_tab_renders_with_month_and_weather_marked_next_step():
     # 계절은 엔진의 달로 넘기고 (T112), 날씨는 11-17 회의 ④대로 "다음 단계"로 막아 둔다.
     app = AppTest.from_file(str(REPO_ROOT / "app" / "main.py"), default_timeout=60).run()
     assert not app.exception
+    assert [t.label for t in app.tabs] == ["시뮬레이터", "상세 분석"]  # 탭 이름 (T204)
     assert app.selectbox(key="sim_weather").disabled
     month = next(s for s in app.selectbox if s.key.startswith("sim_month_"))
     if not month.disabled:  # 팀 자료가 다 올라와 있으면 달을 고를 수 있다
         month.set_value(12).run()
         assert not app.exception
         assert any("그 달에 파는 메뉴" in c.value for c in app.caption)
+        assert any("12월로 계산" in c.value for c in app.caption)  # 계절은 대표 달 하나로 돈다
     assert any(b.label == "기본 시나리오와 비교하기" for b in app.button)
 
 

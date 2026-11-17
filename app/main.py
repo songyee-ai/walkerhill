@@ -152,7 +152,7 @@ def apply_pick(sources: list[RunSource]) -> None:
 
 
 def detail_view() -> None:
-    """실행 하나 자세히 보기 (T09): 1. 돌리기, 2. 결과 보기."""
+    """상세 분석 탭 (T09, 11-17 T204 로 이름을 바꿈): 1. 돌리기, 2. 결과 보기."""
     run_panel()
     show_last_outcome()
 
@@ -281,7 +281,8 @@ def detail_view() -> None:
         money_table(visit_table(run))
 
 
-tab_sim, tab_detail = st.tabs(["간편 시뮬레이터", "실행 하나 자세히 보기"])
+# 탭 이름 (11-17, T204): 첫 탭은 결과를 견주는 시뮬레이터, 둘째 탭은 실행 하나의 선택과 이유를 보는 상세 분석.
+tab_sim, tab_detail = st.tabs(["시뮬레이터", "상세 분석"])
 with tab_sim:
     simulator.render(REPO_ROOT)
 with tab_detail:

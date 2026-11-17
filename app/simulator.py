@@ -1,6 +1,6 @@
-"""간편 시뮬레이터 화면 (T202): 왼쪽 변수 패널(자료 → 누가 → 언제 → 적용할 변수)과 오른쪽 결과(기본 시나리오 대비 변수 적용 후).
+"""시뮬레이터 탭 (T202, 11-17 T204 로 "간편 시뮬레이터"에서 이름을 바꿈): 왼쪽 변수 패널(자료 → 누가 → 언제 → 적용할 변수)과 오른쪽 결과(기본 시나리오 대비 변수 적용 후).
 
-전문 설정(실행 폴더, 프롬프트 같은 것)은 "실행 하나 자세히 보기" 탭에 두고, 여기서는 고르기만 하면 돌아가게 한다.
+전문 설정(실행 폴더, 프롬프트 같은 것)은 "상세 분석" 탭에 두고, 여기서는 고르기만 하면 돌아가게 한다.
 돌리는 것은 app/runs.py 의 `simulate` (README 와 같은 엔진 명령), 견주는 것은 app/compare.py, 식당가 카드는 app/board.py 다.
 """
 
@@ -39,9 +39,12 @@ from app.street import AFTER_LABEL, BASE_LABEL, render_scene, scene_from_compari
 from app.validation import LIMITS_SOURCE, VALIDATION_LIMITS, limits_not_in, load_validation, validation_rows
 from engine.formats import KO
 
-# 계절은 엔진의 "실행의 달"(--month, T112)로 넘긴다. 엔진은 달 하나를 받으므로 달을 고르고 계절을 함께 적는다 (11-17).
-MONTH_SEASON = {12: "겨울", 1: "겨울", 2: "겨울", 3: "봄", 4: "봄", 5: "봄", 6: "여름", 7: "여름", 8: "여름", 9: "가을", 10: "가을", 11: "가을"}
-MONTHS: list[int | None] = [None, *range(1, 13)]
+# 계절은 기간(석 달)으로 고르고, 엔진의 "실행의 달"(--month, T112)에는 그 계절의 대표 달 하나를 넘긴다 (11-17, 화면 담당 결정).
+# 엔진은 달 하나를 받는다. 대표 달은 가운데 달이고, 겨울만 12월이다: 시연 시나리오 셋(T20)이 모두 12월이라 1월로 돌리면
+# 연말 코스(11~12월)가 후보에서 빠진다.
+SEASON_MONTH = {"봄 (3~5월)": 4, "여름 (6~8월)": 7, "가을 (9~11월)": 10, "겨울 (12~2월)": 12}
+MONTH_SEASON = {month: season for season, month in SEASON_MONTH.items()}
+MONTHS: list[int | None] = [None, *SEASON_MONTH.values()]
 # 달을 줘도 바뀌는 것은 그 달에 파는 메뉴와 AI 의 판단뿐이다. 가중치는 일 년 합계에 맞춘다 (FORMATS.md 10.1절 "실행의 달").
 SEASON_NOTE = (
     "계절은 그 달에 파는 메뉴와 AI 의 판단으로만 반영됩니다. 계절에 따른 매출 변동은 아직 넣지 않았습니다 "
@@ -53,8 +56,14 @@ WEATHER_NOTE = "날씨는 다음 단계에서 넣습니다. 날씨와 매출을 
 PRICE_NOTE = "기본 시나리오의 가격은 10~11월 공식 가격입니다. 12월 요금 같은 달별 가격은 '적용할 변수'로 얹습니다."
 
 
+def season_text(month: int | None) -> str:
+    """계절 고르기 칸에 보일 말."""
+    return "정하지 않음 (일 년 전체)" if month is None else MONTH_SEASON[month]
+
+
 def month_text(month: int | None) -> str:
-    return "정하지 않음 (일 년 전체)" if month is None else f"{month}월 ({MONTH_SEASON[month]})"
+    """고른 것과 결과에 보일 말. 어느 달로 계산했는지 함께 적는다."""
+    return "일 년 전체" if month is None else f"{MONTH_SEASON[month].split(' ')[0]} ({month}월로 계산)"
 
 CHANGE_KINDS = ["준비된 상황", "경쟁 호텔이 할인한다", "우리 가격을 바꾼다", "우리 한정 메뉴를 더한다"]
 
@@ -227,16 +236,19 @@ def variable_panel(repo_root: Path) -> Inputs:
     whens = st.pills("때", list(WHEN_TO_CONDITION), selection_mode="multi", default=["저녁"], key="sim_whens") or []
     # 예시 묶음의 저장된 답은 달 없이 받은 것이라, 달을 주면 재생되지 않는다. 예시에서는 고르지 않게 한다.
     month = st.selectbox(
-        "계절 (달)",
+        "계절",
         MONTHS,
-        format_func=month_text,
+        format_func=season_text,
         key=f"sim_month_{root.is_example}",
         disabled=root.is_example,
         help="예시 자료는 달 없이 받아 둔 답이라 고를 수 없습니다." if root.is_example else None,
     )
     st.selectbox("날씨", ["다음 단계에서 넣습니다"], key="sim_weather", disabled=True, help=WEATHER_NOTE)
     if month is not None:
-        st.caption(SEASON_NOTE)
+        st.caption(
+            f"엔진은 달 하나로 돌려 {MONTH_SEASON[month].split(' ')[0]}은 {month}월로 계산합니다 "
+            "(봄 4월, 여름 7월, 가을 10월, 겨울 12월). " + SEASON_NOTE
+        )
 
     _section(4, "적용할 변수")
     change = st.selectbox("변수 종류", CHANGE_KINDS, key="sim_change")
@@ -344,14 +356,16 @@ def _persona_strip(inputs: Inputs) -> str:
     chosen = [c for c in inputs.cards if c["id"] in inputs.personas]
     items = "".join(
         f'<div class="sim-persona"><div class="ic">{as_img(persona_icon(c["name"], 30), "#6366f1", 30)}</div>'
-        f'<div><div class="nm">{escape(c["name"])}</div><div class="ln">{escape(c["group"])} · {escape(c["line"])}</div></div></div>'
+        f'<div class="tx"><div class="nm">{escape(c["name"])}</div>'
+        f'<div class="ln" title="{escape(c["group"])} · {escape(c["line"])}">{escape(c["group"])} · {escape(c["line"])}</div></div></div>'
         for c in chosen
     )
     return f'<div class="sim-personas">{items}</div>' if items else ""
 
 
 def render(repo_root: Path) -> None:
-    panel, main = st.columns([1.3, 2.7], gap="medium")
+    # 패널은 페르소나 이름표가 한 줄에 들어갈 만큼 둔다 (11-17 T204, 창 폭 820px 에서 재어 정함)
+    panel, main = st.columns([1.5, 2.5], gap="medium")
     with panel, st.container(border=True, key="sim_panel"):
         inputs = variable_panel(repo_root)
 
