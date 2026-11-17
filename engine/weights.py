@@ -175,6 +175,26 @@ def group_revenue(
     return dict(groups)
 
 
+def group_venue_revenue(
+    rows: list[SummaryRow], conditions: list[Condition], splits: list[AssumedSplit], venues: dict[str, Venue]
+) -> dict[str, dict[str, float]]:
+    """고객군마다, 워커힐 업장마다의 기본 데이터 매출. 보정의 대조에서 기본 데이터 쪽의 업장별 비중을 내는 데 쓴다 (docs/PRD.md 6.5절).
+
+    `group_revenue` 와 같은 줄을 같은 몫으로 센다: 읽은 워커힐 업장의 줄만, 돌리는 조건에 드는 몫만 넣고 조식과 돌리지 않는 조건은 뺀다.
+    그래서 한 고객군의 업장별 매출을 더하면 `group_revenue` 의 그 고객군 합계와 같다 (가상 매출을 맞춘 바로 그 매출이다).
+    """
+    split = next((s for s in splits if s.split_id == MEAL_SPLIT_ID), None)
+    ours = {venue_id: venue for venue_id, venue in venues.items() if not venue.is_competitor}
+    groups: dict[str, dict[str, float]] = defaultdict(lambda: defaultdict(float))
+    for row in rows:
+        if row.venue_id not in ours or row.revenue_net == 0:
+            continue
+        used = sum(part for condition_id, part, _ in _parts(row, conditions, split, ours) if condition_id is not None)
+        if used:
+            groups[row.customer_group][row.venue_id] += row.revenue_net * used
+    return {group: dict(by_venue) for group, by_venue in groups.items()}
+
+
 def _grade(data_mode: str, found: "GroupRevenue", leans_on_split: bool) -> str:
     """기본 데이터면 `internal`, 가상 예시면 `assumption`. 나누는 비율에 기대는 값이면 그 비율의 등급과 견줘 약한 것이다."""
     grade = "internal" if data_mode == "private" else "assumption"
