@@ -331,25 +331,64 @@ class Calibration(FormatModel):
 
 
 class VenueValidation(FormatModel):
-    """업장 하나의 검증 결과. 값은 비율이 아니라 건수다."""
+    """업장 하나의 검증 결과. 값은 비율이 아니라 건수다.
+
+    업장 일치는 `n` 건으로, 이유 일치는 고른 이유 라벨이 있는 `reason_n` 건으로 잰다.
+    5건 기준도 둘을 따로 본다 (`enough`, `reason_enough`. PRD 6.6절, T117).
+    """
 
     n: int = Field(ge=0)
     enough: bool
     venue_match: int | None = Field(ge=0)
     venue_match_baseline: int | None = Field(ge=0)
+    reason_n: int = Field(ge=0)
+    reason_enough: bool
     reason_match: int | None = Field(ge=0)
     reason_match_baseline: int | None = Field(ge=0)
 
     @model_validator(mode="after")
     def _rules(self) -> Self:
-        counts = (self.venue_match, self.venue_match_baseline, self.reason_match, self.reason_match_baseline)
-        if self.enough and any(c is None for c in counts):
-            raise ValueError("enough 가 true 면 건수를 모두 적는다")
-        if not self.enough and any(c is not None for c in counts):
-            raise ValueError("enough 가 false 면 건수는 null 이다 (검증 건수 부족)")
-        if any(c is not None and c > self.n for c in counts):
-            raise ValueError("건수가 n 보다 크다")
+        if self.reason_n > self.n:
+            raise ValueError("reason_n 이 n 보다 크다 (이유 일치는 n 건 가운데 고른 이유 라벨이 있는 후기로 잰다)")
+        _check_counts(self.enough, self.n, (self.venue_match, self.venue_match_baseline), "enough", "n")
+        _check_counts(
+            self.reason_enough,
+            self.reason_n,
+            (self.reason_match, self.reason_match_baseline),
+            "reason_enough",
+            "reason_n",
+        )
         return self
+
+
+def _check_counts(enough: bool, total: int, counts: tuple[int | None, ...], flag: str, total_name: str) -> None:
+    if enough and any(c is None for c in counts):
+        raise ValueError(f"{flag} 가 true 면 건수를 모두 적는다")
+    if not enough and any(c is not None for c in counts):
+        raise ValueError(f"{flag} 가 false 면 건수는 null 이다 (검증 건수 부족)")
+    if any(c is not None and c > total for c in counts):
+        raise ValueError(f"건수가 {total_name} 보다 크다")
+
+
+class ValidationTotal(FormatModel):
+    """모든 업장을 합친 검증 건수. 검증 건수가 모자란 업장의 후기도 들어간다 (PRD 6.6절, T117)."""
+
+    # 칸끼리의 한계(일치 건수 ≤ 분모, reason_n ≤ n)는 업장들과 함께 `Validation` 에서 본다.
+    n: int = Field(ge=0)
+    venue_match: int = Field(ge=0)
+    venue_match_baseline: int = Field(ge=0)
+    reason_n: int = Field(ge=0)
+    reason_match: int = Field(ge=0)
+    reason_match_baseline: int = Field(ge=0)
+
+
+# total 의 일치 건수마다, 그 건수를 잰 분모의 칸
+_TOTAL_DENOMINATORS = {
+    "venue_match": "n",
+    "venue_match_baseline": "n",
+    "reason_match": "reason_n",
+    "reason_match_baseline": "reason_n",
+}
 
 
 class Validation(FormatModel):
@@ -359,12 +398,30 @@ class Validation(FormatModel):
     created_at: AwareDatetime
     min_reviews: int = Field(ge=1)
     venues: dict[str, VenueValidation]
+    total: ValidationTotal
 
     @model_validator(mode="after")
     def _enough(self) -> Self:
         for venue_id, venue in self.venues.items():
             if venue.enough != (venue.n >= self.min_reviews):
                 raise ValueError(f"업장 '{venue_id}' 의 enough 가 n 과 min_reviews 로 정한 것과 다르다")
+            if venue.reason_enough != (venue.reason_n >= self.min_reviews):
+                raise ValueError(f"업장 '{venue_id}' 의 reason_enough 가 reason_n 과 min_reviews 로 정한 것과 다르다")
+        venues = list(self.venues.values())
+        for name in ("n", "reason_n"):
+            if getattr(self.total, name) != sum(getattr(v, name) for v in venues):
+                raise ValueError(f"total 의 {name} 이 업장들의 {name} 을 합친 것과 다르다")
+        # 검증 건수가 모자란 업장은 건수가 null 이다. 그래서 total 은 적힌 업장의 합 이상이고,
+        # 그 합에 null 인 업장의 분모를 더한 것 이하다. 모든 업장이 적혔으면 둘이 같아 합과 같아야 한다.
+        for name, denominator in _TOTAL_DENOMINATORS.items():
+            low = sum(getattr(v, name) for v in venues if getattr(v, name) is not None)
+            high = low + sum(getattr(v, denominator) for v in venues if getattr(v, name) is None)
+            total = getattr(self.total, name)
+            if not low <= total <= high:
+                raise ValueError(
+                    f"total 의 {name} 은 업장들에 적힌 건수의 합 {low} 이상, "
+                    f"건수가 모자란 업장의 {denominator} 까지 더한 {high} 이하다 (지금 {total})"
+                )
         return self
 
 
