@@ -10,7 +10,6 @@ from html import escape
 from pathlib import Path
 
 import streamlit as st
-import streamlit.components.v1 as components
 
 from app.board import WALKERHILL_NAMES, pct_change, venue_cards
 from app.compare import Comparison, combine_months, compare, summary_groups, zero_groups
@@ -256,14 +255,15 @@ def variable_panel(repo_root: Path) -> Inputs:
     # 예시 묶음의 저장된 답은 달 없이 받은 것이라, 달을 주면 재생되지 않는다. 예시에서는 고르지 않게 한다.
     example_help = "예시 자료는 달 없이 받아 둔 답이라 고를 수 없습니다." if root.is_example else None
     left, right = st.columns(2)
+    # "일 년 전체"는 0 으로 둔다. 선택지에 None 을 두면 Streamlit 이 "고르지 않음"으로 보고 영어 안내 글("Choose an option")을 띄웠다 (11-17 T206).
     start = left.selectbox(
         "기간 시작",
-        [None, *MONTHS],
-        format_func=lambda m: "일 년 전체" if m is None else f"{m}월",
+        [0, *MONTHS],
+        format_func=lambda m: f"{m}월" if m else "일 년 전체",
         key=f"sim_month_{root.is_example}",
         disabled=root.is_example,
         help=example_help,
-    )
+    ) or None
     end = right.selectbox(
         "기간 끝",
         MONTHS,
@@ -495,10 +495,7 @@ def show_result(saved: tuple) -> None:
     if n_chosen < n_all:
         notes.append(f"{scope}의 결과입니다. {ONE_PERSONA_NOTE}")
     if sim_months:
-        notes.append(
-            f"{months_text(sim_months)}: 달마다 돌려 평균했습니다. 금액은 그 기간의 매출이 아니라 일 년 규모로 맞춘 가상 값이라, "
-            f"볼 것은 변화율입니다. {SEASON_NOTE}"
-        )
+        notes.append(period_note(sim_months))
     st.caption("  \n".join(notes))
     per_month = [
         (
@@ -571,6 +568,14 @@ OPENAI_NOTE = "OpenAI 로 받은 답은 팀의 보정·시연 답(Claude)과 모
 ONE_PERSONA_NOTE = "한 고객군에서 한 명만 고르면 그 고객군의 매출 전체가 그 사람의 선택으로 나옵니다."
 
 
+def period_note(months: list[int]) -> str:
+    """기간을 골랐을 때 결과 위의 안내 (11-17 팀장 회신 ①): 달 평균, 같은 무게는 설계 가정, 금액은 일 년 규모."""
+    return (
+        f"{months_text(months)}: 달마다 돌려 평균했습니다 (달마다 같은 무게로 평균한 것은 설계 가정입니다). "
+        f"금액은 그 기간의 매출이 아니라 일 년 규모로 맞춘 가상 값이라, 볼 것은 변화율입니다. {SEASON_NOTE}"
+    )
+
+
 def persona_scope(chosen: int, total: int) -> str:
     """결과가 누구의 것인가. 머리 숫자 위와 안내에 적는다."""
     return f"페르소나 {total}명 모두" if total and chosen >= total else f"고른 페르소나 {chosen}명만"
@@ -606,8 +611,10 @@ def show_comparison(
         scenario_name or record.scenario_id,
         scope,
     )
-    html, height = render_scene(scene)
-    components.html(html, height=height, scrolling=False)
+    html, _ = render_scene(scene)
+    # st.components.v1.html 는 없어질 기능이라 st.iframe 으로 넣는다 (11-17 T206, hojitea-ui 알림). 이름과 이유는 render_scene 이 escape 한다.
+    # 높이는 st.iframe 이 내용을 재어 맞춘다. 어림한 높이(height)를 주면 페르소나가 많을 때 안쪽에 스크롤이 생겼다.
+    st.iframe(html, height="content")
 
     with st.expander("숫자와 카드로 자세히 보기"):
         _show_cards(comparison, catalog, names, allowed)
