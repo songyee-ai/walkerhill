@@ -64,7 +64,7 @@ uv run python -m pytest
 uv run python -m streamlit run app/main.py
 ```
 
-화면에서 조건을 골라 엔진을 돌리고, 페르소나와 방문 조건별 결과를 본다. 키가 없으면 저장된 답을 재생한다.
+화면에서 조건을 골라 엔진을 돌리고, 페르소나와 방문 조건별 결과를 본다. LLM 을 부를 준비가 안 됐으면 저장된 답을 재생한다.
 쓰는 법은 화면 담당의 안내(`docs/PROGRESS.md` 의 T09, T202)를 본다.
 화면이 만든 상황 파일(`scenarios/ui-*.json`)은 깃이 무시한다. 시연에 쓸 상황은 사람이 확정해 `ui-` 없이 올린다.
 가상 예시 값으로 돌린 실행 폴더(`engine/samples/runs/<run_id>/`)도 깃이 무시한다 (T107). 각자 연습으로 받은 답이 올라가지 않게 한다.
@@ -77,14 +77,13 @@ uv run python -m engine --data sample
 ```
 
 - 방문마다 앞선 실행의 저장된 응답을 먼저 찾아 재생하고, 없는 것만 LLM 을 부른다. 그래서 같은 것을 다시 돌리면 LLM 을 부르지 않는다.
-- LLM 을 부르려면 `.env.example` 을 `.env` 로 복사하고 자기 OpenAI 키(`LLM_API_KEY`)와 팀이 정한 모델(`LLM_MODEL`)을 넣는다.
-  공급자와 주소는 `.env.example` 에 팀 설정으로 이미 적혀 있다. 호출 상한도 `.env` 에서 바꾼다.
-- **로컬에서 시험할 때는 자기 Claude 구독으로 먼저 돌린다** (공급자 `claude-code`, T104·T106). OpenAI 키는 보정·시연 답을 받을 때 쓴다.
-  `.env` 에서 아래 세 줄만 바꾸고, 터미널에서 `claude auth login` 을 한 번 한다 (브라우저가 열리면 자기 Claude 계정으로 로그인).
+- LLM 을 부르려면 `.env.example` 을 `.env` 로 복사하고, 터미널에서 `claude auth login` 을 한 번 한다 (브라우저가 열리면 자기 Claude 계정으로 로그인).
+  **팀은 각자의 Claude 구독으로 부른다** (공급자 `claude-code`, 11-17 에 정함. T114). API 키는 쓰지 않는다.
+  공급자와 모델은 `.env.example` 에 팀 설정으로 이미 적혀 있으니 아래 세 줄을 그대로 둔다. 호출 상한도 `.env` 에서 바꾼다.
 
 ```text
 LLM_PROVIDER=claude-code
-LLM_MODEL=claude-sonnet-5-5
+LLM_MODEL=claude-opus-5-5
 CLAUDE_CODE_PATH=
 ```
 
@@ -96,11 +95,15 @@ Get-ChildItem "$env:LOCALAPPDATA\Claude-Data" -Recurse -Filter claude.exe -Error
 ```
 
   - 데스크톱 앱의 로그인은 앱 안에서만 쓰인다. 앱에 로그인돼 있어도 `claude auth login` 은 따로 한 번 해야 한다. 경로를 적었으면 `& "<그 경로>" auth login` 이다.
-  - 가상 예시 값(`--data sample`)으로만 돌린다. 기본 데이터(`--data private`)는 팀이 정한 공급자로만 돌린다 (요약이 어느 회사로 가는지 팀이 정한다. `docs/MEETING_1117.md` ③).
-  - 이 답은 시연과 보정에 쓰지 않는다. 실행 폴더(`engine/samples/runs/<run_id>/`)는 깃이 무시하므로 올라가지 않는다 (T107).
-  - 구독의 사용 한도는 자기 Claude Code 작업과 함께 쓴다. 호출 하나가 2만 토큰을 넘으니(T104 실측) `--personas`, `--conditions` 로 작게 돌린다.
+  - **보정·시연에 쓸 답은 팀장 PC 한 곳에서 받는다.** 나머지는 그 답을 받아 재생한다 (`docs/MEETING_1117.md` ②).
+    각자 시험할 때는 가상 예시 값(`--data sample`)을 `--personas`, `--conditions` 로 작게 돌린다.
+  - 구독의 사용 한도는 자기 Claude Code 작업과 함께 쓴다. 호출 하나가 입력 1만 5천 ~ 3만 토큰이다 (T104·T114 실측).
     한도에 닿으면 엔진이 멈추고, 한도가 풀린 뒤 다시 돌리면 받은 답은 재생한다.
-- 키가 없으면 `--replay-only` 를 붙인다. 저장된 응답만 재생하고, 저장된 응답이 없는 방문은 실패로 남는다.
+  - 기본 데이터(`--data private`)로 부르기 전에, 답을 받는 계정의 Claude 개인정보 설정에서 "모델 학습에 사용"이 꺼져 있는지 확인한다.
+    확인하기 전에는 `--base-profile none` 으로 돌린다 (`CLAUDE.md` 의 "스택", `docs/MEETING_1117.md` ③).
+  - 가상 예시 값으로 돌린 실행 폴더(`engine/samples/runs/<run_id>/`)는 깃이 무시하므로 올라가지 않는다 (T107).
+  - 다른 공급자(OpenAI 등)로 따로 돌려 볼 수는 있다. 그 답은 보정과 시연에 쓰지 않는다. 공급자나 모델이 다르면 팀이 받은 답과 서로 재생되지 않는다.
+- 로그인하지 않았거나 LLM 을 부르지 않으려면 `--replay-only` 를 붙인다. 저장된 응답만 재생하고, 저장된 응답이 없는 방문은 실패로 남는다.
 - 일부만 돌릴 때: `--personas`, `--conditions`, `--venues` 뒤에 식별자를 적는다.
 - 한 달의 방문으로 돌릴 때: `--month <1 ~ 12>` 를 적는다 (계절을 볼 때. T112). 그 달에 팔지 않는 업장과 상품이 후보에서 빠지고, 요청에 달이 실린다.
   적지 않으면 일 년 전체로 본다. 달이 다르면 요청이 달라 저장된 답도 따로 받는다. 예: `uv run python -m engine --data sample --month 12`
@@ -128,8 +131,8 @@ Get-ChildItem "$env:LOCALAPPDATA\Claude-Data" -Recurse -Filter claude.exe -Error
 - 검사에서 어긋난 응답은 실행 폴더의 `llm_rejected/` 에 남는다. 이유는 원장의 `fail_reason` 에 있다.
 - 명령이 끝날 때의 값(`$LASTEXITCODE`): `0` 끝까지 돌았다 (실패한 방문이 있어도 0 이다. 화면에 알린다), `1` 돌리지 못했거나 LLM 을 부를 수 없어 멈췄다, `2` 호출 상한에 닿아 멈췄다.
 - `.env` 는 명령을 돌리는 폴더의 것만 읽는다. 저장소의 맨 위 폴더에서 돌린다.
-- 키 없이 연습할 때는 예시 파일 한 벌의 사본을 돌린다 (사본은 깃이 무시하는 `private/` 에 둔다).
-  예시의 저장된 답은 Anthropic(`claude-opus-5-5`)으로 받은 것이다. 팀 `.env`(OpenAI)와 공급자가 달라 그대로는 재생되지 않으므로,
+- LLM 을 부르지 않고 연습할 때는 예시 파일 한 벌의 사본을 돌린다 (사본은 깃이 무시하는 `private/` 에 둔다).
+  예시의 저장된 답은 공급자 `anthropic`(`claude-opus-5-5`)으로 받은 것이다. 팀 `.env`(공급자 `claude-code`)와 공급자가 달라 그대로는 재생되지 않으므로,
   **그 창에서만** 공급자를 예시의 값으로 바꾸고 `--replay-only` 를 붙인다 (`.env` 는 이미 있는 환경 변수를 덮어쓰지 않는다. 화면은 이것을 스스로 한다).
   예시에는 프롬프트가 `p1` 하나뿐이고 저장된 답도 `p1` 로 받은 것이라 `--prompt p1` 도 적는다:
 
@@ -161,7 +164,7 @@ uv run python -m engine --data sample --root private/try-example --prompt p1 --s
 - 명령은 `uv run python -m <도구>` 꼴로 쓴다. `uv run pytest` 나 `uv run streamlit` 처럼 쓰면 윈도우의 스마트 앱 컨트롤이
   실행 파일을 막는 PC 가 있다 (11-13, 스마트 앱 컨트롤이 켜진 윈도우 11 PC 에서 확인).
 - 화면은 이 PC 에서만 열린다 (`.streamlit/config.toml`). 화면에 내부 자료에서 계산한 값이 나올 수 있어서다.
-- LLM 을 실제로 부르려면 `.env.example` 을 `.env` 로 복사하고 자기 OpenAI 키와 팀이 정한 모델을 넣는다. 키가 없어도 위의 확인과 화면은 돌아간다.
-  `.env` 는 깃에 올라가지 않는다. 키는 서로 주고받지 않는다.
+- LLM 을 실제로 부르려면 `.env.example` 을 `.env` 로 복사하고 `claude auth login` 을 한 번 한다 (팀은 각자의 Claude 구독으로 부른다). 로그인하지 않아도 위의 확인과 화면은 돌아간다.
+  `.env` 는 깃에 올라가지 않는다. 로그인 정보와 키는 서로 주고받지 않는다.
 - 패키지를 더하거나 버전을 바꾸는 것은 엔진 담당만 한다. 필요하면 진행 문서의 "알릴 것"에 적는다.
 - 내부 자료와 실행 결과는 `private/` 에만 둔다 ([CLAUDE.md](CLAUDE.md) 의 "비밀값과 공개 저장소").
