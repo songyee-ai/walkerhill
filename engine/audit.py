@@ -84,12 +84,18 @@ def _expected_discounts(venue: Venue, condition: RunCondition, rows: list[Ledger
 
 
 def _condition_problems(
-    row: LedgerRow, condition: RunCondition, request_persona_id: object, personas: dict[str, Persona], bundle: ConditionBundle
+    row: LedgerRow,
+    condition: RunCondition,
+    request_persona_id: object,
+    personas: dict[str, Persona],
+    bundle: ConditionBundle,
+    month: int | None,
 ) -> list[str]:
-    """저장된 요청의 조건이 페르소나 정의와 방문 조건 묶음에서 나온 것인지 본다.
+    """저장된 요청의 조건이 페르소나 정의와 방문 조건 묶음, 실행의 달에서 나온 것인지 본다.
 
     인원과 예산을 요청에서만 읽으면, 조건을 만드는 코드가 틀렸을 때 그 틀린 값으로 확인하게 된다.
     화면에서 직접 넣은 조건(`manual-`)은 인원과 예산을 사람이 넣은 것이라 견줄 것이 없다.
+    달은 묶음이 아니라 실행 기록의 `month` 와 견준다 (묶음의 조건에는 달이 없다. docs/FORMATS.md 6절).
     """
     problems = []
     if request_persona_id != row.persona_id or condition.condition_id != row.condition_id:
@@ -104,9 +110,11 @@ def _condition_problems(
         problems.append("요청의 인원이 페르소나 정의와 다르다")
     if condition.budget != persona.budget:
         problems.append("요청의 예산이 페르소나 정의와 다르다")
-    for key in ("occasion", "meal", "day_type", "stay", "month"):
+    for key in ("occasion", "meal", "day_type", "stay"):
         if getattr(condition, key) != getattr(planned, key):
             problems.append(f"요청의 {key} 가 묶음의 조건과 다르다")
+    if condition.month != month:
+        problems.append("요청의 month 가 실행의 달과 다르다")
     return problems
 
 
@@ -116,8 +124,13 @@ def violations(
     saved: dict[str, SavedResponse],
     personas: dict[str, Persona],
     bundle: ConditionBundle,
+    *,
+    month: int | None,
 ) -> list[str]:
     """업장을 고른 방문마다 조건을 어겼는지 본다. 어긴 것을 `<방문> — <종류>: <설명>` 으로 돌려준다.
+
+    `month` 에는 그 실행의 달(실행 기록의 `month`)을 꼭 준다. 일 년 전체로 돌린 실행이면 None 이다.
+    빼먹고 볼 수 없게 기본값을 두지 않았다 (달을 주고 돌린 실행을 None 으로 보면 모든 방문이 "조건 불일치"로 나온다).
 
     `status` 가 ok 인 줄만 본다. 방문의 조건은 그 줄의 `request_hash` 가 가리키는 저장된 응답의 요청에서 읽되,
     그 조건이 페르소나 정의와 묶음에서 나온 것인지도 따로 견준다. 예산의 한도는 페르소나 정의에서 낸다.
@@ -150,7 +163,9 @@ def violations(
             bad("없는 업장", f"'{bought[0].venue_id}'")
             continue
         condition: RunCondition = entry.request.condition
-        for problem in _condition_problems(bought[0], condition, entry.request.persona.get("persona_id"), personas, bundle):
+        for problem in _condition_problems(
+            bought[0], condition, entry.request.persona.get("persona_id"), personas, bundle, month
+        ):
             bad("조건 불일치", problem)
         people = condition.adults + condition.children
 

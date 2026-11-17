@@ -11,6 +11,7 @@
   "condition_ids": [
     "meal-dinner-weekend"
   ],
+  "month": null,
   "llm": {
     "provider": "anthropic",
     "model": "claude-opus-5-5",
