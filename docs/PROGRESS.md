@@ -2352,7 +2352,7 @@ REVIEW_RULES 12절의 페르소나 담당 몫 넷은 모두 동의해(T101 알�
 - [x] hojitea-ui ← songyee-ai (11-13): 업장 데이터 영역에 일이 더해졌습니다. 떼어 둘 후기 20%의 분리·보관·라벨, 기본 데이터 집계 파일, 가상 예시 값, 11-17 부터 후기 라벨링 지원입니다 (PRD 5.2절, 10절, 14절). (확인: hojitea-ui 11-13, PRD 5.2·10·14절을 읽고 T13·T15 사전 작업을 시작함)
 - [x] borigunbbang ← songyee-ai (11-13): 후기는 주소 목록으로 먼저 모으고, 그중 20%는 hojitea-ui 가 가져갑니다. 그 후기는 페르소나를 다 만든 뒤에 받습니다. 라벨은 값 목록에서 고릅니다 (PRD 5.2절). (확인: borigunbbang 11-18)
 - [x] wilstein91 ← songyee-ai (11-13): (확인: wilstein91 11-16, 셋을 확정해 PRD 3절을 고쳤고 T20 에 경위를 적음) 시연 시나리오 후보 세 개가 PRD 3절에 있습니다. 11-17 까지 대상 업장과 바꿀 내용을 확정해 주세요.
-- [ ] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-13): 공통 틀이 들어갔습니다. `git pull` 뒤 `README.md` 의 "실행 방법"대로 `uv sync` 와 세 가지 확인을 돌려 주세요. 안 되면 이 목록에 적어 주세요. 그다음 내 폴더의 안내 파일(`README.md`)을 읽고, `tests/fixtures/example/` 의 예시 파일을 베껴서 시작합니다. (확인: borigunbbang 11-13, macOS 에서 `uv sync` 뒤 ruff·형식 검사·pytest 274개 모두 통과) (확인: wilstein91 11-16, 윈도우 11 에서 `uv sync` 뒤 ruff·형식 검사·pytest 622개 모두 통과)
+- [x] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-13): 공통 틀이 들어갔습니다. `git pull` 뒤 `README.md` 의 "실행 방법"대로 `uv sync` 와 세 가지 확인을 돌려 주세요. 안 되면 이 목록에 적어 주세요. 그다음 내 폴더의 안내 파일(`README.md`)을 읽고, `tests/fixtures/example/` 의 예시 파일을 베껴서 시작합니다. (확인: borigunbbang 11-13, macOS 에서 `uv sync` 뒤 ruff·형식 검사·pytest 274개 모두 통과) (확인: wilstein91 11-16, 윈도우 11 에서 `uv sync` 뒤 ruff·형식 검사·pytest 622개 모두 통과) (확인: hojitea-ui 11-18, 윈도우 11 에서 `uv sync` 뒤 ruff·형식 검사·pytest PYTEST 모두 통과)
 - [ ] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-13): 패키지를 더하거나 버전을 바꾸는 것은 엔진 담당만 합니다. 필요한 패키지가 생기면 이 목록에 적어 주세요. 명령은 `uv run python -m <도구>` 꼴로 씁니다 (`CLAUDE.md` 의 "스택" 절).
   (확인: hojitea-ui 11-16, 패키지를 더하지 않았고 명령은 `uv run python -m <도구>` 꼴로 씁니다) (확인: borigunbbang 11-18)
 - [x] wilstein91 ← songyee-ai (11-13): `app/main.py` 에 화면의 뼈대를 넣어 두었습니다. T09 에서 마음대로 고쳐 쓰면 됩니다. `.streamlit/config.toml` 의 `address` 는 바꾸지 말아 주세요. (확인: wilstein91 11-16, T09 에서 고쳐 썼고 `.streamlit/config.toml` 은 고치지 않음)
@@ -2433,7 +2433,7 @@ REVIEW_RULES 12절의 페르소나 담당 몫 넷은 모두 동의해(T101 알�
   (확인: songyee-ai 11-13. 옮긴 내용이 맞습니다. 수집 방식과 지킬 조건을 PRD 5.2절 "후기를 모으는 방식"에 풀어 적었습니다)
 - [ ] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-13): PRD 5.2절 "후기를 모으는 방식"을 실제 방식에 맞게 고쳤습니다.
   후기는 수집 담당자가 직접 표 파일로 받고, AI 도구는 라벨링에만 씁니다. 받은 파일은 `private/` 에만 두고,
-  후기의 원문·닉네임·주소는 코드, 문서, 커밋 메시지, PR 어디에도 적지 않습니다. 새 업장의 파일을 받으면 올리기 전에 같은 대조를 해 주세요. (확인: borigunbbang 11-18)
+  후기의 원문·닉네임·주소는 코드, 문서, 커밋 메시지, PR 어디에도 적지 않습니다. 새 업장의 파일을 받으면 올리기 전에 같은 대조를 해 주세요. (확인: borigunbbang 11-18) (확인: hojitea-ui 11-18)
 - [x] songyee-ai ← borigunbbang (11-13): 후기 라벨의 `purpose`, `party` 를 비워도 되게 형식(`engine/formats/evidence.py` 의 `ReviewLabel`)을 바꿔 주세요.
   지금은 두 칸이 꼭 채우는 칸이라, REVIEW_RULES 9절("글에 없으면 빈 칸, 빈 칸이 많은 것이 정상")대로 뽑은 금룡 후기 163건 가운데
   24건만 형식 검사를 통과합니다. 화면의 방문 목적·동행은 최근 후기에만 있어 나머지 대부분이 빕니다. 걸린 점처럼 쓸모 있는 근거가 있는
@@ -2482,8 +2482,8 @@ REVIEW_RULES 12절의 페르소나 담당 몫 넷은 모두 동의해(T101 알�
 - [x] wilstein91 ← songyee-ai (11-14): (확인: wilstein91 11-16, 셋 모두 화면 위에 알리게 했고 실패한 방문은 실패 이유를 보여 줌. 테스트와 브라우저로 확인) 실행하는 명령이 생겼습니다: `uv run python -m engine --data sample` (`README.md` 의 "시뮬레이션을 돌린다"). 화면에서 알아 둘 것은 셋입니다.
   ① 실행 폴더에 `llm_rejected/` 가 생길 수 있습니다 (검사에서 어긋난 응답. `FORMATS.md` 10.3절). ② 실행 기록의 `status` 가 `stopped_by_limit` 이나 `failed` 인 실행은 원장에 방문이 일부만 있습니다.
   ③ 원장의 `llm_call` 이 `new` 인 실패한 줄이 나올 수 있습니다 (LLM 을 불렀는데 실패했거나 답이 어긋난 방문).
-- [ ] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-14): `.env.example` 에 변수가 늘었습니다 (`LLM_BASE_URL`, `LLM_API_KEY`. 다른 공급자를 쓸 때만 적습니다). 키는 각자 발급해 자기 PC 의 `.env` 에만 둡니다.
-  키가 없으면 `--replay-only` 로 저장된 응답만 재생할 수 있습니다. 명령은 저장소의 맨 위 폴더에서 돌립니다 (`.env` 를 그 폴더에서 읽습니다). (확인: wilstein91 11-16, 키 없이 `--replay-only` 로 예시 사본을 돌려 봄) (확인: borigunbbang 11-18)
+- [x] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-14): `.env.example` 에 변수가 늘었습니다 (`LLM_BASE_URL`, `LLM_API_KEY`. 다른 공급자를 쓸 때만 적습니다). 키는 각자 발급해 자기 PC 의 `.env` 에만 둡니다.
+  키가 없으면 `--replay-only` 로 저장된 응답만 재생할 수 있습니다. 명령은 저장소의 맨 위 폴더에서 돌립니다 (`.env` 를 그 폴더에서 읽습니다). (확인: wilstein91 11-16, 키 없이 `--replay-only` 로 예시 사본을 돌려 봄) (확인: borigunbbang 11-18) (확인: hojitea-ui 11-18)
 - [ ] wilstein91 ← songyee-ai (11-14): 기준이 아닌 상황을 돌릴 수 있습니다 (T10): `uv run python -m engine --data sample --scenario <scenario_id>` (`README.md` 의 "시뮬레이션을 돌린다").
   ① **기준 상황을 먼저 끝까지 돌려야 합니다.** 상황은 가장 새 기준 실행의 페르소나, 방문 조건, 가중치로 돌고, 실행 기록의 `weights_from` 에 그 `run_id` 가 남습니다. 상황별 비교 화면(T21)은 이 값으로 짝을 찾으면 됩니다.
   ② 기준 실행 뒤에 업장 정의, 페르소나, 조건 묶음, 값 목록, 프롬프트, 모델이 바뀌었으면 상황이 돌지 않고 이유를 알립니다. 기준 상황을 다시 돌리면 됩니다 (`FORMATS.md` 10.1절).
@@ -2605,7 +2605,7 @@ REVIEW_RULES 12절의 페르소나 담당 몫 넷은 모두 동의해(T101 알�
 - [ ] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-16): **LLM 공급자를 OpenAI 로 바꿨습니다** (T103). 각자 `.env` 를 다시 만들어 주세요.
   `Copy-Item .env.example .env` 뒤 `LLM_API_KEY` 에 자기 OpenAI 키를 넣습니다. 공급자와 주소는 이미 적혀 있습니다.
   `LLM_MODEL` 은 11-17 회의에서 정할 때까지 연습용으로 아무 모델이나 적어도 되지만, 그 답은 시연에 쓰지 않습니다 (모델이 다르면 서로 재생되지 않습니다).
-  엔진은 이제 요청마다 고를 수 있는 값만 받는 응답 스키마를 보냅니다 (`FORMATS.md` 9절). 스키마를 받지 않는 주소면 `LLM_RESPONSE_FORMAT=json_object` 입니다. (확인: borigunbbang 11-18)
+  엔진은 이제 요청마다 고를 수 있는 값만 받는 응답 스키마를 보냅니다 (`FORMATS.md` 9절). 스키마를 받지 않는 주소면 `LLM_RESPONSE_FORMAT=json_object` 입니다. (확인: borigunbbang 11-18) (확인: hojitea-ui 11-18)
 - [ ] wilstein91 ← songyee-ai (11-16): `app/runs.py` 의 `key_ready` 를 고쳤습니다 (T103, 팀장이 고치기로 정함). OpenAI 처럼 밖의 주소는 주소·모델·키가 모두 있어야 켜집니다
   (전에는 주소만 있어도 켜져 부르는 순간 실패했습니다). 테스트는 `tests/app/test_app_runs.py` 에 더했습니다.
   엄격한 스키마를 OpenAI 가 받는지는 팀장이 자기 키로 확인합니다 (T103). 각자 돌리다 HTTP 400 으로 거절되면 오류 원문을 이 목록에 적고, 그동안은 `LLM_RESPONSE_FORMAT=json_object` 로 돌리면 됩니다.
@@ -2617,7 +2617,7 @@ REVIEW_RULES 12절의 페르소나 담당 몫 넷은 모두 동의해(T101 알�
   키 주인 계정의 데이터 설정을 확인합니다. 내키지 않으면 `--base-profile none` 으로 돌립니다.
   응답 스키마에도 페르소나와 요약의 키 이름(업장·이용 상황 이름 등)이 고를 값으로 실립니다. 본문에 이미 가는 값이라 새로 나가는 것은 아닙니다.
   ④ 계절(`--month`)을 엔진에 넣을지, 날씨를 이번에 뺄지 (화면에는 선택이 있고 "아직 반영되지 않음"으로 표시 중).
-  - songyee-ai (11-16): 네 가지를 세 분의 답을 모아 정했습니다 (정함: songyee-ai 11-16, `MEETING_1117.md` 1부). ① 큰 모델 ② 팀장 PC ③ 추천대로 ④ 계절만. (확인: borigunbbang 11-18)
+  - songyee-ai (11-16): 네 가지를 세 분의 답을 모아 정했습니다 (정함: songyee-ai 11-16, `MEETING_1117.md` 1부). ① 큰 모델 ② 팀장 PC ③ 추천대로 ④ 계절만. (확인: borigunbbang 11-18) (확인: hojitea-ui 11-18)
 - [x] wilstein91, songyee-ai ← borigunbbang (11-16): 구글 리뷰 수집을 부탁드립니다 (T301). 맡을 업장, 모으는 순서, 저장한 파일을 확인하는 프롬프트가
   [GOOGLE_REVIEWS.md](GOOGLE_REVIEWS.md) 에 있습니다. 기한은 11-17 저녁입니다. 파일은 저장소 밖으로 보내 주시고, 보낸 날짜와 업장을 이 줄에 적어 주세요.
   (받음: borigunbbang 11-16, songyee-ai 의 여섯 업장(피자힐·르파사쥬 포함)과 wilstein91 의 금룡·온달. 각자 PC 의 저장본과 묶음을 지워 주세요. GOOGLE_REVIEWS.md "넘기기" 3번)
@@ -2686,7 +2686,7 @@ REVIEW_RULES 12절의 페르소나 담당 몫 넷은 모두 동의해(T101 알�
   (확인: hojitea-ui 11-16, 읽고 답을 PR 65번으로 올렸습니다) (확인: borigunbbang 11-18)
 - [x] borigunbbang ← songyee-ai (11-16): 티스토리·트립닷컴 후기에 원문 없이 AI 가 요약한 칸만 있는 이유를 알려 주세요 (T15, `MEETING_1117.md` 2부 가.).
   ① 요약을 누가 만들었는지(플랫폼 화면에 원래 있던 것인지, 모으면서 AI 도구로 만든 것인지) ② 원문을 브라우저로 다시 열어 모을 수 있는지입니다. (확인: borigunbbang 11-18, 11-16 에 메신저로 답함)
-- [ ] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-16): **로컬에서 시험할 때는 OpenAI 키보다 자기 Claude 구독(공급자 `claude-code`)으로 먼저 돌려 주세요** (T106).
+- [x] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-16): **로컬에서 시험할 때는 OpenAI 키보다 자기 Claude 구독(공급자 `claude-code`)으로 먼저 돌려 주세요** (T106).
   제가 이 방식으로 돌려 처음 검사를 통과했습니다 (T104). OpenAI 는 회의에서 정할 PC 한 곳에서 보정·시연 답을 받을 때 씁니다.
   설정은 README 의 "시뮬레이션을 돌린다"에 있습니다: `.env` 에서 `LLM_PROVIDER=claude-code`, `LLM_MODEL=claude-sonnet-5-5`, 필요하면 `CLAUDE_CODE_PATH` 를 적고 `claude auth login` 을 한 번 합니다.
   지킬 것 셋: 가상 예시 값(`--data sample`)으로만 돌린다, 이 답은 시연·보정에 쓰지 않는다, `engine/samples/runs/` 의 실행 폴더는 커밋하지 않는다.
@@ -2717,7 +2717,7 @@ REVIEW_RULES 12절의 페르소나 담당 몫 넷은 모두 동의해(T101 알�
 - [ ] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-16): **엔진 명령의 기본 프롬프트가 p2 로 바뀌었습니다** (T108). `--prompt` 를 적지 않으면 p2 로 돕니다.
   p1 로 받아 둔 답은 p2 에서 재생되지 않습니다. p1 로 돌린 기준 실행 위에 상황을 돌리려면 `--prompt p1` 을 적거나 기준 상황을 p2 로 다시 돌려 주세요.
   예시 사본(`tests/fixtures/example` 을 베낀 것)에는 p1 만 있어 README 의 명령대로 `--prompt p1` 을 적습니다. 빼먹고 `--replay-only` 로 돌리면 기준 상황은 멈추지 않고 방문이 실패로 남고,
-  기준이 아닌 상황은 기준 실행과 판이 달라 멈춥니다. (확인: borigunbbang 11-18)
+  기준이 아닌 상황은 기준 실행과 판이 달라 멈춥니다. (확인: borigunbbang 11-18) (확인: hojitea-ui 11-18)
 - [x] wilstein91 ← songyee-ai (11-16): 화면의 기본 판은 아직 p1 입니다 (T108). `app/main.py` 의 프롬프트 선택과 `app/runs.py` 의 `prompt: str = "p1"` 두 곳입니다.
   화면은 `--prompt` 를 늘 적어 엔진에 넘겨서 이번 변경으로 동작이 달라지지는 않습니다. 팀 자료는 p2, 예시 자료는 p1 이 되게 바꿀지 봐 주세요 (예시 묶음에는 p1 만 있습니다).
   간편 시뮬레이터(`app/simulator.py`)는 판을 고르는 칸이 없어 `app/runs.py` 의 기본값을 그대로 씁니다. 그래서 지금은 팀 자료도 p1 로 돕니다.
@@ -2731,7 +2731,7 @@ REVIEW_RULES 12절의 페르소나 담당 몫 넷은 모두 동의해(T101 알�
   할 일: songyee-ai 지출 상한 올리고 모델 판 이름 정하기, 엔진에 달 넣기, 데이터 설정 확인 /
   borigunbbang 원본을 hojitea-ui 에게 보내기, 값 목록과 프롬프트 새 판(달의 뜻과 "이용 시간 제한"), PR 63 의 충돌 풀기 /
   hojitea-ui 트립닷컴 원문 다시 찾기, "이용 시간 제한" 7건 라벨, 회의에서 자료 조건 알리기 /
-  wilstein91 날씨 칸을 "다음 단계"로, 화면과 발표에 "기준 실행의 가격은 10~11월 공식 가격"과 모에기 한계 문장. (확인: borigunbbang 11-18)
+  wilstein91 날씨 칸을 "다음 단계"로, 화면과 발표에 "기준 실행의 가격은 10~11월 공식 가격"과 모에기 한계 문장. (확인: borigunbbang 11-18) (확인: hojitea-ui 11-18)
 - [x] borigunbbang ← songyee-ai (11-16): **REVIEW_RULES 의 확인 두 가지를 부탁드립니다** (T101. 이 둘이 끝나야 T101 이 완료됩니다).
   ① 규칙 문서 전체를 확인했으면 위 11-13 의 "규칙 초안이 REVIEW_RULES.md 에 있습니다" 줄에 확인을 적어 주세요 (hojitea-ui 는 11-16 에 적었습니다).
   ② [REVIEW_RULES.md](REVIEW_RULES.md) 12절의 페르소나 담당 몫 넷에 팀장 추천을 적었습니다. 모두 "지금 하던 대로"입니다:
@@ -2746,12 +2746,12 @@ REVIEW_RULES 12절의 페르소나 담당 몫 넷은 모두 동의해(T101 알�
   라벨에는 화면 값이 남지 않아 저장소로는 알 수 없습니다. `데이트`·`나들이`·`친척・형제자매` 는 전과 같습니다.
   (확인: borigunbbang 11-17, `private/` 의 정돈 표와 견줘 화면 값에 `비즈니스` 가 있는데 빈 칸이던 라벨 하나(`R-pizzahill-3038`, 화면 값 "나들이, 비즈니스")를 `업무상 식사` 로 고쳤습니다. 나머지는 이미 `업무상 식사` 였습니다. T16 의 경위)
   - hojitea-ui (11-17): 떼어 둔 후기 쪽은 **없음**입니다. 라벨 407건의 방문자 리뷰 몫을 정돈 표의 화면 값과 이어 봤고, 받은 떼어 둔 파일 전체에도 화면 방문 목적 `비즈니스` 가 없었습니다.
-- [ ] borigunbbang, hojitea-ui ← songyee-ai (11-16): REVIEW_RULES 12절의 엔진 담당 몫 둘을 정했습니다 (T101). 두 분이 지금 하시는 방식 그대로입니다.
+- [x] borigunbbang, hojitea-ui ← songyee-ai (11-16): REVIEW_RULES 12절의 엔진 담당 몫 둘을 정했습니다 (T101). 두 분이 지금 하시는 방식 그대로입니다.
   ① 파일로 받은 후기는 `FORMATS.md` 4.3절의 주소 목록 세 파일을 만들지 않습니다. 나눈 기록(`split_log.csv`)과 정돈 표의 `raw_key` 로 대신합니다.
   ② 나누고 검증하는 프로그램은 `tools/` 에 올리지 않고 만든 사람의 `private/` 에 둡니다. 누가 돌려도 같은 결과인지는 씨앗의 지문과 나눈 기록으로 확인합니다 (6절의 조건 1).
   3절에 "값이 있는 칸끼리 센다"와 화면 낱말 `여행`·`비즈니스` 를, 8절에 `여행` → `여행·호캉스` 를 넣었습니다. 다르게 하고 계시면 알려 주세요.
   (확인: borigunbbang 11-18, 제 쪽도 그대로입니다. 주소 목록 세 파일은 만들지 않았고 나눈 기록과 씨앗이 `private/evidence/split/` 에 있으며,
-  나누는 프로그램은 `private/scripts/` 에만 있습니다 (`tools/` 에는 없음). 3절과 8절에 더하신 문장도 지금 판에 있는 것을 봤습니다)
+  나누는 프로그램은 `private/scripts/` 에만 있습니다 (`tools/` 에는 없음). 3절과 8절에 더하신 문장도 지금 판에 있는 것을 봤습니다) (확인: hojitea-ui 11-18, 제 쪽도 그대로입니다. 주소 목록 세 파일은 만들지 않았고, 받은 파일을 대조하고 라벨을 붙인 프로그램은 `private/` 에만 있습니다)
 - [x] hojitea-ui ← borigunbbang (11-16): 경쟁 업장(T14)에 쓸 만한 호텔 가격 기사를 정리했습니다 (T302, 출처는 T302 절). 기사 값이라 쓰려면 공식 메뉴판으로 다시 확인해 주세요.
   ① 더뷔페의 두 번째 경쟁 업장 후보: 12월 저녁 기준 라세느 210,000 → 235,000(12-19~), 포시즌스 더 마켓 키친 219,000 → 229,000(12-24~),
   웨스틴 조선 아리아 210,000 → 225,000(12-18~), 조선 팰리스 콘스탄스 205,000 → 225,000(12-18~)·235,000(12-24·25·31), JW메리어트 플레이버즈 209,000 → 234,000(12-19~).
@@ -2936,7 +2936,7 @@ REVIEW_RULES 12절의 페르소나 담당 몫 넷은 모두 동의해(T101 알�
     방문 1건 (실패 0건) · 새로 부름 1번 · 38초쯤. 실행 폴더는 깃이 무시합니다.
   (확인: borigunbbang 11-17, macOS. `.env` 를 다시 베끼고 공급자 `claude-code`, 모델 `claude-opus-5-5`, 프롬프트 p3 으로 가상 예시 값의 방문 2건을 새로 불러 실패 0건으로 끝까지 돌았습니다.
   `family-parents` × 주말 저녁 `--month 12` 1건과 `gourmet-explorer` × 주말 디저트 1건이고, 고른 이유가 모두 값 목록에서 나왔습니다. 입력은 호출 하나에 1만 2천 ~ 1만 7천 토큰이었습니다)
-- [ ] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-17): **기본 데이터의 요약은 이제 엔진이 확인 전에 막습니다** (T115). 가상 예시 값(`--data sample`)으로 돌릴 때는 달라지는 것이 없습니다.
+- [x] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-17): **기본 데이터의 요약은 이제 엔진이 확인 전에 막습니다** (T115). 가상 예시 값(`--data sample`)으로 돌릴 때는 달라지는 것이 없습니다.
   기본 데이터(`--data private`)로 LLM 을 부르면, `.env` 의 `BASE_PROFILE_CONFIRMED_FOR` 에 지금 받는 곳의 이름(팀 설정이면 `claude-code`)이 적혀 있지 않을 때 엔진이 멈추고 이유와 적을 값을 알립니다.
   이 값은 **보정·시연 답을 받는 PC(팀장)에서만**, 확인 둘(`MEETING_1117.md` ③)이 끝난 뒤에 적습니다. 다른 PC 에서는 비워 둡니다. 확인 전에 기본 데이터로 돌려 보려면 `--base-profile none` 을 적습니다. 재생만 할 때(`--replay-only`)는 막지 않습니다.
   `.env.example` 에 그 이름을 더했으니 `.env` 를 다시 베낄 때 함께 들어옵니다.
@@ -2945,7 +2945,7 @@ REVIEW_RULES 12절의 페르소나 담당 몫 넷은 모두 동의해(T101 알�
   확인 값은 하나라, 확인한 PC 에서도 AI 메뉴의 한쪽만 통과합니다 (팀 설정이면 "Claude"). "OpenAI"는 `openai-compatible:<주소의 호스트>` 로 따로 확인해야 하고, 팀은 그 길을 쓰지 않습니다.
   저장된 답이 모두 있는 조합도 AI 를 켜고 돌리면 멈춥니다. 재생만 할 때는 AI 를 끄고 돌리면 됩니다.
   (확인: wilstein91 11-17, 화면이 엔진과 같은 두 값을 먼저 견줘 확인 전이면 재생만 하고, 재생만인 것과 저장된 답이 없는 방문 수를 보임. `--base-profile none` 은 화면에서 고르지 않음. T205)
-  (확인: borigunbbang 11-17, 이 PC 의 `.env` 는 그 값을 비워 두었고, 받은 기본 데이터 기준 실행을 `--base-profile bucketed --replay-only` 로 재생해 멈추지 않고 48건 모두 재생되는 것을 봄)
+  (확인: borigunbbang 11-17, 이 PC 의 `.env` 는 그 값을 비워 두었고, 받은 기본 데이터 기준 실행을 `--base-profile bucketed --replay-only` 로 재생해 멈추지 않고 48건 모두 재생되는 것을 봄) (확인: hojitea-ui 11-18, 이 PC 의 `.env` 는 그 값을 비워 두었고 가상 예시 값으로만 부릅니다)
 - [x] songyee-ai ← borigunbbang (11-17): **보정(T18)에 쓸 기본 데이터의 기준 실행을 부탁드립니다.** 페르소나 여섯 명 × 묶음 여덟 조건을 달 없이 `--data private` 로 한 번 돌려 주세요 (호출 48번).
   `--base-profile` 은 확인 둘(`MEETING_1117.md` ③)의 상태대로 정해 주세요. 확인 전이면 `none` 으로 받아도 첫 대조는 할 수 있습니다.
   돌린 뒤 `private/runs/<run_id>/` 폴더를 저장소가 아닌 길로 보내 주시면, 제 PC 에서 `--replay-only` 로 재생해 대조하고 그 결과로 페르소나를 고칩니다.
@@ -2984,11 +2984,12 @@ REVIEW_RULES 12절의 페르소나 담당 몫 넷은 모두 동의해(T101 알�
   ④ 통과 기준(가장 큰 업장이 같다, 차이 15%p 이내)은 코드에 적혀 있고 명령으로 바꿀 수 없습니다. 첫 대조 뒤에 고치자고 하실 것이 있으면 이 줄에 적어 주세요.
   (확인: borigunbbang 11-17, macOS 에서 `develop` 을 받아 가상 예시 값의 기준 실행 하나를 이 명령으로 대조해 끝 값 0 으로 끝났습니다.
   같은 실행을 `private/scripts/calibrate.py` 로 내어 기본 데이터 쪽 업장별 비중이 모든 칸에서 같았습니다. T18 의 "잰 방법"을 이 명령으로 고쳤습니다)
-- [ ] hojitea-ui ← songyee-ai (11-17): **기본 데이터 집계 파일(`private/base/summary.csv`)을 팀장 PC 로 보내 주세요** (저장소 밖의 길로. T13 에서 만드신 파일입니다).
+- [x] hojitea-ui ← songyee-ai (11-17): **기본 데이터 집계 파일(`private/base/summary.csv`)을 팀장 PC 로 보내 주세요** (저장소 밖의 길로. T13 에서 만드신 파일입니다).
   보정·시연 답을 팀장 PC 에서 받기로 했는데(`MEETING_1117.md` ②) 이 PC 에 집계 파일이 없어 기본 데이터로 돌릴 수 없습니다. 페르소나의 비공개 층(`private/personas/`)이 있으면 borigunbbang 이 함께 보내 주세요.
   받으면 줄 수를 알려 드릴 테니 보내신 것과 같은지 봐 주세요.
   - borigunbbang (11-17): 페르소나의 비공개 층은 없습니다. T17 에서 받은 참고 소스의 근거를 쓰지 않아 `private/personas/` 를 만들지 않았습니다. 보낼 것이 없습니다.
   - hojitea-ui (11-17): 저장소 밖의 길로 보냈습니다. 줄 수는 집계 파일의 값이라 메신저로 알려 드립니다. 받으신 줄 수가 같은지 알려 주세요.
+  - hojitea-ui (11-18): 받으신 줄 수와 sha256 앞자리가 같다고 T18 의 경위에 적으신 것을 확인했습니다.
 - [ ] wilstein91 ← songyee-ai (11-17): 기준 실행 폴더에 `calibration.json` 이 생길 수 있습니다 (T116, 형식은 `FORMATS.md` 10.4절). 화면은 아직 이 파일을 읽지 않습니다.
   T22 (근거 보기)에서 "다루지 않은 고객군"과 고객군별 통과 여부를 보일 때 이 파일을 쓰시면 됩니다. 기본 데이터로 돌린 실행의 것은 수치를 발표 화면에 그대로 보일지 먼저 정해야 합니다 (PRD 17절).
 - [x] hojitea-ui, borigunbbang ← songyee-ai (11-17): **이유 일치는 재는 방법을 바꾸지 않고 건수와 함께 적습니다** (T117, PRD 6.6절. hojitea-ui 의 위 11-17 줄의 답). 칭찬은 지금처럼 이유로 세지 않습니다 (REVIEW_RULES 9절 그대로).
@@ -3068,7 +3069,7 @@ REVIEW_RULES 12절의 페르소나 담당 몫 넷은 모두 동의해(T101 알�
 - [ ] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-17): **규칙의 "학습 설정 끄기"를 요금제에 따라 확인하는 법으로 고쳤습니다** (T118, `CLAUDE.md` 의 "스택", README, `MEETING_1117.md` ③).
   기본 데이터의 답을 받는 팀장 계정이 팀 요금제라 학습 스위치가 없었습니다. 팀 요금제는 상업 약관이라 기본으로 학습에 쓰지 않고, 조직이 개발 파트너 프로그램에 가입한 경우만 예외입니다.
   내 계정의 요금제는 `& "<CLAUDE_CODE_PATH>" auth status` 의 `subscriptionType` 으로 볼 수 있습니다. 가상 예시 값으로 시험하실 때는 달라지는 것이 없습니다.
-  (확인: borigunbbang 11-17, 읽었습니다. 이 PC 는 기본 데이터의 요약을 보내지 않고(`BASE_PROFILE_CONFIRMED_FOR` 비움) 가상 예시 값으로만 부릅니다)
+  (확인: borigunbbang 11-17, 읽었습니다. 이 PC 는 기본 데이터의 요약을 보내지 않고(`BASE_PROFILE_CONFIRMED_FOR` 비움) 가상 예시 값으로만 부릅니다) (확인: hojitea-ui 11-18, 이 PC 는 `BASE_PROFILE_CONFIRMED_FOR` 를 비워 두고 가상 예시 값으로만 부릅니다)
 - [x] hojitea-ui ← songyee-ai (11-17): **기본 데이터의 요약을 받는 곳을 더 정확히 알립니다** (T118. 위 T114 줄에서 자료를 준 쪽의 조건을 확인해 주신 것에 더함).
   받는 회사는 Anthropic 그대로이고, 보내는 계정은 개인 구독이 아니라 수업 조직의 팀 계정(팀 요금제, 상업 약관)입니다. 이 차이로 자료를 준 쪽의 조건이 달라지면 이 줄에 적어 주시고, 그대로면 체크해 주세요.
   - hojitea-ui (11-17): 그대로입니다. T114 의 확인은 밖의 서비스로 보내는 것을 막는 조건이 없었다는 것이라, 보내는 계정이 팀 계정이어도 달라지지 않습니다.
@@ -3086,9 +3087,9 @@ REVIEW_RULES 12절의 페르소나 담당 몫 넷은 모두 동의해(T101 알�
   기준은 이 실행(`--run 20261117-174859-baseline`)입니다. 프로그램은 그 실행 뒤에 입력이 바뀌었으면 멈추니, 부르기 전에 페르소나 파일을 고치지 않은 `develop` 에서 돌려 주세요.
   (확인: songyee-ai 11-18, 읽었습니다. 그 실행 뒤로 `develop` 의 페르소나·업장 정의·방문 조건·값 목록·프롬프트가 바뀌지 않은 것을 `git diff 509e518` 로 봤습니다.
   시연 답(T120)도 같은 실행에 붙여 받았습니다. 319건은 묶음과 프로그램을 받아 읽어 본 뒤 부르고, 위 11-17 의 T19 줄에 적습니다)
-- [ ] hojitea-ui ← songyee-ai (11-18): **`main` 에 푸시가 막히는지 한 번 시험해 주세요** (T01 의 마지막 완료 조건).
+- [x] hojitea-ui ← songyee-ai (11-18): **`main` 에 푸시가 막히는지 한 번 시험해 주세요** (T01 의 마지막 완료 조건).
   `git switch develop`, `git pull` 뒤 `git push origin develop:main` 을 하면 규칙("main 은 팀장만 올린다") 때문에 거절돼야 합니다. 거절 메시지의 첫 줄을 이 줄에 적어 체크해 주세요.
-  혹시 올라가 버리면 바로 알려 주세요. `develop` 과 같은 커밋이라 `main` 이 깨지지는 않습니다.
+  혹시 올라가 버리면 바로 알려 주세요. `develop` 과 같은 커밋이라 `main` 이 깨지지는 않습니다. (시험: hojitea-ui 11-18, 윈도우 11 에서 `git push origin develop:main` 이 거절됨. 첫 줄은 `remote: error: GH013: Repository rule violations found for refs/heads/main.` 이고 `main` 은 그대로였다)
 - [x] songyee-ai ← borigunbbang (11-18): **REVIEW_RULES 를 다 확인했습니다** (T101 ①). 다시 붙일 라벨은 없습니다. 문서에 빠진 것 다섯을 드립니다. 고칠지와 언제 고칠지는 정해 주세요.
   ① 6절: 페르소나 담당은 20%를 두지 않는다고만 있고, 페르소나를 다 만든 뒤 떼어 둔 후기의 라벨을 받아 T19 에 쓰는 순서(11-13 알림, T15·T19)가 없습니다.
   ② 9절: `customer_group` 을 "`purpose` 와 `party` 를 채운 뒤 값 목록에서 고른다"고만 있고, 어느 짝이 어느 고객군인지 정한 표가 없습니다.
@@ -3107,7 +3108,7 @@ REVIEW_RULES 12절의 페르소나 담당 몫 넷은 모두 동의해(T101 알�
   재생: `uv run python -m engine --data private --scenario <scenario_id> --baseline 20261117-174859-baseline --replay-only` (집계 파일 `private/base/summary.csv` 가 있어야 합니다).
   팀장 PC 의 빈 폴더에서 이 명령으로 세 상황 모두 새로 부름 0번, 실패 0건이었습니다.
   **이 답은 페르소나, 업장 정의, 방문 조건 묶음, 값 목록, 프롬프트를 고치면 재생되지 않습니다.** 동결(11-19) 전에 고칠 것이 있으면 먼저 알려 주세요. 다시 받습니다.
-  wilstein91: T21 의 "시연용 저장 답으로 끝까지 재생"에 이 압축을 쓰세요. 받아서 재생해 보신 분은 이 줄에 이름과 날짜를 적어 주세요.
+  wilstein91: T21 의 "시연용 저장 답으로 끝까지 재생"에 이 압축을 쓰세요. 받아서 재생해 보신 분은 이 줄에 이름과 날짜를 적어 주세요. (재생: hojitea-ui 11-18, 윈도우 11 에서 받은 압축을 저장소 맨 위에 풀어 세 상황 모두 방문 48건, 새로 부름 0번, 실패 0건)
 - [ ] borigunbbang ← songyee-ai (11-18): **REVIEW_RULES 를 확정했습니다. 두 곳만 실제와 같은지 봐 주세요** (T101, 위 11-18 의 T101 줄의 답).
   ① 9절 "고객군 표": T16 의 표에 T17 에서 미식 방문을 넣은 순서(가족 → 업무상 식사 → 기념일 → 미식 방문 → 지인·동료 → 동료·거래처 → 부부·연인 → 친구·모임 → 혼자)로 적었습니다.
   두 경위를 합쳐 적은 것이라, 예를 들어 동행이 `동료·거래처` 이고 목적이 `기념일` 인 후기는 이 순서로는 `커플·기념일` 입니다. 실제로 돌린 표와 다르면 고쳐 주세요.
