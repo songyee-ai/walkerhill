@@ -2311,25 +2311,25 @@ REVIEW_RULES 12절의 페르소나 담당 몫 넷은 모두 동의해(T101 알�
 남의 영역을 고쳤거나 남이 알아야 할 변경이 있으면 여기에 적는다. 받은 사람이 확인하고 체크한다.
 형식: `- [ ] 받는 사람 ← 보낸 사람 (날짜): 내용`
 
-- [ ] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-11): 깃헙 초대를 수락하고 `CLAUDE.md` 를 읽어 주세요. (확인: hojitea-ui 11-13)
-- [ ] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-12): 내부 자료는 `private/` 폴더에만 두고, 그 내용을 저장소 파일에 옮겨 적지 않습니다. `CLAUDE.md` 의 "비밀값과 공개 저장소" 절을 읽어 주세요. (확인: hojitea-ui 11-13)
-- [ ] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-13): PRD 가 확정됐습니다. [PRD.md](PRD.md) 14절에서 내 영역을, 8절에서 기한과 중간 기한을 확인해 주세요. (확인: hojitea-ui 11-13)
-- [ ] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-13): 실행하면 생기는 파일(저장된 LLM 응답, 원장, 대조 결과)은 `private/` 아래에만 둡니다. 실측 기록과 PR 본문에는 통과 여부와 잰 방법만 적습니다 (`CLAUDE.md` 의 "비밀값과 공개 저장소" 절에 새로 넣은 규칙, PRD 10절). (확인: hojitea-ui 11-13)
+- [ ] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-11): 깃헙 초대를 수락하고 `CLAUDE.md` 를 읽어 주세요. (확인: hojitea-ui 11-13) (확인: borigunbbang 11-18)
+- [ ] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-12): 내부 자료는 `private/` 폴더에만 두고, 그 내용을 저장소 파일에 옮겨 적지 않습니다. `CLAUDE.md` 의 "비밀값과 공개 저장소" 절을 읽어 주세요. (확인: hojitea-ui 11-13) (확인: borigunbbang 11-18)
+- [ ] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-13): PRD 가 확정됐습니다. [PRD.md](PRD.md) 14절에서 내 영역을, 8절에서 기한과 중간 기한을 확인해 주세요. (확인: hojitea-ui 11-13) (확인: borigunbbang 11-18)
+- [ ] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-13): 실행하면 생기는 파일(저장된 LLM 응답, 원장, 대조 결과)은 `private/` 아래에만 둡니다. 실측 기록과 PR 본문에는 통과 여부와 잰 방법만 적습니다 (`CLAUDE.md` 의 "비밀값과 공개 저장소" 절에 새로 넣은 규칙, PRD 10절). (확인: hojitea-ui 11-13) (확인: borigunbbang 11-18)
 - [x] hojitea-ui ← songyee-ai (11-13): 업장 데이터 영역에 일이 더해졌습니다. 떼어 둘 후기 20%의 분리·보관·라벨, 기본 데이터 집계 파일, 가상 예시 값, 11-17 부터 후기 라벨링 지원입니다 (PRD 5.2절, 10절, 14절). (확인: hojitea-ui 11-13, PRD 5.2·10·14절을 읽고 T13·T15 사전 작업을 시작함)
-- [ ] borigunbbang ← songyee-ai (11-13): 후기는 주소 목록으로 먼저 모으고, 그중 20%는 hojitea-ui 가 가져갑니다. 그 후기는 페르소나를 다 만든 뒤에 받습니다. 라벨은 값 목록에서 고릅니다 (PRD 5.2절).
+- [x] borigunbbang ← songyee-ai (11-13): 후기는 주소 목록으로 먼저 모으고, 그중 20%는 hojitea-ui 가 가져갑니다. 그 후기는 페르소나를 다 만든 뒤에 받습니다. 라벨은 값 목록에서 고릅니다 (PRD 5.2절). (확인: borigunbbang 11-18)
 - [x] wilstein91 ← songyee-ai (11-13): (확인: wilstein91 11-16, 셋을 확정해 PRD 3절을 고쳤고 T20 에 경위를 적음) 시연 시나리오 후보 세 개가 PRD 3절에 있습니다. 11-17 까지 대상 업장과 바꿀 내용을 확정해 주세요.
 - [ ] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-13): 공통 틀이 들어갔습니다. `git pull` 뒤 `README.md` 의 "실행 방법"대로 `uv sync` 와 세 가지 확인을 돌려 주세요. 안 되면 이 목록에 적어 주세요. 그다음 내 폴더의 안내 파일(`README.md`)을 읽고, `tests/fixtures/example/` 의 예시 파일을 베껴서 시작합니다. (확인: borigunbbang 11-13, macOS 에서 `uv sync` 뒤 ruff·형식 검사·pytest 274개 모두 통과) (확인: wilstein91 11-16, 윈도우 11 에서 `uv sync` 뒤 ruff·형식 검사·pytest 622개 모두 통과)
 - [ ] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-13): 패키지를 더하거나 버전을 바꾸는 것은 엔진 담당만 합니다. 필요한 패키지가 생기면 이 목록에 적어 주세요. 명령은 `uv run python -m <도구>` 꼴로 씁니다 (`CLAUDE.md` 의 "스택" 절).
-  (확인: hojitea-ui 11-16, 패키지를 더하지 않았고 명령은 `uv run python -m <도구>` 꼴로 씁니다)
+  (확인: hojitea-ui 11-16, 패키지를 더하지 않았고 명령은 `uv run python -m <도구>` 꼴로 씁니다) (확인: borigunbbang 11-18)
 - [x] wilstein91 ← songyee-ai (11-13): `app/main.py` 에 화면의 뼈대를 넣어 두었습니다. T09 에서 마음대로 고쳐 쓰면 됩니다. `.streamlit/config.toml` 의 `address` 는 바꾸지 말아 주세요. (확인: wilstein91 11-16, T09 에서 고쳐 썼고 `.streamlit/config.toml` 은 고치지 않음)
 - [ ] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-13): 형식 검사가 깃에 올라갈 모든 파일을 훑습니다. 데이터 폴더(`data/`, `personas/`, `scenarios/`)에는 [FORMATS.md](FORMATS.md) 1절의 파일과 안내 파일만 두고, 엑셀 파일과 묶은 파일은 올리지 않습니다. 작업 중인 파일은 맨 위의 `private/` 에 둡니다. JSON 의 숫자는 따옴표 없이 적고, CSV 는 "CSV UTF-8"로 저장합니다. 검사가 막는데 꼭 필요한 파일이면 이 목록에 적어 주세요.
-  (확인: hojitea-ui 11-16, 데이터 폴더에는 1절의 파일만 두고, 받은 엑셀·묶음 파일과 작업 파일은 `private/` 에만 둡니다)
+  (확인: hojitea-ui 11-16, 데이터 폴더에는 1절의 파일만 두고, 받은 엑셀·묶음 파일과 작업 파일은 `private/` 에만 둡니다) (확인: borigunbbang 11-18)
 - [x] borigunbbang ← songyee-ai (11-13): 프롬프트의 문장은 `personas/prompts/` 에 둡니다. 응답의 `rejected` 에는 고르지 않은 후보가 빠짐없이 한 번씩 있어야 하니, 프롬프트에 그렇게 적어 주세요 (`FORMATS.md` 9절).
 - [x] wilstein91 ← songyee-ai (11-13): (확인: wilstein91 11-16, 화면은 `read_model` 로 읽고 실패한 줄을 합계에 넣지 않음. 화면 테스트는 예시 실행을 임시 폴더에 베껴 씀) 코드에서 JSON 파일을 읽을 때는 `engine.formats.read_model(경로, 모델)` 을 씁니다. 화면의 뼈대도 그렇게 바꿨습니다. 화면 테스트에 쓸 예시 파일을 더할 때는 `tests/fixtures/<이름>/` 아래에 저장소와 같은 폴더 모양으로 둡니다 (`tests/fixtures/example/` 을 베껴서 고치면 됩니다. 그 묶음도 형식 검사를 받습니다). 원장의 합계는 `status` 가 `ok` 인 줄로만 냅니다. 실패한 방문은 금액이 0 인 줄 하나로 남습니다 (`FORMATS.md` 10.2절).
 - [ ] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-13): 표나 JSON 에 `순매출`, `총결제액` 이라는 열 이름이 있으면 형식 검사가 기본 데이터로 보고 막습니다. 지어낸 값으로 만든 표의 열 이름은 `FORMATS.md` 의 영어 이름(`revenue_net`, `paid`)으로 적어 주세요.
-  (확인: hojitea-ui 11-16, 가상 예시 값의 열 이름은 영어 이름으로 적었습니다 (T13))
-- [ ] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-13): 작업 유닛 T03 ~ T24 를 진행 표에 올렸습니다. 내 유닛의 번호, 기한, 기다리는 것, 완료 조건을 읽어 주세요. 나누는 방식이나 기한에 고칠 것이 있으면 이 목록에 적어 주세요. 커밋과 PR 제목 앞에는 이 번호를 붙입니다. (확인: hojitea-ui 11-13)
-- [ ] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-13): 데이터 형식 약속의 초안이 [FORMATS.md](FORMATS.md) 에 있습니다. 1절의 표에서 내가 만드는 파일과 쓰는 파일을 찾아 읽어 주세요. 고칠 것이 있으면 이 목록에 적고, 없으면 체크해 주세요. 세 명이 체크하면 확정합니다. (확인: hojitea-ui 11-13, 고칠 것 7건이 PR 26번으로 반영된 것을 확인)
+  (확인: hojitea-ui 11-16, 가상 예시 값의 열 이름은 영어 이름으로 적었습니다 (T13)) (확인: borigunbbang 11-18)
+- [ ] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-13): 작업 유닛 T03 ~ T24 를 진행 표에 올렸습니다. 내 유닛의 번호, 기한, 기다리는 것, 완료 조건을 읽어 주세요. 나누는 방식이나 기한에 고칠 것이 있으면 이 목록에 적어 주세요. 커밋과 PR 제목 앞에는 이 번호를 붙입니다. (확인: hojitea-ui 11-13) (확인: borigunbbang 11-18)
+- [ ] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-13): 데이터 형식 약속의 초안이 [FORMATS.md](FORMATS.md) 에 있습니다. 1절의 표에서 내가 만드는 파일과 쓰는 파일을 찾아 읽어 주세요. 고칠 것이 있으면 이 목록에 적고, 없으면 체크해 주세요. 세 명이 체크하면 확정합니다. (확인: hojitea-ui 11-13, 고칠 것 7건이 PR 26번으로 반영된 것을 확인) (확인: borigunbbang 11-18)
 - [x] songyee-ai ← hojitea-ui (11-13): 기본 데이터에는 PRD 2절·5.1절에 적힌 `유형` 열이 없고 `페르소나` 열이 있습니다. (확인: songyee-ai 11-13, PRD 6.1절과 용어 풀이에는 설명이 있었고, 처음 나오는 2절과 5.1절에도 "기본 데이터의 `페르소나` 열"이라는 설명을 붙임)
 - [x] songyee-ai ← hojitea-ui (11-13): FORMATS 3절 `price_basis` 의 `excluded` 는 세금과 봉사료가 따로 붙는 가격인데 엔진은 1.1 만 곱합니다. 봉사료 10% 와 부가세 10% 가 따로면 1.21 입니다. 공개 가격의 표기가 해마다 달라 둘 다 나옵니다. `excluded_vat`(×1.1)·`excluded_vat_service`(×1.21)로 나누기를 제안합니다. (확인: songyee-ai 11-13, 제안대로 둘로 나누고 `excluded` 는 없앰. `FORMATS.md` 2절·3절)
 - [x] songyee-ai ← hojitea-ui (11-13): FORMATS 3절에서 가격이 `null` 인 상품을 "집계 파일의 매출 ÷ 수량"으로 채우면 `revenue_net` 이 세금을 뺀 값이라 단가가 세금만큼 낮아집니다. 8절 집계 파일에 `paid`(세금 포함 결제액의 합) 열을 더하고 `paid ÷ quantity` 로 채우기를 제안합니다. (확인: songyee-ai 11-13, 제안대로 집계 파일에 `paid` 열을 더하고 `paid ÷ quantity` 로 채움. `FORMATS.md` 3절·8절)
@@ -2344,7 +2344,7 @@ REVIEW_RULES 12절의 페르소나 담당 몫 넷은 모두 동의해(T101 알�
   (확인: hojitea-ui 11-16, 읽었고, 그 뒤 회의와 PR 44번으로 정해진 순서(6절)대로 떼어 둔 후기를 받아 라벨을 붙였습니다 (T15))
   (확인: borigunbbang 11-18, 지금 판(11-17, PR 135 뒤)의 1 ~ 13절 전체를 Claude Code 로 읽고 제가 해 온 나누기·정돈·라벨 작업과 견줬습니다.
   다시 붙일 라벨은 없고, 문서에 빠진 것 다섯을 아래 11-18 의 T101 줄에 적었습니다)
-- [ ] borigunbbang ← songyee-ai (11-13): 지도 서비스의 방문자 리뷰에는 방문 목적과 동행이 항목으로 따로 표시됩니다 (최근 후기에만). PRD 5.2절 "수집 첫날 확인할 것"의 첫 항목에 해당합니다. 화면 값을 값 목록으로 옮기는 대응표가 [REVIEW_RULES.md](REVIEW_RULES.md) 8절에 있고, 맞는 값이 없는 것이 세 가지 있습니다.
+- [x] borigunbbang ← songyee-ai (11-13): 지도 서비스의 방문자 리뷰에는 방문 목적과 동행이 항목으로 따로 표시됩니다 (최근 후기에만). PRD 5.2절 "수집 첫날 확인할 것"의 첫 항목에 해당합니다. 화면 값을 값 목록으로 옮기는 대응표가 [REVIEW_RULES.md](REVIEW_RULES.md) 8절에 있고, 맞는 값이 없는 것이 세 가지 있습니다. (확인: borigunbbang 11-18)
 - [x] hojitea-ui ← songyee-ai (11-13): 파일로 받는 후기는 본문이 이미 들어 있어, 20%를 떼기 전에 페르소나 담당이 열면 안 됩니다. 파일을 업장 데이터 담당이 먼저 받는 순서를 [REVIEW_RULES.md](REVIEW_RULES.md) 6절에 제안했습니다.
   (확인: hojitea-ui 11-16, 회의와 PR 44번으로 페르소나 담당이 열지 않고 나눠 넘기는 방식으로 정해져 이 제안은 닫습니다. 받은 20% 의 대조는 T15 의 경위)
 - [x] hojitea-ui ← songyee-ai (11-13): 위 의견 7건을 형식에 반영하면서, 올려 두신 파일을 같은 PR 에서 새 형식으로 옮겼습니다. 형식과 파일이 함께 바뀌지 않으면 자동 검사가 실패하기 때문입니다. 옮긴 내용을 확인해 주세요.
@@ -2360,7 +2360,7 @@ REVIEW_RULES 12절의 페르소나 담당 몫 넷은 모두 동의해(T101 알�
     더파빌리온 빙수를 6-01 ~ 9-30 으로 적고 있어 6~9월로 고쳤습니다. 기본 데이터에는 그 밖의 달(5월, 10월)에도 빙수 판매가 있습니다.
     업장 정의는 공개 자료 쪽이 맞다고 봅니다. 기본 데이터의 그 몫을 엔진에서 어떻게 셀지 정해 주세요. 가상 예시 값의 5월 빙수 4줄은 지웠습니다.
 - [ ] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-13): 데이터 형식이 바뀌었습니다. 상품의 파는 때는 `slots`(끼니와 요일의 짝), 가격 표기는 `included`·`excluded_vat`·`excluded_vat_service`·`unknown`, 집계 파일에는 `month` 와 `paid` 열이 생겼습니다. 방문 조건 묶음에는 투숙 여부와 조식을 넣지 않습니다. 상황 정의에서 상품을 더할 때(`add_product`)도 `slots` 를 씁니다. 바뀌기 전 형식으로 적은 파일은 형식 검사가 받지 않습니다 (`FORMATS.md` 3절·6절·8절).
-  (확인: hojitea-ui 11-16, 업장 정의 16개가 새 형식으로 `--strict` 형식 검사를 오류 없이 지나는 것을 확인했습니다. 남은 오류 1건은 페르소나의 몫입니다)
+  (확인: hojitea-ui 11-16, 업장 정의 16개가 새 형식으로 `--strict` 형식 검사를 오류 없이 지나는 것을 확인했습니다. 남은 오류 1건은 페르소나의 몫입니다) (확인: borigunbbang 11-18)
 - [x] songyee-ai ← hojitea-ui (11-13): T06 업장 정의(`data/venues/pizzahill.json`, `parnas-mercato521.json`)에 엔진과 맞춰야 할 가정이 세 가지 있습니다.
   ① 피자힐은 11:30~22:00 의 90분 7부제라 끼니 구분이 없어 16:00 을 점심·저녁 경계로 잡았습니다. ② 세이스 피자(6가지 맛 한 판)를 4인분(`serves` 4)으로 봤습니다.
   ③ 메르카토521 은 세트가 저녁에만 있어, 점심은 단품(마르게리타 `serves` 2, 볼로네제 `choice`)으로 넣었습니다. 최소 버전의 방문 조건이 저녁이면 점심 단품은 쓰이지 않습니다. 다르게 보시면 알려 주세요.
@@ -2399,13 +2399,13 @@ REVIEW_RULES 12절의 페르소나 담당 몫 넷은 모두 동의해(T101 알�
   (확인: songyee-ai 11-13. 옮긴 내용이 맞습니다. 수집 방식과 지킬 조건을 PRD 5.2절 "후기를 모으는 방식"에 풀어 적었습니다)
 - [ ] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-13): PRD 5.2절 "후기를 모으는 방식"을 실제 방식에 맞게 고쳤습니다.
   후기는 수집 담당자가 직접 표 파일로 받고, AI 도구는 라벨링에만 씁니다. 받은 파일은 `private/` 에만 두고,
-  후기의 원문·닉네임·주소는 코드, 문서, 커밋 메시지, PR 어디에도 적지 않습니다. 새 업장의 파일을 받으면 올리기 전에 같은 대조를 해 주세요.
+  후기의 원문·닉네임·주소는 코드, 문서, 커밋 메시지, PR 어디에도 적지 않습니다. 새 업장의 파일을 받으면 올리기 전에 같은 대조를 해 주세요. (확인: borigunbbang 11-18)
 - [x] songyee-ai ← borigunbbang (11-13): 후기 라벨의 `purpose`, `party` 를 비워도 되게 형식(`engine/formats/evidence.py` 의 `ReviewLabel`)을 바꿔 주세요.
   지금은 두 칸이 꼭 채우는 칸이라, REVIEW_RULES 9절("글에 없으면 빈 칸, 빈 칸이 많은 것이 정상")대로 뽑은 금룡 후기 163건 가운데
   24건만 형식 검사를 통과합니다. 화면의 방문 목적·동행은 최근 후기에만 있어 나머지 대부분이 빕니다. 걸린 점처럼 쓸모 있는 근거가 있는
   후기도 빠집니다. 바뀌면 나머지를 같은 후기 번호로 더하겠습니다.
   (확인: songyee-ai 11-13, 요청대로 두 칸을 비워도 되게 함. `summary` 도 본문이 없는 후기는 비울 수 있다. 대신 근거가 되는 칸이 모두 빈 줄은 오류다. `FORMATS.md` 4.1절)
-- [ ] borigunbbang, hojitea-ui ← songyee-ai (11-13): 후기 라벨의 형식이 바뀌었습니다. `purpose`, `party` 는 글과 화면에 없으면 비웁니다. 값을 지어내지 않습니다.
+- [x] borigunbbang, hojitea-ui ← songyee-ai (11-13): 후기 라벨의 형식이 바뀌었습니다. `purpose`, `party` 는 글과 화면에 없으면 비웁니다. 값을 지어내지 않습니다.
   `summary` 는 본문이 있으면 꼭 쓰고, 본문 없이 화면 값만 있는 후기만 비웁니다 (이것은 형식 검사가 보지 못합니다).
   `purpose`, `party`, `ordered`, `reasons_chosen`, `pain_points`, `compared_with`, `would_return` 이 모두 빈 줄은 형식 검사가 막습니다. 그런 후기는 올리지 않습니다.
   borigunbbang: 금룡의 나머지 후기를 같은 번호로 더해 주세요. hojitea-ui: 떼어 둔 후기와 돕는 라벨에도 같은 규칙입니다 (`FORMATS.md` 4.1절). (확인: hojitea-ui 11-16, 떼어 둔 후기와 돕는 라벨에 같은 규칙을 씁니다)
@@ -2426,7 +2426,7 @@ REVIEW_RULES 12절의 페르소나 담당 몫 넷은 모두 동의해(T101 알�
   안은 셋입니다: ① 적용하지 않는다 (할인은 주문에만. 형식이 그대로다) ② 퍼센트 할인만 적용 (요청의 `addons` 에 할인 칸을 더한다) ③ 주문과 똑같이 적용 ("가장 큰 할인 하나만" 규칙을 요청을 만들 때 미리 계산할 수 없게 된다).
   지금은 업장 정의에 프로모션이 없어 금액이 달라지지 않습니다. 정한 것은 T10 에서 넣습니다 (`FORMATS.md` 12절).
   - songyee-ai (11-16): ① 적용하지 않는다로 정했습니다. 아래 11-16 항목을 읽고 체크해 주세요.
-  (확인: hojitea-ui 11-16, 아래 11-16 항목의 결정(적용하지 않음)을 읽었습니다)
+  (확인: hojitea-ui 11-16, 아래 11-16 항목의 결정(적용하지 않음)을 읽었습니다) (확인: borigunbbang 11-18)
 - [ ] borigunbbang, wilstein91, hojitea-ui ← songyee-ai (11-13): 선택 요청과 응답의 형식이 바뀌었습니다 (`FORMATS.md` 9절 "주문이 없는 후보"). 포장·구매 업장은 상품이 모두 고객이 수량을 정하는 상품이라,
   후보의 `options` 가 빈 목록이고 `addons` 만 있습니다. 그 업장을 고를 때는 `option_id` 를 `null` 로 두고 추가 상품을 하나 이상 삽니다. 주문이 있는 업장에서는 주문을 꼭 하나 고릅니다.
   예산의 `max` 는 고른 주문과 추가 상품을 더한 금액과 견줍니다. 넘는 답은 실패로 남습니다.
@@ -2448,7 +2448,7 @@ REVIEW_RULES 12절의 페르소나 담당 몫 넷은 모두 동의해(T101 알�
   ① 실행 폴더에 `llm_rejected/` 가 생길 수 있습니다 (검사에서 어긋난 응답. `FORMATS.md` 10.3절). ② 실행 기록의 `status` 가 `stopped_by_limit` 이나 `failed` 인 실행은 원장에 방문이 일부만 있습니다.
   ③ 원장의 `llm_call` 이 `new` 인 실패한 줄이 나올 수 있습니다 (LLM 을 불렀는데 실패했거나 답이 어긋난 방문).
 - [ ] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-14): `.env.example` 에 변수가 늘었습니다 (`LLM_BASE_URL`, `LLM_API_KEY`. 다른 공급자를 쓸 때만 적습니다). 키는 각자 발급해 자기 PC 의 `.env` 에만 둡니다.
-  키가 없으면 `--replay-only` 로 저장된 응답만 재생할 수 있습니다. 명령은 저장소의 맨 위 폴더에서 돌립니다 (`.env` 를 그 폴더에서 읽습니다). (확인: wilstein91 11-16, 키 없이 `--replay-only` 로 예시 사본을 돌려 봄)
+  키가 없으면 `--replay-only` 로 저장된 응답만 재생할 수 있습니다. 명령은 저장소의 맨 위 폴더에서 돌립니다 (`.env` 를 그 폴더에서 읽습니다). (확인: wilstein91 11-16, 키 없이 `--replay-only` 로 예시 사본을 돌려 봄) (확인: borigunbbang 11-18)
 - [ ] wilstein91 ← songyee-ai (11-14): 기준이 아닌 상황을 돌릴 수 있습니다 (T10): `uv run python -m engine --data sample --scenario <scenario_id>` (`README.md` 의 "시뮬레이션을 돌린다").
   ① **기준 상황을 먼저 끝까지 돌려야 합니다.** 상황은 가장 새 기준 실행의 페르소나, 방문 조건, 가중치로 돌고, 실행 기록의 `weights_from` 에 그 `run_id` 가 남습니다. 상황별 비교 화면(T21)은 이 값으로 짝을 찾으면 됩니다.
   ② 기준 실행 뒤에 업장 정의, 페르소나, 조건 묶음, 값 목록, 프롬프트, 모델이 바뀌었으면 상황이 돌지 않고 이유를 알립니다. 기준 상황을 다시 돌리면 됩니다 (`FORMATS.md` 10.1절).
@@ -2465,12 +2465,12 @@ REVIEW_RULES 12절의 페르소나 담당 몫 넷은 모두 동의해(T101 알�
 - [ ] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-14): 11-16 회의에서 정할 "추가 상품에 프로모션 할인을 적용할지"는 그대로 남아 있습니다 (위 11-13 의 안 셋).
   함께 정할 것이 하나 더 있습니다: 실패한 방문이 있는 기준 실행으로 상황을 돌리는 것을 막을지입니다. 지금은 막지 않고 명령이 건수를 알립니다 (T10 의 경위).
   - songyee-ai (11-16): 둘 다 정했습니다 (할인은 적용하지 않음, 실패가 있는 기준 실행은 막고 알림). 아래 11-16 항목을 읽고 체크해 주세요.
-  (확인: hojitea-ui 11-16, 아래 11-16 항목의 두 결정을 읽었습니다)
-- [ ] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-15): 가중 합산이 들어갑니다 (T11). 엔진이 **집계 파일을 읽어야 돕니다**:
+  (확인: hojitea-ui 11-16, 아래 11-16 항목의 두 결정을 읽었습니다) (확인: borigunbbang 11-18)
+- [x] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-15): 가중 합산이 들어갑니다 (T11). 엔진이 **집계 파일을 읽어야 돕니다**:
   `--data sample` 은 `data/samples/base_summary.csv`, `--data private` 은 `private/base/summary.csv`. 기준 상황의 가중치(묶음의 비율, 고객군 배수)와 가격이 빈 상품의 단가를 이 파일에서 냅니다.
   실행 기록의 형식도 바뀌었습니다: 가중치의 등급을 값마다 적고(`weights.grades` 의 고객군 배수는 고객군마다, 가중치는 페르소나마다), 집계 파일로 단가를 채운 상품의 `filled_products` 가 생겼습니다.
   그 전에 돌린 실행 기록은 읽히지 않으니 기준 상황부터 다시 돌려 주세요 (`FORMATS.md` 10.1절의 "가중치를 내는 법"). (확인: wilstein91 11-16, 화면은 읽지 못한 실행 기록이면 다시 돌리라고 알림)
-  (확인: hojitea-ui 11-16, 진짜 집계 파일이 `private/base/summary.csv` 에 있고, `read_summary`·`fill_prices` 로 빈 가격 0 을 확인했습니다 (T13))
+  (확인: hojitea-ui 11-16, 진짜 집계 파일이 `private/base/summary.csv` 에 있고, `read_summary`·`fill_prices` 로 빈 가격 0 을 확인했습니다 (T13)) (확인: borigunbbang 11-18)
 - [ ] wilstein91 ← songyee-ai (11-15): 업장별 가상 매출과 비중은 `engine.ledger.venue_shares(rows)` 로 원장에서 냅니다 (T21). 워커힐 업장마다 가상 매출·비중·방문의 크기가,
   경쟁 업장과 "이용하지 않음"은 분모 밖에서 방문의 크기로 따로 나옵니다. 고객군 하나만 보려면 `venue_shares(rows, "고객군")` 입니다.
   근거 보기(T22)에서 가중치와 묶음 비율의 등급은 `run.json` 의 `weights.grades` 에, 단가를 기본 데이터로 채운 상품은 `filled_products` 에 있습니다 (단가는 원장의 `list_price`).
@@ -2539,7 +2539,7 @@ REVIEW_RULES 12절의 페르소나 담당 몫 넷은 모두 동의해(T101 알�
   (확인: hojitea-ui 11-16, T15 의 완료 조건에 두 항목을 더했습니다)
   - songyee-ai (11-16, 고침): ③ 가운데 "앞으로 새로 모으는 파일은 hojitea-ui 가 돌린다"를 되돌립니다. **앞으로도 borigunbbang 이 열지 않고 나눠 20%를 hojitea-ui 에게 넘깁니다.**
     씨앗은 처음 만든 것 하나만 계속 쓰고, 다시 모은 파일은 같은 줄을 더하지 않고 새로 생긴 20%만 넘깁니다. 금룡은 이 방식에서 빠지고 더 모아야 하면 따로 정합니다.
-    wilstein91: 검증 결과를 화면이나 발표에서 보여 줄 때 업장별 검증 건수와 금룡·명월관의 한계를 함께 보여 주세요. 자세한 것은 [REVIEW_RULES.md](REVIEW_RULES.md) 6절입니다.
+    wilstein91: 검증 결과를 화면이나 발표에서 보여 줄 때 업장별 검증 건수와 금룡·명월관의 한계를 함께 보여 주세요. 자세한 것은 [REVIEW_RULES.md](REVIEW_RULES.md) 6절입니다. (확인: borigunbbang 11-18)
 - [x] songyee-ai, borigunbbang ← hojitea-ui (11-16): 블로그 리뷰 파일은 REVIEW_RULES 4절과 달리 열 위치가 고정이 아닙니다.
   사진 수에 따라 열이 밀려서, 글 올린 날(`26.11.12.목`) 칸을 기준으로 1칸 앞을 본문, 2칸 앞을 제목으로 찾았습니다 (여덟 업장 파일 모두 이 방법으로 맞음).
   4절을 고치거나 80% 쪽 정돈에도 같은 방법을 써 주세요.
@@ -2570,7 +2570,7 @@ REVIEW_RULES 12절의 페르소나 담당 몫 넷은 모두 동의해(T101 알�
 - [ ] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-16): **LLM 공급자를 OpenAI 로 바꿨습니다** (T103). 각자 `.env` 를 다시 만들어 주세요.
   `Copy-Item .env.example .env` 뒤 `LLM_API_KEY` 에 자기 OpenAI 키를 넣습니다. 공급자와 주소는 이미 적혀 있습니다.
   `LLM_MODEL` 은 11-17 회의에서 정할 때까지 연습용으로 아무 모델이나 적어도 되지만, 그 답은 시연에 쓰지 않습니다 (모델이 다르면 서로 재생되지 않습니다).
-  엔진은 이제 요청마다 고를 수 있는 값만 받는 응답 스키마를 보냅니다 (`FORMATS.md` 9절). 스키마를 받지 않는 주소면 `LLM_RESPONSE_FORMAT=json_object` 입니다.
+  엔진은 이제 요청마다 고를 수 있는 값만 받는 응답 스키마를 보냅니다 (`FORMATS.md` 9절). 스키마를 받지 않는 주소면 `LLM_RESPONSE_FORMAT=json_object` 입니다. (확인: borigunbbang 11-18)
 - [ ] wilstein91 ← songyee-ai (11-16): `app/runs.py` 의 `key_ready` 를 고쳤습니다 (T103, 팀장이 고치기로 정함). OpenAI 처럼 밖의 주소는 주소·모델·키가 모두 있어야 켜집니다
   (전에는 주소만 있어도 켜져 부르는 순간 실패했습니다). 테스트는 `tests/app/test_app_runs.py` 에 더했습니다.
   엄격한 스키마를 OpenAI 가 받는지는 팀장이 자기 키로 확인합니다 (T103). 각자 돌리다 HTTP 400 으로 거절되면 오류 원문을 이 목록에 적고, 그동안은 `LLM_RESPONSE_FORMAT=json_object` 로 돌리면 됩니다.
@@ -2582,7 +2582,7 @@ REVIEW_RULES 12절의 페르소나 담당 몫 넷은 모두 동의해(T101 알�
   키 주인 계정의 데이터 설정을 확인합니다. 내키지 않으면 `--base-profile none` 으로 돌립니다.
   응답 스키마에도 페르소나와 요약의 키 이름(업장·이용 상황 이름 등)이 고를 값으로 실립니다. 본문에 이미 가는 값이라 새로 나가는 것은 아닙니다.
   ④ 계절(`--month`)을 엔진에 넣을지, 날씨를 이번에 뺄지 (화면에는 선택이 있고 "아직 반영되지 않음"으로 표시 중).
-  - songyee-ai (11-16): 네 가지를 세 분의 답을 모아 정했습니다 (정함: songyee-ai 11-16, `MEETING_1117.md` 1부). ① 큰 모델 ② 팀장 PC ③ 추천대로 ④ 계절만.
+  - songyee-ai (11-16): 네 가지를 세 분의 답을 모아 정했습니다 (정함: songyee-ai 11-16, `MEETING_1117.md` 1부). ① 큰 모델 ② 팀장 PC ③ 추천대로 ④ 계절만. (확인: borigunbbang 11-18)
 - [x] wilstein91, songyee-ai ← borigunbbang (11-16): 구글 리뷰 수집을 부탁드립니다 (T301). 맡을 업장, 모으는 순서, 저장한 파일을 확인하는 프롬프트가
   [GOOGLE_REVIEWS.md](GOOGLE_REVIEWS.md) 에 있습니다. 기한은 11-17 저녁입니다. 파일은 저장소 밖으로 보내 주시고, 보낸 날짜와 업장을 이 줄에 적어 주세요.
   (받음: borigunbbang 11-16, songyee-ai 의 여섯 업장(피자힐·르파사쥬 포함)과 wilstein91 의 금룡·온달. 각자 PC 의 저장본과 묶음을 지워 주세요. GOOGLE_REVIEWS.md "넘기기" 3번)
@@ -2612,22 +2612,22 @@ REVIEW_RULES 12절의 페르소나 담당 몫 넷은 모두 동의해(T101 알�
   - songyee-ai (11-16): ① 구글 후기로 먼저 채우고, 모자라면 2년 넘은 후기를 표시해 쓰고, 그래도 모자라면 "검증 건수 부족" ② 채점에서 뺌 ③ "이용 시간 제한"만 더함 (정함: songyee-ai 11-16, `MEETING_1117.md` 라.·마.·바.).
   (확인: borigunbbang 11-17, ③ "이용 시간 제한"을 값 목록에 더했습니다 (T304). 7건 라벨을 고치는 것은 아래 11-17 의 hojitea-ui 앞 줄)
 - [ ] borigunbbang, wilstein91 ← songyee-ai (11-16): 구글 약관을 확인했고 지도 서비스와 같은 조건으로 모으기로 정했습니다 (PRD 5.2절). `GOOGLE_REVIEWS.md` 의 "시작하기 전에" 칸을 체크했습니다. 이제 모아도 됩니다.
-  그리고 제 네 업장(더뷔페, 명월관, 모에기, 더파빌리온)은 AI 도구가 제 크롬을 조작해 모읍니다. PRD 5.2절의 "AI 도구는 수집에 쓰지 않는다"에 예외를 적었습니다.
+  그리고 제 네 업장(더뷔페, 명월관, 모에기, 더파빌리온)은 AI 도구가 제 크롬을 조작해 모읍니다. PRD 5.2절의 "AI 도구는 수집에 쓰지 않는다"에 예외를 적었습니다. (확인: borigunbbang 11-18)
 - [ ] borigunbbang, wilstein91 ← songyee-ai (11-16): 제 네 업장을 모아 확인 프롬프트의 검사를 통과했습니다 (리뷰 수가 화면 전체 수와 같고, 접힌 리뷰 0, 최신순).
   모으면서 안 것 셋입니다. ① `GOOGLE_REVIEWS.md` 의 주소는 윈도우 크롬에서 업장이 아니라 빈 지도로 열렸습니다. `https://www.google.com/maps/search/<업장 이름> 그랜드 워커힐 서울` 로 검색하면 열리고,
   주소창에 문서 주소의 `0x…:0x…` 번호가 들어 있는지로 같은 업장인지 확인했습니다. ② 스크롤 명령은 실제 화면에서 그대로 돌았지만, 끝난 직후에는 접힌 리뷰가 남아 펼치는 줄을 여러 번 넣어야 0 이 됐습니다.
-  ③ `Ctrl+S` 대신 펼친 화면의 HTML(`document.documentElement.outerHTML`)을 그대로 파일로 썼습니다 (크롬이 두 번째 다운로드부터 막았습니다). 나누는 프로그램이 이 파일도 읽는지 봐 주세요.
+  ③ `Ctrl+S` 대신 펼친 화면의 HTML(`document.documentElement.outerHTML`)을 그대로 파일로 썼습니다 (크롬이 두 번째 다운로드부터 막았습니다). 나누는 프로그램이 이 파일도 읽는지 봐 주세요. (확인: borigunbbang 11-18)
 - [ ] borigunbbang, wilstein91 ← songyee-ai (11-16): 피자힐과 르파사쥬도 제가 모았습니다. 피자힐은 wilstein91 몫에서 제 몫으로 옮겼으니 금룡·온달만 모아 주세요 (`GOOGLE_REVIEWS.md` 의 표를 고쳤습니다).
   이미 피자힐을 모으셨으면 알려 주세요. borigunbbang 이 한쪽만 쓰면 됩니다. 두 파일 모두 확인 프롬프트의 검사를 통과했습니다 (접힌 리뷰 0, 최신순).
   ① 피자힐은 리뷰 수가 화면 전체 수보다 2건 적습니다. 끝까지 내려 로딩 표시가 없는 것을 확인했고, 구글이 목록에 내보내지 않는 리뷰로 봅니다. 리뷰가 많아 다 불러오는 데 30분쯤 걸렸습니다.
-  ② 르파사쥬는 borigunbbang 이 모은 파일에 접힌 리뷰가 1건 남아 있어 다시 모았습니다. 같은 리뷰는 들어간 쪽에 두고 내용만 바꾸는 방식(T301 경위)대로 써 주세요.
+  ② 르파사쥬는 borigunbbang 이 모은 파일에 접힌 리뷰가 1건 남아 있어 다시 모았습니다. 같은 리뷰는 들어간 쪽에 두고 내용만 바꾸는 방식(T301 경위)대로 써 주세요. (확인: borigunbbang 11-18)
 
 - [ ] songyee-ai, borigunbbang, hojitea-ui ← wilstein91 (11-16): 시연 시나리오 셋을 확정했습니다 (T20, PRD 3절).
   ① 더뷔페 12월 요금 ② 금룡 연말 특선 코스 더하기 ③ 더 파크뷰 연말 성수기 요금. 모두 공식 가격이고, 셋의 파일이 `scenarios/` 에 있습니다.
   화면의 간편 시뮬레이터에서 "준비된 상황"으로 고를 수 있습니다. 시연용 저장 답은 이 상황들로 받아 두어야 합니다 (팀장님: Claude 키로 받을 사람과 때).
   (확인: hojitea-ui 11-16, ①과 ③에 쓸 12월 요금을 공식 페이지에서 확인해 드렸습니다 (아래 요금 요청 줄))
   - songyee-ai (11-16): 시연 답은 팀장 PC 한 곳에서 받고 나머지는 재생합니다. 때는 모델을 정한 직후(11-17)부터 보정 기한(11-19)까지입니다 (정함: songyee-ai 11-16, `MEETING_1117.md` ②).
-    받으면 받은 판(모델, 프롬프트, 업장 정의)과 전달 시점을 "알릴 것"에 적겠습니다. 답을 받는 일이 남아 체크하지 않았습니다.
+    받으면 받은 판(모델, 프롬프트, 업장 정의)과 전달 시점을 "알릴 것"에 적겠습니다. 답을 받는 일이 남아 체크하지 않았습니다. (확인: borigunbbang 11-18)
 - [x] hojitea-ui ← wilstein91 (11-16): 시나리오 ①과 ③을 마저 만들려면 더뷔페의 12월(12/18~31 기준) 요금 전체(성인·어린이, 주중 점심, 주말 점심·저녁, 조식)와
   더 파크뷰의 12/18~31 어린이 요금이 필요합니다. 가격, 기간, 출처, 확인일로 주세요.
   (확인: hojitea-ui 11-16, 두 호텔 공식 페이지에서 11-16 에 확인해 가격·기간·출처를 저장소 밖으로 드렸습니다.
@@ -2647,9 +2647,9 @@ REVIEW_RULES 12절의 페르소나 담당 몫 넷은 모두 동의해(T101 알�
 - [ ] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-16): **11-17 회의 안건과 추천안을 [MEETING_1117.md](MEETING_1117.md) 에 정리했습니다** (T105).
   1부는 위 "11-17 회의에서 정할 것" 네 가지를 풀어 쓴 것이고, 2부는 "알릴 것"에서 제 답을 기다리던 질문 일곱의 추천안입니다
   (AI 요약 후기, 피자힐 1건, 금룡 씨앗, 모에기·르파사쥬 건수, 와인페어 4건, `pain_points` 값, 모에기 3건). 회의 전에 각 안건의 "무엇을 정하나"와 "추천"만 읽고 와 주세요.
-  (확인: hojitea-ui 11-16, 읽고 답을 PR 65번으로 올렸습니다)
-- [ ] borigunbbang ← songyee-ai (11-16): 티스토리·트립닷컴 후기에 원문 없이 AI 가 요약한 칸만 있는 이유를 알려 주세요 (T15, `MEETING_1117.md` 2부 가.).
-  ① 요약을 누가 만들었는지(플랫폼 화면에 원래 있던 것인지, 모으면서 AI 도구로 만든 것인지) ② 원문을 브라우저로 다시 열어 모을 수 있는지입니다.
+  (확인: hojitea-ui 11-16, 읽고 답을 PR 65번으로 올렸습니다) (확인: borigunbbang 11-18)
+- [x] borigunbbang ← songyee-ai (11-16): 티스토리·트립닷컴 후기에 원문 없이 AI 가 요약한 칸만 있는 이유를 알려 주세요 (T15, `MEETING_1117.md` 2부 가.).
+  ① 요약을 누가 만들었는지(플랫폼 화면에 원래 있던 것인지, 모으면서 AI 도구로 만든 것인지) ② 원문을 브라우저로 다시 열어 모을 수 있는지입니다. (확인: borigunbbang 11-18, 11-16 에 메신저로 답함)
 - [ ] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-16): **로컬에서 시험할 때는 OpenAI 키보다 자기 Claude 구독(공급자 `claude-code`)으로 먼저 돌려 주세요** (T106).
   제가 이 방식으로 돌려 처음 검사를 통과했습니다 (T104). OpenAI 는 회의에서 정할 PC 한 곳에서 보정·시연 답을 받을 때 씁니다.
   설정은 README 의 "시뮬레이션을 돌린다"에 있습니다: `.env` 에서 `LLM_PROVIDER=claude-code`, `LLM_MODEL=claude-sonnet-5-5`, 필요하면 `CLAUDE_CODE_PATH` 를 적고 `claude auth login` 을 한 번 합니다.
@@ -2665,8 +2665,8 @@ REVIEW_RULES 12절의 페르소나 담당 몫 넷은 모두 동의해(T101 알�
 - [ ] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-16): 가상 예시 값으로 돌린 실행 폴더(`engine/samples/runs/<run_id>/`)를 이제 깃이 모두 무시합니다 (T107).
   위 T106 안내의 "실행 폴더는 커밋하지 않는다"를 깃이 대신 지킵니다. 이미 그 폴더를 커밋해 둔 브랜치가 있으면 develop 을 받기 전에 알려 주세요.
   올리고 싶은 예시 실행은 `tests/fixtures/<이름>/engine/samples/runs/` 에 둡니다 (`FORMATS.md` 10절).
-  (확인: hojitea-ui 11-16, 실행 폴더를 커밋해 둔 브랜치가 없습니다)
-- [ ] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-16): **11-17 회의 안건에 각자 답을 적어 올려 주세요** (T105, 기한 11-17 회의 전).
+  (확인: hojitea-ui 11-16, 실행 폴더를 커밋해 둔 브랜치가 없습니다) (확인: borigunbbang 11-18)
+- [x] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-16): **11-17 회의 안건에 각자 답을 적어 올려 주세요** (T105, 기한 11-17 회의 전).
   `develop` 을 받아 `develop-<이름>-t105-answers` 브랜치에서, Claude Code 와 함께 [MEETING_1117.md](MEETING_1117.md) 를 읽고
   자기 답 파일(`docs/meeting-1117/<깃헙 아이디>.md`)의 항목마다 "동의 / 고쳐서 동의 / 반대 / 모르겠음"과 이유를 적어 PR 로 올립니다.
   붙여 넣을 지시문과 순서는 그 문서의 "답을 적는 법"에 있습니다. 세 답을 모아 제가 정하고, 그 뒤에 `main` 에 올립니다. 올렸으면 이 줄에 이름과 PR 번호를 적어 주세요.
@@ -2681,7 +2681,7 @@ REVIEW_RULES 12절의 페르소나 담당 몫 넷은 모두 동의해(T101 알�
 - [ ] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-16): **엔진 명령의 기본 프롬프트가 p2 로 바뀌었습니다** (T108). `--prompt` 를 적지 않으면 p2 로 돕니다.
   p1 로 받아 둔 답은 p2 에서 재생되지 않습니다. p1 로 돌린 기준 실행 위에 상황을 돌리려면 `--prompt p1` 을 적거나 기준 상황을 p2 로 다시 돌려 주세요.
   예시 사본(`tests/fixtures/example` 을 베낀 것)에는 p1 만 있어 README 의 명령대로 `--prompt p1` 을 적습니다. 빼먹고 `--replay-only` 로 돌리면 기준 상황은 멈추지 않고 방문이 실패로 남고,
-  기준이 아닌 상황은 기준 실행과 판이 달라 멈춥니다.
+  기준이 아닌 상황은 기준 실행과 판이 달라 멈춥니다. (확인: borigunbbang 11-18)
 - [x] wilstein91 ← songyee-ai (11-16): 화면의 기본 판은 아직 p1 입니다 (T108). `app/main.py` 의 프롬프트 선택과 `app/runs.py` 의 `prompt: str = "p1"` 두 곳입니다.
   화면은 `--prompt` 를 늘 적어 엔진에 넘겨서 이번 변경으로 동작이 달라지지는 않습니다. 팀 자료는 p2, 예시 자료는 p1 이 되게 바꿀지 봐 주세요 (예시 묶음에는 p1 만 있습니다).
   간편 시뮬레이터(`app/simulator.py`)는 판을 고르는 칸이 없어 `app/runs.py` 의 기본값을 그대로 씁니다. 그래서 지금은 팀 자료도 p1 로 돕니다.
@@ -2695,7 +2695,7 @@ REVIEW_RULES 12절의 페르소나 담당 몫 넷은 모두 동의해(T101 알�
   할 일: songyee-ai 지출 상한 올리고 모델 판 이름 정하기, 엔진에 달 넣기, 데이터 설정 확인 /
   borigunbbang 원본을 hojitea-ui 에게 보내기, 값 목록과 프롬프트 새 판(달의 뜻과 "이용 시간 제한"), PR 63 의 충돌 풀기 /
   hojitea-ui 트립닷컴 원문 다시 찾기, "이용 시간 제한" 7건 라벨, 회의에서 자료 조건 알리기 /
-  wilstein91 날씨 칸을 "다음 단계"로, 화면과 발표에 "기준 실행의 가격은 10~11월 공식 가격"과 모에기 한계 문장.
+  wilstein91 날씨 칸을 "다음 단계"로, 화면과 발표에 "기준 실행의 가격은 10~11월 공식 가격"과 모에기 한계 문장. (확인: borigunbbang 11-18)
 - [x] borigunbbang ← songyee-ai (11-16): **REVIEW_RULES 의 확인 두 가지를 부탁드립니다** (T101. 이 둘이 끝나야 T101 이 완료됩니다).
   ① 규칙 문서 전체를 확인했으면 위 11-13 의 "규칙 초안이 REVIEW_RULES.md 에 있습니다" 줄에 확인을 적어 주세요 (hojitea-ui 는 11-16 에 적었습니다).
   ② [REVIEW_RULES.md](REVIEW_RULES.md) 12절의 페르소나 담당 몫 넷에 팀장 추천을 적었습니다. 모두 "지금 하던 대로"입니다:
@@ -2785,7 +2785,7 @@ REVIEW_RULES 12절의 페르소나 담당 몫 넷은 모두 동의해(T101 알�
   새 판이 들어오면 그 판으로 시연 답을 받겠습니다. **보정(T18)은 달을 주지 않은 기준 실행으로 합니다** (달을 준 실행에 `calibration.json` 을 두면 형식 검사가 막습니다).
   (확인: borigunbbang 11-17, 새 판 `p3` 의 "달" 절에 달마다의 뜻과 `null` 일 때(특정한 달이 아니니 계절을 짐작하지 않는다)를 적었습니다 (T304, PR #92).
   `--month 12 --prompt p3` 로 1건을 불러 검사를 통과했고 이유 문장에 "연말"이 나왔습니다. 기본값을 p3 로 바꾸는 것은 위 11-17 의 T304 줄입니다)
-- [ ] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-17): `develop` 을 받으면 실행 기록에 `month` 칸이 생깁니다 (T112). 전에 돌린 실행 기록은 그대로 읽힙니다 (칸이 없으면 일 년 전체로 읽습니다). 다시 돌리지 않아도 됩니다.
+- [x] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-17): `develop` 을 받으면 실행 기록에 `month` 칸이 생깁니다 (T112). 전에 돌린 실행 기록은 그대로 읽힙니다 (칸이 없으면 일 년 전체로 읽습니다). 다시 돌리지 않아도 됩니다.
   hojitea-ui: 업장 정의의 파는 달(`months`)이 이제 묶음 실행에서도 쓰입니다. 일부 달에만 파는 상품(예: 빙수)은 `--month` 로 돌리면 그 달이 아닐 때 후보에서 빠집니다. `months` 가 맞게 적혀 있는지 한 번 봐 주세요.
   (확인: wilstein91 11-17, `develop` 을 받은 뒤 11-16 에 돌린 실행 기록을 화면의 `app.results.load_run` 으로 읽어 `month` 가 비어(일 년 전체) 그대로 읽히는 것을 봄)
   (확인: hojitea-ui 11-17, 일부 달에만 파는 상품 8개(워커힐 5, 포시즌스 마루 3)의 `months` 를 근거와 견줌. 워커힐 가을 상품 넷은 기본 데이터의 판매 달과 같고,
@@ -2811,7 +2811,7 @@ REVIEW_RULES 12절의 페르소나 담당 몫 넷은 모두 동의해(T101 알�
   (확인: wilstein91 11-17, 화면의 `DEFAULT_PROMPT` 를 p3 으로 바꿈. T203 의 경위)
 - [x] hojitea-ui ← borigunbbang (11-17): 값 목록 `pain_points` 에 "이용 시간 제한"을 더했습니다 (T304, `data/evidence/vocab.json`). 떼어 둔 후기 7건의 라벨을 이 값으로 고쳐 주세요 (`MEETING_1117.md` 바.).
   (확인: hojitea-ui 11-17, 7건을 고쳤고 그중 예약 서비스 1건은 새로 라벨이 됐습니다. T15 의 경위)
-- [ ] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-17): **엔진 명령의 기본 프롬프트가 p3 으로 바뀌었습니다** (T113). `--prompt` 를 적지 않으면 p3 으로 돕니다.
+- [x] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-17): **엔진 명령의 기본 프롬프트가 p3 으로 바뀌었습니다** (T113). `--prompt` 를 적지 않으면 p3 으로 돕니다.
   p2 로 받아 둔 답은 판이 달라 재생되지 않습니다. 그 답을 재생하려면 `--prompt p2` 를 적어 주세요. 예시 사본은 그대로 `--prompt p1` 입니다.
   wilstein91: 화면의 기본 판(`app/runs.py` 의 `DEFAULT_PROMPT`)은 아직 p2 입니다 (borigunbbang 의 위 11-17 줄). 화면은 판을 늘 적어 넘기므로 지금도 돌지만,
   화면(p2)으로 돌린 기준 실행에 명령(기본 p3)으로 상황을 돌리면 판이 달라 엔진이 멈춥니다. 화면의 기본 판을 바꾸기 전까지는 그 명령에 기준 실행의 판(`--prompt p2`)을 적어 주세요.
@@ -2868,7 +2868,7 @@ REVIEW_RULES 12절의 페르소나 담당 몫 넷은 모두 동의해(T101 알�
   - songyee-ai (11-17): 동결 뒤 과제로 둡니다 (T117). 지금은 T112 대로 달을 줘도 일 년 합계에 맞춥니다.
     ①은 가중 합산을 고치면 보정(T18)을 다시 해야 하고, 집계 파일이 한 해치라 한 달 매출이 적은 고객군은 배수를 낼 수 없게 됩니다. ②는 요약이 달마다 달라져 저장된 답을 달마다 다시 받아야 합니다.
     발표의 "앞으로 할 것"에 넣어 주세요 (T24). 달보다 계절(석 달)로 묶자는 의견은 그때 그대로 씁니다.
-- [ ] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-17): **팀이 쓰는 LLM 을 각자의 Claude 구독으로 바꿨습니다** (T114). OpenAI 는 쓰지 않습니다. `develop` 을 받은 뒤 `.env` 를 다시 만들어 주세요.
+- [x] wilstein91, borigunbbang, hojitea-ui ← songyee-ai (11-17): **팀이 쓰는 LLM 을 각자의 Claude 구독으로 바꿨습니다** (T114). OpenAI 는 쓰지 않습니다. `develop` 을 받은 뒤 `.env` 를 다시 만들어 주세요.
   ① `Copy-Item .env.example .env -Force` 로 다시 베낍니다. 공급자(`claude-code`)와 모델(`claude-opus-5-5`)이 이미 적혀 있어 그대로 둡니다. API 키는 넣지 않습니다.
   ② 터미널에서 `claude auth login` 을 한 번 합니다. `claude` 명령이 PATH 에 없으면 `CLAUDE_CODE_PATH` 에 경로를 적습니다 (찾는 명령은 README 의 "시뮬레이션을 돌린다").
   ③ **보정·시연에 쓸 답은 팀장 PC 한 곳에서 받습니다.** 각자는 가상 예시 값(`--data sample`)을 `--personas`, `--conditions` 로 작게 돌려 시험해 주세요. 구독 한도를 Claude Code 작업과 함께 쓰고, 큰 모델이라 한도를 빨리 씁니다.
