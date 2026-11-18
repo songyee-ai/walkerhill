@@ -56,8 +56,28 @@ def _status(enough: bool, reason_enough: bool, min_reviews: int) -> str:
     return ""
 
 
-def _row(name: str, n: int, enough: bool, venue: tuple, reason_n: int, reason_enough: bool, reason: tuple, min_reviews: int) -> dict:
+def _versus(count: int | None, baseline: int | None) -> str:
+    """일치 건수를 단순 기준과 견준 높고 낮음. 건수가 모자라 말하지 않는 칸은 비운다."""
+    if count is None or baseline is None:
+        return ""
+    return "단순 기준보다 높음" if count > baseline else "단순 기준보다 낮음" if count < baseline else "단순 기준과 같음"
+
+
+def _row(
+    name: str, n: int, enough: bool, venue: tuple, reason_n: int, reason_enough: bool, reason: tuple, min_reviews: int, masked: bool
+) -> dict:
     # 이유 일치의 분모는 고른 이유 라벨이 있는 후기 수(`reason_n`)다. `n` 으로 나누면 이유 일치가 낮아 보인다 (T117).
+    if masked:
+        # 기본 데이터 실행이면 일치 건수 대신 단순 기준과 견준 높고 낮음만 보인다. 단순 기준은 기본 데이터의 매출로 고른 업장이라
+        # 그 건수로 고객군마다 매출이 가장 큰 업장이 짐작된다. 저장소에도 높고 낮음만 적는다 (11-18 T19 줄, borigunbbang 의 T23 알림 ②)
+        return {
+            "업장": name,
+            "검증 건수": n,
+            "고른 업장이 같음": _versus(*venue),
+            "이유를 잰 건수": reason_n,
+            "이유가 겹침": _versus(*reason),
+            "상태": _status(enough, reason_enough, min_reviews),
+        }
     return {
         "업장": name,
         "검증 건수": n,
@@ -70,8 +90,11 @@ def _row(name: str, n: int, enough: bool, venue: tuple, reason_n: int, reason_en
     }
 
 
-def validation_rows(validation: Validation, names: dict[str, str]) -> list[dict]:
-    """업장마다 한 줄과 모든 업장을 합친 한 줄: 검증 건수, 일치 건수(기준 방식과 함께), 상태, 한계."""
+def validation_rows(validation: Validation, names: dict[str, str], masked: bool = False) -> list[dict]:
+    """업장마다 한 줄과 모든 업장을 합친 한 줄: 검증 건수, 일치 건수(기준 방식과 함께), 상태, 한계.
+
+    `masked` 면 일치 건수 대신 단순 기준과 견준 높고 낮음을 보인다 (기본 데이터 실행. app/results.py 의 `shows_numbers`).
+    """
     least = validation.min_reviews
     rows = []
     for venue_id, result in sorted(validation.venues.items(), key=lambda item: names.get(item[0], item[0])):
@@ -84,6 +107,7 @@ def validation_rows(validation: Validation, names: dict[str, str]) -> list[dict]
             result.reason_enough,
             (result.reason_match, result.reason_match_baseline),
             least,
+            masked,
         )
         rows.append(row | {"한계": VALIDATION_LIMITS.get(venue_id, "")})
     # 합친 줄에도 5건 기준을 똑같이 적용한다. 형식에는 칸이 없어 화면이 건수로 정한다 (T117 팀장 알림).
@@ -98,6 +122,7 @@ def validation_rows(validation: Validation, names: dict[str, str]) -> list[dict]
         reason_enough,
         (total.reason_match, total.reason_match_baseline) if reason_enough else (None, None),
         least,
+        masked,
     )
     rows.append(row | {"한계": TOTAL_NOTE})
     return rows
