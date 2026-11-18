@@ -46,7 +46,7 @@ from app.scenario_builder import (
 )
 from app.street import AFTER_LABEL, BASE_LABEL, render_scene, scene_from_comparison
 from app.validation import LIMITS_SOURCE, VALIDATION_LIMITS, limits_not_in, load_validation, validation_rows
-from engine.formats import KO
+from engine.formats import KO, RunRecord, read_model
 
 # 기간은 "X월 ~ Y월"로 고른다 (11-17, 화면 담당 결정). 엔진의 "실행의 달"(--month, T112)은 달 하나를 받으므로
 # 기간의 달마다 기본 시나리오와 변수 적용 후를 돌리고, 결과는 달 평균으로 합친다 (app/compare.py 의 combine_months).
@@ -251,10 +251,12 @@ def variable_panel(repo_root: Path) -> Inputs:
     names = {c["id"]: c["name"] for c in cards}
     default = next(([p] for p in DEFAULT_PERSONAS if p in names), list(names)[:1])
     persona_key = f"sim_personas_{root.is_example}"
+    # 처음 값은 세션 상태로 둔다. 칸에 default= 를 주면서 "모두 고르기" 버튼이 같은 키를 바꾸면 Streamlit 이 경고를 낸다
+    # (11-18 borigunbbang 이 찾음). 목록에 없는 값이 남아 있으면 칸이 오류를 내므로 걸러 둔다.
+    st.session_state[persona_key] = [p for p in st.session_state.get(persona_key, default) if p in names]
     personas = st.multiselect(
         "페르소나",
         list(names),
-        default=default,
         format_func=lambda i: names[i],
         placeholder="페르소나를 고르세요",
         key=persona_key,
@@ -787,12 +789,23 @@ def show_validation(run_dir: Path, names: dict[str, str]) -> None:
     if validation is None:
         return
     names = WALKERHILL_NAMES | names
+    # 기본 데이터 실행이면 일치 건수 대신 단순 기준과 견준 높고 낮음만 보인다 (app/validation.py). 실행 기록을 못 읽으면 가린다.
+    try:
+        masked = not shows_numbers(read_model(run_dir / "run.json", RunRecord))
+    except (OSError, ValueError):
+        masked = True
     with st.expander("검증 결과 (떼어 둔 후기로 잰 것)", expanded=True):
-        st.caption(
-            f"값은 비율이 아니라 건수입니다. 이유가 겹친 것은 고른 이유가 적힌 후기(이유를 잰 건수) 가운데에서 셉니다. "
-            f"{validation.min_reviews}건 미만이면 일치 건수를 말하지 않습니다."
-        )
-        st.dataframe(validation_rows(validation, names), hide_index=True)
+        if masked:
+            st.caption(
+                "기본 데이터로 돌린 실행이라 일치 건수는 가리고, 단순 기준(기본 데이터에서 매출이 가장 큰 업장)보다 높은지 낮은지만 보입니다. "
+                f"이유는 고른 이유가 적힌 후기(이유를 잰 건수)로 잽니다. {validation.min_reviews}건 미만이면 말하지 않습니다."
+            )
+        else:
+            st.caption(
+                f"값은 비율이 아니라 건수입니다. 이유가 겹친 것은 고른 이유가 적힌 후기(이유를 잰 건수) 가운데에서 셉니다. "
+                f"{validation.min_reviews}건 미만이면 일치 건수를 말하지 않습니다."
+            )
+        st.dataframe(validation_rows(validation, names, masked), hide_index=True)
         for venue_id in limits_not_in(validation):
             st.caption(f"{names.get(venue_id, venue_id)} (이 결과에 없음) 한계: {VALIDATION_LIMITS[venue_id]}")
         st.caption(f"한계의 출처: {LIMITS_SOURCE}")
