@@ -22,6 +22,9 @@ if str(REPO_ROOT) not in sys.path:
 from app import evidence, simulator, style  # noqa: E402
 from app.compare import venue_names  # noqa: E402
 from app.results import (  # noqa: E402
+    FILLED_PRICE,
+    FILLED_PRICE_HELP,
+    FILLED_PRICE_SHORT,
     RunSource,
     condition_names,
     list_runs,
@@ -51,8 +54,15 @@ from engine.formats import KO  # noqa: E402
 
 
 def money_table(rows: list[dict]) -> None:
-    """표를 그린다. 금액 열("…원)"으로 끝나는 열)에는 천 단위 쉼표를 넣는다."""
-    money = {key: st.column_config.NumberColumn(format="localized") for key in (rows[0] if rows else {}) if key.endswith("원)")}
+    """표를 그린다. 금액 열("…원)"으로 끝나는 열)에는 천 단위 쉼표를 넣는다.
+
+    가린 칸("가격 미확인 (내부 자료로 채움)", PRD 17절)이 든 금액 열은 숫자 열로 둘 수 없어, 그 열의 숫자를 쉼표를 넣은 글로 바꾼다.
+    """
+    keys = [key for key in (rows[0] if rows else {}) if key.endswith("원)")]
+    texts = {key for key in keys if any(isinstance(row[key], str) for row in rows)}
+    if texts:
+        rows = [row | {key: f"{row[key]:,}" if isinstance(row[key], int) else row[key] for key in texts} for row in rows]
+    money = {key: st.column_config.NumberColumn(format="localized") for key in keys if key not in texts}
     st.dataframe(rows, hide_index=True, column_config=money)
 
 
@@ -239,18 +249,23 @@ def detail_view() -> None:
             st.markdown(f"**{KO['choice_kind']['none']}**")
         else:
             st.markdown(f"**{view.venue}** — {view.venue_detail}")
+            # 기본 데이터 실행에서 집계 파일로 채운 단가는 내부 자료라 그 단가가 든 금액을 가린다 (PRD 17절, app/results.py)
             left, right = st.columns(2)
-            left.metric("낸 금액 (가상)", won(view.total_paid))
-            right.metric("워커힐 매출 (가상, 세금 뺀 값)", won(view.revenue_net))
+            if view.hidden:
+                left.metric("낸 금액 (가상)", FILLED_PRICE_SHORT, help=FILLED_PRICE_HELP)
+                right.metric("워커힐 매출 (가상, 세금 뺀 값)", FILLED_PRICE_SHORT, help=FILLED_PRICE_HELP)
+            else:
+                left.metric("낸 금액 (가상)", won(view.total_paid))
+                right.metric("워커힐 매출 (가상, 세금 뺀 값)", won(view.revenue_net))
             money_table(
                 [
                     {
                         "상품": line.product,
                         "수량": line.quantity,
                         "단위": line.unit,
-                        "표시가 (가상, 원)": line.list_price,
-                        "할인 (가상, 원)": line.discount,
-                        "낸 금액 (가상, 원)": line.paid,
+                        "표시가 (가상, 원)": FILLED_PRICE if line.hidden else line.list_price,
+                        "할인 (가상, 원)": FILLED_PRICE if line.hidden else line.discount,
+                        "낸 금액 (가상, 원)": FILLED_PRICE if line.hidden else line.paid,
                     }
                     for line in view.lines
                 ]
@@ -277,7 +292,7 @@ def detail_view() -> None:
                     {
                         "업장": item.venue,
                         "구분": item.kind,
-                        "가장 싼 주문 (가상, 원)": item.cheapest,
+                        "가장 싼 주문 (가상, 원)": FILLED_PRICE if item.hidden else item.cheapest,
                         "걸린 점": ", ".join(item.pain_labels),
                         "고르지 않은 이유": item.text,
                     }

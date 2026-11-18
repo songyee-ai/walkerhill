@@ -4,8 +4,8 @@
 - 페르소나: 속성 묶음마다 근거 등급과 근거가 된 후기 번호. 방문 모습·기호·구매 성향에 후기가 없으면 "이유 근거 부족".
 - 가중치: 실행 하나의 고객군 배수, 페르소나 가중치, 묶음 비율의 근거 등급과 그 실행의 검증 결과("검증 건수 부족").
 
-기본 데이터로 돌린 실행의 가중치 수치는 보이지 않고 등급만 보인다. 발표 화면에서 기본 데이터의 수치를 그대로 보일지는
-아직 정하지 않았다 (PRD 17절, 11-20 까지 전원이 정함). 정해지면 `SHOW_BASE_NUMBERS` 를 그 결정대로 둔다.
+기본 데이터로 돌린 실행의 가중치 수치는 보이지 않고 등급만 보인다. 발표 화면에서도 가린다 (PRD 17절, 11-18 화면 담당과 팀장이 "가림"을 추천해 나머지 동의를 기다림. 그동안도 가린다).
+가릴지의 기준은 화면 전체가 같게 `app/results.py` 의 `shows_numbers` 하나다.
 표를 만드는 함수는 Streamlit 없이 돌아 테스트가 직접 본다. 그리는 것은 `render` 뿐이다.
 """
 
@@ -13,16 +13,12 @@ import json
 from dataclasses import dataclass
 from pathlib import Path
 
-from engine.formats import KO, Persona, Venue, merged_persona, read_model
+from app.results import shows_numbers
+from engine.formats import KO, Calibration, Persona, Venue, merged_persona, read_model
 from engine.formats.persona import EVIDENCE_KEYS, REASON_EVIDENCE_KEYS
 from engine.formats.run import RunRecord
 
-# 기본 데이터로 돌린 실행의 가중치 수치를 화면에 보일지. PRD 17절의 결정 전에는 보이지 않는다 (T22).
-SHOW_BASE_NUMBERS = False
-BASE_NUMBERS_NOTE = (
-    "기본 데이터로 돌린 실행이라 수치는 가리고 근거 등급만 보입니다. "
-    "발표 화면에서 기본 데이터의 수치를 보일지는 팀이 정합니다 (PRD 17절)."
-)
+BASE_NUMBERS_NOTE = "기본 데이터로 돌린 실행이라 수치는 가리고 근거 등급만 보입니다 (PRD 17절)."
 
 GRADE = KO["grade"]
 # 근거 등급의 순서 (강한 것부터). 표를 이 순서로 센다.
@@ -217,10 +213,6 @@ def baseline_runs(folder: Path) -> list[str]:
     return sorted(found, reverse=True)
 
 
-def shows_numbers(record: RunRecord) -> bool:
-    return record.data_mode == "sample" or SHOW_BASE_NUMBERS
-
-
 def _value(value: float, record: RunRecord) -> str:
     return f"{value:,.4g}" if shows_numbers(record) else "가림"
 
@@ -251,6 +243,44 @@ def weight_rows(record: RunRecord, names: dict[str, str]) -> dict[str, list[dict
         for condition_id, value in by_condition.items()
     ]
     return {"고객군 배수": groups, "페르소나 가중치": people, "묶음 비율": ratios}
+
+
+def load_calibration(run_dir: Path) -> Calibration | None:
+    """기준 실행의 보정 대조 결과 (T116, `FORMATS.md` 10.4절). 대조 명령을 돌린 실행에만 있다."""
+    path = run_dir / "calibration.json"
+    return read_model(path, Calibration) if path.is_file() else None
+
+
+def calibration_rows(calibration: Calibration, record: RunRecord, names: dict[str, str]) -> list[dict]:
+    """고객군마다 보정의 통과·미달 (PRD 6.5절).
+
+    기본 데이터 실행이면 비중 수치와 어느 업장이 가장 큰지는 가리고, 가장 큰 업장이 같은지와 차이가 기준 안인지만 보인다
+    (PRD 17절, 11-18 팀장 회신). 가상 예시 값의 실행은 수치까지 보인다.
+    """
+    criteria = calibration.criteria
+    rows = []
+    for group, result in sorted(calibration.groups.items()):
+        few = result.personas is not None and result.personas < criteria.diff_min_personas
+        widest = max((abs(v.diff_pp) for v in result.venues.values()), default=0.0)
+        if few:
+            diff = f"보지 않음 (페르소나 {result.personas}명)"
+        else:
+            diff = f"기준 안 ({criteria.max_diff_pp:g}%p 이내)" if widest <= criteria.max_diff_pp else f"기준 넘음 ({criteria.max_diff_pp:g}%p 초과)"
+        row = {
+            "고객군": group,
+            "페르소나 수": "" if result.personas is None else result.personas,
+            "가장 큰 업장이 같음": "예" if result.top_sim is not None and result.top_sim == result.top_base else "아니오",
+            "업장별 비중 차이": diff,
+            "결과": "통과" if result.passed else "미달",
+        }
+        if shows_numbers(record):
+            row |= {
+                "가장 큰 업장 (시뮬레이션)": names.get(result.top_sim or "", result.top_sim or ""),
+                "가장 큰 업장 (집계 파일)": names.get(result.top_base or "", result.top_base or ""),
+                "가장 큰 차이 (%p)": round(widest, 1),
+            }
+        rows.append(row)
+    return rows
 
 
 def product_notes(record: RunRecord, found: dict[str, Venue]) -> list[str]:
@@ -336,6 +366,16 @@ def render(repo_root: Path) -> None:
             st.dataframe(rows, hide_index=True)
         for note in product_notes(record, found_venues):
             st.caption(note)
+        try:
+            calibration = load_calibration(source.folder / run_id)
+        except (OSError, ValueError) as error:
+            calibration = None
+            st.warning(f"보정 대조 결과를 읽지 못했습니다: {error}")
+        if calibration is not None:
+            st.markdown(f"**보정 대조** · {'모든 고객군 통과' if calibration.passed else '미달인 고객군이 있음'}")
+            st.dataframe(calibration_rows(calibration, record, names), hide_index=True)
+            if calibration.uncovered_groups:
+                st.caption("페르소나가 없어 대조하지 않은 고객군: " + ", ".join(calibration.uncovered_groups))
         show_validation(source.folder / run_id, names)
         if not (source.folder / run_id / "validation.json").is_file():
             st.caption("이 실행에는 검증 결과가 없습니다. 검증(T19)을 돌린 실행에서 업장별 검증 건수와 \"검증 건수 부족\"이 보입니다.")

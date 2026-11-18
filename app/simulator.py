@@ -11,10 +11,18 @@ from pathlib import Path
 
 import streamlit as st
 
-from app.board import WALKERHILL_NAMES, pct_change, venue_cards
+from app.board import WALKERHILL_NAMES, index_text, pct_change, venue_cards
 from app.compare import Comparison, combine_months, compare, summary_groups, zero_groups
 from app.icons import as_img, persona_icon
-from app.results import load_run, names_from_files, visit_view, won
+from app.results import (
+    FILLED_PRICE,
+    MASKED_AMOUNT_NOTE,
+    load_run,
+    names_from_files,
+    shows_numbers,
+    visit_view,
+    won,
+)
 from app.runs import (
     AI_CHOICES,
     EXAMPLE_VENUES,
@@ -618,6 +626,10 @@ def show_comparison(
 ) -> None:
     names = {v.venue_id: v.name for v in catalog.values()} | comparison.names
     record = comparison.scen.record
+    # 기본 데이터 실행이면 금액과 손님 수를 가린다 (PRD 17절, 11-18 팀장 회신. app/results.py 의 `shows_numbers`)
+    masked = not (shows_numbers(record) and shows_numbers(comparison.base.record))
+    if masked:
+        st.caption(MASKED_AMOUNT_NOTE)
 
     # 식당가 그림: 페르소나가 기본 시나리오 → 변수 적용 후로 옮겨 가는 모습 (app/street.py)
     shown = [v for v in (allowed or list(catalog)) if v in catalog]
@@ -629,6 +641,7 @@ def show_comparison(
         [v for v in shown if catalog[v].is_competitor],
         scenario_name or record.scenario_id,
         scope,
+        masked,
     )
     html, _ = render_scene(scene)
     # st.components.v1.html 는 없어질 기능이라 st.iframe 으로 넣는다 (11-17 T206, hojitea-ui 알림). 이름과 이유는 render_scene 이 escape 한다.
@@ -636,7 +649,7 @@ def show_comparison(
     st.iframe(html, height="content")
 
     with st.expander("숫자와 카드로 자세히 보기"):
-        _show_cards(comparison, catalog, names, allowed)
+        _show_cards(comparison, catalog, names, allowed, masked)
     # 검증 결과는 그 안에 접는 칸이 있어 위의 접는 칸 밖에 둔다 (접는 칸 안에 접는 칸은 둘 수 없다).
     if comparison.base.run_dir is not None:
         show_validation(comparison.base.run_dir, names)
@@ -650,18 +663,27 @@ def show_comparison(
             _show_person(comparison)
 
 
-def _show_cards(comparison: Comparison, catalog: dict[str, VenueInfo], names: dict[str, str], allowed: list[str] | None) -> None:
+def _show_cards(
+    comparison: Comparison, catalog: dict[str, VenueInfo], names: dict[str, str], allowed: list[str] | None, masked: bool = False
+) -> None:
     # 한눈에: 워커힐 가상 매출과 옮긴 사람
     diff = comparison.total_after - comparison.total_before
     a, b, c = st.columns(3)
-    a.metric(
-        "워커힐 가상 매출 변화",
-        pct_change(comparison.total_before, comparison.total_after) if diff else "변화 없음",
-        delta=f"{diff:+,}원 (가상 · 일 년 규모)" if diff else None,
-        delta_color="normal" if diff else "off",
-        help=f"{BASE_LABEL} {won(comparison.total_before)} → {AFTER_LABEL} {won(comparison.total_after)}. "
-        "금액은 기본 데이터의 일 년 매출 규모에 맞춘 가상 값입니다.",
-    )
+    if masked:
+        a.metric(
+            "워커힐 가상 매출 변화",
+            pct_change(comparison.total_before, comparison.total_after) if diff else "변화 없음",
+            help=MASKED_AMOUNT_NOTE,
+        )
+    else:
+        a.metric(
+            "워커힐 가상 매출 변화",
+            pct_change(comparison.total_before, comparison.total_after) if diff else "변화 없음",
+            delta=f"{diff:+,}원 (가상 · 일 년 규모)" if diff else None,
+            delta_color="normal" if diff else "off",
+            help=f"{BASE_LABEL} {won(comparison.total_before)} → {AFTER_LABEL} {won(comparison.total_after)}. "
+            "금액은 기본 데이터의 일 년 매출 규모에 맞춘 가상 값입니다.",
+        )
     b.metric("워커힐 밖으로 나간 방문", f"{comparison.count('out')}건", delta=-comparison.count("out") or None)
     c.metric("워커힐로 들어온 방문", f"{comparison.count('in')}건", delta=comparison.count("in") or None)
 
@@ -692,7 +714,19 @@ def _show_cards(comparison: Comparison, catalog: dict[str, VenueInfo], names: di
     for i, card in enumerate(cards):
         with columns[i % 3].container(border=True):
             st.markdown(f"**{card.name}**  \n:small[{card.kind_label}]")
-            if card.revenue_before is not None:
+            if masked:
+                # 금액과 손님 수 대신 기본 시나리오를 100 으로 둔 지수와 변화율 (PRD 17절)
+                revenue = card.revenue_before is not None
+                before = card.revenue_before if revenue else card.guests_before
+                after = card.revenue_after if revenue else card.guests_after
+                pct = pct_change(before, after)
+                st.metric(
+                    "가상 매출 (지수)" if revenue else "손님 (지수)",
+                    index_text(before, after),
+                    delta=pct if after != before else "변화 없음",
+                    delta_color="normal" if after != before else "off",
+                )
+            elif card.revenue_before is not None:
                 change = card.revenue_after - card.revenue_before
                 st.metric(
                     "가상 매출",
@@ -728,7 +762,8 @@ def _show_person(comparison: Comparison) -> None:
             if view.failed_reason or not view.found:
                 st.write(f"AI 답을 받지 못했습니다: {view.failed_reason or '이 실행에 없는 방문'}")
                 continue
-            st.write(f"{view.venue or KO['choice_kind']['none']} — {won(view.total_paid)}")
+            # 내부 자료로 채운 단가가 든 방문은 금액을 가린다 (PRD 17절)
+            st.write(f"{view.venue or KO['choice_kind']['none']} — {FILLED_PRICE if view.hidden else won(view.total_paid)}")
             st.write(view.reason_text or "")
             for item in view.not_chosen:
                 st.caption(f"고르지 않음: {item.venue} — {item.text}")

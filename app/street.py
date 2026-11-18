@@ -9,9 +9,10 @@
 from dataclasses import dataclass
 from html import escape
 
-from app.board import pct_change, venue_cards
+from app.board import index_text, pct_change, venue_cards
 from app.compare import Comparison, Place
 from app.icons import persona_icon, venue_icon
+from app.results import MASKED_AMOUNT_NOTE
 
 # 화면에서 두 실행을 부르는 이름 (11-16 화면 담당 결정: "평소/바뀐 뒤" 대신)
 BASE_LABEL = "기본 시나리오"
@@ -54,6 +55,8 @@ class Scene:
     hidden: int = 0  # AI 답을 받지 못해 그리지 않은 방문 수
     # 누구의 결과인가 (예: "고른 페르소나 1명만"). 머리 숫자 위에 적는다 (11-17 팀장 요청)
     scope: str = ""
+    # 기본 데이터 실행이면 금액과 손님 수를 가리고 변화율과 지수만 보인다 (PRD 17절, app/results.py 의 `shows_numbers`)
+    masked: bool = False
 
 
 NONE_KEY = "none"
@@ -77,6 +80,7 @@ def scene_from_comparison(
     competitors: list[str],
     title: str = "",
     scope: str = "",
+    masked: bool = False,
 ) -> Scene:
     """비교 결과를 거리 그림으로 바꾼다. `walkerhill`, `competitors` 의 업장은 손님이 없어도 가게를 둔다."""
     cards = {place_key(c.place): c for c in venue_cards(comparison, names, walkerhill)}
@@ -109,7 +113,7 @@ def scene_from_comparison(
         if m.move != "failed"
     ]
     hidden = sum(1 for m in comparison.moves if m.move == "failed")
-    return Scene(title, stores, tokens, comparison.total_before, comparison.total_after, hidden, scope)
+    return Scene(title, stores, tokens, comparison.total_before, comparison.total_after, hidden, scope, masked)
 
 
 # ── 그리기 ──
@@ -143,17 +147,24 @@ def money(amount: float) -> str:
     return f"{amount:,}원"
 
 
-def value_text(store: Store, value: float) -> str:
+def value_text(store: Store, value: float, masked: bool = False) -> str:
+    if masked:
+        # 금액과 손님 수 대신 기본 시나리오를 100 으로 둔 지수 (PRD 17절)
+        return index_text(store.before, value)
     return f"{money(value)} (가상)" if store.unit == "won" else f"{value:,.0f}명 (가상)"
 
 
-def delta_text(store: Store) -> tuple[str, str]:
+def delta_text(store: Store, masked: bool = False) -> tuple[str, str]:
     """(글, 색의 이름). 색은 up / down / flat 이고, 늘었나 줄었나만 뜻한다 (가게 테두리의 색과 같은 뜻)."""
     diff = store.after - store.before
-    if round(diff) == 0:
+    pct = pct_change(store.before, store.after)
+    # 가릴 때는 변화율로 본다 (작은 손님 수의 변화도 비율로는 보인다). 반올림해 0% 면 변화 없음이다.
+    if (pct in ("변화 없음", "+0%", "-0%")) if masked else round(diff) == 0:
         return "변화 없음", "flat"
     sign = "▲" if diff > 0 else "▼"
-    if store.unit == "won":
+    if masked:
+        text = f"{sign} {pct}"
+    elif store.unit == "won":
         text = f"{sign} {money(abs(diff))} ({pct_change(store.before, store.after)})"
     else:
         text = f"{sign} {abs(diff):,.0f}명"
@@ -330,14 +341,14 @@ def render_scene(scene: Scene) -> tuple[str, int]:
     parts = [f'<div class="zone" style="top:{top + 4}px">{escape(name)}</div>' for name, top in heads]
     for store in scene.stores:
         slot = slots[store.key]
-        d_text, d_kind = delta_text(store)
+        d_text, d_kind = delta_text(store, scene.masked)
         state = " lost" if store.key in lost and store.key not in won else " won" if store.key in won and store.key not in lost else ""
         parts.append(
             f'<div class="store {store.kind}{state}" style="left:{slot.left:.3f}%;top:{slot.top}px;width:{slot.width:.3f}%">'
             f'<div class="card"><div class="top"><div class="pic">{_small(store.icon, 20)}</div>'
             f'<div class="id"><div class="nm" title="{escape(store.name)} · {escape(store.caption)}">{escape(store.name)}</div>'
-            f'<div class="val"><span class="before-v">{escape(value_text(store, store.before))}</span>'
-            f'<span class="after-v">{escape(value_text(store, store.after))}</span></div></div></div>'
+            f'<div class="val"><span class="before-v">{escape(value_text(store, store.before, scene.masked))}</span>'
+            f'<span class="after-v">{escape(value_text(store, store.after, scene.masked))}</span></div></div></div>'
             f'<div class="lane" style="height:{lanes * LANE_H}px"><span class="d after-d {d_kind}">{escape(d_text)}</span></div></div></div>'
         )
     for i, (token, (bx, by), (ax, ay)) in enumerate(zip(scene.tokens, before, after, strict=True)):
@@ -372,9 +383,17 @@ def render_scene(scene: Scene) -> tuple[str, int]:
         note.append(f"{BASE_LABEL}와 선택이 같습니다. 이 변수로는 고른 페르소나의 선택이 바뀌지 않았습니다.")
     if scene.hidden:
         note.append(f"AI 답을 받지 못한 방문 {scene.hidden}건은 그림과 매출에서 뺐습니다.")
-    note.append(
-        "모든 금액과 손님 수는 가상 값입니다. 금액은 기본 데이터의 일 년 매출 규모에 맞춘 값이라, 기간을 골라도 그 기간의 매출이 아닙니다. "
-        "페르소나에 마우스를 올리면 고른 이유가 보입니다."
+    if scene.masked:
+        note.append(f"{MASKED_AMOUNT_NOTE} 페르소나에 마우스를 올리면 고른 이유가 보입니다.")
+    else:
+        note.append(
+            "모든 금액과 손님 수는 가상 값입니다. 금액은 기본 데이터의 일 년 매출 규모에 맞춘 값이라, 기간을 골라도 그 기간의 매출이 아닙니다. "
+            "페르소나에 마우스를 올리면 고른 이유가 보입니다."
+        )
+    amounts = (
+        "금액은 가림 · 기본 시나리오 = 100"
+        if scene.masked
+        else f"{money(scene.total_before)} → {money(scene.total_after)} (가상 · 일 년 규모)"
     )
     outs = sum(t.move == "out" for t in scene.tokens)
     ins = sum(t.move == "in" for t in scene.tokens)
@@ -383,7 +402,7 @@ def render_scene(scene: Scene) -> tuple[str, int]:
         '<div class="wrap" id="root"><div class="kpis">'
         f'<div class="kpi"><div class="k">워커힐 가상 매출 변화 · {scope}{escape(scene.title)}</div>'
         f'<div class="v"><span class="chg {t_kind if diff else "flat"}">{escape(t_pct)}</span>'
-        f"<small>{escape(money(scene.total_before))} → {escape(money(scene.total_after))} (가상 · 일 년 규모)</small></div></div>"
+        f"<small>{escape(amounts)}</small></div></div>"
         f'<div class="kpi"><div class="k">워커힐 밖으로 나간 방문</div><div class="v">{outs}건</div></div>'
         f'<div class="kpi"><div class="k">워커힐로 들어온 방문</div><div class="v">{ins}건</div></div></div>'
         '<div class="bar"><div class="seg">'

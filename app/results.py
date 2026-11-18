@@ -76,6 +76,31 @@ def won(amount: int | float) -> str:
     return f"{round(amount):,}원 (가상)"
 
 
+# 발표 화면에서 기본 데이터의 수치를 보일지 (PRD 17절). 11-18 화면 담당과 팀장이 "가림"을 추천했고 나머지 두 사람의 동의를 기다린다
+# ("알릴 것"의 11-18 줄). 정하기 전에도 가리는 쪽을 기본으로 둔다. 보이기로 정하면 이 값만 True 로 바꾼다.
+# 기본 데이터로 돌린 실행에서 가리는 것 (가리는 곳은 팀장이 화면 코드를 따라가 찾아 준 셋. 11-18 팀장 회신):
+# - 가상 매출의 금액: 고객군 배수로 고객군 합이 기본 데이터의 매출과 같아지게 맞춘 값이라 실제 매출 규모가 드러난다. 변화율과 지수만 보인다.
+# - 손님 수: 가중치 × 묶음 비율이라 근거 보기에서 가린 가중치를 다시 계산할 수 있다. 변화율과 지수만 보인다.
+# - 집계 파일로 채운 단가(`filled_products`): 내부 자료의 평균 단가다. 그 단가가 든 금액은 "가격 미확인"으로 보인다.
+# 가상 예시 값의 실행은 지어낸 값이라 그대로 보인다.
+SHOW_BASE_NUMBERS = False
+MASKED_AMOUNT_NOTE = "기본 데이터의 매출 규모에 맞춘 값이라 금액은 가립니다. 변화율과, 기본 시나리오를 100 으로 둔 지수만 보입니다."
+FILLED_PRICE = "가격 미확인 (내부 자료로 채움)"
+# 큰 숫자 칸(st.metric)에는 긴 글이 잘려 보여 짧게 쓰고, 까닭은 도움말에 둔다
+FILLED_PRICE_SHORT = "가격 미확인"
+FILLED_PRICE_HELP = "가격이 비어 있는 상품이라 기본 데이터의 평균 단가로 채웠습니다. 내부 자료라 그 단가가 든 금액은 가립니다."
+
+
+def shows_numbers(record: RunRecord) -> bool:
+    """이 실행의 금액·손님 수·가중치 수치를 그대로 보여도 되는가."""
+    return record.data_mode == "sample" or SHOW_BASE_NUMBERS
+
+
+def hidden_prices(record: RunRecord) -> set[str]:
+    """가릴 단가의 상품 (`<venue_id>:<product_id>`). 수치를 보여도 되는 실행이면 비어 있다."""
+    return set() if shows_numbers(record) else set(record.filled_products)
+
+
 def condition_label(condition: RunCondition) -> str:
     """방문 조건을 한국어로 적는다. 예: "식사 · 저녁 · 주말"."""
     return _condition_label(condition.occasion, condition.meal, condition.day_type, condition.stay, condition.month)
@@ -149,6 +174,8 @@ class BoughtLine:
     list_price: int
     discount: int
     paid: int
+    # 내부 자료로 채운 단가라 가리는 줄 (`hidden_prices`)
+    hidden: bool = False
 
 
 @dataclass
@@ -158,6 +185,8 @@ class NotChosen:
     cheapest: int | None
     pain_labels: list[str]
     text: str
+    # 후보의 상품 가운데 내부 자료로 채운 단가가 있어 "가장 싼 주문"을 가린다
+    hidden: bool = False
 
 
 @dataclass
@@ -183,10 +212,16 @@ class VisitView:
     condition: RunCondition | None = None
     not_chosen: list[NotChosen] = field(default_factory=list)
 
+    @property
+    def hidden(self) -> bool:
+        """산 것에 내부 자료로 채운 단가가 있어 이 방문의 금액을 가린다."""
+        return any(line.hidden for line in self.lines)
+
 
 def visit_view(run: LoadedRun, persona_id: str, condition_id: str) -> VisitView:
     """페르소나와 방문 조건을 하나씩 골랐을 때의 결과."""
     view = VisitView(persona_id, condition_id)
+    hidden = hidden_prices(run.record)
     rows = [r for r in run.rows if r.persona_id == persona_id and r.condition_id == condition_id]
     if not rows:
         return view
@@ -231,6 +266,7 @@ def visit_view(run: LoadedRun, persona_id: str, condition_id: str) -> VisitView:
                     list_price=row.list_price,
                     discount=row.discount,
                     paid=row.paid,
+                    hidden=f"{row.venue_id}:{row.product_id}" in hidden,
                 )
             )
         view.total_paid = sum(line.paid for line in view.lines)
@@ -240,20 +276,24 @@ def visit_view(run: LoadedRun, persona_id: str, condition_id: str) -> VisitView:
         mentioned = set()
         for rejected in saved.response.rejected:
             mentioned.add(rejected.venue_id)
-            view.not_chosen.append(_not_chosen(candidates.get(rejected.venue_id), rejected.venue_id, rejected.pain_labels, rejected.text))
+            view.not_chosen.append(
+                _not_chosen(candidates.get(rejected.venue_id), rejected.venue_id, rejected.pain_labels, rejected.text, hidden)
+            )
         # 후보였는데 고르지도, 고르지 않은 이유를 적지도 않은 업장도 빠뜨리지 않고 보여 준다.
         for venue_id, candidate in candidates.items():
             if venue_id != first.venue_id and venue_id not in mentioned:
-                view.not_chosen.append(_not_chosen(candidate, venue_id, [], "이유를 적지 않았다"))
+                view.not_chosen.append(_not_chosen(candidate, venue_id, [], "이유를 적지 않았다", hidden))
     return view
 
 
-def _not_chosen(candidate, venue_id: str, pain_labels: list[str], text: str) -> NotChosen:
+def _not_chosen(candidate, venue_id: str, pain_labels: list[str], text: str, hidden: set[str]) -> NotChosen:
     if candidate is None:
         return NotChosen(venue_id, "후보에 없던 업장", None, pain_labels, text)
     kind = KO["choice_kind"]["competitor" if candidate.is_competitor else "walkerhill"]
     prices = [o.total for o in candidate.options] or [a.unit_price for a in candidate.addons]
-    return NotChosen(candidate.name, kind, min(prices) if prices else None, pain_labels, text)
+    products = {line.product_id for o in candidate.options for line in o.lines} | {a.product_id for a in candidate.addons}
+    masked = any(f"{venue_id}:{product_id}" in hidden for product_id in products)
+    return NotChosen(candidate.name, kind, min(prices) if prices else None, pain_labels, text, masked)
 
 
 def run_notices(run: LoadedRun) -> list[str]:
@@ -292,8 +332,8 @@ def visit_table(run: LoadedRun) -> list[dict]:
                     "페르소나": personas[persona_id],
                     "방문 조건": conditions[condition_id],
                     "고른 곳": chosen,
-                    "낸 금액 (가상, 원)": view.total_paid,
-                    "워커힐 매출 (가상, 세금 뺀 원)": view.revenue_net,
+                    "낸 금액 (가상, 원)": FILLED_PRICE if view.hidden else view.total_paid,
+                    "워커힐 매출 (가상, 세금 뺀 원)": FILLED_PRICE if view.hidden else view.revenue_net,
                     "고른 이유": view.reason_text or "",
                 }
             )
