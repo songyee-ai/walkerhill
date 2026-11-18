@@ -347,14 +347,21 @@ EXCLUDED = [
     ("인원 초과", "persona", party(13)),
     ("인원 초과", "persona", party(10, 3)),
     ("예약 조건 위반", "venue", reservation(party_min=5)),
+    # 업장과 페르소나를 함께 고친다. 어린이도 인원으로 센다 (코스 A·B 는 어린이도 같은 가격이라 어린이 가격이 없어 빠지는 것이 아니다).
+    ("예약 조건 위반", "both", (reservation(party_min=5), party(3, 1))),
+    ("예약 조건 위반", "both", (reservation(party_min=3), party(2))),
     ("다른 이용 상황의 업장", "venue", lambda d: d.update(occasions=["dessert"], products=[], hours=None)),
 ]
 
 
 @pytest.mark.parametrize("kind, where, change", EXCLUDED, ids=[f"{k}-{i}" for i, (k, _, _) in enumerate(EXCLUDED)])
 def test_venue_that_breaks_a_condition_is_never_a_candidate(example_copy, kind, where, change):
-    path = venue_file(example_copy, "geumryong") if where == "venue" else persona_file(example_copy, "family-elders")
-    edit(path, change)
+    if where == "both":
+        edit(venue_file(example_copy, "geumryong"), change[0])
+        edit(persona_file(example_copy, "family-elders"), change[1])
+    else:
+        path = venue_file(example_copy, "geumryong") if where == "venue" else persona_file(example_copy, "family-elders")
+        edit(path, change)
 
     # 그래도 금룡을 골랐다고 적은 답을 넣는다. 엔진은 그 답을 받아들이지 않아야 한다.
     forced = lambda visit, request: answer(request, "geumryong", "geumryong-o1")  # noqa: E731
@@ -496,6 +503,99 @@ def test_amounts_are_recomputed_from_the_venue_definition(example_copy):
     assert "수량" in amount_problems(tampered(lambda line: line.update(quantity=3)), response, venues)[0]
     assert "할인" in amount_problems(tampered(lambda line: line.update(discount=1000)), response, venues)[0]
     assert "파는 상품이 아니다" in amount_problems(tampered(lambda line: line.update(product_id="ghost")), response, venues)[0]
+
+
+# ── 검증 사례를 실행으로 넣기: 요청을 잘못 만든 엔진을 흉내 낸다 ─────────────
+#
+# 파는 달과 금액은 요청을 만드는 쪽(`build_request`)이 먼저 걸러, 맞는 요청으로는 어긴 답을 만들 수 없다.
+# 그래서 요청을 만드는 쪽이 틀렸다고 치고(달을 보지 않거나 금액을 잘못 적음) 그 요청에서 고른 답을 엔진에 넣는다.
+# 답을 다시 검사하는 쪽(`amount_problems`)이 막아 금액이 0 인 실패 줄로 남고, 원장을 따로 세는 검사의 위반도 0 이어야 한다
+# (PRD 11절 "검증 사례를 종류마다 3건 이상 넣었을 때 조건 위반이 0건").
+
+
+def break_requests(monkeypatch, broken) -> None:
+    """엔진과 이 파일의 `requests_in` 이 쓰는 `build_request` 를 `broken(real, kwargs)` 로 바꾼다. 정해 둔 답도 그 요청에 맞춰 저장된다."""
+    real = build_request
+    wrong = lambda **kwargs: broken(real, kwargs)  # noqa: E731
+    monkeypatch.setattr("engine.runner.build_request", wrong)
+    monkeypatch.setitem(globals(), "build_request", wrong)
+
+
+def ignoring_the_month(real, kwargs):
+    """달을 보지 않고 후보를 만든다. 요청에는 실행의 달을 그대로 적는다."""
+    condition = kwargs["condition"]
+    request, skipped = real(**{**kwargs, "condition": condition.model_copy(update={"month": None})})
+    if request is None:
+        return None, skipped
+    return request.model_copy(update={"condition": request.condition.model_copy(update={"month": condition.month})}), skipped
+
+
+# (무엇, 고칠 업장, 고치는 것, 페르소나, 고른 업장). 7월에는 고른 주문의 상품을 팔지 않는다.
+OUT_OF_SEASON = [
+    ("업장의 파는 달", "geumryong", lambda d: d.update(months=[12]), "family-elders", "geumryong"),
+    ("상품의 파는 달", "geumryong", lambda d: product_of(d, "course-a").update(months=[4, 5, 6]), "family-elders", "geumryong"),
+    # 성인과 어린이 가격은 파는 달이 같을 때만 한 주문으로 짝짓는다 (`engine.candidates`). 그래서 둘 다 4 ~ 6월로 둔다.
+    ("성인·어린이 짝 주문의 파는 달", "thebuffet", lambda d: [product_of(d, p).update(months=[4, 5, 6]) for p in ("dinner-adult", "dinner-child")],
+     "family-kids", "thebuffet"),
+]
+
+
+@pytest.mark.parametrize("name, venue_id, change, persona_id, chosen", OUT_OF_SEASON, ids=[c[0] for c in OUT_OF_SEASON])
+def test_answer_that_orders_out_of_season_fails(example_copy, monkeypatch, name, venue_id, change, persona_id, chosen):
+    """파는 달이 아님: 달을 보지 않고 만든 요청에서 그 달에 팔지 않는 주문을 고르면 실패 줄로 남는다."""
+    edit(venue_file(example_copy, venue_id), change)
+    # 고치지 않은 엔진은 그 주문을 7월의 후보에 넣지 않는다.
+    honest = requests_in(example_copy, [persona_id], [DINNER], month=7).get(f"{persona_id}__{DINNER}")
+    offered = honest.candidate(chosen) if honest and chosen in [c.venue_id for c in honest.candidates] else None
+    assert offered is None or not any(line.product_id == "course-a" or line.product_id.endswith("-child") for o in offered.options for line in o.lines)
+
+    break_requests(monkeypatch, ignoring_the_month)
+    played = play(example_copy, lambda visit, request: first_option(request, chosen), persona_ids=[persona_id], month=7)
+    (row,) = played.visit(persona_id, DINNER)
+    assert row.status == "failed" and "이번 조건에 파는 상품이 아니다" in row.fail_reason
+    assert (row.choice_kind, row.paid, row.revenue_net) == ("none", 0, 0)
+    assert played.saved == {}  # 어긋난 답은 재생할 답으로 베껴 두지 않는다
+    assert played.violations() == []
+
+
+def wrong_amount(change):
+    """금룡의 첫 주문의 첫 줄을 `change` 로 고친 요청을 만든다. 줄과 주문의 합계는 고친 값에 맞춰 다시 적는다."""
+
+    def broken(real, kwargs):
+        request, skipped = real(**kwargs)
+        data = request.model_dump(mode="json")
+        candidate = next(c for c in data["candidates"] if c["venue_id"] == "geumryong")
+        option = candidate["options"][0]
+        line = option["lines"][0]
+        change(line)
+        line["line_total"] = line["quantity"] * line["unit_price"] - line["discount"]
+        option["total"] = sum(x["line_total"] for x in option["lines"])
+        if line["discount"]:
+            # 깎인 줄이 있는 후보에는 적용된 프로모션이 있어야 요청의 모양이 맞다 (docs/FORMATS.md 9절).
+            benefit = {"type": "discount_amount", "value": line["discount"]}
+            candidate["promotions"] = [{"promo_id": "made-up", "name": "없는 할인", "benefit": benefit, "applied": True}]
+        return ChoiceRequest.model_validate(data), skipped
+
+    return broken
+
+
+WRONG_AMOUNTS = [
+    ("단가", lambda line: line.update(unit_price=100000)),
+    ("수량", lambda line: line.update(quantity=3)),
+    ("할인", lambda line: line.update(discount=1000)),
+]
+
+
+@pytest.mark.parametrize("what, change", WRONG_AMOUNTS, ids=[w for w, _ in WRONG_AMOUNTS])
+def test_answer_with_a_wrong_amount_fails(example_copy, monkeypatch, what, change):
+    """금액 불일치: 금액을 잘못 적은 요청에서 그 주문을 고르면, 업장 정의로 다시 계산해 걸려 실패 줄로 남는다."""
+    break_requests(monkeypatch, wrong_amount(change))
+    played = play(example_copy, pick_geumryong)
+    (row,) = played.visit("family-elders", DINNER)
+    assert row.status == "failed" and what in row.fail_reason
+    assert (row.choice_kind, row.paid, row.revenue_net) == ("none", 0, 0)
+    assert played.saved == {}
+    assert played.violations() == []
 
 
 # ── 위반을 세는 쪽이 위반을 정말 알아보는가 ────────────────────────────
