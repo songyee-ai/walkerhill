@@ -32,26 +32,67 @@ def load_validation(run_dir: Path) -> Validation | None:
     return read_model(path, Validation) if path.is_file() else None
 
 
+TOTAL_LABEL = "모든 업장 합계"
+TOTAL_NOTE = "검증 건수가 모자란 업장의 후기도 합계에는 들어갑니다."
+
+
 def _of(count: int | None, n: int) -> str:
     return "" if count is None else f"{n}건 중 {count}건"
 
 
+def _status(enough: bool, reason_enough: bool, min_reviews: int) -> str:
+    """5건 기준은 업장 일치(`n`)와 이유 일치(`reason_n`)를 따로 본다 (PRD 6.6절, T117)."""
+    if not enough:
+        return f"검증 건수 부족 ({min_reviews}건 미만)"
+    if not reason_enough:
+        return f"이유는 검증 건수 부족 (고른 이유가 있는 후기 {min_reviews}건 미만)"
+    return ""
+
+
+def _row(name: str, n: int, enough: bool, venue: tuple, reason_n: int, reason_enough: bool, reason: tuple, min_reviews: int) -> dict:
+    # 이유 일치의 분모는 고른 이유 라벨이 있는 후기 수(`reason_n`)다. `n` 으로 나누면 이유 일치가 낮아 보인다 (T117).
+    return {
+        "업장": name,
+        "검증 건수": n,
+        "고른 업장이 같음": _of(venue[0], n),
+        "같음 (단순 기준)": _of(venue[1], n),
+        "이유를 잰 건수": reason_n,
+        "이유가 겹침": _of(reason[0], reason_n),
+        "겹침 (단순 기준)": _of(reason[1], reason_n),
+        "상태": _status(enough, reason_enough, min_reviews),
+    }
+
+
 def validation_rows(validation: Validation, names: dict[str, str]) -> list[dict]:
-    """업장마다 한 줄: 검증 건수, 일치 건수(기준 방식과 함께), 상태, 한계."""
+    """업장마다 한 줄과 모든 업장을 합친 한 줄: 검증 건수, 일치 건수(기준 방식과 함께), 상태, 한계."""
+    least = validation.min_reviews
     rows = []
     for venue_id, result in sorted(validation.venues.items(), key=lambda item: names.get(item[0], item[0])):
-        rows.append(
-            {
-                "업장": names.get(venue_id, venue_id),
-                "검증 건수": result.n,
-                "고른 업장이 같음": _of(result.venue_match, result.n),
-                "같음 (단순 기준)": _of(result.venue_match_baseline, result.n),
-                "이유가 겹침": _of(result.reason_match, result.n),
-                "겹침 (단순 기준)": _of(result.reason_match_baseline, result.n),
-                "상태": "" if result.enough else f"검증 건수 부족 ({validation.min_reviews}건 미만)",
-                "한계": VALIDATION_LIMITS.get(venue_id, ""),
-            }
+        row = _row(
+            names.get(venue_id, venue_id),
+            result.n,
+            result.enough,
+            (result.venue_match, result.venue_match_baseline),
+            result.reason_n,
+            result.reason_enough,
+            (result.reason_match, result.reason_match_baseline),
+            least,
         )
+        rows.append(row | {"한계": VALIDATION_LIMITS.get(venue_id, "")})
+    # 합친 줄에도 5건 기준을 똑같이 적용한다. 형식에는 칸이 없어 화면이 건수로 정한다 (T117 팀장 알림).
+    total = validation.total
+    enough, reason_enough = total.n >= least, total.reason_n >= least
+    row = _row(
+        TOTAL_LABEL,
+        total.n,
+        enough,
+        (total.venue_match, total.venue_match_baseline) if enough else (None, None),
+        total.reason_n,
+        reason_enough,
+        (total.reason_match, total.reason_match_baseline) if reason_enough else (None, None),
+        least,
+    )
+    rows.append(row | {"한계": TOTAL_NOTE})
     return rows
 
 
