@@ -103,6 +103,10 @@ def test_doc_validation_example_is_valid(doc):
     validation = Validation.model_validate(doc.validation)
     assert validation.venues["geumryong"].enough is True
     assert validation.venues["thebuffet"].enough is False
+    # 업장 일치는 잴 수 있어도 이유 일치는 건수가 모자랄 수 있다 (T117)
+    assert validation.venues["pizzahill"].enough is True
+    assert validation.venues["pizzahill"].reason_enough is False
+    assert validation.total.reason_n == sum(v.reason_n for v in validation.venues.values())
 
 
 # ── 문서의 코드 값 표 = 코드 ─────────────────────────────────────────────────

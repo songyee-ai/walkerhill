@@ -13,3 +13,11 @@
 - 돌리는 명령은 `uv run python -m tools.venue_data.<스크립트 이름>` 꼴이다. 스크립트를 넣을 때 빈 `__init__.py` 를 함께 넣는다.
 - 테스트는 `tests/venue_data/` 아래에 새 파일로 더한다. 테스트에는 지어낸 값만 쓴다.
 - 올리기 전에 린트와 형식 검사를 돌린다: `uv run python -m ruff check .`, `uv run python -m tools.check_formats`
+
+들어 있는 것 (11-17, hojitea-ui)
+
+- `build_summary.py` 기본 데이터에서 집계 파일을 만든다. `uv run python -m tools.venue_data.build_summary` (`--out <폴더>` 로 다른 곳에 쓸 수 있다)
+  - 읽는 것: `private/base/source.json` (기본 데이터 파일의 위치, 열 이름, 다이닝 줄을 고르는 값), 그 기본 데이터, `private/base/map.json` (상품 대응표), `data/venues/`
+  - 쓰는 것: `private/base/summary.csv`, `private/base/meta.json`
+- `make_sample.py` 가상 예시 값을 만든다. 기본 데이터를 읽지 않는다. `uv run python -m tools.venue_data.make_sample` 는 검사만 하고, `--write` 를 붙이면 `data/samples/base_summary.csv` 를 덮어쓴다
+- 테스트: `tests/venue_data/test_venue_data_scripts.py`
