@@ -3476,6 +3476,13 @@ REVIEW_RULES 12절의 페르소나 담당 몫 넷은 모두 동의해(T101 알�
   borigunbbang: 검증 결과 장(업장별 검증 건수, 금룡·명월관 한계, 높고 낮음만), 페르소나 소개 장, 이유 문장을 고객군의 사실로 옮기지 않기, 마지막에 PRD 12절 "하지 않는 주장" 검토.
   hojitea-ui: 시연 상황 셋의 설명(금룡은 11·12월만, 12월 요금 둘은 일 년 내내 받는다고 가정), 업장 데이터와 근거 장, 발표 자료에 든 화면 그림이 가린 화면인지 검토.
   songyee-ai: 발표할 PC(팀장 PC)에서 wilstein91 의 시연 순서대로 끝까지 돌려 보기.
+- [ ] songyee-ai ← borigunbbang (11-18): **LLM 에 보내는 선택 요청에서 `scenario_id` 를 빼 주세요** (T23. 엔진·형식은 팀장 영역이라 요청합니다).
+  지금: `build_request` 가 요청에 `scenario_id` 를 넣고, `user_message` 가 요청 전체를 JSON 으로 보내 모델이 상황의 이름(`ui-price-geumryong-p15` 같은)을 그대로 봅니다.
+  페르소나 프롬프트(`personas/prompts/p1`~`p3`)는 `scenario_id` 를 쓰지 않습니다. 바뀐 가격·메뉴는 `candidates` 에 따로 실리니 고르는 데 필요한 정보는 줄지 않습니다.
+  이유: 상황 이름이 "가격 인상", "경쟁 업장 할인" 같은 바뀐 내용을 미리 알려 페르소나의 선택을 그쪽으로 끌 수 있습니다.
+  드는 것: `scenario_id` 가 요청 해시에도 들어 있어, 빼면 저장된 답(`engine/samples/`, `tests/fixtures/example/` 의 `llm/`, 팀장 PC 의 보정·시연 답)을 모두 재생할 수 없고 다시 받아야 합니다.
+  고칠 곳: `engine/formats/choice.py` 의 `ChoiceRequest`, `engine/candidates.py` 의 `build_request`, `engine/runner.py`, `docs/FORMATS.md` 9절, `tests/fixtures/example/`, `tests/test_llm.py`.
+  기능 동결(11-19) 전에 할지, 동결 뒤로 미룰지, 하지 않을지 정해서 이 줄에 적고 체크해 주세요.
   나누는 까닭: 개인 작업이 끝난 두 사람이 자기 영역의 장을 쓰면 wilstein91 의 일이 줄고, 내용을 가장 잘 아는 사람이 씁니다.
   `slides/` 는 wilstein91 의 폴더라 파일은 wilstein91 만 고칩니다. 원고는 이 줄 아래나 메신저로 넘겨 주세요. 원고를 언제까지 받을지는 wilstein91 이 정해 이 줄에 적어 주세요.
   `slides/` 는 공개 저장소에 올라가니 원고에도 내부 자료의 수치와 후기 원문을 적지 않습니다. 다르게 나누고 싶으면 이 줄에 적어 주세요. 세 분이 확인하면 체크합니다.
