@@ -43,6 +43,12 @@ EVIDENCE_LABEL = {
 REASON_LACK = "이유 근거 부족"
 PRICE_UNKNOWN = "가격 미확인"
 BASIS_UNKNOWN = "가격 표기 미확인"
+# 엔진은 가상 예시 값으로 돌릴 때도 집계 파일로 단가를 채운다 (engine.weights.fill_prices).
+# 11-17 업장 데이터 담당이 "기본 데이터로 돌릴 때만"이라는 옛 문구가 실제와 다르다고 찾아 줌.
+PRICE_FILL_NOTE = (
+    "가격이 비어 있어, 엔진이 돌릴 때마다 집계 파일의 낸 금액 ÷ 수량으로 단가를 채웁니다. "
+    "가상 예시 값으로 돌리면 지어낸 단가로 채워집니다. 집계 파일에 팔린 것이 없으면 후보에서 뺍니다."
+)
 # 영업시간과 예약은 형식에 등급 칸이 없다 (FORMATS.md 3절). 지어내지 않고 출처만 보인다.
 NO_GRADE = "등급 칸 없음 (출처만)"
 # 후기 번호는 많으면 앞의 것만 표에 보이고 나머지는 수로 적는다. 전체는 펼쳐 본다.
@@ -282,7 +288,7 @@ def render(repo_root: Path) -> None:
         rows = venue_value_rows(venue)
         unknown = [r["무엇"] for r in rows if r["표시"] == PRICE_UNKNOWN]
         if unknown:
-            st.warning(f"{PRICE_UNKNOWN}: {', '.join(unknown)} — 가격이 비어 있어 기본 데이터로 돌릴 때만 집계 파일로 단가를 채웁니다.")
+            st.warning(f"{PRICE_UNKNOWN}: {', '.join(unknown)} — {PRICE_FILL_NOTE}")
         st.dataframe(rows, hide_index=True)
         st.caption("영업시간과 예약은 형식에 근거 등급 칸이 없어 출처만 보입니다. 출처가 비어 있는 값은 업장의 기본 출처를 씁니다.")
         with st.expander("출처 목록"):

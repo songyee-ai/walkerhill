@@ -1,6 +1,7 @@
 """상황별 비교와 식당가 보기 (T21, app/compare.py, app/board.py)."""
 
 import json
+import re
 import shutil
 import sys
 from pathlib import Path
@@ -17,6 +18,9 @@ from app.results import load_run  # noqa: E402
 from app.validation import (  # noqa: E402
     LIMITS_SECTION,
     LIMITS_SOURCE_LINES,
+    MEETING_LIMIT_LINES,
+    MEETING_LIMITS_SECTION,
+    TOTAL_LABEL,
     VALIDATION_LIMITS,
     limits_not_in,
     load_validation,
@@ -133,8 +137,49 @@ def test_validation_shows_counts_and_limits_together(tmp_path: Path):
     assert rows["금룡"]["검증 건수"] == 12 and rows["금룡"]["고른 업장이 같음"] == "12건 중 8건"
     assert rows["금룡"]["한계"] == VALIDATION_LIMITS["geumryong"]  # 11-16 팀원 요청: 한계를 함께
     assert rows["더뷔페"]["상태"].startswith("검증 건수 부족") and rows["더뷔페"]["고른 업장이 같음"] == ""
-    # 명월관은 이 결과에 없지만 한계는 감추지 않는다.
-    assert limits_not_in(validation) == ["myongwolgwan"]
+    # 11-17 T117: 이유가 겹친 것은 고른 이유가 있는 후기(reason_n)로 나눈다. n(12)으로 나누면 낮아 보인다.
+    assert rows["금룡"]["이유를 잰 건수"] == 10 and rows["금룡"]["이유가 겹침"] == "10건 중 9건"
+    assert rows["금룡"]["겹침 (단순 기준)"] == "10건 중 6건" and rows["금룡"]["상태"] == ""
+    # 모든 업장을 합친 줄이 마지막에 하나 더 있다. 건수가 모자란 더뷔페의 후기도 들어간다.
+    total = rows[TOTAL_LABEL]
+    assert list(rows)[-1] == TOTAL_LABEL
+    assert total["검증 건수"] == 15 and total["고른 업장이 같음"] == "15건 중 9건"
+    assert total["이유가 겹침"] == "11건 중 9건" and total["상태"] == ""
+    # 명월관·모에기는 이 결과에 없지만 한계는 감추지 않는다.
+    assert limits_not_in(validation) == ["myongwolgwan", "moegi"]
+
+
+def test_validation_counts_reason_shortage_apart_and_on_the_total(tmp_path: Path):
+    # 업장 일치는 5건이 넘어도 이유는 모자랄 수 있다. 합친 줄에도 5건 기준을 똑같이 적용한다 (T117 팀장 알림).
+    run_dir = tmp_path / "run"
+    run_dir.mkdir()
+    (run_dir / "validation.json").write_text(
+        json.dumps(
+            {
+                "format_version": 1,
+                "created_at": "2026-11-19T15:00:00+09:00",
+                "min_reviews": 5,
+                "venues": {
+                    "pizzahill": {
+                        "n": 6, "enough": True, "venue_match": 4, "venue_match_baseline": 3,
+                        "reason_n": 2, "reason_enough": False, "reason_match": None, "reason_match_baseline": None,
+                    },
+                },
+                "total": {
+                    "n": 6, "venue_match": 4, "venue_match_baseline": 3,
+                    "reason_n": 2, "reason_match": 1, "reason_match_baseline": 1,
+                },
+            }
+        ),
+        encoding="utf-8",
+    )  # fmt: skip
+    rows = {r["업장"]: r for r in validation_rows(load_validation(run_dir), WALKERHILL_NAMES)}
+    pizza, total = rows["피자힐"], rows[TOTAL_LABEL]
+    assert pizza["고른 업장이 같음"] == "6건 중 4건" and pizza["이유가 겹침"] == ""
+    assert pizza["상태"].startswith("이유는 검증 건수 부족")
+    # 합친 줄의 reason_n(2)도 5건 미만이라, 파일에 건수가 있어도 말하지 않는다.
+    assert total["고른 업장이 같음"] == "6건 중 4건" and total["이유가 겹침"] == "" and total["겹침 (단순 기준)"] == ""
+    assert total["상태"].startswith("이유는 검증 건수 부족")
 
 
 def test_detail_tab_renders_validation_with_limits(tmp_path: Path):
@@ -159,4 +204,16 @@ def test_limits_still_match_the_review_rules():
     flat = " ".join(line.strip() for line in part.splitlines())
     for venue_id, line in LIMITS_SOURCE_LINES.items():
         assert line in flat, f"REVIEW_RULES 6절의 {venue_id} 한계 문장이 바뀌었다. 원문을 읽고 VALIDATION_LIMITS 를 고친다"
-    assert set(LIMITS_SOURCE_LINES) == set(VALIDATION_LIMITS)
+    assert set(LIMITS_SOURCE_LINES) | set(MEETING_LIMIT_LINES) == set(VALIDATION_LIMITS)
+
+
+def test_moegi_limit_is_the_meeting_sentence():
+    # 11-17 회의 사.: 모에기의 한계 문장을 T19 결과, 화면의 검증 칸, 발표 자료에 똑같이 적는다.
+    text = (REPO_ROOT / "docs" / "MEETING_1117.md").read_text(encoding="utf-8")
+    start = text.index(MEETING_LIMITS_SECTION)
+    # 사.는 마지막 절일 수 있어, 다음 제목이 없으면 문서 끝까지 본다.
+    found = re.search(r"\n#{1,3} ", text[start + 1 :])
+    section = text[start : start + 1 + found.start()] if found else text[start:]
+    for venue_id, line in MEETING_LIMIT_LINES.items():
+        assert line in section, f"MEETING_1117 사.의 {venue_id} 한계 문장이 바뀌었다"
+        assert VALIDATION_LIMITS[venue_id] == line
