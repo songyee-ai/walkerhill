@@ -105,12 +105,17 @@ def _write_validation(run_dir: Path) -> None:
                 "venues": {
                     "geumryong": {
                         "n": 12, "enough": True, "venue_match": 8, "venue_match_baseline": 7,
-                        "reason_match": 9, "reason_match_baseline": 6,
+                        "reason_n": 10, "reason_enough": True, "reason_match": 9, "reason_match_baseline": 6,
                     },
                     "thebuffet": {
                         "n": 3, "enough": False, "venue_match": None, "venue_match_baseline": None,
-                        "reason_match": None, "reason_match_baseline": None,
+                        "reason_n": 1, "reason_enough": False, "reason_match": None, "reason_match_baseline": None,
                     },
+                },
+                # 11-17 T117: 이유 일치의 분모(reason_n)와 모든 업장을 합친 total 이 형식에 더해졌다 (songyee-ai 가 맞춤)
+                "total": {
+                    "n": 15, "venue_match": 9, "venue_match_baseline": 8,
+                    "reason_n": 11, "reason_match": 9, "reason_match_baseline": 6,
                 },
             }
         ),

@@ -3,7 +3,8 @@
   "run_id": "20261117-101500-baseline",
   "criteria": {
     "top_venue_must_match": true,
-    "max_diff_pp": 15
+    "max_diff_pp": 15,
+    "diff_min_personas": 2
   },
   "groups": {
     "가족·친족": {
@@ -21,6 +22,7 @@
       },
       "top_sim": "thebuffet",
       "top_base": "thebuffet",
+      "personas": 2,
       "pass": true
     }
   },

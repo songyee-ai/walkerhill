@@ -24,6 +24,9 @@ EXIT_OK, EXIT_FAILED = 0, 1
 # 명령의 인자로 두지 않은 까닭: 돌릴 때마다 바꿔 가며 통과시키지 못하게 한다.
 TOP_VENUE_MUST_MATCH = True
 MAX_DIFF_PP = 15
+# 11-17 의 첫 대조 뒤 한 번 고친 것 (T18, T119): 페르소나가 이 수보다 적은 고객군은 업장별 차이를 적기만 하고 통과를 가르지 않는다.
+# 페르소나가 한 명이면 고르기 하나가 그 고객군 비중의 약 4분의 1 이라, 차이를 맞추려면 끼니마다 업장을 적어 넣어야 한다.
+DIFF_MIN_PERSONAS = 2
 
 # 비중은 소수 넷째 자리, 차이(%p)는 둘째 자리까지 적는다. 통과 여부는 적힌 차이로 정한다.
 SHARE_DIGITS = 4
@@ -40,8 +43,11 @@ def _top(shares: dict[str, float]) -> str | None:
     return next((venue_id for venue_id, share in shares.items() if share == best), None) if best > 0 else None
 
 
-def compare(sim: dict[str, float], base: dict[str, float], venue_ids: list[str]) -> dict:
-    """한 고객군의 대조 결과. `sim`, `base` 는 업장마다의 매출이다 (단위는 상관없다. 비중만 본다)."""
+def compare(sim: dict[str, float], base: dict[str, float], venue_ids: list[str], check_diffs: bool = True) -> dict:
+    """한 고객군의 대조 결과. `sim`, `base` 는 업장마다의 매출이다 (단위는 상관없다. 비중만 본다).
+
+    `check_diffs` 가 거짓이면 업장별 차이는 적기만 하고 통과는 가장 큰 업장으로만 가른다 (페르소나가 한 명인 고객군).
+    """
     sim_total, base_total = sum(sim.values()), sum(base.values())
     sim_share = {v: sim.get(v, 0.0) / sim_total if sim_total > 0 else 0.0 for v in venue_ids}
     base_share = {v: base.get(v, 0.0) / base_total if base_total > 0 else 0.0 for v in venue_ids}
@@ -55,7 +61,8 @@ def compare(sim: dict[str, float], base: dict[str, float], venue_ids: list[str])
     top_sim, top_base = _top(sim_written), _top(base_written)
     # 어느 한쪽에 매출이 없으면 견줄 수 없어 통과가 아니다.
     comparable = top_sim is not None and top_base is not None
-    passed = comparable and (top_sim == top_base or not TOP_VENUE_MUST_MATCH) and all(abs(d) <= MAX_DIFF_PP for d in diffs.values())
+    small = not check_diffs or all(abs(d) <= MAX_DIFF_PP for d in diffs.values())
+    passed = comparable and (top_sim == top_base or not TOP_VENUE_MUST_MATCH) and small
     return {
         "venues": {
             v: {
@@ -139,17 +146,21 @@ def calibrate(root: Path, data_mode: str, run_id: str | None = None) -> tuple[Pa
         if persona_id not in inputs.personas:
             not_run.setdefault(persona.customer_group, []).append(persona_id)
     covered = sorted({persona.customer_group for persona in everyone.values()})
+    # 고객군의 페르소나 수는 저장소의 수다. 실행에서 일부만 돌린 고객군은 위에서 미달로 적힌다.
+    sizes = {group: sum(persona.customer_group == group for persona in everyone.values()) for group in covered}
     groups = {}
     for group in covered:
         sim = {venue_id: entry["weighted_revenue"] for venue_id, entry in venue_shares(rows, group)["walkerhill"].items()}
-        groups[group] = compare(sim, base.get(group, {}), venue_ids)
+        found = compare(sim, base.get(group, {}), venue_ids, check_diffs=sizes[group] >= DIFF_MIN_PERSONAS)
         if group in not_run:
-            groups[group]["pass"] = False
+            found["pass"] = False
+        # 파일의 키 차례: venues, top_sim, top_base, personas, pass (FORMATS.md 10.4절의 예시).
+        groups[group] = {**{k: v for k, v in found.items() if k != "pass"}, "personas": sizes[group], "pass": found["pass"]}
     result = Calibration.model_validate(
         {
             "format_version": 1,
             "run_id": record.run_id,
-            "criteria": {"top_venue_must_match": TOP_VENUE_MUST_MATCH, "max_diff_pp": MAX_DIFF_PP},
+            "criteria": {"top_venue_must_match": TOP_VENUE_MUST_MATCH, "max_diff_pp": MAX_DIFF_PP, "diff_min_personas": DIFF_MIN_PERSONAS},
             "groups": groups,
             # 기본 데이터에 매출이 있는데 페르소나가 없어 다루지 않은 고객군.
             "uncovered_groups": sorted(group for group, by_venue in base.items() if group not in covered and sum(by_venue.values()) > 0),
@@ -176,14 +187,16 @@ def main(argv: list[str] | None = None) -> int:
     print(f"대조 결과: {path}")
     print(
         f"통과 기준: 비중이 가장 큰 업장이 같다 ({'본다' if result.criteria.top_venue_must_match else '보지 않는다'}) · "
-        f"업장별 비중의 차이가 모두 {result.criteria.max_diff_pp:g}%p 이내"
+        f"업장별 비중의 차이가 모두 {result.criteria.max_diff_pp:g}%p 이내 "
+        f"(페르소나가 {result.criteria.diff_min_personas}명보다 적은 고객군, 곧 페르소나가 한 명인 고객군은 가장 큰 업장만 본다)"
     )
     for group, found in result.groups.items():
         worst = max(found.venues.items(), key=lambda item: abs(item[1].diff_pp), default=None)
         gap = f"{worst[0]} {worst[1].diff_pp:+.2f}%p" if worst else "없음"
+        few = found.personas is not None and found.personas < result.criteria.diff_min_personas
         print(
             f"- {group}: {'통과' if found.passed else '미달'} · 가장 큰 업장 가상 {found.top_sim or '없음'} / 기본 {found.top_base or '없음'} · "
-            f"가장 큰 차이 {gap}"
+            f"가장 큰 차이 {gap}" + (f" (페르소나 {found.personas}명이라 차이는 보지 않음)" if few else "")
         )
         if group in not_run:
             print(
