@@ -120,3 +120,11 @@ def test_price_fill_note_matches_the_engine():
     # 엔진은 가상 예시 값으로 돌릴 때도 집계 파일로 단가를 채운다 (engine.weights.fill_prices, 11-17 업장 데이터 담당이 찾아 줌).
     assert "기본 데이터로 돌릴 때만" not in PRICE_FILL_NOTE
     assert "가상 예시 값" in PRICE_FILL_NOTE and "후보에서 뺍니다" in PRICE_FILL_NOTE
+
+
+def test_header_note_separates_simulated_amounts_from_official_prices():
+    # 11-18 팀장 회신 (PR 174): 근거 보기의 공식 가격은 출처가 있는 공개 가격이라 "가상"이 아니다. "가상"은 시뮬레이션이 낸 금액에만.
+    from app.style import HEADER_NOTE
+
+    assert "화면의 모든 금액" not in HEADER_NOTE
+    assert "시뮬레이션이 낸 금액" in HEADER_NOTE and "가상" in HEADER_NOTE and "공식 가격" in HEADER_NOTE
