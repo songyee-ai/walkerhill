@@ -14,7 +14,12 @@ from pathlib import Path
 from engine.formats import Validation, read_model
 
 LIMITS_SECTION = "지금까지 나눈 것과 한계"
-LIMITS_SOURCE = f'docs/REVIEW_RULES.md 6절 "{LIMITS_SECTION}"'
+# 모에기의 한계는 11-17 회의 사.에서 정했다. 그 문장을 "T19 결과, 화면의 검증 칸, 발표 자료에 똑같이 적는다".
+MEETING_LIMITS_SECTION = "### 사."
+LIMITS_SOURCE = f'docs/REVIEW_RULES.md 6절 "{LIMITS_SECTION}", 모에기는 docs/MEETING_1117.md 사.'
+MEETING_LIMIT_LINES = {
+    "moegi": "모에기의 검증 후기 5건 가운데 3건이 엔진 담당의 시험 자료에 들어 있었다. 페르소나 담당은 보지 않았다.",
+}
 # 화면 문구가 옮겨 온 원문의 문장 (고칠 때 원문과 대조하려고 남긴다).
 LIMITS_SOURCE_LINES = {
     "geumryong": "금룡은 11-13 에 지금과 다른 씨앗으로 나눴다. 그 씨앗과 프로그램도 업장 데이터 담당에게 넘어가 다시 나눠 같은 결과인 것을 확인했다.",
@@ -24,6 +29,8 @@ VALIDATION_LIMITS = {
     "geumryong": "11-13 에 다른 업장과 다른 씨앗(무작위 값)으로 나눴습니다. 그 씨앗으로 다시 나눠 같은 결과인 것은 확인했지만, "
     "지금 씨앗과 달라 금룡 후기를 더 모으면 이어서 나누는 방법을 따로 정해야 합니다.",
     "myongwolgwan": "떼어 둔 후기가 11-13 에 페르소나 쪽에서 태그 분포를 본 시험 파일을 그대로 나눈 것입니다 (본문은 읽지 않았습니다).",
+    # 회의에서 문장을 똑같이 적기로 해 원문 그대로 둔다.
+    "moegi": MEETING_LIMIT_LINES["moegi"],
 }
 
 

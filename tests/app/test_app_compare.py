@@ -1,6 +1,7 @@
 """상황별 비교와 식당가 보기 (T21, app/compare.py, app/board.py)."""
 
 import json
+import re
 import shutil
 import sys
 from pathlib import Path
@@ -17,6 +18,8 @@ from app.results import load_run  # noqa: E402
 from app.validation import (  # noqa: E402
     LIMITS_SECTION,
     LIMITS_SOURCE_LINES,
+    MEETING_LIMIT_LINES,
+    MEETING_LIMITS_SECTION,
     TOTAL_LABEL,
     VALIDATION_LIMITS,
     limits_not_in,
@@ -142,8 +145,8 @@ def test_validation_shows_counts_and_limits_together(tmp_path: Path):
     assert list(rows)[-1] == TOTAL_LABEL
     assert total["검증 건수"] == 15 and total["고른 업장이 같음"] == "15건 중 9건"
     assert total["이유가 겹침"] == "11건 중 9건" and total["상태"] == ""
-    # 명월관은 이 결과에 없지만 한계는 감추지 않는다.
-    assert limits_not_in(validation) == ["myongwolgwan"]
+    # 명월관·모에기는 이 결과에 없지만 한계는 감추지 않는다.
+    assert limits_not_in(validation) == ["myongwolgwan", "moegi"]
 
 
 def test_validation_counts_reason_shortage_apart_and_on_the_total(tmp_path: Path):
@@ -201,4 +204,16 @@ def test_limits_still_match_the_review_rules():
     flat = " ".join(line.strip() for line in part.splitlines())
     for venue_id, line in LIMITS_SOURCE_LINES.items():
         assert line in flat, f"REVIEW_RULES 6절의 {venue_id} 한계 문장이 바뀌었다. 원문을 읽고 VALIDATION_LIMITS 를 고친다"
-    assert set(LIMITS_SOURCE_LINES) == set(VALIDATION_LIMITS)
+    assert set(LIMITS_SOURCE_LINES) | set(MEETING_LIMIT_LINES) == set(VALIDATION_LIMITS)
+
+
+def test_moegi_limit_is_the_meeting_sentence():
+    # 11-17 회의 사.: 모에기의 한계 문장을 T19 결과, 화면의 검증 칸, 발표 자료에 똑같이 적는다.
+    text = (REPO_ROOT / "docs" / "MEETING_1117.md").read_text(encoding="utf-8")
+    start = text.index(MEETING_LIMITS_SECTION)
+    # 사.는 마지막 절일 수 있어, 다음 제목이 없으면 문서 끝까지 본다.
+    found = re.search(r"\n#{1,3} ", text[start + 1 :])
+    section = text[start : start + 1 + found.start()] if found else text[start:]
+    for venue_id, line in MEETING_LIMIT_LINES.items():
+        assert line in section, f"MEETING_1117 사.의 {venue_id} 한계 문장이 바뀌었다"
+        assert VALIDATION_LIMITS[venue_id] == line
