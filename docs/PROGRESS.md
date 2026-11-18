@@ -2838,6 +2838,7 @@ REVIEW_RULES 12절의 페르소나 담당 몫 넷은 모두 동의해(T101 알�
   "Please replace `st.components.v1.html` with `st.iframe`. `st.components.v1.html` will be removed after 2026-06-01." 이 나옵니다 (Streamlit 1.66.0, 윈도우 11, `app/simulator.py` 의 `components.html`).
   지금은 그대로 돌지만, 적힌 날짜가 지나 있어 Streamlit 판이 오르면 그 부분이 깨질 수 있습니다. 시연 전에 바꿀지 봐 주세요.
   (확인: wilstein91 11-17, `st.iframe` 으로 바꿔 서버 기록에 경고가 나오지 않는 것을 봤습니다. T206)
+  (main 확인: hojitea-ui 11-18, `main` 의 `cb2f29e` 를 띄워 "예시로 연습"으로 비교를 한 번 돌림. 서버 기록에 경고가 없고 식당가 그림이 뜨며 브라우저 콘솔에 오류 없음. 윈도우 11)
 - [x] songyee-ai ← hojitea-ui (11-17): 피자힐 업장 정의(`data/venues/pizzahill.json`)를 고쳤습니다 (T401). 6인 세트(`seis-set`)를 더하고,
   세이스 피자 단품은 주문에 더하는 상품으로 바꿨습니다. 질문이 달라지므로 **보정·시연 답을 받기 전에** 이 변경이 든 develop 을 받아 주세요.
   (확인: songyee-ai 11-17, 이 변경이 든 `develop` (`d89bfb8`)을 팀장 PC 에 받았습니다. 보정·시연 답은 아직 받지 않았고, 받을 때 이 업장 정의로 받습니다)
