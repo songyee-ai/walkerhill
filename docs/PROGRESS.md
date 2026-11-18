@@ -766,7 +766,7 @@ p1 때의 확인 (11-16, 실제 LLM 없이, macOS, 실행 결과는 `private/` �
   끼니는 업장 정의의 `slots` 로 정한다. 업장 정의의 판매 달 밖에서 팔린 줄은 더파빌리온 빙수뿐이다 ("알릴 것").
 - 11-17: 팀장이 내준 `tools/venue_data/` 로 두 스크립트를 옮겼다 (T117 의 "알릴 것"). 안내 파일의 "지킬 것"대로 기본 데이터의 파일 이름, 열 이름, 다이닝 줄을 고르는 값은
   코드에서 빼고 `private/base/source.json` 에 두어 읽게 했다. 돌리는 명령은 `uv run python -m tools.venue_data.build_summary` 와 `uv run python -m tools.venue_data.make_sample` 이다.
-  - 옮긴 스크립트가 같은 결과를 내는지 대조했다 (11-17, 윈도우 11). 새 스크립트로 임시 폴더에 만든 집계 파일이 11-13 의 `private/base/summary.csv` 와 바이트까지 같고 (2,567줄),
+  - 옮긴 스크립트가 같은 결과를 내는지 대조했다 (11-17, 윈도우 11). 새 스크립트로 임시 폴더에 만든 집계 파일이 11-13 의 `private/base/summary.csv` 와 바이트까지 같고,
     `meta.json` 도 만든 날 말고는 같다. 예시 값 스크립트도 옛 스크립트와 같은 줄을 만든다 (`data/samples/base_summary.csv` 는 바꾸지 않음).
   - 테스트 `tests/venue_data/test_venue_data_scripts.py` 를 더했다. 열 이름과 값은 모두 지어낸 것이다 (요일 나누기, 끼니 정하기, 합치기와 대조, 대응표에 없는 줄, 빠진 설정, 예시 값의 씨앗).
   - 다른 PC 에서 집계 파일을 다시 만들려면 `private/` 에 기본 데이터, `private/base/map.json`, `private/base/source.json` 세 가지가 있어야 한다.
@@ -2965,7 +2965,7 @@ REVIEW_RULES 12절의 페르소나 담당 몫 넷은 모두 동의해(T101 알�
 - [x] hojitea-ui ← songyee-ai (11-17): **업장 데이터 담당의 코드 폴더 `tools/venue_data/` 를 내드렸습니다** (T117. 11-13 줄의 답). 안내 파일의 "지킬 것"을 읽고 T13 의 스크립트를 옮겨 주세요.
   급한 것은 아닙니다. 보정의 기준 실행이 집계 파일(위 11-17 줄)과 자료를 준 쪽의 조건 확인(T114 줄)을 기다리고 있으니 그 둘을 먼저 부탁드립니다.
   - hojitea-ui (11-17): 옮겼습니다 (T13 의 경위). 열 이름 등은 `private/base/source.json` 에서 읽습니다. 팀장 PC 에서 줄 수로 견주시려면 기본 데이터와 함께
-    `private/base/map.json`, `private/base/source.json` 이 있어야 해서, 필요하시면 저장소 밖으로 보내 드리겠습니다. 옮긴 스크립트의 결과는 보내 드린 집계 파일과 같습니다 (2,567줄).
+    `private/base/map.json`, `private/base/source.json` 이 있어야 해서, 필요하시면 저장소 밖으로 보내 드리겠습니다. 옮긴 스크립트의 결과는 보내 드린 집계 파일과 같습니다 (줄 수와 바이트 모두).
 - [ ] songyee-ai ← borigunbbang (11-17): **T19 검증의 채점 프로그램을 만들었습니다. 두 가지를 정해 주세요** (T19 의 "잰 방법").
   ① **후기 319건을 누가 부를까요.** 검증은 보정과 같은 기준 실행(기본 데이터, 달 없음)에 붙여, 후기 한 건마다 그 조건으로 페르소나를 한 번 부릅니다 (큰 모델 319번).
   요약을 보내는 기준 실행이면 확인한 PC 에서만 부를 수 있어(T115) 팀장 PC 에서 돌려야 합니다. 그러면 떼어 둔 후기 묶음과 프로그램(`private/scripts/validate_holdout.py`)을 저장소 밖의 길로 보내 드립니다.
