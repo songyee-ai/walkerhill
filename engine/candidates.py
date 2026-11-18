@@ -240,7 +240,6 @@ def candidates_for(venues: list[Venue], condition: RunCondition) -> tuple[list[C
 def build_request(
     *,
     prompt_version: str,
-    scenario_id: str,
     persona: dict[str, Any],
     condition: RunCondition,
     venues: list[Venue],
@@ -255,7 +254,6 @@ def build_request(
         return None, skipped
     request = ChoiceRequest(
         prompt_version=prompt_version,
-        scenario_id=scenario_id,
         persona=persona,
         condition=condition,
         candidates=candidates,

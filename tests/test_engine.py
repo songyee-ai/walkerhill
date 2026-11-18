@@ -121,7 +121,6 @@ def requests_in(root: Path, persona_ids, condition_ids, venue_ids=None, month=No
         for condition_id in condition_ids:
             request, _ = build_request(
                 prompt_version="p1",
-                scenario_id="baseline",
                 persona=inputs.persona_json[persona.persona_id],
                 condition=run_condition(inputs.conditions.condition(condition_id), persona, month),
                 venues=list(inputs.venues.values()),
@@ -1076,7 +1075,7 @@ def test_every_real_venue_file_gives_valid_requests():
         for condition in bundle.conditions:
             visit = run_condition(condition, persona)
             request, _ = build_request(
-                prompt_version="p1", scenario_id="baseline", persona=raw, condition=visit, venues=venues, vocab=vocab
+                prompt_version="p1", persona=raw, condition=visit, venues=venues, vocab=vocab
             )
             if request is None:
                 continue
@@ -1218,7 +1217,6 @@ def test_seasonal_added_product_is_not_offered_with_a_year_round_order(example_c
     # 조건에 달이 있으면 그 달의 방문이라, 다시 계산할 때도 파는 달이 다른 것을 문제 삼지 않는다.
     request, _ = build_request(
         prompt_version="p1",
-        scenario_id="baseline",
         persona=inputs.persona_json["family-elders"],
         condition=december,
         venues=list(seasonal.values()),
@@ -1291,7 +1289,6 @@ def test_visit_with_a_month_is_counted_whole(example_copy):
         )
         request, _ = build_request(
             prompt_version="p1",
-            scenario_id="baseline",
             persona=inputs.persona_json[persona.persona_id],
             condition=condition,
             venues=list(inputs.venues.values()),

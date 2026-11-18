@@ -1,12 +1,11 @@
 {
   "format_version": 1,
-  "request_hash": "3048cd02fff58366",
+  "request_hash": "44f617297b40af86",
   "provider": "anthropic",
   "model": "claude-opus-5-5",
   "created_at": "2026-11-17T10:15:00+09:00",
   "request": {
     "prompt_version": "p1",
-    "scenario_id": "baseline",
     "persona": {
       "format_version": 1,
       "persona_id": "family-elders",

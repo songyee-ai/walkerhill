@@ -119,7 +119,6 @@ def request_for(
     visit = run_condition(inputs.conditions.condition(condition_id), persona).model_copy(update=condition)
     request, _ = build_request(
         prompt_version="p1",
-        scenario_id=scenario_id,
         persona=inputs.persona_json[persona_id],
         condition=visit,
         venues=list(inputs.venues.values()),
