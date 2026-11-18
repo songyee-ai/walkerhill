@@ -13,6 +13,7 @@ if str(REPO_ROOT) not in sys.path:
 from app.evidence import (  # noqa: E402
     BASIS_UNKNOWN,
     NO_GRADE,
+    PRICE_FILL_NOTE,
     PRICE_UNKNOWN,
     REASON_LACK,
     baseline_runs,
@@ -113,3 +114,9 @@ def test_evidence_tab_renders(part: str):
     app.run()
     assert not app.exception
     assert [t.label for t in app.tabs][-1] == "근거 보기"
+
+
+def test_price_fill_note_matches_the_engine():
+    # 엔진은 가상 예시 값으로 돌릴 때도 집계 파일로 단가를 채운다 (engine.weights.fill_prices, 11-17 업장 데이터 담당이 찾아 줌).
+    assert "기본 데이터로 돌릴 때만" not in PRICE_FILL_NOTE
+    assert "가상 예시 값" in PRICE_FILL_NOTE and "후보에서 뺍니다" in PRICE_FILL_NOTE

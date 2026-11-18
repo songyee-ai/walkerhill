@@ -143,6 +143,19 @@ def conditions_for(root: Path, days: list[str], whens: list[str]) -> list[str]:
     ]
 
 
+def chosen_note(condition_ids: list[str], names: dict[str, str], allowed, catalog: dict, is_example: bool) -> str:
+    """고급 설정의 "고른 방문 조건"을 식별자가 아니라 이름으로 적는다 (11-17 업장 데이터 담당이 찾아 줌)."""
+    conditions = ", ".join(names.get(c, c) for c in condition_ids) or "없음"
+    venues = ", ".join(catalog[v].name if v in catalog else v for v in allowed) if is_example else "모두"
+    return f"고른 방문 조건: {conditions} · 업장: {venues}"
+
+
+def newest_run_dir(results: list) -> Path | None:
+    """달마다 돌린 기준·상황 실행 가운데 가장 새 실행 폴더 (`run_id` 가 날짜와 시각으로 시작한다)."""
+    dirs = [o.run_dir for _, r in results for o in (r.baseline, r.scenario) if o is not None and o.run_dir]
+    return max(dirs, key=lambda d: d.name) if dirs else None
+
+
 def menu_slots_for(occasions: tuple[str, ...]) -> list[str]:
     """한정 메뉴를 팔 수 있는 때: 그 업장의 이용 상황(occasions)에 드는 것만."""
     return [label for label, (occasion, _) in MENU_SLOTS.items() if occasion in occasions]
@@ -358,7 +371,7 @@ def variable_panel(repo_root: Path) -> Inputs:
         data_mode = st.radio("값", modes, format_func=lambda m: {"sample": "가상 예시 값", "private": "기본 데이터 (이 PC 에만)"}[m], key="sim_mode")
         if root.is_example:
             st.caption("예시 자료는 미리 받아 둔 답으로만 돌립니다.")
-        st.caption(f"고른 방문 조건: {', '.join(condition_ids) or '없음'} · 업장: {', '.join(allowed) if root.is_example else '모두'}")
+        st.caption(chosen_note(condition_ids, names_from_files(root.path), allowed, catalog, root.is_example))
 
     # 기본 데이터의 요약은 받는 곳으로 보내도 된다고 확인한 PC 에서만 AI 를 새로 부른다 (T115, 11-17 팀장과 정함).
     # 확인 전에는 `--base-profile none` 으로 바꿔 돌리지 않고 재생만 한다. 팀장 PC 에서 받은 답과 요청이 같아야 재생되기 때문이다.
@@ -460,6 +473,12 @@ def render(repo_root: Path) -> None:
                             month=month,
                         )
                     results.append((month, result))
+                # 방금 돌린 실행을 상세 분석의 "실행 (새것이 위)"에서 고른 상태로 둔다. 그러지 않으면 전에 고른 실행이
+                # 그대로 남아 새로고침 전까지 예전 실행이 보였다 (11-17 업장 데이터 담당이 찾아 줌).
+                # 상세 분석 탭은 이 탭 뒤에 그려져, 같은 그리기에서 main.apply_pick 이 이 값을 받는다.
+                newest = newest_run_dir(results)
+                if newest is not None:
+                    st.session_state["pick"] = (newest.parent, newest.name)
                 st.session_state["sim_result"] = (
                     results, inputs.root.path, inputs.data_mode, list(inputs.months), list(inputs.allowed),
                     inputs.replay_only, len(inputs.personas), inputs.all_personas,
@@ -734,7 +753,10 @@ def show_validation(run_dir: Path, names: dict[str, str]) -> None:
         return
     names = WALKERHILL_NAMES | names
     with st.expander("검증 결과 (떼어 둔 후기로 잰 것)", expanded=True):
-        st.caption(f"값은 비율이 아니라 건수입니다. {validation.min_reviews}건 미만인 업장은 일치 건수를 말하지 않습니다.")
+        st.caption(
+            f"값은 비율이 아니라 건수입니다. 이유가 겹친 것은 고른 이유가 적힌 후기(이유를 잰 건수) 가운데에서 셉니다. "
+            f"{validation.min_reviews}건 미만이면 일치 건수를 말하지 않습니다."
+        )
         st.dataframe(validation_rows(validation, names), hide_index=True)
         for venue_id in limits_not_in(validation):
             st.caption(f"{names.get(venue_id, venue_id)} (이 결과에 없음) 한계: {VALIDATION_LIMITS[venue_id]}")

@@ -21,7 +21,15 @@ from app.scenario_builder import (  # noqa: E402
     our_price,
     write_scenario,
 )
-from app.simulator import conditions_for, menu_slots_for, persona_cards, prepared_scenarios, venue_catalog  # noqa: E402
+from app.simulator import (  # noqa: E402
+    chosen_note,
+    conditions_for,
+    menu_slots_for,
+    newest_run_dir,
+    persona_cards,
+    prepared_scenarios,
+    venue_catalog,
+)
 from engine.formats import Scenario, Venue, read_model  # noqa: E402
 from engine.scenarios import ScenarioError, apply_scenario  # noqa: E402
 
@@ -138,6 +146,25 @@ def test_names_come_from_definition_files_when_no_answer_was_saved(tmp_path: Pat
     names = names_from_files(_copy(tmp_path))
     assert names["family-elders"] != "family-elders"
     assert names["meal-dinner-weekend"] == "식사 · 저녁 · 주말"
+
+
+def test_advanced_settings_name_the_chosen_conditions_and_venues():
+    # 11-17 업장 데이터 담당이 찾아 줌: 고급 설정에 "meal-dinner-weekend" 처럼 식별자가 영어로 보였다.
+    note = chosen_note(["meal-dinner-weekend"], names_from_files(EXAMPLE), ["geumryong"], venue_catalog(EXAMPLE), True)
+    assert note == "고른 방문 조건: 식사 · 저녁 · 주말 · 업장: 금룡"
+    assert chosen_note([], {}, [], {}, False) == "고른 방문 조건: 없음 · 업장: 모두"
+
+
+def test_newest_run_is_picked_for_the_detail_tab(tmp_path: Path):
+    # 11-17 업장 데이터 담당이 찾아 줌: 시뮬레이터로 돌린 뒤 상세 분석에 예전 실행이 고른 채로 남았다.
+    # 시뮬레이터는 돌린 실행 가운데 가장 새것을 상세 분석에 넘긴다 (main.apply_pick).
+    root = _copy(tmp_path)
+    result = simulate(
+        root, REPO_ROOT, "sample", "competitor-chinese-discount",
+        ["family-elders"], ["meal-dinner-weekend"], list(EXAMPLE_VENUES), False, is_example=True,
+    )  # fmt: skip
+    assert newest_run_dir([(None, result)]) == result.scenario.run_dir
+    assert newest_run_dir([]) is None
 
 
 def test_months_between_wraps_the_year():
