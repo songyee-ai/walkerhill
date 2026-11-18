@@ -6,6 +6,7 @@
 """
 
 import json
+import re
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -89,6 +90,16 @@ FILLED_PRICE = "가격 미확인 (내부 자료로 채움)"
 # 큰 숫자 칸(st.metric)에는 긴 글이 잘려 보여 짧게 쓰고, 까닭은 도움말에 둔다
 FILLED_PRICE_SHORT = "가격 미확인"
 FILLED_PRICE_HELP = "가격이 비어 있는 상품이라 기본 데이터의 평균 단가로 채웠습니다. 내부 자료라 그 단가가 든 금액은 가립니다."
+
+
+# AI 의 이유 문장 안의 금액 ("48,300원", "4만 8천원", "15만 원"). 채운 단가가 든 방문에서는 이것도 가린다 (11-18 borigunbbang 이 찾음).
+AMOUNT_RE = re.compile(r"(?:\d[\d,.]*\s*(?:억|만|천|백)?\s*)+원")
+MASKED_IN_TEXT = "(금액 가림)"
+
+
+def mask_amounts(text: str | None) -> str | None:
+    """글 안의 금액을 "(금액 가림)"으로 바꾼다. 저장된 답은 그대로 두고 보여 줄 때만 바꾼다 (재생이 깨지지 않게)."""
+    return AMOUNT_RE.sub(MASKED_IN_TEXT, text) if text else text
 
 
 def shows_numbers(record: RunRecord) -> bool:
@@ -283,6 +294,13 @@ def visit_view(run: LoadedRun, persona_id: str, condition_id: str) -> VisitView:
         for venue_id, candidate in candidates.items():
             if venue_id != first.venue_id and venue_id not in mentioned:
                 view.not_chosen.append(_not_chosen(candidate, venue_id, [], "이유를 적지 않았다", hidden))
+    # 채운 단가가 든 방문은 금액 칸만 가리면 AI 의 이유 문장으로 그 금액이 다시 보인다. 문장 안의 금액도 가린다.
+    # 화면의 다른 곳(시뮬레이터, 식당가 그림, 모든 방문 표)은 이 이유를 가져다 쓰므로 여기서 한 번만 가린다.
+    if view.hidden:
+        view.reason_text = mask_amounts(view.reason_text)
+    for item in view.not_chosen:
+        if item.hidden:
+            item.text = mask_amounts(item.text) or ""
     return view
 
 

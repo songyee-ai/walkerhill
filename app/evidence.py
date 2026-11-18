@@ -271,7 +271,9 @@ def calibration_rows(calibration: Calibration, record: RunRecord, names: dict[st
             "페르소나 수": "" if result.personas is None else result.personas,
             "가장 큰 업장이 같음": "예" if result.top_sim is not None and result.top_sim == result.top_base else "아니오",
             "업장별 비중 차이": diff,
-            "결과": "통과" if result.passed else "미달",
+            # 페르소나가 적은 고객군은 업장별 차이를 보지 않고 통과했다. 같은 기준으로 통과한 것처럼 읽히지 않게 한계를 붙인다
+            # (11-18 borigunbbang 요청, T18 의 "통과 기준을 고침", T119)
+            "결과": ("통과" if result.passed else "미달") + (f" · 보정 한계: 페르소나 {result.personas}명" if few else ""),
         }
         if shows_numbers(record):
             row |= {

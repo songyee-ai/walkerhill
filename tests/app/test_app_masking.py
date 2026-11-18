@@ -4,6 +4,7 @@
 값은 모두 예시 묶음의 지어낸 값이다. 실제 기본 데이터로 돌린 실행은 쓰지 않는다.
 """
 
+import csv
 import json
 import shutil
 import sys
@@ -22,13 +23,16 @@ from app.results import (  # noqa: E402
     FILLED_PRICE,
     FILLED_PRICE_SHORT,
     MASKED_AMOUNT_NOTE,
+    MASKED_IN_TEXT,
     load_run,
+    mask_amounts,
     shows_numbers,
     visit_table,
     visit_view,
 )
 from app.street import render_scene, scene_from_comparison  # noqa: E402
-from engine.formats import LEDGER_COLUMNS  # noqa: E402
+from app.validation import validation_rows  # noqa: E402
+from engine.formats import LEDGER_COLUMNS, Validation  # noqa: E402
 from engine.formats.io import read_csv  # noqa: E402
 
 RUNS = REPO_ROOT / "tests" / "fixtures" / "example" / "engine" / "samples" / "runs"
@@ -118,3 +122,78 @@ def test_calibration_shows_pass_and_top_match_but_hides_numbers_for_base_data(tm
         assert row["결과"] in ("통과", "미달") and row["가장 큰 업장이 같음"] in ("예", "아니오")
     # 가상 예시 값은 지어낸 값이라 어느 업장인지와 가장 큰 차이까지 보인다.
     assert all("가장 큰 차이 (%p)" in row for row in sample)
+
+
+def test_amounts_in_text_are_masked():
+    assert mask_amounts("1인 48,300원이라 괜찮다") == "1인 (금액 가림)이라 괜찮다"
+    assert mask_amounts("4만 8천원 코스와 15만 원 코스") == "(금액 가림) 코스와 (금액 가림) 코스"
+    assert mask_amounts("어른 4명, 2시간") == "어른 4명, 2시간"  # 금액이 아닌 숫자는 그대로
+    assert mask_amounts(None) is None
+
+
+def _put_amount_in_reason(run_dir: Path) -> None:
+    """기준 실행의 그 방문 이유 문장에 금액을 넣는다 (지어낸 값). 실제 답에서는 채운 단가로 계산한 금액이 나온다."""
+    path = run_dir / "ledger.csv"
+    with path.open(encoding="utf-8-sig", newline="") as f:
+        rows = list(csv.DictReader(f))
+    for row in rows:
+        if row["persona_id"] == PERSONA and row["reason_text"]:
+            row["reason_text"] += " 1인 48,300원이라 괜찮다."
+    with path.open("w", encoding="utf-8-sig", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=LEDGER_COLUMNS, lineterminator="\n")
+        writer.writeheader()
+        writer.writerows(rows)
+
+
+def test_reason_amounts_are_masked_only_when_the_visit_bought_a_filled_price(tmp_path: Path):
+    # 11-18 borigunbbang: 금액 칸은 "가격 미확인"인데 바로 아래 AI 의 이유 문장에 채운 단가로 계산한 금액이 그대로 보였다.
+    runs, _ = _private_copy(tmp_path)
+    _put_amount_in_reason(runs / BASE)
+    view = visit_view(load_run(runs / BASE), PERSONA, CONDITION)
+    assert view.hidden and "48,300원" not in view.reason_text and MASKED_IN_TEXT in view.reason_text
+    # 모든 방문 표와 비교(식당가 그림, 한 사람씩 자세히 보기)도 같은 이유를 쓴다.
+    assert all("48,300원" not in row["고른 이유"] for row in visit_table(load_run(runs / BASE)))
+    comparison = compare(load_run(runs / BASE), load_run(runs / SCEN))
+    assert all("48,300원" not in (m.reason_after or "") for m in comparison.moves)
+    # 가상 예시 값 실행은 가리지 않는다.
+    sample = tmp_path / "sample"
+    shutil.copytree(RUNS, sample)
+    _put_amount_in_reason(sample / BASE)
+    assert "48,300원" in visit_view(load_run(sample / BASE), PERSONA, CONDITION).reason_text
+
+
+def test_one_persona_groups_carry_the_calibration_limit(tmp_path: Path):
+    # 11-18 borigunbbang: 페르소나가 한 명인 고객군은 업장별 차이를 보지 않고 통과했다. 같은 기준으로 통과한 것처럼 보이지 않게 한계를 붙인다.
+    runs, _ = _private_copy(tmp_path)
+    calibration = load_calibration(runs / BASE)
+    group = next(iter(calibration.groups))
+    one = calibration.model_copy(update={"groups": {group: calibration.groups[group].model_copy(update={"personas": 1})}})
+    [row] = calibration_rows(one, load_run(runs / BASE).record, {})
+    assert row["결과"].endswith("보정 한계: 페르소나 1명") and row["업장별 비중 차이"].startswith("보지 않음")
+    [row] = calibration_rows(calibration, load_run(runs / BASE).record, {})
+    assert "보정 한계" not in row["결과"]  # 페르소나가 둘이면 붙이지 않는다
+
+
+def test_validation_shows_higher_or_lower_instead_of_counts_for_base_data():
+    # 11-18 borigunbbang 알림 ②: 단순 기준은 기본 데이터의 매출로 고른 업장이라, 기본 데이터 실행에서는 건수 대신 높고 낮음만 보인다.
+    validation = Validation.model_validate(
+        {
+            "format_version": 1,
+            "created_at": "2026-11-19T15:00:00+09:00",
+            "min_reviews": 5,
+            "venues": {
+                "geumryong": {
+                    "n": 12, "enough": True, "venue_match": 8, "venue_match_baseline": 7,
+                    "reason_n": 6, "reason_enough": True, "reason_match": 2, "reason_match_baseline": 3,
+                },
+            },
+            "total": {"n": 12, "venue_match": 8, "venue_match_baseline": 7, "reason_n": 6, "reason_match": 2, "reason_match_baseline": 3},
+        }
+    )  # fmt: skip
+    masked = validation_rows(validation, {"geumryong": "금룡"}, masked=True)
+    for row in masked:
+        assert "같음 (단순 기준)" not in row and "겹침 (단순 기준)" not in row
+        assert not any("건 중" in str(value) for value in row.values())
+    assert masked[0]["고른 업장이 같음"] == "단순 기준보다 높음" and masked[0]["이유가 겹침"] == "단순 기준보다 낮음"
+    plain = validation_rows(validation, {"geumryong": "금룡"})
+    assert plain[0]["고른 업장이 같음"] == "12건 중 8건"  # 가상 예시 값 실행은 지금처럼 건수
