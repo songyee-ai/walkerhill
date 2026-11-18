@@ -678,13 +678,15 @@ customer_group,venue_id,product_id,occasion,meal,day_type,month,unit,quantity,pa
 | 키 | 뜻 |
 |---|---|
 | `prompt_version` | 프롬프트의 판 이름. 프롬프트를 고치면 바꾼다 |
-| `scenario_id` | 어느 상황인가 |
 | `persona` | 두 층을 합친 페르소나. 기본 데이터로 돌릴 때는 엔진이 붙인 `base_profile` 과, 비공개 층의 흔적 `overridden_by_private` (5절)가 들어 있다. 가상 예시로 돌릴 때는 둘 다 없거나 비어 있다 |
 | `condition` | 이번 방문 조건. 6절의 조건에 `adults`, `children`, `budget`, `purpose`, `party` 를 더한 것. `purpose` 와 `party` 는 검증할 때 후기의 라벨을 넣고 (후기에 비어 있으면 `null`), 다른 때는 `null` 이다 |
 | `candidates` | 규칙으로 추린 후보 업장. 업장마다 고를 수 있는 주문(`options`)이 들어 있다. 주문 없이 추가 상품(`addons`)만 있는 후보도 있다 (아래 "주문이 없는 후보") |
 | `allow_none` | "이용하지 않음"을 고를 수 있는가. 늘 `true` |
 | `vocab` | 이유로 쓸 수 있는 라벨: `reasons_chosen`, `pain_points` |
 
+- **요청에 상황의 이름(`scenario_id`)은 없다** (11-18, T121. 그 전에는 있었다). 상황은 후보의 가격·상품·프로모션으로만 요청에 드러난다.
+  후보가 기준과 같은 방문은 어느 상황에서 돌려도 요청이 같아 기준의 답이 재생되고, LLM 이 상황의 이름에서 무엇이 바뀌었는지 짐작하지 못한다.
+  어느 상황의 방문인지는 실행 기록과 원장의 `scenario_id` 에 남는다.
 - 주문(`options`)의 수량과 금액은 엔진이 3절의 수량 규칙과 프로모션으로 미리 계산한다.
 - 성인 가격과 어린이 가격처럼 함께 사야 하는 상품은 주문 하나의 `lines` 에 여러 줄로 넣는다.
 - `qty_rule` 이 `choice` 인 상품은 후보의 `addons` 에 넣고, LLM 이 수량을 고른다.
@@ -731,7 +733,6 @@ customer_group,venue_id,product_id,occasion,meal,day_type,month,unit,quantity,pa
 ```json
 {
   "prompt_version": "p1",
-  "scenario_id": "baseline",
   "persona": {"persona_id": "family-elders", "name": "어르신을 모신 행사 가족"},
   "condition": {
     "condition_id": "meal-dinner-weekend",
@@ -1113,8 +1114,8 @@ customer_group,venue_id,product_id,occasion,meal,day_type,month,unit,quantity,pa
 
 ```csv
 run_id,scenario_id,visit_id,persona_id,customer_group,condition_id,choice_kind,venue_id,product_id,quantity,unit,list_price,discount,paid,revenue_net,represented,counted_share,weighted_revenue,reason_labels,reason_text,used_attributes,llm_call,request_hash,status,fail_reason
-20261117-101500-baseline,baseline,family-elders__meal-dinner-weekend,family-elders,가족·친족,meal-dinner-weekend,walkerhill,geumryong,course-a,4,1인,150000,0,600000,545455,120.0,1.0,65454600,별실;주차·접근,어르신을 모시는 자리라 별실이 있고 차로 오기 편한 곳을 골랐다.,visit.purposes;preferences.needs,new,3048cd02fff58366,ok,
-20261117-103000-competitor-chinese-discount,competitor-chinese-discount,family-elders__meal-dinner-weekend,family-elders,가족·친족,meal-dinner-weekend,competitor,examplehotel-chinese,course,4,1인,140000,56000,504000,0,120.0,1.0,0,혜택·할인,할인 폭이 커서 이번에는 다른 호텔로 갔다.,buying.price_sensitivity,new,ee5893fa9739d0ca,ok,
+20261117-101500-baseline,baseline,family-elders__meal-dinner-weekend,family-elders,가족·친족,meal-dinner-weekend,walkerhill,geumryong,course-a,4,1인,150000,0,600000,545455,120.0,1.0,65454600,별실;주차·접근,어르신을 모시는 자리라 별실이 있고 차로 오기 편한 곳을 골랐다.,visit.purposes;preferences.needs,new,44f617297b40af86,ok,
+20261117-103000-competitor-chinese-discount,competitor-chinese-discount,family-elders__meal-dinner-weekend,family-elders,가족·친족,meal-dinner-weekend,competitor,examplehotel-chinese,course,4,1인,140000,56000,504000,0,120.0,1.0,0,혜택·할인,할인 폭이 커서 이번에는 다른 호텔로 갔다.,buying.price_sensitivity,new,4f37e77301272ce3,ok,
 ```
 
 ### 10.3 저장된 LLM 응답 `llm/<request_hash>.json`
@@ -1131,7 +1132,13 @@ run_id,scenario_id,visit_id,persona_id,customer_group,condition_id,choice_kind,v
 - **해시를 내는 법**: `{"provider": …, "model": …, "request": …}` 를 키를 정렬하고 공백 없이 적은 JSON 으로 바꾼 뒤, 그 글의 SHA-256 에서 앞 16글자를 쓴다.
   직접 계산하지 말고 `engine.formats.compute_request_hash` 를 쓴다. PC 가 달라도 같은 요청이면 같은 값이 나온다.
 - 같은 `request_hash` 의 파일이 있으면 LLM 을 부르지 않고 그 응답을 쓴다. 그러면 원장이 똑같이 나온다 (PRD 7.3절).
-  실행하는 명령(`python -m engine`)은 같은 `data_mode` 의 앞선 실행들의 `llm/` 을 새 실행부터 찾는다. 재생한 응답은 그 실행의 `llm/` 에도 베껴 둔다.
+  실행하는 명령(`python -m engine`)은 같은 `data_mode` 의 앞선 실행들의 `llm/` 을 찾는다. 재생한 응답은 그 실행의 `llm/` 에도 베껴 둔다.
+- **찾는 순서** (11-18, T121): `--answers` 로 가리킨 폴더, 그다음 먼저 돌린 실행부터다. 기준이 아닌 상황은 그 앞에 기준 실행의 `llm/` 을 가장 먼저 찾는다.
+  같은 요청의 답이 여러 실행에 있으면 가장 먼저 받은 답을 쓴다. 그래서 상황의 변경과 상관없는 방문(요청이 기준과 같다)은 기준의 답을 그대로 재생하고,
+  기준 상황을 다시 재생해도 나중에 돌린 상황의 답이 끼어들지 않는다.
+- **요청에 `scenario_id` 가 든 옛 모양의 답** (11-18 전에 받은 것)은 해시가 달라 재생되지 않는다. 한 번 변환한다: `uv run python -m tools.rehash_answers`
+  (요청에서 `scenario_id` 를 지우고 `request_hash`·파일 이름·원장의 `request_hash` 칸을 새 해시로 바꾼다. 답의 내용은 그대로다. LLM 을 부르지 않는다).
+  변환하지 않은 폴더가 있으면 엔진은 돌리기 전에 멈추고 알린다. 받아 둔 압축은 풀어서 변환한다.
 - 팀원끼리 이 폴더를 저장소 밖의 경로로 주고받으면 키가 없는 사람도 같은 결과를 재생할 수 있다.
 - `created_at` 은 그 응답을 받은 실행의 시각이다. `usage` 는 공급자가 알려 준 값이고, LLM 이 답한 것이 아닌 "정해 둔 답"은 0 이다.
 - `llm/` 에는 검사(9절)를 통과한 응답만 둔다. 받자마자 저장하므로 실행이 도중에 멈춰도 받은 답은 남는다.

@@ -444,7 +444,7 @@ def ledger_row() -> dict:
 
 def test_example_ledger_row_is_valid(ledger_row):
     row = LedgerRow.from_row(ledger_row)
-    assert (row.paid, row.revenue_net, row.request_hash) == (600000, 545455, "3048cd02fff58366")
+    assert (row.paid, row.revenue_net, row.request_hash) == (600000, 545455, "44f617297b40af86")
 
 
 @pytest.mark.parametrize(

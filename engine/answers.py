@@ -56,6 +56,25 @@ class AnswerBook:
         return request_hash, None, None, None
 
 
+def old_style_folder(folders: list[Path]) -> Path | None:
+    """요청에 `scenario_id` 가 든 옛 모양의 저장된 응답이 있는 첫 폴더. 없으면 None (11-18, T121).
+
+    옛 모양의 답은 해시가 달라 조용히 재생되지 않는다. 돌리기 전에 알려 주려고 본다.
+    폴더마다 파일 하나만 읽는다. 변환 도구(`tools/rehash_answers.py`)가 폴더를 통째로 바꾸기 때문이다.
+    """
+    for folder in folders:
+        first = next(iter(sorted(folder.glob("*.json"))), None)
+        if first is None:
+            continue
+        try:
+            request = json.loads(first.read_bytes()).get("request")
+        except (OSError, ValueError, AttributeError):
+            continue
+        if isinstance(request, dict) and "scenario_id" in request:
+            return folder
+    return None
+
+
 def read_reply(raw_text: str) -> tuple[ChoiceResponse | None, list[str]]:
     """LLM 이 돌려준 글을 응답으로 읽는다. (응답, 읽지 못한 이유)를 돌려준다.
 

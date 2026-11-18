@@ -30,12 +30,15 @@ DEFAULT_PROMPT = "p3"
 
 
 def earlier_answers(root: Path, data_mode: str) -> list[Path]:
-    """앞선 실행들의 저장된 응답 폴더. 새 실행부터 본다.
+    """앞선 실행들의 저장된 응답 폴더. 먼저 돌린 실행부터 본다.
 
     같은 `data_mode` 의 실행만 본다. 가상 예시로 돌릴 때 `private/` 를 읽지 않으려는 것이다.
+    같은 요청의 답이 여러 실행에 있으면 가장 먼저 받은 답을 쓴다 (11-18, T121. 그 전에는 새 실행부터 봤다).
+    요청에서 상황의 이름을 뺀 뒤로, 그 전에 받은 실행들에는 같은 요청에 다른 답이 든 것이 있다 (기준과 상황이 따로 물었다).
+    새 실행부터 보면 기준 상황을 재생할 때 나중에 돌린 상황의 답이 먼저 잡혀 원장이 달라진다.
     """
     folder = runs_folder(root, data_mode)
-    return sorted((p for p in folder.glob("*/llm") if p.is_dir()), reverse=True)
+    return sorted(p for p in folder.glob("*/llm") if p.is_dir())
 
 
 def main(argv: list[str] | None = None) -> int:

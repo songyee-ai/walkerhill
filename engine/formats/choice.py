@@ -143,7 +143,8 @@ class RequestVocab(FormatModel):
 
 class ChoiceRequest(FormatModel):
     prompt_version: Text
-    scenario_id: Id
+    # 상황의 이름은 요청에 넣지 않는다 (11-18, T121). 후보가 같으면 어느 상황에서 돌려도 요청이 같아 저장된 응답이 재생되고,
+    # LLM 이 상황의 이름에서 무엇이 바뀌었는지 짐작하지 못한다.
     # 두 층을 합친 페르소나. 엔진이 붙인 base_profile 이 들어갈 수 있어 모양을 묶어 두지 않는다.
     persona: dict[str, Any]
     condition: RunCondition

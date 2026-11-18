@@ -24,7 +24,6 @@ from engine.formats import (
     RejectedResponse,
     RunRecord,
     SavedResponse,
-    compute_request_hash,
     read_model,
 )
 from engine.formats.choice import AddonChoice, Choice, Rejected, problems_in_response
@@ -1273,7 +1272,7 @@ def test_command_says_when_the_limit_stopped_it(example_copy, stub, clean_env, c
     assert "--limit 은 0 이상의 정수다" in capsys.readouterr().err
 
 
-def test_command_looks_in_given_answers_first_and_then_newer_runs_first(example_copy, stub, clean_env):
+def test_command_looks_in_given_answers_first_and_then_earlier_runs_first(example_copy, stub, clean_env):
     clean_env.setattr(cli, "datetime", Clock())
     clean_env.setenv("LLM_PROVIDER", "openai-compatible")
     clean_env.setenv("LLM_MODEL", "local-model")
@@ -1292,8 +1291,9 @@ def test_command_looks_in_given_answers_first_and_then_newer_runs_first(example_
         saved["response"] = first_option(request, venue_id).model_dump(mode="json")
         save_json(folder / saved_path.name, saved)
 
-    # 이름으로 보아 더 새로운 실행의 응답이 먼저 쓰인다.
-    copy_choosing(runs / "20991231-000000-baseline" / "llm", "thebuffet")
+    # 이름으로 보아 먼저 돌린 실행의 응답이 먼저 쓰인다 (T121). 나중에 돌린 실행의 다른 답은 끼어들지 않는다.
+    copy_choosing(runs / "20991231-000000-baseline" / "llm", "examplehotel-buffet")
+    copy_choosing(runs / "20000101-000000-baseline" / "llm", "thebuffet")
     assert command(example_copy, "--replay-only") == cli.EXIT_OK
     rows = Played(example_copy, sorted(p for p in runs.iterdir() if (p / "run.json").is_file())[-1], {}).rows
     assert [row.venue_id for row in rows] == ["thebuffet"]
@@ -1371,16 +1371,6 @@ def test_check_refuses_a_rejected_reply_under_another_name(example_copy):
     (folder / f"{request_hash}.json").rename(folder / "0123456789abcdef.json")
     errors = errors_of(example_copy)
     assert "llm_rejected/0123456789abcdef.json: 파일 이름이 request_hash 와 다르다" in errors
-
-
-def test_check_refuses_a_rejected_reply_from_another_scenario(example_copy):
-    played, request_hash = rejected_run(example_copy)
-    folder = played.run_dir / "llm_rejected"
-    data = load_json(folder / f"{request_hash}.json")
-    data["request"]["scenario_id"] = "geumryong-course-price-up"
-    data["request_hash"] = compute_request_hash(data["provider"], data["model"], data["request"])
-    save_json(folder / f"{data['request_hash']}.json", data)
-    assert f"llm_rejected/{data['request_hash']}.json: 요청의 scenario_id 가 실행 기록과 다르다" in errors_of(example_copy)
 
 
 def test_check_reads_a_rejected_reply_strictly(example_copy):

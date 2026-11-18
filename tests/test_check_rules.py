@@ -1276,7 +1276,6 @@ def test_saved_response_is_read_as_written(example_copy):
     ("change", "message"),
     [
         (lambda d: d.update(provider="other"), "provider 나 model 이 실행 기록과 다르다"),
-        (lambda d: d["request"].update(scenario_id="geumryong-course-price-up"), "요청의 scenario_id 가 실행 기록과 다르다"),
     ],
 )
 def test_saved_response_belongs_to_its_run(example_copy, change, message):

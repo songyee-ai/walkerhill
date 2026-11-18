@@ -836,8 +836,6 @@ class Checker:
                 self.error(path, f"request_hash 가 요청으로 다시 낸 값 '{expected}' 와 다르다 (요청을 손으로 고쳤는가)")
             if (entry.provider, entry.model) != (record.llm.provider, record.llm.model):
                 self.error(path, "provider 나 model 이 실행 기록과 다르다")
-            if entry.request.scenario_id != record.scenario_id:
-                self.error(path, "요청의 scenario_id 가 실행 기록과 다르다")
             # 요청에 비공개 층이나 기본 데이터에서 나온 값이 섞였는지는 check_nothing_private 가 본다.
             # 그 검사는 이 폴더뿐 아니라 저장소의 모든 JSON 을 본다.
             for problem in problems_in_response(entry.request, entry.response):
@@ -867,8 +865,6 @@ class Checker:
                 self.error(path, f"request_hash 가 요청으로 다시 낸 값 '{expected}' 와 다르다 (요청을 손으로 고쳤는가)")
             if (entry.provider, entry.model) != (record.llm.provider, record.llm.model):
                 self.error(path, "provider 나 model 이 실행 기록과 다르다")
-            if entry.request.scenario_id != record.scenario_id:
-                self.error(path, "요청의 scenario_id 가 실행 기록과 다르다")
             condition = entry.request.condition
             if not condition.condition_id.startswith(MANUAL_CONDITION_PREFIX) and condition.month != record.month:
                 self.error(path, "요청의 달(condition.month)이 실행 기록의 month 와 다르다")

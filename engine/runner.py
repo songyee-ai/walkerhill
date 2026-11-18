@@ -14,7 +14,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from engine.answers import AnswerBook, read_reply, save_rejected, save_response
+from engine.answers import AnswerBook, old_style_folder, read_reply, save_rejected, save_response
 from engine.candidates import build_request, run_condition
 from engine.formats.choice import ChoiceRequest, RunCondition, problems_in_response
 from engine.formats.conditions import MANUAL_CONDITION_PREFIX, ConditionBundle
@@ -355,7 +355,6 @@ def run_visit(
     }
     request, skipped = build_request(
         prompt_version=prompt_version,
-        scenario_id=inputs.scenario.scenario_id,
         persona=inputs.persona_json[persona.persona_id],
         condition=condition,
         venues=list(inputs.venues.values()),
@@ -556,6 +555,16 @@ def run(
     run_dir = runs_folder(root, data_mode) / run_id
     if run_dir.exists():
         raise FileExistsError(f"실행 폴더가 이미 있다: {run_dir}")
+    if base is not None:
+        # 기준 실행의 답을 가장 먼저 찾는다. 요청에 상황의 이름이 없어 후보가 기준과 같은 방문은 요청도 같다.
+        # 그 방문은 기준의 답을 그대로 재생해, 두 실행의 차이에 상황의 변경만 남는다 (11-18, T121).
+        answers = [runs_folder(root, data_mode) / base.run_id / "llm", *answers]
+    old = old_style_folder(answers)
+    if old is not None:
+        raise ValueError(
+            f"요청에 scenario_id 가 든 옛 모양의 저장된 응답이 있다: {old}. 이대로 돌리면 재생되지 않고 LLM 을 새로 부른다. "
+            "먼저 변환한다: uv run python -m tools.rehash_answers (docs/FORMATS.md 10.3절)"
+        )
     book = AnswerBook(answers, provider, model)
     session = None
     if llm is not None:
