@@ -96,6 +96,46 @@ def test_build_counts_unmapped_and_outside(tmp_path):
     assert meta["outside_venue_definition"]["v1/p1"]["reasons"] == ["파는 달 밖(11월)", "파는 요일 밖(weekend)"]
 
 
+def test_build_people(tmp_path):
+    """인원 = 수량 × 한 개당 인원. 사람이 아닌 상품(None)은 빈 칸, 대응표에 값이 없으면 빈 칸으로 두고 meta 에 적는다."""
+    d = tmp_path / "venues"
+    d.mkdir()
+    slots = [{"meal": "dinner", "day_type": "all"}]
+    products = [{"product_id": pid, "unit": "세트", "occasion": "meal", "slots": slots, "months": None}
+                for pid in ("set2", "goods", "unknown")]
+    (d / "v1.json").write_text(json.dumps({"venue_id": "v1", "months": None, "products": products}), encoding="utf-8")
+    mapping = {"products": [
+        {"base_venue": "가게A", "base_product_id": "S", "venue_id": "v1", "product_id": "set2", "people_per_unit": 2},
+        {"base_venue": "가게A", "base_product_id": "G", "venue_id": "v1", "product_id": "goods", "people_per_unit": None},
+        {"base_venue": "가게A", "base_product_id": "U", "venue_id": "v1", "product_id": "unknown"},
+    ]}
+    base = _base(tmp_path, [
+        ("2026-11-17", "식음", "가게A", "S", "친구·모임", "3", "330", "300", "아니오"),
+        ("2026-11-18", "식음", "가게A", "S", "친구·모임", "1", "110", "100", "아니오"),
+        ("2026-11-17", "식음", "가게A", "G", "친구·모임", "5", "550", "500", "아니오"),
+        ("2026-11-17", "식음", "가게A", "U", "친구·모임", "1", "110", "100", "아니오"),
+    ])
+    rows, meta = build_summary.build(SOURCE, base, mapping, build_summary.load_products(d))
+    assert {r["product_id"]: r["people"] for r in rows} == {"set2": "8", "goods": "", "unknown": ""}
+    assert meta["people_blank_products"] == ["v1/goods", "v1/unknown"]
+    assert meta["people_rule_missing"] == ["v1/unknown"]
+
+
+def test_make_sample_people_for():
+    assert make_sample.people_for({"qty_rule": "per_person", "serves": 1}, 3) == "3"
+    assert make_sample.people_for({"qty_rule": "per_serves", "serves": 2}, 3) == "6"
+    assert make_sample.people_for({"qty_rule": "choice", "serves": 1}, 3) == ""
+
+
+def test_make_sample_add_people_keeps_values():
+    """저장소의 예시 파일에 people 을 채워도 다른 칸의 값은 바뀌지 않는다."""
+    rows = make_sample.add_people()
+    with make_sample.OUT.open(encoding="utf-8-sig", newline="") as f:
+        before = [{k: v for k, v in r.items() if k != "people"} for r in csv.DictReader(f)]
+    assert [{k: v for k, v in r.items() if k != "people"} for r in rows] == before
+    assert all(r["people"] == "" or int(r["people"]) >= int(float(r["quantity"])) for r in rows)
+
+
 def test_load_source_needs_every_key(tmp_path):
     broken = {**SOURCE, "columns": {k: v for k, v in SOURCE["columns"].items() if k != "paid"}}
     path = tmp_path / "source.json"

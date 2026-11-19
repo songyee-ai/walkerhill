@@ -6,7 +6,7 @@
 읽는 것 (data/venues 말고는 모두 private/ 에 있고 깃에 올라가지 않는다)
 - private/base/source.json  기본 데이터 파일의 위치, 열 이름, 다이닝 줄을 고르는 값
 - 그 기본 데이터 파일
-- private/base/map.json     기본 데이터 상품 → venue_id·product_id 대응표
+- private/base/map.json     기본 데이터 상품 → venue_id·product_id 대응표, 상품마다 한 개당 인원(people_per_unit)
 - data/venues/*.json        업장 정의 (단위, 파는 때 slots, 파는 달 months)
 
 만드는 것 (private/base/)
@@ -47,6 +47,8 @@ HOLIDAYS_2026 = {
 CALENDAR_SOURCE = ("한국천문연구원 특일 정보 기준 2026 공휴일(대체공휴일 포함, 노동절·제헌절·6-03 지방선거일 포함). "
                    "인사혁신처 발표·「관공서의 공휴일에 관한 규정」으로 확인 2026-11-13")
 DAYS = {"weekday": {"weekday"}, "weekend": {"weekend"}, "all": {"weekday", "weekend"}}
+PEOPLE_RULE = ("people = quantity × 대응표의 people_per_unit (1인 단위는 1, 세트·판·개는 한 개당 인원). "
+               "people_per_unit 이 null 인 상품(사람이 아닌 상품)은 빈 칸 (T402, 11-19 wilstein91 결정)")
 
 
 def day_type(date: str) -> str:
@@ -93,7 +95,9 @@ def build(source: dict, base_file: Path, mapping: dict, products: dict) -> tuple
     col = source["columns"]
     by_product = {(m["base_venue"], m["base_product_id"]): m for m in mapping["products"]}
 
-    sums: dict[tuple, list[int]] = defaultdict(lambda: [0, 0, 0])
+    sums: dict[tuple, list[int]] = defaultdict(lambda: [0, 0, 0, 0])
+    people_unit: dict[tuple[str, str], int | None] = {}  # (venue_id, product_id) → 한 개당 인원 (None 이면 사람이 아님)
+    no_people_rule: set[str] = set()
     total_rows = dining_rows = 0
     unmapped: dict[str, int] = defaultdict(int)
     dining_paid = dining_net = 0
@@ -127,19 +131,27 @@ def build(source: dict, base_file: Path, mapping: dict, products: dict) -> tuple
             unconfirmed = "Y" if r[col["price_unconfirmed"]] == source["unconfirmed_value"] else "N"
             key = (r[col["customer_group"]], m["venue_id"], m["product_id"], prod["occasion"], meal_for(prod, dtype),
                    dtype, month, prod["unit"], unconfirmed)
+            if "people_per_unit" not in m:
+                no_people_rule.add(f"{m['venue_id']}/{m['product_id']}")
+            per = m.get("people_per_unit")
+            people_unit[key_out] = per
+            qty = int(float(r[col["quantity"]]))
             s = sums[key]
-            s[0] += int(float(r[col["quantity"]]))
+            s[0] += qty
             s[1] += paid
             s[2] += net
+            s[3] += qty * per if per is not None else 0
 
     rows = []
     for key in sorted(sums):
         group, venue, product, occ, meal, dtype, month, unit, unconfirmed = key
-        qty, paid, net = sums[key]
+        qty, paid, net, people = sums[key]
         row = {"customer_group": group, "venue_id": venue, "product_id": product, "occasion": occ, "meal": meal,
                "day_type": dtype, "month": str(month), "unit": unit, "quantity": str(qty), "paid": str(paid),
-               "revenue_net": str(net), "price_unconfirmed": unconfirmed}
-        SummaryRow.from_row(row)  # 형식에 맞는지 모델로 확인한다
+               "revenue_net": str(net), "price_unconfirmed": unconfirmed,
+               "people": "" if people_unit[(venue, product)] is None else str(people)}
+        # 형식에 맞는지 모델로 확인한다. people 은 형식(FORMATS 8절)에 들어온 뒤부터 검사·기록된다
+        SummaryRow.from_row({k: v for k, v in row.items() if k in SUMMARY_COLUMNS})
         rows.append(row)
 
     summary_paid = sum(int(r["paid"]) for r in rows)
@@ -163,6 +175,10 @@ def build(source: dict, base_file: Path, mapping: dict, products: dict) -> tuple
         "day_type_calendar": CALENDAR_SOURCE,
         "meal_rule": "업장 정의의 slots 로 정한다. 그 요일에 파는 끼니가 하나면 그 끼니, 여럿이면 빈 칸",
         "unit": "업장 정의(data/venues)의 unit 으로 바꿔 적음",
+        "people_rule": PEOPLE_RULE,
+        "people_written": "people" in SUMMARY_COLUMNS,
+        "people_blank_products": sorted(f"{v}/{p}" for (v, p), per in people_unit.items() if per is None),
+        "people_rule_missing": sorted(no_people_rule),
     }
     return rows, meta
 
@@ -170,7 +186,8 @@ def build(source: dict, base_file: Path, mapping: dict, products: dict) -> tuple
 def write(rows: list[dict[str, str]], meta: dict, out_dir: Path) -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
     with (out_dir / "summary.csv").open("w", encoding="utf-8-sig", newline="") as f:
-        w = csv.DictWriter(f, fieldnames=SUMMARY_COLUMNS, lineterminator="\n")
+        # people 처럼 형식에 아직 없는 열은 쓰지 않는다 (형식에 들어오면 그대로 써진다)
+        w = csv.DictWriter(f, fieldnames=SUMMARY_COLUMNS, lineterminator="\n", extrasaction="ignore")
         w.writeheader()
         w.writerows(rows)
     (out_dir / "meta.json").write_text(json.dumps(meta, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -191,6 +208,10 @@ def main(argv: list[str] | None = None) -> int:
     match = meta["revenue_check"]["match"]
     print(f"집계 줄 {len(rows)}개, 바꾸지 못한 줄 {meta['unmapped_rows']}개, 매출 합 대조 {'일치' if match else '불일치'}")
     outside = meta["outside_venue_definition"]
+    if meta["people_rule_missing"]:
+        print(f"대응표에 people_per_unit 이 없는 상품 {len(meta['people_rule_missing'])}개 (빈 칸으로 둠): "
+              + ", ".join(meta["people_rule_missing"]))
+    print(f"인원(people) 열: {'썼음' if meta['people_written'] else '계산만 함 (형식에 아직 없음)'}")
     print(f"업장 정의의 파는 때·달과 어긋난 상품 {len(outside)}개")
     for key, o in outside.items():
         print(f"  {key}: {o['rows']}줄, {', '.join(o['reasons'])}")

@@ -9,6 +9,11 @@
 
     uv run python -m tools.venue_data.make_sample            # 만들어 검사만 한다 (파일을 바꾸지 않음)
     uv run python -m tools.venue_data.make_sample --write    # data/samples/base_summary.csv 를 덮어쓴다
+    uv run python -m tools.venue_data.make_sample --add-people  # 지금 예시 파일의 값은 그대로 두고 people 열만 채운다 (T402)
+
+인원(people)은 업장 정의로 센다: per_person 은 수량, per_serves 는 수량 × serves, choice(더하는 상품·포장)는 빈 칸.
+기본 데이터는 상품 설명의 인원을 쓰지만(build_summary), 예시 값은 지어낸 값이라 공개된 업장 정의만 쓴다.
+people 은 형식(FORMATS 8절, engine/formats/summary.py)에 들어온 뒤부터 파일에 써진다.
 """
 
 from __future__ import annotations
@@ -27,6 +32,35 @@ SEED = 20261113
 SAMPLE_UNIT_PRICE = 50000  # 가격이 비어 있는 상품에 쓰는 지어낸 단가 (세금 포함)
 OUT = ROOT / "data" / "samples" / "base_summary.csv"
 DAYS = {"weekday": ["weekday"], "weekend": ["weekend"], "all": ["weekday", "weekend"]}
+
+
+def people_for(product: dict, quantity: int) -> str:
+    """업장 정의의 상품 하나와 수량으로 인원을 센다. 사람이 아닌 상품(choice)은 빈 칸."""
+    if product["qty_rule"] == "per_person":
+        return str(quantity)
+    if product["qty_rule"] == "per_serves":
+        return str(quantity * product["serves"])
+    return ""
+
+
+def load_products(venues_dir: Path = ROOT / "data" / "venues") -> dict[tuple[str, str], dict]:
+    out = {}
+    for f in venues_dir.glob("*.json"):
+        v = json.loads(f.read_text(encoding="utf-8"))
+        for p in v["products"]:
+            out[(v["venue_id"], p["product_id"])] = p
+    return out
+
+
+def add_people(path: Path = OUT, venues_dir: Path = ROOT / "data" / "venues") -> list[dict[str, str]]:
+    """예시 파일의 줄은 그대로 두고 people 을 채운 줄을 돌려준다. 파일은 쓰지 않는다."""
+    products = load_products(venues_dir)
+    with path.open(encoding="utf-8-sig", newline="") as f:
+        rows = list(csv.DictReader(f))
+    for row in rows:
+        row["people"] = people_for(products[(row["venue_id"], row["product_id"])], int(float(row["quantity"])))
+        SummaryRow.from_row({k: v for k, v in row.items() if k in SUMMARY_COLUMNS})
+    return rows
 
 
 def build(venues_dir: Path = ROOT / "data" / "venues", vocab: Path = ROOT / "data" / "evidence" / "vocab.json",
@@ -51,8 +85,9 @@ def build(venues_dir: Path = ROOT / "data" / "venues", vocab: Path = ROOT / "dat
                         row = {"customer_group": group, "venue_id": v["venue_id"], "product_id": p["product_id"],
                                "occasion": p["occasion"], "meal": meal or "", "day_type": dtype, "month": str(month),
                                "unit": p["unit"], "quantity": str(qty), "paid": str(paid),
-                               "revenue_net": str(round(paid / 1.1)), "price_unconfirmed": unconfirmed}
-                        SummaryRow.from_row(row)
+                               "revenue_net": str(round(paid / 1.1)), "price_unconfirmed": unconfirmed,
+                               "people": people_for(p, qty)}
+                        SummaryRow.from_row({k: v for k, v in row.items() if k in SUMMARY_COLUMNS})
                         rows.append(row)
     return rows
 
@@ -60,10 +95,23 @@ def build(venues_dir: Path = ROOT / "data" / "venues", vocab: Path = ROOT / "dat
 def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(description="가상 예시 집계 파일을 만든다 (T13)")
     parser.add_argument("--write", action="store_true", help="data/samples/base_summary.csv 를 덮어쓴다")
+    parser.add_argument("--add-people", action="store_true",
+                        help="지금 예시 파일의 값은 그대로 두고 people 열만 채워 쓴다 (형식에 people 이 있어야 한다)")
     args = parser.parse_args(argv)
+    if args.add_people:
+        if "people" not in SUMMARY_COLUMNS:
+            raise SystemExit("형식(engine/formats/summary.py)에 people 열이 아직 없다. 형식이 바뀐 뒤에 돌린다")
+        rows = add_people()
+        buf = io.StringIO()
+        w = csv.DictWriter(buf, fieldnames=SUMMARY_COLUMNS, lineterminator="\n")
+        w.writeheader()
+        w.writerows(rows)
+        OUT.write_text("﻿" + buf.getvalue(), encoding="utf-8", newline="")
+        print(f"가상 예시 값 {len(rows)}줄에 people 을 채워 {OUT.relative_to(ROOT)} 에 썼다")
+        return
     rows = build()
     buf = io.StringIO()
-    w = csv.DictWriter(buf, fieldnames=SUMMARY_COLUMNS, lineterminator="\n")
+    w = csv.DictWriter(buf, fieldnames=SUMMARY_COLUMNS, lineterminator="\n", extrasaction="ignore")
     w.writeheader()
     w.writerows(rows)
     if args.write:
