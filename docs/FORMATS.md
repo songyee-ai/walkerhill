@@ -24,6 +24,7 @@
 | 8 | 기본 데이터 집계 파일 | `private/base/summary.csv` | 업장 데이터 | 엔진, 페르소나 | `private/`. 가상 예시는 `data/samples/base_summary.csv` |
 | 9 | 선택 요청과 응답 | 파일이 아니다. 엔진이 LLM 을 부를 때의 형식이다 | 엔진(요청), 페르소나(프롬프트) | 엔진 | — |
 | 10 | 실행 결과 | `private/runs/<run_id>/` | 엔진 | 화면, 페르소나 | `private/`. 가상 예시로 만든 것은 `engine/samples/runs/` (깃이 무시한다. 올리는 예시는 `tests/fixtures/<이름>/engine/samples/runs/`) |
+| 10.6 | 매출 변화 나누기 | `private/runs/<run_id>/changes.json` (상황 실행만) | 엔진 | 화면 | 실행 결과와 같다 (10절) |
 
 파일 하나는 한 사람이 쓴다. 남이 만든 파일은 읽기만 하고, 고칠 것은 주인에게 요청한다.
 
@@ -957,6 +958,7 @@ customer_group,venue_id,product_id,occasion,meal,day_type,month,unit,quantity,pe
 | `llm/<request_hash>.json` | 저장된 LLM 응답. 요청 하나가 파일 하나. 검사를 통과한 것만 둔다 |
 | `llm_rejected/<request_hash>.json` | 검사에서 어긋난 LLM 응답. 재생에는 쓰지 않는다 (10.3절) |
 | `calibration.json` | 보정의 대조 결과 (기준 상황만) |
+| `changes.json` | 기준과 견준 매출 변화 나누기 (상황 실행만, 10.6절) |
 | `validation.json`, `validation_reviews.csv` | 떼어 둔 후기로 잰 검증 결과와, 후기 한 건마다의 결과 |
 
 - 실행 하나의 폴더에는 위의 파일만 둔다. 검증 결과는 떼어 둔 후기로 잰 것이라 `private/runs/` 의 실행에만 있고, `engine/samples/runs/` 에는 두지 않는다.
@@ -1377,6 +1379,126 @@ run_id,scenario_id,visit_id,persona_id,customer_group,condition_id,choice_kind,v
 | `baseline_venue_id`, `baseline_venue_match`, `baseline_reason_match` | 단순 기준이 고른 곳과 그 결과. 후기에 고른 이유 라벨이 없으면 `baseline_reason_match` 는 빈 칸이다 |
 | `skipped` | 돌리지 못한 이유. 고객군이 비어 있거나 그 고객군에 페르소나가 없으면 적는다. 이런 후기는 `n` 에서 빼고, 돌린 결과의 칸(`persona_id` 부터 `baseline_reason_match` 까지)은 모두 빈 칸이다 |
 
+### 10.6 매출 변화 나누기 `changes.json`
+
+상황 실행(기준이 아닌 실행)이 끝나면 엔진이 그 실행 폴더에 함께 쓴다 (`engine/changes.py`, T210). 기준 실행(`weights_from`)과 견준 워커힐의 가상 매출 변화를
+워커힐 업장마다 갈래로 나눈 것이다 (PRD 8절의 1단계). LLM 을 부르지 않는다. 기준 실행에는 없다.
+화면이 읽는다. 11-19 현재 화면(`app/compare.py`)은 두 원장을 따로 견주고 있고, 이 파일을 읽게 바꾸는 것은 화면 담당의 일이다.
+
+```json
+{
+  "format_version": 1,
+  "run_id": "20261117-103000-competitor-chinese-discount",
+  "baseline_run_id": "20261117-101500-baseline",
+  "excluded_visits": [],
+  "walkerhill": {
+    "new": 0,
+    "from_competitor": 0,
+    "from_walkerhill": 0,
+    "to_competitor": -57272775,
+    "to_walkerhill": 0,
+    "to_none": 0,
+    "price": 0,
+    "order": 0,
+    "total": -57272775
+  },
+  "venues": [
+    {
+      "venue_id": "geumryong",
+      "before": 57272775,
+      "after": 0,
+      "parts": {
+        "new": 0,
+        "from_competitor": 0,
+        "from_walkerhill": 0,
+        "to_competitor": -57272775,
+        "to_walkerhill": 0,
+        "to_none": 0,
+        "price": 0,
+        "order": 0,
+        "total": -57272775
+      }
+    }
+  ],
+  "visits": [
+    {
+      "visit_id": "family-elders__meal-dinner-weekend",
+      "represented": 105.0,
+      "before": {
+        "kind": "walkerhill",
+        "venue_id": "geumryong"
+      },
+      "after": {
+        "kind": "competitor",
+        "venue_id": "examplehotel-chinese"
+      },
+      "parts": [
+        {
+          "venue_id": "geumryong",
+          "part": "to_competitor",
+          "amount": -57272775
+        }
+      ]
+    }
+  ]
+}
+```
+
+| 키 | 뜻 |
+|---|---|
+| `run_id` | 이 상황 실행 |
+| `baseline_run_id` | 견준 기준 실행. 실행 기록의 `weights_from` 과 같다 |
+| `excluded_visits` | 두 실행 모두에서 뺀 방문의 `visit_id` (아래 "나누는 법") |
+| `walkerhill` | 워커힐 전체의 갈래별 금액(아래 갈래 표의 키 여덟 개)과 `total`. 업장들의 값을 더한 것이다 |
+| `venues[].venue_id` | 워커힐 업장. 두 실행 어느 쪽에서도 그 업장을 고른 방문이 없으면 적지 않는다 |
+| `venues[].before`, `venues[].after` | 그 업장의 기준과 상황의 가상 매출 (원) |
+| `venues[].parts` | 그 업장의 갈래별 금액과 `total` (`after` − `before`) |
+| `visits[].visit_id`, `visits[].represented` | 방문(페르소나 × 조건)과 그 방문이 대표하는 팀 수. 두 실행에서 같다 |
+| `visits[].before`, `visits[].after` | 방문이 간 곳. `kind` 는 `walkerhill`, `competitor`, `none` 이고, `venue_id` 는 `none` 이면 `null` 이다 |
+| `visits[].parts` | 그 방문이 든 갈래: `venue_id`, `part`(갈래의 키), `amount`(원). 금액이 바뀌지 않은 방문도 적는다 (`parts` 가 비거나 금액이 0 이다) |
+
+**갈래** — 방문 하나가 기준에서 상황으로 어디에 갔나로 정한다. 금액은 원 단위 정수이고 세금을 뺀 가상 매출이다.
+
+| 갈래 | 키 | 방문이 간 곳 (기준 → 상황) | 금액 |
+|---|---|---|---|
+| 새로 들어온 매출 | `new` | 이용 안 함 → 이 업장 | 상황의 매출 (0 이상) |
+| 옮겨 온 매출(경쟁에서) | `from_competitor` | 경쟁 업장 → 이 업장 | 상황의 매출 (0 이상) |
+| 옮겨 온 매출(워커힐 안에서) | `from_walkerhill` | 다른 워커힐 업장 → 이 업장 | 상황의 매출 (0 이상) |
+| 잃은 매출(경쟁으로) | `to_competitor` | 이 업장 → 경쟁 업장 | −(기준의 매출) (0 이하) |
+| 잃은 매출(워커힐 안으로) | `to_walkerhill` | 이 업장 → 다른 워커힐 업장 | −(기준의 매출) (0 이하) |
+| 잃은 매출(이용 안 함으로) | `to_none` | 이 업장 → 이용 안 함 | −(기준의 매출) (0 이하) |
+| 가격 효과 | `price` | 이 업장 → 이 업장. 고른 상품, 수량, `counted_share` 가 같고 가격이나 할인만 달랐다 | 상황 − 기준 (어느 쪽도 된다) |
+| 주문 변화 | `order` | 이 업장 → 이 업장. 상품이나 수량이 달랐다 | 상황 − 기준 (어느 쪽도 된다) |
+
+**나누는 법**
+
+- 방문(`visit_id`)마다 두 실행의 원장을 견준다. 두 실행은 같은 페르소나·조건·가중치로 돌아 방문마다 대표하는 팀 수가 같다.
+  그래서 갈래는 방문이 "어디에 갔나"만 견줘 정하고, 금액은 원장의 `weighted_revenue` 를 방문·업장마다 더해 원 단위로 반올림한 것이다.
+- 한쪽 실행에서라도 실패했거나(`status` 가 `ok` 가 아니다) 한쪽에만 있는 방문은 두 실행 모두에서 빼고 `excluded_visits` 에 적는다 (화면의 비교와 같다).
+- 워커힐 안에서 옮긴 방문은 두 업장에 한 번씩 적힌다 (떠난 곳에 `to_walkerhill`, 온 곳에 `from_walkerhill`). `walkerhill` 에서 둘을 더하면 옮기면서 달라진 금액만 남는다.
+- PRD 8절의 넷으로 보일 때는 `from_competitor` 와 `from_walkerhill` 을 더해 옮겨 온 매출, `to_` 로 시작하는 셋을 더해 잃은 매출, `price` 와 `order` 를 더해 단가 효과로 묶는다.
+
+**맞아야 하는 것** — 모델(`engine/formats/changes.py`)이 읽을 때 본다. 남는 금액이 없다.
+
+- 업장마다 갈래를 모두 더하면 `parts.total` 이고, `parts.total` 은 `after` − `before` 다.
+- 업장들의 갈래와 `total` 을 더하면 `walkerhill` 의 같은 키다.
+- 방문들의 `parts` 를 업장·갈래마다 더하면 그 업장의 그 갈래 금액이다.
+- 형식 검사가 두 실행의 원장으로 다시 나눠 이 파일과 같은지 본다 (11절). 손으로 고치지 않는다.
+
+예 (지어낸 방문 다섯, `tests/test_changes.py`):
+
+| 방문 | 기준 → 상황 | 갈래 |
+|---|---|---|
+| a | `thebuffet` → `thebuffet`. 같은 상품·수량에 값만 올랐다 | `thebuffet` 의 `price` |
+| b | `thebuffet` → 경쟁 뷔페 | `thebuffet` 의 `to_competitor` |
+| c | `thebuffet` → `pizzahill` | `thebuffet` 의 `to_walkerhill`, `pizzahill` 의 `from_walkerhill` |
+| d | 이용 안 함 → `geumryong` | `geumryong` 의 `new` |
+| e | `pizzahill` → `pizzahill`. 다른 상품을 골랐다 | `pizzahill` 의 `order` |
+
+**넷이 아니라 다섯인 까닭** (11-19 wilstein91 결정, T210) — PRD 8절은 넷(새로 들어온 매출, 옮겨 온 매출, 잃은 매출, 단가 효과)으로 나눈다.
+여기서는 단가 효과를 가격 효과와 주문 변화로 갈랐다. 팀이 기본 데이터로 돌린 상황 실행에서, 워커힐의 가격이 바뀌지 않은 방문도 같은 업장에서 주문을 바꾼 것이 있었다 (AI 답의 흔들림).
+하나로 묶으면 이것이 가격 때문에 생긴 변화처럼 보인다. 상황과 상관없는 방문의 주문 변화는 T210 의 다음 조건(상황과 상관없는 방문은 기준의 답을 쓴다)으로 없앤다.
+
 ## 11. 형식이 맞는지 볼 것
 
 아래를 검사하는 도구가 `tools/check_formats.py` 에 있다. 자동 검사도 PR 마다 이 도구를 돌린다.
@@ -1406,6 +1528,7 @@ uv run python -m tools.check_formats --strict   # 다 만든 뒤의 기준으로
 - 저장된 응답의 요청에서 깎인 줄과 후보의 `promotions` 의 `applied` 가 서로 맞는다 (9절).
 - 묶음의 조건으로 돌린 방문은 저장된 응답과 어긋난 응답의 요청의 달(`condition.month`)이 실행 기록의 `month` 와 같다 (10.1절의 "실행의 달").
   달을 준 실행은 고른 줄의 `counted_share` 가 1 이고 `calibration.json` 이 없다. 상황의 `month` 는 `weights_from` 의 실행과 같다.
+- 매출 변화 나누기(`changes.json`)는 상황 실행에만 있고, `run_id`·`baseline_run_id` 가 실행 기록과 맞고, 두 실행의 원장으로 다시 나눈 것과 같다 (10.6절. 11-19, T210).
 - 예시 묶음의 `engine/samples/runs/` 의 실행 기록은 모두 `data_mode` 가 `sample` 이다. 가중치가 빠짐없이 있고 등급에 `internal` 이 없다.
   가중치와 등급의 키가 같고, 고객군마다 묶음의 비율을 더하면 1 (인원이 없어 낼 수 없으면 모두 0) 이고, 페르소나의 가중치가 고객군 배수 × 고객군 안의 몫이다.
   `filled_products` 의 상품은 업장 정의에서 가격이 빈 상품이다.

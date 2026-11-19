@@ -16,13 +16,14 @@ from typing import Any
 
 from engine.answers import AnswerBook, old_style_folder, read_reply, save_rejected, save_response
 from engine.candidates import build_request, run_condition
+from engine.changes import decompose
 from engine.constants import CONSTANTS_PATH, used_constants
 from engine.formats.choice import ChoiceRequest, RunCondition, problems_in_response
 from engine.formats.conditions import MANUAL_CONDITION_PREFIX, ConditionBundle
 from engine.formats.evidence import Vocab
-from engine.formats.io import read_json, read_model, write_json
+from engine.formats.io import read_csv, read_json, read_model, write_json
 from engine.formats.persona import Persona, merge_persona_layers, merged_persona
-from engine.formats.run import RUN_ID_RE, VISIT_ID_SEPARATOR, LedgerRow, RunRecord, Weights
+from engine.formats.run import LEDGER_COLUMNS, RUN_ID_RE, VISIT_ID_SEPARATOR, LedgerRow, RunRecord, Weights
 from engine.formats.scenario import BASELINE_ID, Scenario
 from engine.formats.summary import SummaryRow
 from engine.formats.venue import Venue
@@ -642,6 +643,12 @@ def run(
                 "constants": used_constants(inputs.conditions),
             },
         )
+        if base is not None:
+            # 기준과 견준 매출 변화 나누기를 상황 실행 폴더에 함께 쓴다 (T210, docs/FORMATS.md 10.6절).
+            base_dir = runs_folder(root, data_mode) / base.run_id
+            base_rows = [LedgerRow.from_row(row) for row in read_csv(base_dir / "ledger.csv", LEDGER_COLUMNS)]
+            changes = decompose(base_rows, rows, base.run_id, run_id)
+            write_json(run_dir / "changes.json", changes.model_dump(mode="json"))
     return run_dir
 
 
