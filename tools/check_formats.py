@@ -464,12 +464,17 @@ class Checker:
             for item in review.ordered:
                 if not item.startswith(FREE_NAME_PREFIX) and item not in product_ids:
                     bad(f"ordered 의 '{item}' 가 업장 정의에 없다 (정의에 없는 메뉴는 '{FREE_NAME_PREFIX}' 뒤에 적는다)")
+        # 경쟁 업장의 후기는 워커힐 업장과 견준 것도 적는다 (11-19, T305 요청). 워커힐 업장의 후기는 경쟁 업장과 견준 것만 적는다.
+        any_venue = venue is not None and venue.is_competitor
         for item in review.compared_with:
             if item.startswith(FREE_NAME_PREFIX):
                 continue
             other = self.venues.get(item)
-            if other is None or not other.is_competitor:
-                bad(f"compared_with 의 '{item}' 가 경쟁 업장 정의에 없다 (정의에 없는 곳은 '{FREE_NAME_PREFIX}' 뒤에 적는다)")
+            if item == review.venue_id:
+                bad(f"compared_with 에 후기의 업장 '{item}' 자신을 적었다")
+            elif other is None or not (other.is_competitor or any_venue):
+                where = "업장 정의" if any_venue else "경쟁 업장 정의"
+                bad(f"compared_with 의 '{item}' 가 {where}에 없다 (정의에 없는 곳은 '{FREE_NAME_PREFIX}' 뒤에 적는다)")
 
         if self.vocab is None:
             self.error(path, "라벨 값 목록 data/evidence/vocab.json 이 없거나 읽을 수 없다")

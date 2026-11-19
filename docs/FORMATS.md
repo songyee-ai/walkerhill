@@ -301,7 +301,7 @@
 | `paid_total` | 일행이 낸 총액 | 글에 금액이 있을 때만 |
 | `reasons_chosen` | 고른 이유 | 값 목록에서. 여러 개면 `;` |
 | `pain_points` | 걸린 점 | 값 목록에서. 여러 개면 `;` |
-| `compared_with` | 견준 곳 | 경쟁 업장의 `venue_id`. 정의에 없는 곳이면 `이름:` 뒤에 한국어로 적는다 |
+| `compared_with` | 견준 곳 | 경쟁 업장의 `venue_id`. 경쟁 업장의 후기에는 워커힐 업장의 `venue_id` 도 적는다 (11-19, T305). 후기의 업장 자신은 적지 않는다. 정의에 없는 곳이면 `이름:` 뒤에 한국어로 적는다 |
 | `would_return` | 다시 올 뜻 | `yes`, `no`, 글에 없으면 빈 칸 |
 | `summary` | 한두 문장 요약 | 우리 말로 쓴다. 원문을 따오지 않는다. 본문이 있으면 꼭 쓰고, 본문 없이 화면 값만 있는 후기만 비운다 |
 | `labeler`, `labeled_on` | 라벨을 붙인 사람(깃헙 아이디), 붙인 날 | |
@@ -424,7 +424,7 @@ R-geumryong-0027,geumryong,map,2026-03,,,,,,meal,dinner,,,,,,대기,,no,예약�
 |---|---|---|
 | `persona_id`, `name` | 식별자, 짧은 이름 | |
 | `customer_group` | 속한 고객군 | |
-| `share_in_group` | 고객군 안의 몫: `value` (0 ~ 1), `grade`, `basis` | 한 고객군의 페르소나 몫을 더하면 1 이어야 한다 |
+| `share_in_group` | 고객군 안의 몫: `value` (0 ~ 1), `grade`, `basis` | 한 고객군의 페르소나 몫을 더하면 1 이어야 한다. 사람 수가 아니라 방문(팀)의 비율이다: 후기 한 건을 방문 한 번으로 센다 (11-19, borigunbbang 확인. 엔진은 팀의 비율로 읽는다, T210) |
 | `visit` | 방문 모습: `purposes`, `party` (`label`, `adults`, `children`), `occasions`, `meals`, `day_types` | `purposes` 와 `party.label` 은 값 목록에서 |
 | `budget` | 예산: `basis` (`per_person` 1인 기준, `party` 일행 전체 기준), `typical` 평소 쓰는 금액, `max` 이 금액을 넘으면 아예 고려하지 않는 금액 | 엔진은 `max` 를 넘는 주문만 후보에서 뺀다 (9절). `typical` 은 LLM 이 판단할 때 쓴다 |
 | `preferences` | 기호와 제약: `cuisines_like`, `cuisines_avoid`, `dietary`, `atmosphere`, `needs` | `atmosphere` 는 항목마다 중요도 1 ~ 3 |
