@@ -216,6 +216,33 @@ def test_ordered_product_must_exist_or_use_free_name(example_copy):
     assert not found(check(example_copy), "ordered")
 
 
+def test_compared_with_walkerhill_venue_only_in_competitor_reviews(example_copy):
+    # 경쟁 업장의 후기는 워커힐 업장과 견준 것도 적는다 (11-19, T305). 워커힐 업장의 후기는 경쟁 업장만 적는다.
+    competitor = REVIEWS.with_name("examplehotel-chinese.csv")
+
+    def as_competitor(rows):
+        del rows[1:]
+        rows[0].update(
+            review_id="R-examplehotel-chinese-0001",
+            venue_id="examplehotel-chinese",
+            ordered="",
+            compared_with="geumryong;examplehotel-buffet",
+        )
+
+    shutil.copy(example_copy / REVIEWS, example_copy / competitor)
+    edit_csv(example_copy, competitor, as_competitor)
+    problems = check(example_copy)
+    assert not found(problems, "compared_with"), messages(problems)
+
+    edit_csv(example_copy, competitor, lambda rows: rows[0].update(compared_with="examplehotel-chinese"))
+    assert found(check(example_copy), "compared_with 에 후기의 업장 'examplehotel-chinese' 자신을 적었다")
+    edit_csv(example_copy, competitor, lambda rows: rows[0].update(compared_with="nowhere"))
+    assert found(check(example_copy), "compared_with 의 'nowhere' 가 업장 정의에 없다")
+
+    edit_csv(example_copy, REVIEWS, lambda rows: rows[0].update(compared_with="thebuffet"))
+    assert found(check(example_copy), "compared_with 의 'thebuffet' 가 경쟁 업장 정의에 없다")
+
+
 def test_csv_without_bom_is_a_warning(example_copy):
     edit_csv(example_copy, REVIEWS, lambda rows: None, bom=False)
     problems = check(example_copy)
