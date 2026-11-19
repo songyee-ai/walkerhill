@@ -1,0 +1,86 @@
+﻿review_id,venue_id,source_kind,posted_ym,customer_group,purpose,party,adults,children,occasion,meal,day_type,stay,ordered,paid_total,reasons_chosen,pain_points,compared_with,would_return,summary,labeler,labeled_on
+R-grandhyatt-steakhouse-0001,grandhyatt-steakhouse,map,,커플·기념일,기념일,부부·연인,,,meal,,,,,,,,,,같은 호텔에서 혼례를 올린 부부가 결혼기념일을 맞아 찾았다는 글.,borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0002,grandhyatt-steakhouse,map,,,,,,,meal,dinner,,,이름:저녁 코스,,,,,,"저녁 코스가 정성스럽고 새로웠으며 고기가 올해 먹은 것 중 으뜸이었고, 직원 응대와 대화하기 편한 분위기도 좋아 특별한 날에 권했다.",borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0003,grandhyatt-steakhouse,map,,,,,,,meal,,,,이름:런치 메뉴,,,,,,"점심 메뉴에 전채, 주요리, 후식이 포함돼 괜찮았고 분위기도 좋았다는 평.",borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0004,grandhyatt-steakhouse,map,,,,,,,meal,,,,이름:스테이크,,,맛 기대 이하,,,응대와 첫 요리는 좋았으나 고기가 너무 질겨 실망했다고 했다.,borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0005,grandhyatt-steakhouse,map,,,,,,,meal,,,,이름:코스,,,서비스,,,"품격 있는 고깃집에서 코스를 골랐는데 안심이 부드러웠고, 음식이 늦게 나왔어도 상냥한 응대 덕에 넘어갈 만했다고 했다.",borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0014,grandhyatt-steakhouse,map,,커플·기념일,기념일,,,,meal,,,,이름:달팽이 구이;이름:시그니처 세트;이름:프렌치 양파 수프,,,,,yes,"기념할 날 저녁에 대표 세트를 시키고 양파 국물 요리와 달팽이를 추가해 먹었는데 거의 남김없이 먹을 만큼 맛있었고, 고기용 칼을 직접 고르는 과정과 친절한 응대가 기억에 남았다고 했다.",borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0016,grandhyatt-steakhouse,map,,,,,,,meal,,,,,,,,,yes,재방문하고 싶다는 한 줄 평.,borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0017,grandhyatt-steakhouse,map,,가족·친족,일상 외식,,,,meal,,,,이름:농어그릴구이;이름:모듬스테이크;이름:양갈비구이;이름:어니언스프,,,,,,"가족끼리 외식하며 수프, 양고기, 스테이크, 생선 요리를 먹고 모두 좋았다는 평.",borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0020,grandhyatt-steakhouse,map,,,,,,,meal,,,,,,,가격,,,둘이 가면 비용이 꽤 들고 분위기는 좋지만 값어치는 낮아 연말 같은 때가 아니면 굳이 갈 곳은 아니라고 했다.,borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0022,grandhyatt-steakhouse,map,,커플·기념일,기념일,,,,meal,,,,이름:스테이크,,,,,,부담 없이 기념할 날을 보내기 괜찮았고 고기가 맛있었다고 했다.,borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0023,grandhyatt-steakhouse,map,,,,,,,meal,,,,,,,,,yes,꼭 다시 가고 싶다는 한 줄 평.,borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0025,grandhyatt-steakhouse,map,,,,,,,meal,dinner,,,이름:갈릭 콩피,,,주차·접근,,,"맛보다는 값어치가 괜찮은 편이고 밤에는 창가가 아니면 답답하며, 마늘 요리가 별미였지만 차를 대기가 번거로워 넉넉히 일찍 오라고 했다.",borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0026,grandhyatt-steakhouse,map,,,,,,,meal,,,,이름:농어그릴,,,,,yes,구운 농어가 뛰어나 자주 찾게 된다는 평.,borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0029,grandhyatt-steakhouse,map,,,,,,,meal,,,,이름:달팽이요리;이름:스테이크,,,,,,"직원 응대가 마음에 들었고 고기와 후식, 처음 먹어 본 달팽이 요리까지 맛있었으며 밤 경치도 좋아 근사한 저녁 자리로 권했다.",borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0031,grandhyatt-steakhouse,map,,가족·친족,,아이 동반 가족,2,1,meal,,,,이름:스테이크 코스;이름:와인 페어링,,,,,,"주말 점심에 어른 둘과 어린 자녀가 고기 코스를 함께 들었는데 셋이 먹기에 넉넉했고 와인 곁들임이 좋았으며, 뒤로 갈수록 고기 맛이 다소 무겁게 느껴졌지만 전체적으로 흡족했다고 했다.",borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0032,grandhyatt-steakhouse,map,,,,,,,meal,,,,,,,가격,,,값에 비해 만족도가 낮았고 기대했던 불 쇼 같은 볼거리도 없었다고 했다.,borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0033,grandhyatt-steakhouse,map,,,,,,,meal,,,,,,,가격,,,맛은 훌륭하지만 비싸다는 짧은 평이다.,borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0034,grandhyatt-steakhouse,map,,,,,,,meal,lunch,,,이름:당근케이크;이름:해산물 가스파초,,,,,yes,차가운 해산물 수프와 당근 케이크가 맛있었고 칼을 직접 고르는 일이 새로웠으며 비 오는 풍경도 운치 있었다고 했다.,borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0035,grandhyatt-steakhouse,map,,,,,,,meal,,,,이름:푸아그라,,,,,,구운 거위 간 요리가 넉넉하고 맛있었다는 평.,borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0036,grandhyatt-steakhouse,map,,,,,,,meal,,,,이름:샴페인브런치,,,,,,동행과 주말 브런치를 먹었는데 알차고 느긋해서 좋았다는 평.,borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0037,grandhyatt-steakhouse,map,,,,,,,meal,,,,,,,소음,,,"조용하진 않았어도 상냥하고 맛이 좋았고, 철판에서 익는 모습을 보며 기다리는 재미가 있었다고 했다.",borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0039,grandhyatt-steakhouse,map,,가족·친족,가족 행사,,,,meal,,,,,,,가격;서비스;소음,,,"아들 생일을 축하하려고 골랐는데 응대가 기대에 못 미치고 값어치가 낮았으며, 시끄럽고 냉방이 지나쳐 크게 실망했다고 했다.",borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0040,grandhyatt-steakhouse,map,,,,,,,meal,lunch,,,이름:3가지 코스,,,,,,"응대, 맛, 값 모두 흡족했고 세 단계로 나오는 요리가 배불러 후식을 조금 남겼으며 같은 호텔의 다른 식당도 맛있다고 했다.",borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0042,grandhyatt-steakhouse,map,,,,,,,meal,,,,,,,메뉴 구성,,,"차림이 바뀐 뒤 구성이 다소 아쉬웠지만 고기와 재료가 좋고 응대, 분위기, 주차가 편해 주말 늦은 아침 식사로 알맞다고 했다.",borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0044,grandhyatt-steakhouse,map,,,,,,,meal,lunch,,,이름:라비올리;이름:스테이크,,,맛 기대 이하,,no,점심 고기가 질기고 맛이 없어 차라리 집에서 굽는 게 낫겠다고 했고 파스타도 실망스러웠다고 했다.,borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0046,grandhyatt-steakhouse,map,,,,,,,meal,,,,이름:돼지갈비,,,가격,,,응대가 흠잡을 데 없고 돼지고기 요리가 맛있었으며 값은 위치 탓인지 다소 비싸다고 했다.,borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0047,grandhyatt-steakhouse,map,,,,,,,meal,,,,이름:샴페인브런치,,,,,,주말 한정 브런치를 먹었는데 가짓수가 많고 모두 맛있어 다른 뷔페와 비교가 안 된다는 평.,borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0048,grandhyatt-steakhouse,map,,,,,,,meal,,,,이름:양갈비구이,,,,,,양고기 구이가 그런대로 흡족했다는 평.,borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0050,grandhyatt-steakhouse,map,,,,,,,meal,,,,이름:코스요리,,,맛 기대 이하;서비스,,,"연말 저녁 코스는 대체로 괜찮았고 관자와 송로 요리가 좋았지만, 주요리가 실망스럽고 응대가 어수선해 특급호텔답지 않았다고 했다.",borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0051,grandhyatt-steakhouse,map,,,,,,,meal,dinner,,,이름:안심 스테이크,,,예약이 어려움;주차·접근,,,"저녁에 가서 분위기와 응대가 좋고 안심이 맛있었으며, 찾아가기 불편해 차로 가는 게 낫고 자리 잡기가 어려워 한 달쯤 앞서 예약하라고 했다.",borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0052,grandhyatt-steakhouse,map,,,,,,,meal,,,,,,,주차·접근,,,점심이 맛있었고 주변 길이 가팔라 호텔 안에서 끼니를 해결하는 편이 낫다고 했다.,borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0054,grandhyatt-steakhouse,map,,,,,,,meal,dinner,,,,,,가격,,,다른 건 다 좋은데 너무 비싸다는 짧은 평이다.,borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0057,grandhyatt-steakhouse,map,,,,,,,meal,,,,,,,양,,,맛있고 친절하지만 양이 많아 다 먹기 힘들었다고 했다.,borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0058,grandhyatt-steakhouse,map,,친구·모임,,친구,2,,meal,,,,이름:스테이크;이름:초코아이스크림,,,서비스,,,"친구와 서로 다른 굽기로 주문했는데 직원이 접시를 뒤바꿔 놓아 둘 다 고기를 남겼고, 다른 요리와 넉넉한 후식은 괜찮았다고 했다.",borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0060,grandhyatt-steakhouse,map,,,,,,,meal,,,,이름:주말 브런치,,,,,,주말 낮 메뉴가 괜찮아 가 볼 만했다는 평.,borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0061,grandhyatt-steakhouse,map,,,,,,,meal,lunch,,,이름:스테이크;이름:스테이크 타르타르;이름:오리 콩피;이름:제주 대합,,,주차·접근;혼잡·좌석 간격,,,"점심에 고기와 오리, 조개, 육회 요리를 시켰고 응대는 좋았지만 매우 붐볐으며, 마감 시간이 정해져 있고 대리 주차는 따로 돈을 내야 한다고 알렸다.",borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0062,grandhyatt-steakhouse,map,,,,,,,meal,dinner,,,이름:코스,,,,,,"코스를 먹었는데 응대, 음식, 경치 모두 좋았다고 했다.",borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0063,grandhyatt-steakhouse,map,,,,,,,meal,,,,,,,서비스,,no,맛있고 배부르지만 창가가 더워 냉방을 부탁했을 때 한 직원이 사실과 다른 말을 하는 등 해마다 올 때마다 응대가 차가워 이제 오지 않겠다고 했다.,borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0065,grandhyatt-steakhouse,map,,,,,,,meal,,,,,,,맛 기대 이하,,,성탄절에 들렀는데 요리가 미리 만들어 둔 듯 식어 있어 아쉬웠고 응대는 좋았다고 했다.,borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0066,grandhyatt-steakhouse,map,,,,,,,meal,dinner,,,이름:디너세트,,,,,,밤 분위기가 좋아 회식이나 데이트에 알맞고 저녁 세트 구성이 알차며 친절하다고 했다.,borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0067,grandhyatt-steakhouse,map,,,,,,,meal,,,,side;이름:링귀니 랍스터 연어 파스타;이름:부라타 치즈;이름:시저 샐러드;이름:한우 스테이크,,,맛 기대 이하,,,"샐러드와 치즈 요리, 고기, 파스타는 좋았지만 곁들임 요리들이 너무 느끼하거나 퍽퍽해 아쉬웠다고 했다.",borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0068,grandhyatt-steakhouse,map,,,,,,,meal,,,,이름:주말 브런치 세트,,,,,,주말 늦은 아침 세트의 값어치가 괜찮다는 짧은 평이다.,borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0069,grandhyatt-steakhouse,map,,,,,,,meal,,,,,,,맛 기대 이하,,,분위기는 괜찮았으나 요리마다 조금씩 부족했다고 했다.,borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0071,grandhyatt-steakhouse,map,,가족·친족,일상 외식,3대 가족,,,meal,,,,이름:주말 브런치,,,,,,"식구들 일정을 맞추기 쉬운 주말 낮에 온 가족이 모이는데, 어린 손주부터 어르신까지 입맛이 달라 늘 가던 고깃집이나 뷔페 대신 다른 곳을 찾게 된 사정을 적었다.",borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0073,grandhyatt-steakhouse,map,,,,,,,meal,,,,이름:돈마호크;이름:등심;이름:랍스타;이름:안심,,,맛 기대 이하,,,창가 자리 분위기가 좋았고 고기는 등심보다 안심이 낫고 바닷가재도 맛있었지만 돼지고기 요리는 별로였다고 했다.,borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0074,grandhyatt-steakhouse,map,,,,,,,meal,,,,이름:위켄드 브렌치,,,,,,"주말 늦은 아침 차림을 먹었는데 경치와 친절, 맛 모두 좋아 연인과 기념할 날에 오기 알맞다고 했다.",borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0076,grandhyatt-steakhouse,map,,커플·기념일,기념일,아이 동반 가족,2,,meal,,,,이름:런치 스페셜,,,,,,"결혼 기념일에 갓난아기를 데리고 갔는데 직원들이 친절해 편하게 식사했고, 지난해 같은 호텔 뷔페보다 더 맛있었으며 다만 음악이 너무 들뜬 느낌이었다고 했다.",borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0079,grandhyatt-steakhouse,map,,,,,,,meal,,,,이름:주말 브런치코스,,,,,,주말 늦은 아침 코스가 매우 좋다는 짧은 평이다.,borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0080,grandhyatt-steakhouse,map,,가족·친족,,,,,meal,,,guest,hanwoo-tenderloin;이름:랍스터구이;이름:양갈비,,,,,,"호텔에 묵으며 저녁에 식구마다 다른 고기와 해산물을 시켰는데 모두 흡족했고, 객실에서 미리 주문해 도착하자마자 먹을 수 있었으며 후식도 맛있었다고 했다.",borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0081,grandhyatt-steakhouse,map,,,,,,,meal,dinner,,,이름:스테이크,,,가격,,,고기 맛이 뛰어나고 분위기도 괜찮지만 호텔이라 값이 매우 비싸다고 했다.,borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0082,grandhyatt-steakhouse,map,,,,,,,meal,,,,,,,가격,,,최고라고 단언하면서 비싼 것만 흠이라고 했다.,borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0083,grandhyatt-steakhouse,map,,커플·기념일,기념일,,,,meal,dinner,,,,,,,,,특별한 날에 들렀고 무엇을 고를지 몰라 직원 추천을 받아 즐겼다고 했다.,borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0085,grandhyatt-steakhouse,map,,,,,,,meal,,,,이름:립아이스테이크;이름:양갈비구이,,,,,,점심에 가서 곁들이는 뷔페식 요리와 함께 주요리로 등심 스테이크와 양고기를 골랐다는 글.,borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0086,grandhyatt-steakhouse,map,,,,,,,meal,,,,이름:티본스테이크,,,,,,뼈 붙은 고기 요리가 지금까지 먹은 것 중 최고였다고 했다.,borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0088,grandhyatt-steakhouse,map,,친구·모임,모임,,,,meal,,,,이름:코스,,,,,,"모임 약속으로 가서 코스를 먹었는데 보통의 호텔 뷔페보다 훨씬 흡족했고, 요리 품질과 선택 폭, 마지막에 원하는 요리를 더 시킬 수 있는 점과 창가 전망이 좋았다고 했다.",borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0090,grandhyatt-steakhouse,map,,가족·친족,,,,,meal,,,,이름:스테이크,,,대기;맛 기대 이하;서비스,,,"가족끼리 점심에 여럿이 주문했더니 음식이 매우 늦게 나와 고기가 식어 있었고, 식기를 거칠게 내려놓는 등 응대가 특급호텔답지 않아 가장 실망스러웠다고 했다.",borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0091,grandhyatt-steakhouse,map,,,,,,,meal,dinner,,,,,,대기;메뉴 구성,,,미국식 고깃집을 표방하지만 독한 술 주문을 처음엔 거절하고 오래 기다리게 했으며 계속 나오는 서부풍 음악이 거슬렸다고 했다. 배는 불렀다고 덧붙였다.,borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0092,grandhyatt-steakhouse,map,,,,,,,meal,dinner,,,이름:감자튀김;이름:스테이크,,,가격;맛 기대 이하;서비스,,,"주문과 다른 더 비싼 고기가 나왔고 빵과 물까지 따로 사야 했으며 감자가 금방 식고 응대가 매우 느려, 운영 방식을 강하게 비판하며 다른 곳을 권했다.",borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0093,grandhyatt-steakhouse,map,,커플·기념일,,부부·연인,,,meal,dinner,,,,,,,,,애인에게 청혼하는 행사를 준비해 갔는데 매우 흡족했다고 했다.,borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0094,grandhyatt-steakhouse,map,,,,,,,meal,,,,,,,서비스,,,경치 좋은 맛집이지만 전보다 덜 친절해졌다고 했다.,borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0095,grandhyatt-steakhouse,map,,,,,,,meal,,,,이름:지중해식 해산물,,,,,,해산물 요리가 그럭저럭 괜찮았다는 평.,borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0096,grandhyatt-steakhouse,map,,,,,,,meal,lunch,,,이름:고메런치,,,,,,메신저 선물로 받은 점심 상품으로 이용했는데 알차고 좋았다고 했다.,borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0097,grandhyatt-steakhouse,map,,커플·기념일,,부부·연인,,,meal,,,,이름:음료 패키지;이름:주말 브런치,,평판·브랜드,,,,"토요일 낮에 배우자와 주말 코스에 와인 무제한 음료를 곁들여 오래 여유롭게 즐겼고, 마지막 고기가 특히 부드러웠으며 햇빛에 맞춰 가림막을 올려 주는 세심함이 좋았다. 아래 풍경이 공사 중이라 아쉬웠고, 비싼 값이 망설여졌지만 값을 할 만했다고 했다.",borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0098,grandhyatt-steakhouse,map,,,,,,,meal,,,,이름:스테이크;이름:오리 요리,,,맛 기대 이하,,,"응대와 분위기는 훌륭했지만 고기는 평소 먹던 것만 못했고 오리 요리는 입에 맞지 않아, 맛보다 분위기를 내세우는 곳 같다고 했다.",borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0099,grandhyatt-steakhouse,map,,,,,2,,meal,dinner,,guest,이름:코스 메뉴,,혜택·할인,맛 기대 이하,,,"호텔에 묵으며 카드 혜택 적립금으로 2인 코스를 먹었고, 예약과 창가 자리 이동, 식사 속도 조절 등 응대가 세심했으며 대부분 요리는 좋았지만 일부 아쉬웠다. 숙박객에겐 값이 합리적이지만 고기만 보고 굳이 찾을 정도는 아니라고 했다.",borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0100,grandhyatt-steakhouse,map,,친구·모임,모임,친구,,,meal,,,,,,,,,,"동창의 혼례를 앞두고 친구들이 모였는데, 미리 부탁한 것을 식당이 기대보다 정성껏 챙겨 줘 감동했다는 평.",borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0101,grandhyatt-steakhouse,map,,,,,,,meal,dinner,,,이름:스테이크,,,예약이 어려움,,,"모든 요리가 무난히 맛있고 창가 경치가 좋아 특별한 날에 알맞지만 꼭 미리 자리를 잡아야 하며, 호텔 숙박과 묶으면 좋다고 했다.",borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0103,grandhyatt-steakhouse,map,,,,,,,meal,,,,이름:새우관자샐러드;이름:훈제연어,,,,,,새우·관자 샐러드와 연어 요리가 맛있었다는 평.,borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0104,grandhyatt-steakhouse,map,,,,,,,meal,,,,side;이름:시저샐러드;이름:연어스테이크;이름:한우스테이크,,,,,,"분위기가 좋았고 샐러드, 소고기와 연어 스테이크, 감자 곁들이를 먹었다는 글.",borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0105,grandhyatt-steakhouse,map,,,,,,,meal,,,,이름:스테이크,,분위기·전망,가격,이름:보타르가,,"연말 기분을 내려고 예약했지만 물값이 비쌌고 고기는 다른 집이 더 나았으며, 구석 자리에 앉아 분위기를 즐기지 못해 다음엔 다른 식당에 가겠다고 했다.",borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0107,grandhyatt-steakhouse,map,,,,,,,meal,dinner,,,side;이름:피노 누아;이름:한우,,,메뉴 구성,,,국내산 소고기가 아주 부드럽고 곁들임도 맛있었지만 와인 목록에 있는 술이 다 있지는 않았다며 그래도 권한다고 했다.,borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0108,grandhyatt-steakhouse,map,,,,,,,meal,,,,이름:위켄드 브런치,,,,,yes,"주말 늦은 아침 차림이 그동안 가 본 호텔 뷔페들보다 만족스러웠고 직원들, 특히 후식을 구워 준 직원이 다정했다고 했다.",borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0109,grandhyatt-steakhouse,map,,친구·모임,모임,,,,meal,,,,,,,,,,남편 직장 동기 내외들과 함께 늦은 아침 식사를 했는데 영화 같은 기분이었다는 평.,borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0110,grandhyatt-steakhouse,map,,,,,,,meal,dinner,,,이름:세트,,,양,,,세트를 시켰는데 직원은 친절했지만 마지막 고기가 작고 얇아 놀랐다며 값을 더 받더라도 제대로 된 고기를 달라고 했다.,borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0111,grandhyatt-steakhouse,map,,,,,,,meal,,,,이름:주말 브런치,,,,,,"주말 늦은 아침 식사로 경치와 분위기, 맛, 양 모두 흡족했다고 했다.",borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0112,grandhyatt-steakhouse,map,,커플·기념일,기념일,부부·연인,,,meal,,,,,,분위기·전망,가격;대기;서비스,,,"처음엔 음식과 응대에 만족했으나, 성탄 전야에 배우자와 오래전 예약하고 갔더니 줄이 길고 벽에 막힌 구석 자리를 받았으며 옮겨 달라는 부탁을 거절당하고 재촉까지 받아 식사하지 않고 나왔다고 했다.",borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0114,grandhyatt-steakhouse,map,,,,,,,meal,dinner,,,이름:가리비;이름:스트립로인 스테이크,,,서비스,,,조개 요리와 숙성 고기가 잘 익었고 외국어 응대도 좋았지만 후식을 사양하자마자 청하지도 않은 계산서를 가져온 점이 아쉬웠다고 했다.,borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0115,grandhyatt-steakhouse,map,,,,,,,meal,,,,이름:감자튀김,,,맛 기대 이하;서비스,이름:마치스테이크,,응대와 고기가 평범한 식당만 못하고 감자도 패스트푸드 수준이라며 다른 호텔 고깃집을 권했다.,borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0116,grandhyatt-steakhouse,map,,,,,,,meal,,,,이름:샴페인브런치,,,,,,"주말 브런치의 스테이크, 리소토, 양고기 등이 훌륭했다는 평.",borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0117,grandhyatt-steakhouse,map,,,,,,,meal,dinner,,,이름:달팽이 전체요리;이름:맥앤치즈;이름:식전빵;이름:아이스크림;이름:안심 스테이크,,,맛 기대 이하;메뉴 구성;양,,,"몇 해 만에 다시 갔는데 고기가 주문보다 더 익고 퍽퍽했으며 곁들임과 유료로 바뀐 빵도 예전만 못했고, 달팽이 요리와 응대, 경치는 좋았지만 후식은 양만 많았다고 했다.",borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0118,grandhyatt-steakhouse,map,,친구·모임,,친구,,,meal,lunch,,,,,,,,,기념할 날이면 친구들과 자주 찾고 점심 코스는 부담이 덜하다고 했다.,borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0119,grandhyatt-steakhouse,map,,친구·모임,,친구,,,meal,,,,이름:감자튀김;이름:부라타;이름:샐러드;이름:스테이크,,혜택·할인,가격;맛 기대 이하,,,"식사권이 생겨 아는 사람과 갔는데 샐러드는 특색이 없고 고기는 질겼으며 여러 겨자 소스도 차이를 못 느껴, 값에 비해 실망스러웠다고 비꼬았다.",borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0121,grandhyatt-steakhouse,map,,,,,,,meal,,,,이름:햄버거,,,맛 기대 이하,,,지역색이 강한 맛이었고 버거 고기가 입에 맞지 않았다고 했다.,borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0124,grandhyatt-steakhouse,map,,,,,,,meal,,,,이름:주말 브런치메뉴,,,,,,"봄에 주말 늦은 아침 차림을 골라 먹었고, 차림이 바뀐 직후라 덜 다듬어진 부분은 있었지만 응대와 분위기는 흡족했다고 했다.",borigunbbang,2026-11-19
+R-grandhyatt-steakhouse-0125,grandhyatt-steakhouse,map,,,,,,,meal,dinner,,,이름:골수;이름:디저트 플래터;이름:소갈비살;이름:이베리아 햄,,,,,,"창가 경치가 환상적이었고 첫 요리와 양념 잘 된 갈비살 주요리, 후식 모둠까지 훌륭했으며 값은 다소 높지만 품질과 담당 직원의 세심함을 생각하면 수긍할 만하다고 했다.",borigunbbang,2026-11-19
