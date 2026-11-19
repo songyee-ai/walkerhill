@@ -152,3 +152,30 @@ def test_format_doc_example_is_the_example_run():
     section = doc[doc.index("### 10.6") :]
     example = re.search(r"```json\n(.*?)\n```", section, re.S).group(1)
     assert json.loads(example) == json.loads((RUNS / COMPETITOR_RUN / "changes.json").read_text(encoding="utf-8"))
+
+
+def test_visit_unrelated_to_the_changed_venue_keeps_the_baseline_answer(example_copy):
+    """바꾼 업장(금룡)이 기준과 상황 어느 선택에도 끼지 않으면 원장은 기준의 답이다 (T210 의 임시 규칙).
+
+    요청은 금룡의 가격이 달라 기준과 다르다. 상황의 답이 경쟁 뷔페로 옮겨도 그 변화는 기준의 답으로 덮이고 실행 기록에 남는다.
+    """
+    from tests.test_engine import first_option
+
+    base = play(example_copy, lambda visit_id, request: first_option(request, "thebuffet"))
+    played = play_scenario(example_copy, PRICE_UP, lambda visit_id, request: first_option(request, "examplehotel-buffet"), base)
+    (visit,) = {row.visit_id for row in played.rows}
+    assert played.record.baseline_answers == [visit]
+    assert [(r.venue_id, r.product_id, r.request_hash) for r in played.rows] == [(r.venue_id, r.product_id, r.request_hash) for r in base.rows]
+    assert read_model(played.run_dir / "changes.json", Changes).walkerhill.total == 0
+    assert [str(p) for p in check(example_copy, strict=True)] == []
+
+
+def test_visit_that_chooses_the_changed_venue_keeps_its_own_answer(example_copy):
+    """상황에서 바꾼 업장을 고르면 그것이 상황의 효과다. 기준의 답으로 덮지 않는다."""
+    from tests.test_engine import first_option
+
+    base = play(example_copy, lambda visit_id, request: first_option(request, "thebuffet"))
+    played = play_scenario(example_copy, PRICE_UP, pick_geumryong, base)
+    assert played.record.baseline_answers == []
+    assert {r.venue_id for r in played.rows} == {"geumryong"}
+    assert [str(p) for p in check(example_copy, strict=True)] == []

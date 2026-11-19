@@ -400,6 +400,27 @@ def run_visit(
     return VisitResult(visit_rows(base, request, response, inputs.venues, "new", request_hash), skipped)
 
 
+def _chosen_venues(rows: list[LedgerRow]) -> set[str]:
+    return {r.venue_id for r in rows if r.status == "ok" and r.choice_kind != "none" and r.venue_id}
+
+
+def keep_baseline_answer(rows: list[LedgerRow], base_rows: list[LedgerRow], changed_venues: set[str]) -> bool:
+    """기준이 아닌 상황에서, 이 방문의 원장을 기준의 답으로 적을까 (T210, docs/FORMATS.md 10.1절의 `baseline_answers`).
+
+    기준에서 고른 곳과 상황에서 고른 곳 둘 다 상황이 바꾼 업장이 아니면 기준의 답을 쓴다. 바꾼 업장과 상관없는 방문의 답이
+    LLM 의 흔들림으로 달라져 상황의 효과처럼 보이는 것을 막는다 (11-19 wilstein91 결정).
+    두 실행 가운데 한쪽이라도 실패했거나, 요청이 같아 이미 기준의 답을 재생했으면 그대로 둔다.
+
+    임시 규칙이다: 답이 하나뿐이라 흔들림과 진짜 변화(예: 고르지 않는 업장이 바뀌어 남은 업장 사이의 판단이 바뀜)를 가를 수 없어서 둔다.
+    개선 2단계에서 비율로 고르게 되면 없애고, 흔들림 폭보다 큰 변화만 효과로 본다 (진행 문서의 T212).
+    """
+    if any(r.status != "ok" for r in (*rows, *base_rows)):
+        return False
+    if {r.request_hash for r in rows} == {r.request_hash for r in base_rows}:
+        return False
+    return not ((_chosen_venues(rows) | _chosen_venues(base_rows)) & changed_venues)
+
+
 def _git(root: Path, *args: str) -> str | None:
     try:
         done = subprocess.run(["git", *args], cwd=root, capture_output=True, text=True, check=True)
@@ -573,6 +594,14 @@ def run(
     skipped: set[str] = set()
     replayed: dict[str, Path] = {}
     visits = failed = calls_replayed = 0
+    # 기준이 아닌 상황: 바꾼 업장과 상관없는 방문은 기준의 답을 쓴다 (T210 의 임시 규칙, `keep_baseline_answer`).
+    changed_venues = {change.venue_id for change in inputs.scenario.changes}
+    base_visits: dict[str, list[LedgerRow]] = {}
+    kept_baseline: list[str] = []
+    if base is not None:
+        base_dir = runs_folder(root, data_mode) / base.run_id
+        for row in (LedgerRow.from_row(r) for r in read_csv(base_dir / "ledger.csv", LEDGER_COLUMNS)):
+            base_visits.setdefault(row.visit_id, []).append(row)
     status = "ok"
     finished = False
     try:
@@ -594,6 +623,16 @@ def run(
                 status = "stopped_by_limit"
                 break
             visits += 1
+            base_rows = base_visits.get(result.rows[0].visit_id) if base is not None else None
+            if base_rows and keep_baseline_answer(result.rows, base_rows, changed_venues):
+                # 기준의 원장 줄을 이 실행의 줄로 옮기고, 기준의 저장된 답을 이 실행의 llm/ 에도 둔다 (형식 검사가 원장과 답을 맞춰 본다).
+                # 이 상황에서 받은 답은 지우지 않는다. 같은 상황을 다시 돌릴 때 LLM 을 또 부르지 않게 한다.
+                result.rows = [
+                    r.model_copy(update={"run_id": run_id, "scenario_id": scenario_id, "llm_call": "replay"}) for r in base_rows
+                ]
+                for request_hash in {r.request_hash for r in base_rows if r.request_hash}:
+                    replayed[f"{request_hash}.json"] = base_dir / "llm" / f"{request_hash}.json"
+                kept_baseline.append(result.rows[0].visit_id)
             rows.extend(result.rows)
             skipped.update(result.skipped)
             failed += any(row.status == "failed" for row in result.rows)
@@ -641,6 +680,7 @@ def run(
                 "counts": {"visits": visits, "failed": failed},
                 "status": status,
                 "constants": used_constants(inputs.conditions),
+                "baseline_answers": kept_baseline if base is not None else None,
             },
         )
         if base is not None:

@@ -982,6 +982,7 @@ customer_group,venue_id,product_id,occasion,meal,day_type,month,unit,quantity,pe
 | `counts` | `visits` 돌린 수, `failed` 실패한 수 |
 | `status` | `ok`, `stopped_by_limit`, `failed` |
 | `constants` | 이 실행이 쓴 결정 상수와 그 값·근거의 목록. 하나마다 `constant_id`, `name`, `value`, `unit`, `grade`, `source`, `checked_on`, `file` (적힌 파일). 아래 "쓴 결정 상수" |
+| `baseline_answers` | 기준이 아닌 상황에서, 바꾼 업장이 기준과 상황 어느 선택에도 끼지 않아 원장을 기준의 답으로 적은 방문의 `visit_id` 목록. 기준 상황은 `null`. 11-19(T210) 전의 실행 기록에는 없다. 아래 "상관없는 방문의 답" |
 
 - 묶음의 조건으로 돌린 실행은 `weights` 에 페르소나마다의 가중치와, 고객군과 조건마다의 비율이 빠짐없이 있어야 한다. 없으면 원장의 `represented` 를 확인할 수 없다.
   화면에서 조건을 직접 넣어 돌린 방문(`manual-`)에는 가중치가 없다.
@@ -1167,9 +1168,20 @@ customer_group,venue_id,product_id,occasion,meal,day_type,month,unit,quantity,pe
     {"constant_id": "calibration-max-diff-pp", "name": "보정 통과: 업장별 비중 차이의 한도", "value": 15, "unit": "%p", "grade": "assumption", "source": null, "checked_on": "2026-11-17", "file": "engine/constants.json"},
     {"constant_id": "calibration-diff-min-personas", "name": "보정 통과: 업장별 차이를 따지는 최소 페르소나 수", "value": 2, "unit": "명", "grade": "assumption", "source": null, "checked_on": "2026-11-17", "file": "engine/constants.json"},
     {"constant_id": "meal-lunch-dinner", "name": "집계 파일에서 끼니가 비어 있는 식사 매출", "value": {"lunch": 0.5, "dinner": 0.5}, "unit": null, "grade": "assumption", "source": null, "checked_on": "2026-11-13", "file": "engine/conditions.json"}
-  ]
+  ],
+  "baseline_answers": null
 }
 ```
+
+**상관없는 방문의 답** (11-19 wilstein91 결정, T210. 임시 규칙)
+
+- 기준이 아닌 상황에서 방문 하나를 돈 뒤, 기준에서 고른 곳과 상황에서 고른 곳 둘 다 상황이 바꾼 업장(상황 정의의 `changes` 의 `venue_id`)이 아니면,
+  그 방문의 원장은 기준 실행의 원장 줄로 적는다 (`run_id`·`scenario_id` 는 이 실행의 것, `llm_call` 은 `replay`). 기준의 저장된 답을 이 실행의 `llm/` 에도 베껴 둔다.
+  그런 방문은 `baseline_answers` 에 적는다. 한쪽이라도 실패했거나 요청이 같아 이미 기준의 답을 재생한 방문은 해당하지 않는다.
+- 까닭: 방문마다 답이 하나라, 바꾼 업장과 상관없는 방문의 답이 LLM 의 흔들림으로 달라지면 상황의 효과처럼 보인다 (매출 변화 나누기의 "주문 변화", 10.6절).
+  답이 하나로는 흔들림과 진짜 변화(고르지 않는 업장이 바뀌어 남은 업장 사이의 판단이 바뀌는 것)를 가를 수 없어 상관없는 변화는 두지 않는다.
+- LLM 은 그대로 부른다 (어디를 고를지는 물어야 안다). 이 상황에서 받은 답은 지우지 않고 `llm/` 에 남는다.
+- 없애는 조건: 개선 2단계에서 비율로 고르게 되면 이 규칙을 없애고, 흔들림 폭보다 큰 변화만 효과로 본다 (진행 문서의 T212).
 
 ### 10.2 소비 원장 `ledger.csv`
 
