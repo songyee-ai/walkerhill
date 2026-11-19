@@ -24,6 +24,8 @@ from app.results import (  # noqa: E402
     FILLED_PRICE_SHORT,
     MASKED_AMOUNT_NOTE,
     MASKED_IN_TEXT,
+    MASKED_SHARE,
+    engine_output_for_screen,
     load_run,
     mask_amounts,
     shows_numbers,
@@ -197,3 +199,24 @@ def test_validation_shows_higher_or_lower_instead_of_counts_for_base_data():
     assert masked[0]["고른 업장이 같음"] == "단순 기준보다 높음" and masked[0]["이유가 겹침"] == "단순 기준보다 낮음"
     plain = validation_rows(validation, {"geumryong": "금룡"})
     assert plain[0]["고른 업장이 같음"] == "12건 중 8건"  # 가상 예시 값 실행은 지금처럼 건수
+
+
+def test_engine_output_hides_people_coverage_from_base_data():
+    # 11-19 T210 뒤로 엔진이 "페르소나가 있는 고객군이 차지하는 인원의 몫"을 남긴다. 기본 데이터에서 낸 비율이라
+    # 기본 데이터 실행에서는 "엔진이 남긴 말"에서도 가린다 (T127). 나머지 말은 고쳐 쓰지 않는다 (팀장 요청, 11-16). 값은 지어낸 것이다.
+    said = (
+        "공급자 claude-code · 모델 claude-opus-5-5 · 프롬프트 p3\n"
+        "페르소나가 있는 고객군이 집계 파일의 인원 가운데 61.3% 를 차지한다 (나머지 고객군은 시뮬레이션에 나오지 않는다)\n"
+        "방문 48건 (실패 0건) · 새로 부름 0번 · 재생 48번 · 호출 상한 0번"
+    )
+    hidden = engine_output_for_screen(said, "private")
+    assert "61.3%" not in hidden and f"인원 가운데 {MASKED_SHARE} 를 차지한다" in hidden
+    assert hidden.replace(f"인원 가운데 {MASKED_SHARE}", "인원 가운데 61.3%") == said  # 그 밖은 한 글자도 바뀌지 않는다
+    assert engine_output_for_screen(said, None) == hidden  # 어느 자료였는지 모르면 가린다
+    assert engine_output_for_screen(said, "sample") == said  # 가상 예시 값은 그대로
+    assert engine_output_for_screen("", "private") == ""
+
+
+def test_masked_amount_note_no_longer_says_revenue_was_fitted():
+    # 11-19 T210 뒤로 가상 매출을 기본 데이터 매출에 맞추지 않는다. 가리는 까닭은 기본 데이터의 인원으로 정한 방문 수다 (T127).
+    assert "매출 규모에 맞춘" not in MASKED_AMOUNT_NOTE and "인원" in MASKED_AMOUNT_NOTE
