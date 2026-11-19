@@ -3,7 +3,7 @@
 방문마다 저장된 응답을 먼저 찾는다. 있으면 재생하고, 없으면 LLM 을 불러 답을 받아 검사한 뒤 저장한다.
 LLM 을 주지 않고 돌리면(재생만) 저장된 응답이 없는 방문은 실패로 남는다.
 기준이 아닌 상황은 업장 정의의 사본에 상황을 적용해 돌리고, 페르소나·방문 조건·가중치는 기준 실행의 것을 그대로 쓴다.
-기준 상황의 가중치는 집계 파일에서 낸다: 묶음의 비율은 돌리기 전에, 고객군 배수는 방문을 다 돈 뒤 원장으로 맞춘다 (`engine.weights`).
+기준 상황의 가중치는 방문을 돌기 전에 집계 파일의 인원에서 정한다 (`engine.weights`, T210).
 """
 
 import hashlib
@@ -16,11 +16,11 @@ from typing import Any
 
 from engine.answers import AnswerBook, old_style_folder, read_reply, save_rejected, save_response
 from engine.candidates import build_request, run_condition
+from engine.constants import CONSTANTS_PATH, used_constants
 from engine.formats.choice import ChoiceRequest, RunCondition, problems_in_response
 from engine.formats.conditions import MANUAL_CONDITION_PREFIX, ConditionBundle
 from engine.formats.evidence import Vocab
 from engine.formats.io import read_json, read_model, write_json
-from engine.formats.money import round_half_up, weighted_amount
 from engine.formats.persona import Persona, merge_persona_layers, merged_persona
 from engine.formats.run import RUN_ID_RE, VISIT_ID_SEPARATOR, LedgerRow, RunRecord, Weights
 from engine.formats.scenario import BASELINE_ID, Scenario
@@ -40,12 +40,12 @@ from engine.llm import (
 )
 from engine.scenarios import apply_scenario
 from engine.weights import (
+    average_parties,
     base_profiles,
-    condition_ratios,
+    decide_weights,
     empty_profile,
     fill_prices,
-    fit_weights,
-    group_revenue,
+    group_people,
     read_summary,
     summary_path,
 )
@@ -219,6 +219,7 @@ def load_inputs(
             "scenario": _hash_files([scenario_path]),
             "vocab": _hash_files([vocab_path]),
             "summary": _hash_files([summary_file]),
+            "constants": _hash_files([CONSTANTS_PATH]),
         },
     )
 
@@ -282,7 +283,7 @@ def _same_as_baseline(what: str, given: list[str] | None, base: list[str]) -> li
 def _changed_since_baseline(base: RunRecord, hashes: dict[str, str], provider: str, model: str, prompt_version: str) -> list[str]:
     """기준 실행 뒤에 달라진 것. 하나라도 있으면 상황 사이의 차이에 상황의 변경이 아닌 것이 섞인다."""
     # 집계 파일이 바뀌면 채운 단가와 기본 데이터의 요약이 달라진다. 그래서 집계 파일도 견준다.
-    keys = ("venues", "personas", "conditions", "vocab", "summary")
+    keys = ("venues", "personas", "conditions", "vocab", "summary", "constants")
     changed = [key for key in keys if base.inputs.get(key) != hashes[key]]
     # 프롬프트의 글은 LLM 을 부를 수 있게 돌린 실행에만 해시가 남는다. 둘 다 있을 때만 견준다.
     if "prompt" in base.inputs and "prompt" in hashes and base.inputs["prompt"] != hashes["prompt"]:
@@ -298,19 +299,6 @@ def represented(weights: Weights, persona: Persona, condition_id: str) -> float:
     if condition_id.startswith(MANUAL_CONDITION_PREFIX):
         return 0.0
     return weights.persona_weight[persona.persona_id] * weights.condition_ratio[persona.customer_group][condition_id]
-
-
-def reweigh(rows: list[LedgerRow], weights: Weights, personas: dict[str, Persona]) -> list[LedgerRow]:
-    """원장의 줄에 가중치를 다시 적는다: `represented` 와 `weighted_revenue`.
-
-    기준 상황은 고객군 배수를 방문을 다 돈 뒤에 원장으로 맞추므로, 방문을 돌 때는 대표하는 크기를 0 으로 적어 두고 여기서 채운다.
-    """
-    out = []
-    for row in rows:
-        size = represented(weights, personas[row.persona_id], row.condition_id)
-        weighted = round_half_up(weighted_amount(row.revenue_net, size, row.counted_share))
-        out.append(LedgerRow.model_validate({**row.model_dump(), "represented": size, "weighted_revenue": weighted}))
-    return out
 
 
 @dataclass
@@ -425,12 +413,12 @@ def _engine_commit(root: Path) -> str:
     `root` 는 엔진 코드가 있는 저장소다. 실행기는 자료의 폴더가 아니라 돌아가는 코드의 자리(`CODE_ROOT`)를 준다.
 
     `engine/` 아래에서도 코드가 아닌 것은 보지 않는다: 가상 예시의 실행 결과(`engine/samples/`)와 방문 조건 묶음
-    (`engine/conditions.json`. 입력이라 `inputs` 의 해시에 따로 남는다).
+    (`engine/conditions.json`, `engine/constants.json`. 입력이라 `inputs` 의 해시에 따로 남는다).
     """
     commit = _git(root, "rev-parse", "--short", "HEAD")
     if not commit:
         return "unknown"
-    code = ("engine", ":(exclude)engine/samples", ":(exclude)engine/conditions.json")
+    code = ("engine", ":(exclude)engine/samples", ":(exclude)engine/conditions.json", ":(exclude)engine/constants.json")
     return commit + ("+dirty" if _git(root, "status", "--porcelain", "--", *code) else "")
 
 
@@ -476,8 +464,8 @@ def run(
     - `receiver`: `llm` 이 요청을 보내는 곳의 이름 (`engine.llm.receiver_of`). 주지 않으면 `provider` 다.
       주소로 받는 곳이 갈리는 공급자(`openai-compatible`)는 주소의 호스트까지 든 이름을 준다.
     - `month`: 실행의 달 (1 ~ 12). 주면 묶음의 조건을 모두 그 달의 방문으로 돌린다: 그 달에 팔지 않는 업장과 상품은 후보에서 빠지고,
-      요청의 `condition.month` 에 그 달이 실린다. 주지 않으면 일 년 전체로 본다. 가중치는 달을 줘도 집계 파일의 일 년 합계에 맞춘다:
-      고객군 배수를 이 실행의 원장으로 맞추므로 고객군의 가상 매출 합은 달과 상관없이 같다 (docs/FORMATS.md 10.1절의 "실행의 달").
+      요청의 `condition.month` 에 그 달이 실린다. 주지 않으면 일 년 전체로 본다. 가중치는 그 달의 인원으로 낸다
+      (11-19 wilstein91 결정. docs/FORMATS.md 10.1절의 "실행의 달").
       기준이 아닌 상황은 기준 실행의 달을 따른다. 다른 달을 따로 주면 돌리지 않는다.
     - `llm`: 저장된 응답이 없는 방문에서 부를 공급자. 주지 않으면 부르지 않고 그 방문을 실패로 남긴다 (재생만).
       `provider` 와 `model` 은 `llm` 이 실제로 부르는 곳과 같아야 한다 (요청의 해시와 실행 기록에 들어간다).
@@ -544,12 +532,12 @@ def run(
         raise ValueError(f"방문 조건 묶음에 없는 조건이 있다: {condition_ids}")
     personas = list(inputs.personas.values())
 
-    # 기준 상황은 가중치를 집계 파일에서 낸다. 묶음의 비율은 지금 내고, 고객군 배수는 방문을 다 돈 뒤에 원장으로 맞춘다.
-    fitting = weights is None
-    if fitting:
-        revenue = group_revenue(inputs.summary, conditions, inputs.conditions.assumed_splits, inputs.venues)
-        groups = sorted({p.customer_group for p in personas})
-        ratios, ratio_grades = condition_ratios(revenue, groups, condition_ids, data_mode)
+    # 기준 상황은 가중치를 집계 파일의 인원에서 방문을 돌기 전에 정한다 (T210). 달을 주면 그 달의 인원이다.
+    if weights is None:
+        people = group_people(
+            inputs.summary, conditions, inputs.conditions.assumed_splits, inputs.venues, average_parties(personas), month
+        )
+        weights = decide_weights(personas, people, condition_ids, data_mode)
 
     run_id = f"{now:%Y%m%d-%H%M%S}-{scenario_id}"
     run_dir = runs_folder(root, data_mode) / run_id
@@ -594,8 +582,7 @@ def run(
                     inputs=inputs,
                     persona=persona,
                     condition=run_condition(condition, persona, month),
-                    # 가중치를 맞추는 중이면 0 으로 적어 두고, 다 돈 뒤에 reweigh 로 채운다.
-                    represented=0.0 if weights is None else represented(weights, persona, condition.condition_id),
+                    represented=represented(weights, persona, condition.condition_id),
                     prompt_version=prompt_version,
                     book=book,
                     run_dir=run_dir,
@@ -621,9 +608,6 @@ def run(
         # 폴더가 남으면 형식 검사가 막고, 가상 예시로 돌린 것이면 그 폴더가 저장소 안이다.
         if not finished:
             status = "failed"
-        if fitting:
-            weights = fit_weights(personas, ratios, ratio_grades, revenue, rows, data_mode)
-            rows = reweigh(rows, weights, inputs.personas)
         _write_run(
             run_dir,
             rows,
@@ -655,6 +639,7 @@ def run(
                 "weights_from": base.run_id if base else None,
                 "counts": {"visits": visits, "failed": failed},
                 "status": status,
+                "constants": used_constants(inputs.conditions),
             },
         )
     return run_dir

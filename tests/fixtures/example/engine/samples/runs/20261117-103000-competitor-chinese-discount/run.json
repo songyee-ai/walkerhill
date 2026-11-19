@@ -28,15 +28,16 @@
     "conditions": "81ec9570eef55a09",
     "scenario": "0e8b0c3142b42966",
     "vocab": "8198206734bb16a5",
-    "summary": "e03de3cfd0f4355d",
+    "summary": "b2e533d5aec19534",
+    "constants": "7a4f07ea30f833ec",
     "prompt": "9fee7d4f42a62d8b"
   },
   "weights": {
     "group_multiplier": {
-      "가족·친족": 240.0
+      "가족·친족": 210.0
     },
     "persona_weight": {
-      "family-elders": 120.0
+      "family-elders": 105.0
     },
     "condition_ratio": {
       "가족·친족": {
@@ -55,7 +56,8 @@
           "meal-dinner-weekend": "assumption"
         }
       }
-    }
+    },
+    "people_coverage": 1.0
   },
   "filled_products": [],
   "skipped_products": [],
@@ -64,5 +66,110 @@
     "visits": 1,
     "failed": 0
   },
-  "status": "ok"
+  "status": "ok",
+  "constants": [
+    {
+      "constant_id": "filled-price-unit",
+      "name": "집계 파일로 채운 단가의 반올림 단위",
+      "value": 100,
+      "unit": "원",
+      "grade": "assumption",
+      "source": null,
+      "checked_on": "2026-11-15",
+      "file": "engine/constants.json"
+    },
+    {
+      "constant_id": "base-profile-top-products",
+      "name": "기본 데이터의 요약에 업장마다 적는 상품 수",
+      "value": 3,
+      "unit": "개",
+      "grade": "assumption",
+      "source": null,
+      "checked_on": "2026-11-15",
+      "file": "engine/constants.json"
+    },
+    {
+      "constant_id": "base-profile-bucket-high",
+      "name": "비중을 높음(high)으로 보는 선",
+      "value": 1.5,
+      "unit": "배",
+      "grade": "assumption",
+      "source": null,
+      "checked_on": "2026-11-15",
+      "file": "engine/constants.json"
+    },
+    {
+      "constant_id": "base-profile-bucket-mid",
+      "name": "비중을 보통(mid)으로 보는 선",
+      "value": 0.5,
+      "unit": "배",
+      "grade": "assumption",
+      "source": null,
+      "checked_on": "2026-11-15",
+      "file": "engine/constants.json"
+    },
+    {
+      "constant_id": "takeout-teams-per-item",
+      "name": "인원이 빈 칸인 포장 한 개가 나타내는 팀 수",
+      "value": 1,
+      "unit": "팀",
+      "grade": "assumption",
+      "source": null,
+      "checked_on": "2026-11-19",
+      "file": "engine/constants.json"
+    },
+    {
+      "constant_id": "add-on-people-per-item",
+      "name": "인원이 빈 칸인 추가 상품 한 개가 나타내는 사람 수",
+      "value": 0,
+      "unit": "명",
+      "grade": "assumption",
+      "source": null,
+      "checked_on": "2026-11-19",
+      "file": "engine/constants.json"
+    },
+    {
+      "constant_id": "calibration-top-venue-must-match",
+      "name": "보정 통과: 가장 큰 업장이 같아야 하는가",
+      "value": true,
+      "unit": null,
+      "grade": "assumption",
+      "source": null,
+      "checked_on": "2026-11-17",
+      "file": "engine/constants.json"
+    },
+    {
+      "constant_id": "calibration-max-diff-pp",
+      "name": "보정 통과: 업장별 비중 차이의 한도",
+      "value": 15,
+      "unit": "%p",
+      "grade": "assumption",
+      "source": null,
+      "checked_on": "2026-11-17",
+      "file": "engine/constants.json"
+    },
+    {
+      "constant_id": "calibration-diff-min-personas",
+      "name": "보정 통과: 업장별 차이를 따지는 최소 페르소나 수",
+      "value": 2,
+      "unit": "명",
+      "grade": "assumption",
+      "source": null,
+      "checked_on": "2026-11-17",
+      "file": "engine/constants.json"
+    },
+    {
+      "constant_id": "meal-lunch-dinner",
+      "name": "집계 파일에서 끼니가 비어 있는 식사 매출",
+      "value": {
+        "lunch": 0.5,
+        "dinner": 0.5
+      },
+      "unit": null,
+      "grade": "assumption",
+      "source": null,
+      "checked_on": "2026-11-13",
+      "file": "engine/conditions.json"
+    }
+  ]
 }

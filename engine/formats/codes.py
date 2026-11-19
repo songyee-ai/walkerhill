@@ -14,7 +14,8 @@ DayType = Literal["weekday", "weekend"]
 DayTypeOrAll = Literal["weekday", "weekend", "all"]
 Stay = Literal["guest", "visitor"]
 PriceBasis = Literal["included", "excluded_vat", "excluded_vat_service", "unknown"]
-Grade = Literal["internal", "official", "review", "assumption", "unknown"]
+# 근거 등급. 11-19(T210)에 학술 자료·통계·업계 보고서·기사를 더했다 (공개 자료에서 가져온 값을 설계 가정과 나눠 적으려고).
+Grade = Literal["internal", "official", "literature", "statistic", "review", "industry", "article", "assumption", "unknown"]
 ScenarioKind = Literal["baseline", "our_price", "our_promo", "competitor"]
 ChoiceKind = Literal["walkerhill", "competitor", "none"]
 QtyRule = Literal["per_person", "per_serves", "choice"]
@@ -64,7 +65,11 @@ KO: dict[str, dict[str, str]] = {
     "grade": {
         "internal": "내부 매출 자료",
         "official": "공식 사실",
+        "literature": "학술 자료",
+        "statistic": "공공 통계",
         "review": "후기에서 관찰",
+        "industry": "업계 보고서",
+        "article": "기사",
         "assumption": "설계 가정",
         "unknown": "미확인",
     },

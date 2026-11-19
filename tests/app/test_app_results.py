@@ -132,7 +132,9 @@ def test_season_gap_row_is_not_taken_as_the_choice(run_copy: Path):
     # 일부 달에만 파는 상품을 고르면 엔진이 나머지 몫을 "이용하지 않음" 줄로 더 적는다 (engine.ledger.visit_rows).
     def split(rows):
         chosen = rows[0]
-        chosen.update(counted_share="0.5", weighted_revenue=str(round(545455 * 120 * 0.5)))
+        # 가중 매출은 그 줄의 represented 로 다시 낸다. 예시 실행의 represented 가 바뀌어도 이 시험은 그대로 맞는다.
+        weighted = float(chosen["revenue_net"]) * float(chosen["represented"]) * 0.5
+        chosen.update(counted_share="0.5", weighted_revenue=str(round(weighted)))
         gap = dict(chosen)
         for key in ("venue_id", "product_id", "unit", "reason_labels", "used_attributes"):
             gap[key] = ""

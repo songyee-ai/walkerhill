@@ -85,7 +85,8 @@ def test_restaurant_cards_show_who_left_and_who_arrived():
     # 워커힐 업장만 가상 매출이 있다. 금룡은 평소의 매출이 모두 사라졌다.
     assert geumryong.revenue_before == comparison.total_before and geumryong.revenue_after == 0
     assert rival.revenue_before is None
-    assert rival.guests_before == 0 and rival.guests_after == 120.0
+    # 손님 수는 그 방문이 대신하는 팀 수(represented)다. 예시 실행에서는 105 팀이다.
+    assert rival.guests_before == 0 and rival.guests_after == 105.0
     # 손님이 없어도 식당가의 워커힐 업장은 카드가 있다. 바뀐 카드가 앞에 온다.
     assert buffet.revenue_before == 0 and not buffet.changed
     assert cards[0] is geumryong

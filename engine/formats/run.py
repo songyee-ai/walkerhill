@@ -24,6 +24,7 @@ from engine.formats.codes import (
     Text,
     Won,
 )
+from engine.formats.constants import UsedConstant
 from engine.formats.io import blank_to_none, split_list
 from engine.formats.money import net_of_tax, weighted_amount
 
@@ -78,12 +79,19 @@ RATIO_SUM_TOLERANCE = 1e-6
 
 
 class Weights(FormatModel):
-    """가중 합산에 쓴 값 (docs/PRD.md 7.2절). 기준 상황에서 한 번 정하고 다른 상황에서도 그대로 쓴다."""
+    """가중 합산에 쓴 값 (docs/PRD.md 7.2절). 기준 상황에서 한 번 정하고 다른 상황에서도 그대로 쓴다.
+
+    11-19(T210)부터 방문 수(인원)로 낸다: 고객군 배수 = 고객군의 인원 ÷ Σ(페르소나의 몫 × 일행 수), 묶음의 비율 = 조건의 인원 ÷ 고객군의 인원.
+    그래서 페르소나의 가중치 × 묶음의 비율이 그 방문이 대표하는 팀 수다. 그 전의 실행은 매출로 맞춘 배수가 적혀 있다.
+    """
 
     group_multiplier: dict[str, float]
     persona_weight: dict[str, float]
     condition_ratio: dict[str, dict[str, float]]
     grades: WeightGrades
+    # 집계 파일의 인원 가운데 페르소나가 있는 고객군의 인원이 차지하는 몫 (0 ~ 1). 페르소나가 없는 고객군은 시뮬레이션에 나오지 않는다.
+    # 11-19(T210) 전의 실행에는 없다.
+    people_coverage: float | None = Field(default=None, ge=0, le=1)
 
     @model_validator(mode="after")
     def _rules(self) -> Self:
@@ -136,6 +144,8 @@ class RunRecord(FormatModel):
     weights_from: str | None
     counts: Counts
     status: Literal["ok", "stopped_by_limit", "failed"]
+    # 이 실행이 쓴 결정 상수와 그 값·근거 (docs/FORMATS.md 6.1절). 11-19(T210) 전의 실행 기록에는 없다.
+    constants: list[UsedConstant] | None = None
 
     @model_validator(mode="after")
     def _rules(self) -> Self:

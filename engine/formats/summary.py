@@ -21,6 +21,7 @@ SUMMARY_COLUMNS = [
     "month",
     "unit",
     "quantity",
+    "people",
     "paid",
     "revenue_net",
     "price_unconfirmed",
@@ -42,6 +43,9 @@ class SummaryRow(FormatModel):
     month: Month
     unit: Text
     quantity: float = Field(ge=0)
+    # 그 수량으로 먹은 사람 수의 합 (T210). 사람 수로 셀 수 없는 상품(포장, 추가 상품)은 빈 칸이다.
+    # 엔진은 빈 칸인 포장을 한 개 한 팀으로 보고, 빈 칸인 그 밖의 상품은 0 명으로 센다 (docs/FORMATS.md 8절).
+    people: float | None = Field(default=None, ge=0)
     # 고객이 낸 금액의 합 (세금 포함). 가격이 비어 있는 상품의 단가는 paid ÷ quantity 로 채운다.
     paid: Won
     # 세금을 뺀 매출의 합. 낸 금액 ÷ 1.1 이다.
@@ -67,4 +71,5 @@ class SummaryRow(FormatModel):
     def from_row(cls, row: dict[str, str]) -> Self:
         data: dict[str, object] = dict(row)
         data["meal"] = blank_to_none(row.get("meal"))
+        data["people"] = blank_to_none(row.get("people"))
         return cls.model_validate(data)
