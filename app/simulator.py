@@ -17,6 +17,7 @@ from app.icons import as_img, persona_icon
 from app.results import (
     FILLED_PRICE,
     MASKED_AMOUNT_NOTE,
+    engine_output_for_screen,
     load_run,
     names_from_files,
     shows_numbers,
@@ -506,7 +507,7 @@ def render(repo_root: Path) -> None:
 
 def show_result(saved: tuple) -> None:
     results, sim_root, sim_mode, sim_months, sim_allowed, replay_only, n_chosen, n_all = saved
-    # 엔진이 남긴 말은 고쳐 쓰지 않고 그대로 보여 준다 (팀장 요청, 11-16).
+    # 엔진이 남긴 말은 고쳐 쓰지 않고 그대로 보여 준다 (팀장 요청, 11-16). 기본 데이터에서 낸 수치만 가린다 (T127).
     outputs = []
     for month, result in results:
         where = "" if month is None else f" ({month}월)"
@@ -553,7 +554,7 @@ def show_result(saved: tuple) -> None:
             f"{group} ({', '.join('일 년 전체' if m is None else f'{m}월' for m in months)})" for group, months in zero.items()
         )
         st.warning(
-            f"워커힐 업장을 고른 방문이 없어 매출 규모를 맞추지 못한 고객군이 있습니다: {listed}. "
+            f"그 달의 집계 파일에 인원이 없어 무게가 0 인 고객군이 있습니다: {listed}. "
             "그 달에는 이 고객군의 가상 매출이 0 으로 들어가"
             + (" 달 평균이 그만큼 낮아집니다." if len(per_month) > 1 else " 합계에서 빠집니다.")
         )
@@ -571,7 +572,7 @@ def show_result(saved: tuple) -> None:
         for label, outcome in outputs:
             run_id = f" · 실행 `{outcome.run_dir.name}`" if outcome.run_dir else ""
             st.markdown(f"**{label}**{run_id} — {outcome.meaning}")
-            st.code(outcome.output or "(남긴 말 없음)", language=None)
+            st.code(engine_output_for_screen(outcome.output, sim_mode) or "(남긴 말 없음)", language=None)
 
 
 # 결과 보기 (11-16 팀 결정: 지도 대신 식당가 카드와 페르소나로 행동 변화를 보여 준다)
@@ -598,10 +599,13 @@ ONE_PERSONA_NOTE = "한 고객군에서 한 명만 고르면 그 고객군의 �
 
 
 def period_note(months: list[int]) -> str:
-    """기간을 골랐을 때 결과 위의 안내 (11-17 팀장 회신 ①): 달 평균, 같은 무게는 설계 가정, 금액은 일 년 규모."""
+    """기간을 골랐을 때 결과 위의 안내 (11-17 팀장 회신 ①): 달 평균, 같은 무게는 설계 가정, 금액은 한 달 평균 규모.
+
+    11-19 T210 뒤로 달마다 그 달의 인원으로 무게를 내므로, 달 평균의 금액은 한 달 규모다 (T127. 그 전에는 일 년 규모로 맞췄다).
+    """
     return (
         f"{months_text(months)}: 달마다 돌려 평균했습니다 (달마다 같은 무게로 평균한 것은 설계 가정입니다). "
-        f"금액은 그 기간의 매출이 아니라 일 년 규모로 맞춘 가상 값이라, 볼 것은 변화율입니다. {SEASON_NOTE}"
+        f"금액은 달마다 그 달의 인원으로 낸 가상 값의 한 달 평균이라 그 기간의 매출 합이 아니고, 볼 것은 변화율입니다. {SEASON_NOTE}"
     )
 
 
@@ -684,7 +688,7 @@ def _show_cards(
             delta=f"{diff:+,}원 (가상 · 일 년 규모)" if diff else None,
             delta_color="normal" if diff else "off",
             help=f"{BASE_LABEL} {won(comparison.total_before)} → {AFTER_LABEL} {won(comparison.total_after)}. "
-            "금액은 기본 데이터의 일 년 매출 규모에 맞춘 가상 값입니다.",
+            "금액은 집계 파일의 일 년 인원으로 정한 방문 수에서 나온 가상 값입니다.",
         )
     b.metric("워커힐 밖으로 나간 방문", f"{comparison.count('out')}건", delta=-comparison.count("out") or None)
     c.metric("워커힐로 들어온 방문", f"{comparison.count('in')}건", delta=comparison.count("in") or None)
