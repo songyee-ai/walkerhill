@@ -11,6 +11,7 @@ from app.breakdown import Breakdown, average, load_breakdown
 from app.results import LoadedRun, condition_names, load_run, persona_names, visit_view
 from engine.formats import SUMMARY_COLUMNS
 from engine.formats.io import read_csv
+from engine.formats.run import VISIT_ID_SEPARATOR
 from engine.ledger import venue_shares
 
 # 선택이 어떻게 바뀌었나. 순서는 화면에 보여 주는 순서다.
@@ -45,6 +46,9 @@ class Move:
     represented: float
     reason_after: str | None
     fail_reason: str | None = None
+    # 상황과 상관없어 기본 시나리오의 답을 그대로 쓴 방문 (실행 기록의 `baseline_answers`, T210 의 임시 규칙. FORMATS.md 10.1절).
+    # 화면에 그 수와 표시를 보인다 (T128). T212 에서 규칙이 없어지면 엔진이 목록을 쓰지 않아 저절로 False 다.
+    kept_baseline: bool = False
 
 
 @dataclass
@@ -74,6 +78,11 @@ class Comparison:
 
     def count(self, move: str) -> int:
         return sum(1 for m in self.moves if m.move == move)
+
+    @property
+    def kept_count(self) -> int:
+        """기본 시나리오의 답을 그대로 쓴 방문의 수 (T128)."""
+        return sum(1 for m in self.moves if m.kept_baseline)
 
 
 def baseline_dir_of(scen_dir: Path) -> Path:
@@ -136,6 +145,7 @@ def compare(
     file_names = file_names or {}
     personas = {k: file_names.get(k, v) for k, v in persona_names(base).items()} | _named(persona_names(scen))
     conditions = {k: file_names.get(k, v) for k, v in condition_names(base).items()} | _named(condition_names(scen))
+    kept = set(scen.record.baseline_answers or [])
     moves = []
     for persona_id in base.record.persona_ids:
         for condition_id in base.record.condition_ids:
@@ -153,6 +163,7 @@ def compare(
                     represented or represented_after,
                     reason,
                     fail_after or fail_before,
+                    f"{persona_id}{VISIT_ID_SEPARATOR}{condition_id}" in kept,
                 )
             )
     # AI 답을 받지 못한 방문은 두 실행 모두에서 매출에 넣지 않는다. 넣으면 답이 없는 쪽만 0원이 되어
