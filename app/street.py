@@ -28,7 +28,7 @@ class Store:
     kind: str  # walkerhill / competitor / none
     icon: str  # SVG
     caption: str
-    # 워커힐 업장은 가상 매출(원), 경쟁 업장과 외식 안 함은 손님 수(가상, 명)
+    # 워커힐 업장은 가상 매출(원), 경쟁 업장과 외식 안 함은 방문 수(가상, 팀. 방문이 대표하는 팀 수의 합이다, T124)
     before: float
     after: float
     unit: str  # "won" / "guests"
@@ -55,7 +55,7 @@ class Scene:
     hidden: int = 0  # AI 답을 받지 못해 그리지 않은 방문 수
     # 누구의 결과인가 (예: "고른 페르소나 1명만"). 머리 숫자 위에 적는다 (11-17 팀장 요청)
     scope: str = ""
-    # 기본 데이터 실행이면 금액과 손님 수를 가리고 변화율과 지수만 보인다 (PRD 17절, app/results.py 의 `shows_numbers`)
+    # 기본 데이터 실행이면 금액과 방문 수를 가리고 변화율과 지수만 보인다 (PRD 17절, app/results.py 의 `shows_numbers`)
     masked: bool = False
 
 
@@ -149,16 +149,16 @@ def money(amount: float) -> str:
 
 def value_text(store: Store, value: float, masked: bool = False) -> str:
     if masked:
-        # 금액과 손님 수 대신 기본 시나리오를 100 으로 둔 지수 (PRD 17절)
+        # 금액과 방문 수 대신 기본 시나리오를 100 으로 둔 지수 (PRD 17절)
         return index_text(store.before, value)
-    return f"{money(value)} (가상)" if store.unit == "won" else f"{value:,.0f}명 (가상)"
+    return f"{money(value)} (가상)" if store.unit == "won" else f"{value:,.0f}팀 (가상)"
 
 
 def delta_text(store: Store, masked: bool = False) -> tuple[str, str]:
     """(글, 색의 이름). 색은 up / down / flat 이고, 늘었나 줄었나만 뜻한다 (가게 테두리의 색과 같은 뜻)."""
     diff = store.after - store.before
     pct = pct_change(store.before, store.after)
-    # 가릴 때는 변화율로 본다 (작은 손님 수의 변화도 비율로는 보인다). 반올림해 0% 면 변화 없음이다.
+    # 가릴 때는 변화율로 본다 (작은 방문 수의 변화도 비율로는 보인다). 반올림해 0% 면 변화 없음이다.
     if (pct in ("변화 없음", "+0%", "-0%")) if masked else round(diff) == 0:
         return "변화 없음", "flat"
     sign = "▲" if diff > 0 else "▼"
@@ -167,7 +167,7 @@ def delta_text(store: Store, masked: bool = False) -> tuple[str, str]:
     elif store.unit == "won":
         text = f"{sign} {money(abs(diff))} ({pct_change(store.before, store.after)})"
     else:
-        text = f"{sign} {abs(diff):,.0f}명"
+        text = f"{sign} {abs(diff):,.0f}팀"
     return text, "up" if diff > 0 else "down"
 
 
@@ -387,7 +387,7 @@ def render_scene(scene: Scene) -> tuple[str, int]:
         note.append(f"{MASKED_AMOUNT_NOTE} 페르소나에 마우스를 올리면 고른 이유가 보입니다.")
     else:
         note.append(
-            "모든 금액과 손님 수는 가상 값입니다. 금액은 집계 파일의 일 년 인원으로 정한 방문 수에서 나온 값입니다. "
+            "모든 금액과 방문 수는 가상 값입니다. 금액은 집계 파일의 일 년 인원으로 정한 방문 수에서 나온 값입니다. "
             "페르소나에 마우스를 올리면 고른 이유가 보입니다."
         )
     amounts = (
