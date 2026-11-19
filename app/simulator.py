@@ -656,6 +656,8 @@ def show_comparison(
     st.iframe(html, height="content")
 
     _show_breakdown(comparison.breakdown, names, masked)
+    if note := kept_note(comparison):
+        st.caption(note)
 
     with st.expander("숫자와 카드로 자세히 보기"):
         _show_cards(comparison, catalog, names, allowed, masked)
@@ -706,6 +708,24 @@ def breakdown_rows(found: Breakdown, names: dict[str, str], masked: bool) -> lis
         | {"합계": breakdown_amount(v.parts_total, found.before, masked)}
         for v in found.venues
     ]
+
+
+# 기본 시나리오의 답을 그대로 쓴 방문 (T128, 11-19 팀장 결정). 방문 수는 페르소나 × 방문 조건의 개수라 기본 데이터 실행에서도 가리지 않는다.
+# 임시: T210 의 규칙(FORMATS.md 10.1절 "상관없는 방문의 답")이 T212 에서 없어지면 엔진이 목록을 쓰지 않아 이 줄도 나오지 않는다. 그때 이 코드를 지운다.
+KEPT_RULE = "AI 답의 작은 흔들림을 상황의 효과로 보지 않으려는 임시 규칙이고, 개선 2단계에서 없앱니다."
+KEPT_VISIT_NOTE = (
+    "이 방문은 상황이 바꾼 업장과 상관없어 기본 시나리오의 답을 그대로 썼습니다. 그래서 고른 곳과 이유가 기본 시나리오와 같습니다. " + KEPT_RULE
+)
+
+
+def kept_note(comparison: Comparison) -> str | None:
+    """기본 시나리오의 답을 그대로 쓴 방문이 몇 건인지. 없으면 None 이다."""
+    if not comparison.kept_count:
+        return None
+    return (
+        f"방문 {len(comparison.moves)}건 가운데 {comparison.kept_count}건은 이 상황이 바꾼 업장과 상관없어 "
+        f"기본 시나리오의 답을 그대로 썼습니다. {KEPT_RULE}"
+    )
 
 
 def _show_breakdown(found: Breakdown | None, names: dict[str, str], masked: bool) -> None:
@@ -820,6 +840,8 @@ def _show_person(comparison: Comparison) -> None:
     options = [(m.persona_id, m.condition_id) for m in comparison.moves]
     labels = {(m.persona_id, m.condition_id): f"{m.persona} · {m.condition}" for m in comparison.moves}
     pick = st.selectbox("방문", options, format_func=lambda o: labels[o], key="sim_detail")
+    if any(m.kept_baseline for m in comparison.moves if (m.persona_id, m.condition_id) == pick):
+        st.caption(KEPT_VISIT_NOTE)
     left, right = st.columns(2)
     for column, title, run in ((left, BASE_LABEL, comparison.base), (right, AFTER_LABEL, comparison.scen)):
         with column:
