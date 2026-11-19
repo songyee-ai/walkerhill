@@ -27,6 +27,7 @@ from app.results import (  # noqa: E402
     FILLED_PRICE_SHORT,
     RunSource,
     condition_names,
+    engine_output_for_screen,
     list_runs,
     load_run,
     party_label,
@@ -140,6 +141,7 @@ def run_panel() -> None:
             with st.spinner("엔진을 돌리는 중입니다…"):
                 outcome = run_engine(command, REPO_ROOT, env_overrides=replay_env(root.is_example, call_llm))
             st.session_state["last_outcome"] = outcome
+            st.session_state["last_outcome_mode"] = data_mode
             if outcome.run_dir is not None:
                 st.session_state["pick"] = (outcome.run_dir.parent, outcome.run_dir.name)
             st.rerun()
@@ -155,7 +157,9 @@ def show_last_outcome() -> None:
     else:
         st.error(f"돌리기: {outcome.meaning}")
     with st.expander("엔진이 남긴 말", expanded=outcome.exit_code != 0):
-        st.code(outcome.output or "(남긴 말 없음)", language=None)
+        # 기본 데이터로 돌렸으면 기본 데이터에서 낸 수치만 가린다 (T127). 어느 자료였는지 모르면 가린다.
+        shown = engine_output_for_screen(outcome.output, st.session_state.get("last_outcome_mode"))
+        st.code(shown or "(남긴 말 없음)", language=None)
 
 
 def apply_pick(sources: list[RunSource]) -> None:

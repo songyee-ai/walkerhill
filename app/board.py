@@ -91,7 +91,7 @@ def pct_change(before: float, after: float) -> str:
 
 
 def index_text(before: float, value: float) -> str:
-    """기본 시나리오를 100 으로 둔 지수. 금액·손님 수를 가리는 실행에서 쓴다 (app/results.py 의 `shows_numbers`).
+    """기본 시나리오를 100 으로 둔 지수. 금액·방문 수를 가리는 실행에서 쓴다 (app/results.py 의 `shows_numbers`).
 
     기본 시나리오가 0 이면 지수를 낼 수 없어 "없음" 또는 "새로 생김"으로 적는다.
     """

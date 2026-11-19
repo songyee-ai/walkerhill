@@ -1,0 +1,56 @@
+{
+  "format_version": 1,
+  "run_id": "20261117-103000-competitor-chinese-discount",
+  "baseline_run_id": "20261117-101500-baseline",
+  "excluded_visits": [],
+  "walkerhill": {
+    "new": 0,
+    "from_competitor": 0,
+    "from_walkerhill": 0,
+    "to_competitor": -57272775,
+    "to_walkerhill": 0,
+    "to_none": 0,
+    "price": 0,
+    "order": 0,
+    "total": -57272775
+  },
+  "venues": [
+    {
+      "venue_id": "geumryong",
+      "before": 57272775,
+      "after": 0,
+      "parts": {
+        "new": 0,
+        "from_competitor": 0,
+        "from_walkerhill": 0,
+        "to_competitor": -57272775,
+        "to_walkerhill": 0,
+        "to_none": 0,
+        "price": 0,
+        "order": 0,
+        "total": -57272775
+      }
+    }
+  ],
+  "visits": [
+    {
+      "visit_id": "family-elders__meal-dinner-weekend",
+      "represented": 105.0,
+      "before": {
+        "kind": "walkerhill",
+        "venue_id": "geumryong"
+      },
+      "after": {
+        "kind": "competitor",
+        "venue_id": "examplehotel-chinese"
+      },
+      "parts": [
+        {
+          "venue_id": "geumryong",
+          "part": "to_competitor",
+          "amount": -57272775
+        }
+      ]
+    }
+  ]
+}

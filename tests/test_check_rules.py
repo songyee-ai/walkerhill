@@ -1183,6 +1183,8 @@ def test_ledger_cannot_show_a_choice_the_response_did_not_make(example_copy):
 
 def test_ledger_rows_for_added_products_are_matched_too(example_copy):
     """추가 상품(고객이 수량을 정하는 상품)을 고른 방문은 원장에 그 줄이 따로 있어야 한다."""
+    # 기준 실행의 원장을 고치면 경쟁 업장 할인 실행의 매출 변화 나누기(changes.json)도 달라진다. 이 시험과 상관없어 뺀다.
+    (example_copy / RUNS / COMPETITOR_RUN / "changes.json").unlink()
     tea = {"product_id": "tea", "name": "차", "occasion": "meal"}
     tea |= {"slots": [{"meal": "lunch", "day_type": "all"}, {"meal": "dinner", "day_type": "all"}]}
     tea |= {"months": None, "audience": "all", "unit": "잔", "serves": 1}
@@ -1351,6 +1353,8 @@ FAILED_ROW |= {"reason_text": "", "used_attributes": "", "status": "failed", "fa
 
 
 def test_failed_visit_is_one_row_without_amounts(example_copy):
+    # 기준 실행의 원장을 고치면 경쟁 업장 할인 실행의 매출 변화 나누기(changes.json)도 달라진다. 이 시험과 상관없어 뺀다.
+    (example_copy / RUNS / COMPETITOR_RUN / "changes.json").unlink()
     run_json = RUNS / BASELINE_RUN / "run.json"
     edit_json(example_copy, run_json, lambda d: d.update(counts={"visits": 1, "failed": 1}))
     original = load_csv(example_copy / LEDGER)[0]
@@ -1406,6 +1410,8 @@ def season_rows(root: Path, share: str, gap: dict | None) -> list[dict]:
 
 def test_seasonal_choice_counts_the_rest_as_not_using(example_copy):
     """석 달만 파는 곳을 고르면 몫이 0.25 이고, 나머지 0.75 는 '이용하지 않음' 줄 하나로 남는다 (10.2절)."""
+    # 기준 실행의 원장을 고치면 경쟁 업장 할인 실행의 매출 변화 나누기(changes.json)도 달라진다. 이 시험과 상관없어 뺀다.
+    (example_copy / RUNS / COMPETITOR_RUN / "changes.json").unlink()
     save_csv(example_copy / LEDGER, season_rows(example_copy, "0.25", {}))
     assert [str(p) for p in check(example_copy, strict=True)] == []
 

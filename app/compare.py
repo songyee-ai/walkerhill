@@ -7,9 +7,11 @@
 from dataclasses import dataclass, field, replace
 from pathlib import Path
 
+from app.breakdown import Breakdown, average, load_breakdown
 from app.results import LoadedRun, condition_names, load_run, persona_names, visit_view
 from engine.formats import SUMMARY_COLUMNS
 from engine.formats.io import read_csv
+from engine.formats.run import VISIT_ID_SEPARATOR
 from engine.ledger import venue_shares
 
 # 선택이 어떻게 바뀌었나. 순서는 화면에 보여 주는 순서다.
@@ -40,10 +42,13 @@ class Move:
     before: Place
     after: Place
     move: str
-    # 그 방문이 대표하는 손님 수 (가상). 지도의 점 크기에 쓴다.
+    # 그 방문이 대표하는 방문 수(팀 수, 가상). 11-19 T210 뒤로 방문의 무게가 인원에서 낸 팀 수다. 지도의 점 크기에 쓴다.
     represented: float
     reason_after: str | None
     fail_reason: str | None = None
+    # 상황과 상관없어 기본 시나리오의 답을 그대로 쓴 방문 (실행 기록의 `baseline_answers`, T210 의 임시 규칙. FORMATS.md 10.1절).
+    # 화면에 그 수와 표시를 보인다 (T128). T212 에서 규칙이 없어지면 엔진이 목록을 쓰지 않아 저절로 False 다.
+    kept_baseline: bool = False
 
 
 @dataclass
@@ -68,9 +73,16 @@ class Comparison:
     total_before: int
     total_after: int
     uncovered_groups: list[str] = field(default_factory=list)
+    # 엔진이 쓴 매출 변화 나누기 (app/breakdown.py, T124). 11-19 T210 전의 실행에는 없다.
+    breakdown: Breakdown | None = None
 
     def count(self, move: str) -> int:
         return sum(1 for m in self.moves if m.move == move)
+
+    @property
+    def kept_count(self) -> int:
+        """기본 시나리오의 답을 그대로 쓴 방문의 수 (T128)."""
+        return sum(1 for m in self.moves if m.kept_baseline)
 
 
 def baseline_dir_of(scen_dir: Path) -> Path:
@@ -133,6 +145,7 @@ def compare(
     file_names = file_names or {}
     personas = {k: file_names.get(k, v) for k, v in persona_names(base).items()} | _named(persona_names(scen))
     conditions = {k: file_names.get(k, v) for k, v in condition_names(base).items()} | _named(condition_names(scen))
+    kept = set(scen.record.baseline_answers or [])
     moves = []
     for persona_id in base.record.persona_ids:
         for condition_id in base.record.condition_ids:
@@ -150,6 +163,7 @@ def compare(
                     represented or represented_after,
                     reason,
                     fail_after or fail_before,
+                    f"{persona_id}{VISIT_ID_SEPARATOR}{condition_id}" in kept,
                 )
             )
     # AI 답을 받지 못한 방문은 두 실행 모두에서 매출에 넣지 않는다. 넣으면 답이 없는 쪽만 0원이 되어
@@ -179,16 +193,23 @@ def compare(
         shares_before["walkerhill_total"],
         shares_after["walkerhill_total"],
         uncovered,
+        _matching_breakdown(scen, base, shares_after["walkerhill_total"] - shares_before["walkerhill_total"]),
     )
+
+
+def _matching_breakdown(scen: LoadedRun, base: LoadedRun, diff: int) -> Breakdown | None:
+    """상황 실행의 매출 변화 나누기. 두 원장으로 낸 매출 변화와 같을 때만 쓴다 (빼는 방문이 같아야 같다. FORMATS.md 10.6절)."""
+    found = load_breakdown(scen.run_dir, scen.record.run_id, base.record.run_id)
+    return found if found is not None and found.total == diff else None
 
 
 def combine_months(per_month: list[tuple[int, "Comparison"]]) -> "Comparison":
     """기간의 달마다 낸 비교를 하나로 합친다 (11-17, 화면의 "X월 ~ Y월").
 
-    엔진은 달 하나로 돌고, 달을 줘도 가중치는 일 년 합계에 맞춘다 (FORMATS.md 10.1절 "실행의 달").
-    그래서 달마다의 매출을 더하지 않고 **달 평균**을 낸다. 같은 달의 기준과 상황끼리만 견준 값을 평균하므로
+    엔진은 달 하나로 돌고, 달을 주면 그 달의 인원으로 가중치를 낸다 (FORMATS.md 10.1절 "실행의 달". 11-19 T210 전에는 일 년 합계에 맞췄다).
+    화면은 달마다의 매출을 더하지 않고 **달 평균**을 낸다 (한 달 규모). 같은 달의 기준과 상황끼리만 견준 값을 평균하므로
     "달이 다른 실행끼리 합계를 견주지 않는다"는 엔진 담당의 당부를 지킨다. 방문은 달을 붙여 모두 보이고,
-    손님 수가 달 수만큼 불지 않게 방문이 대표하는 손님 수도 달 수로 나눈다.
+    방문 수가 달 수만큼 불지 않게 방문이 대표하는 팀 수도 달 수로 나눈다.
     """
     if len(per_month) == 1:
         return per_month[0][1]
@@ -211,6 +232,7 @@ def combine_months(per_month: list[tuple[int, "Comparison"]]) -> "Comparison":
         for venue_id in sorted(before)
     ]
     first = per_month[0][1]
+    found = [c.breakdown for _, c in per_month]
     return Comparison(
         first.base,
         first.scen,
@@ -220,14 +242,16 @@ def combine_months(per_month: list[tuple[int, "Comparison"]]) -> "Comparison":
         round(sum(c.total_before for _, c in per_month) / n),
         round(sum(c.total_after for _, c in per_month) / n),
         first.uncovered_groups,
+        # 한 달이라도 나누기가 없으면 평균을 내지 않는다 (빠진 달이 0 으로 섞이면 갈래가 작아 보인다)
+        average([b for b in found if b is not None]) if all(found) else None,
     )
 
 
 def zero_groups(per_month: list[tuple[int | None, "Comparison"]]) -> dict[str, list[int | None]]:
     """고객군 배수가 0 인 고객군과 그 달 (팀장 요청, 11-17).
 
-    그 달에 워커힐 업장을 고른 방문이 없는 고객군은 배수를 맞출 수 없어 0 이고, 그 실행에서 그 고객군의 가상 매출은 0 이다
-    (FORMATS.md 10.1절 "실행의 달"). 기간의 달 평균에 0 이 섞이면 평균이 낮아지므로 화면에 알린다. 달 없이 돌렸으면 달은 None 이다.
+    그 달의 집계 파일에 인원이 없는 고객군은 배수가 0 이고, 그 실행에서 그 고객군의 가상 매출은 0 이다
+    (FORMATS.md 10.1절 "실행의 달". 11-19 T210 전에는 "워커힐 업장을 고른 방문이 없어 배수를 맞출 수 없음"이었다. T127). 기간의 달 평균에 0 이 섞이면 평균이 낮아지므로 화면에 알린다. 달 없이 돌렸으면 달은 None 이다.
     """
     found: dict[str, list[int | None]] = {}
     for month, comparison in per_month:

@@ -29,7 +29,7 @@
     "scenario": "7f0c40802f158f2c",
     "vocab": "8198206734bb16a5",
     "summary": "b2e533d5aec19534",
-    "constants": "7a4f07ea30f833ec",
+    "constants": "38af19f087377bc0",
     "prompt": "9fee7d4f42a62d8b"
   },
   "weights": {
@@ -171,5 +171,6 @@
       "checked_on": "2026-11-13",
       "file": "engine/conditions.json"
     }
-  ]
+  ],
+  "baseline_answers": null
 }
