@@ -255,9 +255,11 @@ def test_one_persona_by_default_and_a_button_for_all():
 
 
 def test_period_note_says_equal_weights_are_an_assumption():
-    # 기간의 달을 같은 무게로 평균한 것은 설계 가정이고, 금액은 일 년 규모라고 적는다 (11-17 팀장 회신 ①, T206).
+    # 기간의 달을 같은 무게로 평균한 것은 설계 가정이라고 적는다 (11-17 팀장 회신 ①, T206).
+    # 11-19 T210 뒤로 달마다 그 달의 인원으로 무게를 내므로, 금액은 일 년 규모가 아니라 한 달 평균이라고 적는다 (T127).
     from app.simulator import period_note
 
     note = period_note([11, 12, 1, 2])
     assert note.startswith("11월 ~ 2월 (4개월)")
-    assert "같은 무게로 평균한 것은 설계 가정" in note and "일 년 규모" in note
+    assert "같은 무게로 평균한 것은 설계 가정" in note and "한 달 평균" in note
+    assert "일 년 규모" not in note

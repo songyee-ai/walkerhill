@@ -1,0 +1,47 @@
+﻿review_id,venue_id,source_kind,posted_ym,customer_group,purpose,party,adults,children,occasion,meal,day_type,stay,ordered,paid_total,reasons_chosen,pain_points,compared_with,would_return,summary,labeler,labeled_on
+R-lotte-mugunghwa-0001,lotte-mugunghwa,map,,,,,,,meal,,,,이름:냉면 반상차림,,,,,,"냉면이 중심인 상차림을 대접받듯 먹었고, 전채부터 고기와 후식까지 맛이 좋았다고 했다.",borigunbbang,2026-11-19
+R-lotte-mugunghwa-0002,lotte-mugunghwa,map,,친구·모임,,친구,,,meal,dinner,,,,,,,,,"한국인 친구를 데려가 대접했는데 친구가 크게 감동했고, 값은 높아도 수긍할 만한 혁신적인 한식이라고 평했다.",borigunbbang,2026-11-19
+R-lotte-mugunghwa-0003,lotte-mugunghwa,map,,커플·기념일,기념일,,,,meal,lunch,,,,,,,,,"기념할 날에 처음 들렀고, 요리가 새롭고 맛있었으며 책임자의 응대가 아주 친절했다고 했다.",borigunbbang,2026-11-19
+R-lotte-mugunghwa-0004,lotte-mugunghwa,map,,가족·친족,가족 행사,,,,meal,dinner,,,,,,서비스,,,"어머니 생일에 가족이 함께 가려고 온라인으로 잡아 둔 자리가 도착하니 없다고 했고, 대안 제시도 없어 식사를 못 하고 응대에 크게 실망했다.",borigunbbang,2026-11-19
+R-lotte-mugunghwa-0005,lotte-mugunghwa,map,,가족·친족,가족 행사,부모와 성인 자녀,,,meal,,,,,,,,,,"자녀들이 생일을 축하하려고 준비해 준 자리였고, 높은 층에서 밤 풍경을 보며 친절한 응대와 특별한 요리로 기뻤다고 했다.",borigunbbang,2026-11-19
+R-lotte-mugunghwa-0006,lotte-mugunghwa,map,,,,,,,meal,,,,,,,,,yes,"직원이 친절하고 전용 승강기 덕에 금방 위층에 닿았으며, 음식이 깔끔하고 자리 사이가 여유로웠다고 했다.",borigunbbang,2026-11-19
+R-lotte-mugunghwa-0008,lotte-mugunghwa,map,,가족·친족,가족 행사,3대 가족,,,meal,lunch,,,이름:소백코스,,,,,yes,"부모의 결혼 기념일에 조부모부터 손녀까지 함께 코스를 먹었고, 맛과 설명, 축하 문구 서비스, 전망이 모두 흡족했다고 했다.",borigunbbang,2026-11-19
+R-lotte-mugunghwa-0009,lotte-mugunghwa,map,,,,,,,meal,lunch,,,,,,,,yes,들어설 때부터 안내가 따뜻했고 요리마다 재료 설명을 들어 더 맛있게 느꼈다고 했다.,borigunbbang,2026-11-19
+R-lotte-mugunghwa-0010,lotte-mugunghwa,map,,,,,,,meal,,,,이름:소백코스,,,맛 기대 이하;서비스;소음;혼잡·좌석 간격,,no,"점심 코스를 요리별로 자세히 평했는데, 일부 요리에서 상한 냄새가 났고 접시를 서둘러 내고 치워 쫓기는 느낌이었으며 단체 손님 소리로 시끄러워 만족하지 못했다.",borigunbbang,2026-11-19
+R-lotte-mugunghwa-0011,lotte-mugunghwa,map,,,,,,,meal,lunch,,,,,,,,yes,"회사 점심 때 큰 기대 없이 들렀다가 깔끔한 맛과 세심한 응대에 놀랐고, 같은 호텔의 다른 식당도 가 볼 생각이라고 했다.",borigunbbang,2026-11-19
+R-lotte-mugunghwa-0013,lotte-mugunghwa,map,,,,,,,meal,,,,,,,맛 기대 이하,,,"값을 생각하면 무난하지만 맛이 기대만큼 뛰어나진 않았고, 높은 곳에서 보는 도시 풍경은 즐길 만했다고 했다.",borigunbbang,2026-11-19
+R-lotte-mugunghwa-0014,lotte-mugunghwa,map,,가족·친족,가족 행사,,,,meal,,,,,,,,,,"아버지 생일 자리로 이용했고, 높은 층의 전망과 그림 같은 담음새가 맛보다 더 인상적이었다고 했다.",borigunbbang,2026-11-19
+R-lotte-mugunghwa-0015,lotte-mugunghwa,map,,,,,,,meal,dinner,,,,,,,,yes,"오랜만에 귀국해 마음먹고 찾았는데, 평소 꺼리는 해산물 요리까지 다 먹을 만큼 맛있었고 응대도 편안했다고 했다.",borigunbbang,2026-11-19
+R-lotte-mugunghwa-0019,lotte-mugunghwa,map,,가족·친족,가족 행사,,,,meal,,,,,,,가격,,,"동생 혼사를 앞둔 가족끼리 모였고, 맛은 좋았으나 술값과 반입 비용이 비싸 술을 중시하는 사람에겐 맞지 않지만 교통과 전망 덕에 이런 자리엔 괜찮았다고 했다.",borigunbbang,2026-11-19
+R-lotte-mugunghwa-0020,lotte-mugunghwa,map,,,,,,,meal,,,,이름:평양냉면 한상,,,가격,,,값은 조금 비싸게 느껴졌지만 정성이 담긴 냉면 상차림이었다고 했다.,borigunbbang,2026-11-19
+R-lotte-mugunghwa-0022,lotte-mugunghwa,map,,,,,,,meal,,,,,,,양,,,양이 부족해 배가 차지 않았지만 응대는 최고였다는 짧은 평이다.,borigunbbang,2026-11-19
+R-lotte-mugunghwa-0024,lotte-mugunghwa,map,,,,,,,meal,,,,이름:한려,,,맛 기대 이하,,,"몇 달 전 점심 코스를 먹었는데 기대에는 조금 못 미쳤고, 생선 요리는 좋았으며 응대는 세심하고 공간은 고요했다고 했다.",borigunbbang,2026-11-19
+R-lotte-mugunghwa-0027,lotte-mugunghwa,map,,가족·친족,,부모와 성인 자녀,,,meal,dinner,,,,,,,,,부모와 함께 갔는데 깔끔하고 깊은 맛과 분위기에 부모가 매우 흡족해했다고 했다.,borigunbbang,2026-11-19
+R-lotte-mugunghwa-0028,lotte-mugunghwa,map,,,,,,,meal,,,,이름:코스요리,,,,,,"당일에도 자리를 잡을 수 있었고 조용했으며, 옆 일식당 느낌의 후식이 나왔고 코스가 맛있었다고 했다.",borigunbbang,2026-11-19
+R-lotte-mugunghwa-0033,lotte-mugunghwa,map,,가족·친족,가족 행사,부모와 성인 자녀,,,meal,lunch,,,,,,,,,부모의 환갑 자리였는데 예약 때부터 당일까지 직원들이 이를 챙기고 사진까지 찍어 주어 부모가 무척 기뻐했다고 했다.,borigunbbang,2026-11-19
+R-lotte-mugunghwa-0034,lotte-mugunghwa,map,,,,,,,meal,,,,,,,서비스,,,"처음엔 분위기가 좋았으나 도중에 응대가 끊겨 직접 직원을 찾아 계산해야 했고, 설명이나 보상도 없어 마무리가 최악이었다고 했다.",borigunbbang,2026-11-19
+R-lotte-mugunghwa-0039,lotte-mugunghwa,map,,커플·기념일,기념일,부부·연인,,,meal,,,,,,,,,,부부가 결혼 기념으로 찾아 정성스러운 응대와 음식·전망에 만족한 후기.,borigunbbang,2026-11-19
+R-lotte-mugunghwa-0041,lotte-mugunghwa,map,,,,,,,meal,dinner,,,,,,,이름:신라호텔 라연,,"다른 호텔의 한식 고급 식당보다 더 흡족했고 응대, 맛, 분위기 어느 것도 빠지지 않는다며 강하게 권했다.",borigunbbang,2026-11-19
+R-lotte-mugunghwa-0042,lotte-mugunghwa,map,,,,,,,meal,,,,,,,맛 기대 이하,,,점심에 들러 독특한 구성의 정통 고급 한식을 먹었고 재료와 응대는 훌륭했으나 후식이 다소 아쉬웠다고 했다.,borigunbbang,2026-11-19
+R-lotte-mugunghwa-0048,lotte-mugunghwa,map,,,,,,,meal,,,,,,,가격,,,전용 승강기와 친절한 응대가 있는 고급 호텔 식당이지만 그만큼 값이 비싸다는 뉘앙스로 권했다.,borigunbbang,2026-11-19
+R-lotte-mugunghwa-0051,lotte-mugunghwa,map,,가족·친족,가족 행사,부모와 성인 자녀,3,,meal,lunch,,,이름:금강,,,가격,,yes,"생일을 맞아 부모와 셋이 할인 제도를 써서 평일 점심 코스를 방에서 먹었고, 세 시간 가까이 여유 있게 머물 수 있었고 차 요청까지 들어줘 고마웠다고 했다. 그래도 값은 비싸다고 느꼈다.",borigunbbang,2026-11-19
+R-lotte-mugunghwa-0054,lotte-mugunghwa,map,,가족·친족,가족 행사,,,,meal,,,,,,,,,,부모 생일마다 자주 찾는데 직원 친절과 음식이 늘 일정한 수준을 지킨다고 했다.,borigunbbang,2026-11-19
+R-lotte-mugunghwa-0056,lotte-mugunghwa,map,,,,,,,meal,,,,이름:금강코스,,,,,,점심 코스를 먹었고 생일 축하 상차림과 케이크가 함께 나왔다는 짧은 기록이다.,borigunbbang,2026-11-19
+R-lotte-mugunghwa-0057,lotte-mugunghwa,map,,,,,,,meal,,,,,,,,이름:라연,,다른 호텔 한식당보다 낫다는 한 줄 비교다.,borigunbbang,2026-11-19
+R-lotte-mugunghwa-0060,lotte-mugunghwa,map,,가족·친족,가족 행사,,,,meal,dinner,,,,,,,,,가족 자리로 최고라는 짧은 평이다.,borigunbbang,2026-11-19
+R-lotte-mugunghwa-0061,lotte-mugunghwa,map,,가족·친족,가족 행사,,,,meal,lunch,,,,,,,,,부모 생일 축하로 갔고 코스가 훌륭했으며 어린아이가 있는 가족도 쓰기 좋은 공간이고 직원 응대가 뛰어났다고 했다.,borigunbbang,2026-11-19
+R-lotte-mugunghwa-0062,lotte-mugunghwa,map,,,,,,,meal,,,,이름:금강,,,맛 기대 이하,,,"지난겨울 점심 코스를 먹었는데 후식 말고는 다 맛있고 깔끔했으며, 홀이 한산해 조용히 대화하며 먹기 좋았다고 했다.",borigunbbang,2026-11-19
+R-lotte-mugunghwa-0063,lotte-mugunghwa,map,,커플·기념일,기념일,부부·연인,,,meal,lunch,,,,,,,,,부부의 생일을 맞아 식사했는데 매우 흡족했다고 했다.,borigunbbang,2026-11-19
+R-lotte-mugunghwa-0070,lotte-mugunghwa,map,,비즈니스·접대,업무상 식사,동료·거래처,,,meal,dinner,,,,,,,,,중요한 해외 거래처를 데려가 걱정했으나 맛이 좋고 직원이 외국어로 요리를 설명해 손님들이 무척 만족했다며 외국인 접대 장소로 권했다.,borigunbbang,2026-11-19
+R-lotte-mugunghwa-0072,lotte-mugunghwa,map,,,,,,,meal,,,,이름:은대구,,,,,,"우연히 들렀는데 평소 즐기지 않던 요리까지 맛있었고, 따로 사 간 케이크를 후식에 맞춰 차려 주는 등 담당 직원이 처음부터 끝까지 세심했다고 했다.",borigunbbang,2026-11-19
+R-lotte-mugunghwa-0075,lotte-mugunghwa,map,,,,,,,meal,lunch,,,,,,서비스,,,전화를 받은 직원이 아는 것도 없고 말투가 고급 식당답지 않았다며 접수 응대를 개선해 달라고 했다.,borigunbbang,2026-11-19
+R-lotte-mugunghwa-0076,lotte-mugunghwa,map,,,,,,,meal,dinner,,,,,,서비스;소음,,no,방에서 먹을 땐 괜찮았지만 두 번째로 홀에서 먹을 때 옆 단체 손님의 아이가 계속 울었는데 직원이 손을 쓰지 않아 매우 불쾌했다고 했다.,borigunbbang,2026-11-19
+R-lotte-mugunghwa-0078,lotte-mugunghwa,map,,,,,,,meal,dinner,,,,,,가격;맛 기대 이하,,,"값에 비해 요리 수준이 낮고, 응대는 무난하며 창가에 앉으면 경치 덕에 비용이 아깝지 않은 정도라고 했다.",borigunbbang,2026-11-19
+R-lotte-mugunghwa-0079,lotte-mugunghwa,map,,가족·친족,,부모와 성인 자녀,,,meal,,,,,,,,,,함께 간 어른들이 좋아한다는 짧은 평이다.,borigunbbang,2026-11-19
+R-lotte-mugunghwa-0080,lotte-mugunghwa,map,,,,,,,meal,,,,,,,서비스;소음,,no,"방 손님의 아기가 홀에서 오래 울도록 내버려 두어 시끄럽고 불쾌했으며, 홀 손님을 챙기지 않는다며 방을 잡지 않으면 가지 말라고 했다.",borigunbbang,2026-11-19
+R-lotte-mugunghwa-0088,lotte-mugunghwa,map,,,,,,,meal,,,,이름:고유;이름:금강,,,예약이 어려움,,,점심 코스를 먹었는데 앞쪽 요리가 새롭고 양도 넉넉했으며 전통주와 잘 어울렸다고 했다. 홀이 비었는데도 예약 때 창가 자리가 없다고 한 점은 납득하지 못했다.,borigunbbang,2026-11-19
+R-lotte-mugunghwa-0089,lotte-mugunghwa,map,,,,,,,meal,,,,이름:채식 세트,,,,,,채식 코스를 주문했는데 갈수록 더 맛있게 느껴질 만큼 고른 품질이었고 인터넷으로 자리 잡기도 쉬웠다고 했다.,borigunbbang,2026-11-19
+R-lotte-mugunghwa-0091,lotte-mugunghwa,map,,가족·친족,가족 행사,부모와 성인 자녀,,,meal,,,,이름:은대구,,,가격;맛 기대 이하,,,"어머니 생일 저녁 자리로 기분 내기엔 충분했고 높은 층 전망이 가장 좋았지만, 맛은 무난한 정도라 값을 생각하면 아쉬웠다고 했다.",borigunbbang,2026-11-19
+R-lotte-mugunghwa-0092,lotte-mugunghwa,map,,,,,,,meal,,,,,,,맛 기대 이하,이름:라연,,비슷한 성격의 다른 호텔 한식당과 견주면 맛이 다소 거칠게 느껴졌고 경치는 좋았다고 했다.,borigunbbang,2026-11-19
+R-lotte-mugunghwa-0093,lotte-mugunghwa,map,,친구·모임,모임,친구,,,meal,dinner,,,taebaek-course,,,,,yes,"오랜만에 친구들과 모여 코스를 먹었는데 값은 있지만 다른 한식당보다 깔끔하고 색다른 맛이었고, 친절한 설명과 축하 문구, 사진 서비스가 즐거웠다고 했다.",borigunbbang,2026-11-19
+R-lotte-mugunghwa-0094,lotte-mugunghwa,map,,,,,,,meal,dinner,,,,,,가격,,,코스에 특별 요리를 더할 수 있고 여러 재료를 싸 먹는 요리와 전복 비빔밥이 인상적이었으며 모두 좋았지만 값이 다소 높았다고 했다.,borigunbbang,2026-11-19

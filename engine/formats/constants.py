@@ -12,8 +12,22 @@ from pydantic import Field, model_validator
 
 from engine.formats.codes import FormatModel, Grade, Id, Text, has_duplicates
 
-# 상수의 값. 숫자이거나 예·아니오다. 나누는 비율처럼 갈래마다 값이 있으면 갈래 이름을 키로 둔다 (실행 기록에서만).
-ConstantValue = bool | int | float
+
+class Range(FormatModel):
+    """값이 하나가 아니라 범위인 상수 (예: 15 ~ 20%, 가격 탄력성 −1.0 ~ −0.7). 4단계에서 범위 안의 값을 바꿔 가며 돌린다 (11-19 wilstein91 결정)."""
+
+    min: float
+    max: float
+
+    @model_validator(mode="after")
+    def _order(self) -> Self:
+        if self.min > self.max:
+            raise ValueError("범위의 min 이 max 보다 크다")
+        return self
+
+
+# 상수의 값. 숫자, 예·아니오, 범위({"min", "max"}) 가운데 하나다. 나누는 비율처럼 갈래마다 값이 있으면 갈래 이름을 키로 둔다 (실행 기록에서만).
+ConstantValue = bool | int | float | Range
 
 
 class Constant(FormatModel):
@@ -34,10 +48,12 @@ class Constant(FormatModel):
     checked_on: date
     note: Text
     owner: Text
+    # 엔진이 지금 이 값을 쓰는가. 정해 두었지만 아직 쓰지 않는 값(다음 단계에서 쓸 값)은 false 이고 실행 기록에 남지 않는다.
+    in_use: bool = True
 
 
 class ConstantsFile(FormatModel):
-    """결정 상수 파일 `engine/constants.json`."""
+    """결정 상수 파일: 엔진의 `engine/constants.json` 과, 집계 파일 옆의 `summary_constants.json` (6.1절)."""
 
     format_version: Literal[1]
     constants: list[Constant] = Field(min_length=1)

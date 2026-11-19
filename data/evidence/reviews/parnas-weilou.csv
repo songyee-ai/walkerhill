@@ -1,0 +1,43 @@
+﻿review_id,venue_id,source_kind,posted_ym,customer_group,purpose,party,adults,children,occasion,meal,day_type,stay,ordered,paid_total,reasons_chosen,pain_points,compared_with,would_return,summary,labeler,labeled_on
+R-parnas-weilou-0001,parnas-weilou,map,,,,,,,meal,,,,이름:맨보사,,,,,,새우 튀김빵 요리가 아주 맛있었다는 한 줄 평.,borigunbbang,2026-11-19
+R-parnas-weilou-0003,parnas-weilou,map,,,,,,,meal,,,,,,,가격;맛 기대 이하,,,값에 비해 음식이 특별하지 않았다는 짧은 평.,borigunbbang,2026-11-19
+R-parnas-weilou-0006,parnas-weilou,map,,가족·친족,가족 행사,3대 가족,,,meal,lunch,,,이름:점심 코스,,,,,,조모 생일을 맞아 온 가족이 낮 코스를 먹었고 매우 만족했다는 후기.,borigunbbang,2026-11-19
+R-parnas-weilou-0007,parnas-weilou,map,,,,,,,meal,,,,이름:게살볶음밥;이름:멘보샤;이름:베이징덕,,,가격;맛 기대 이하,,,"오리와 새우 튀김빵은 좋았고 볶음밥은 아쉬웠으며, 직원들이 알아서 챙겨 줬지만 값이 다소 비싸 별 하나를 뺐다는 평.",borigunbbang,2026-11-19
+R-parnas-weilou-0008,parnas-weilou,map,,,,,,,meal,,,,,,,,이름:팔선,,새 단장 뒤 실내와 응대가 괜찮고 음식도 다른 유명 호텔 중식당에는 못 미치나 충분히 좋다는 평.,borigunbbang,2026-11-19
+R-parnas-weilou-0012,parnas-weilou,map,,,,,,,meal,,,,이름:사천 단단면,,,,,,전부 맛있었고 특히 매운 비빔면이 좋아 소스를 꼭 넣으라고 권함.,borigunbbang,2026-11-19
+R-parnas-weilou-0013,parnas-weilou,map,,,,,,,meal,,,,,,,메뉴 구성,,,"음식, 경치, 응대가 다 좋았으나 주말엔 고를 수 있는 메뉴가 적어 아쉬웠다는 평.",borigunbbang,2026-11-19
+R-parnas-weilou-0016,parnas-weilou,map,,,,,,,meal,dinner,,,이름:한우스테이크,,,,,,정갈한 음식이었고 중식당에서 소고기 구이가 이토록 맛있어 놀랐다는 평.,borigunbbang,2026-11-19
+R-parnas-weilou-0018,parnas-weilou,map,,,,,,,meal,,,,chef-signature,,,,,,경치 좋은 곳에서 셰프 대표 코스를 먹었다며 값을 적은 짧은 글.,borigunbbang,2026-11-19
+R-parnas-weilou-0019,parnas-weilou,map,,,,,,,meal,,,,,,,가격,,,값이 비싼 만큼 음식은 맛있다는 평.,borigunbbang,2026-11-19
+R-parnas-weilou-0022,parnas-weilou,map,,,,,,,meal,dinner,,,이름:북경 오리,,,맛 기대 이하;서비스,,,오리는 여전히 좋았지만 나머지 요리가 기름지고 간이 맞지 않았으며 직원과 관리자의 태도가 무례했다는 혹평.,borigunbbang,2026-11-19
+R-parnas-weilou-0023,parnas-weilou,map,,가족·친족,일상 외식,,,,meal,,,,이름:베이징덕,,,,,,가족끼리 처음 가 봤는데 간이 세지 않아 좋았고 호텔치고 값도 무난하다는 평.,borigunbbang,2026-11-19
+R-parnas-weilou-0024,parnas-weilou,map,,,,,,,meal,lunch,,,이름:베이징덕,,,가격,,,오리 껍질이 부드럽고 촉촉해 인상 깊었지만 값은 매우 비싸다는 평.,borigunbbang,2026-11-19
+R-parnas-weilou-0026,parnas-weilou,map,,,,,,,meal,,,,,,,맛 기대 이하,,,청결하고 경치가 좋지만 간이 약간 약했다는 평.,borigunbbang,2026-11-19
+R-parnas-weilou-0028,parnas-weilou,map,,,,,,,meal,,,,이름:베이징 카오야,,,,,,오리 구이가 서울에서 으뜸이라는 짧은 평.,borigunbbang,2026-11-19
+R-parnas-weilou-0029,parnas-weilou,map,,,,,,,meal,,,,,,,가격;양,,,초대를 받아 먹었으며 값에 비해 양이 적지만 손님을 모시기엔 괜찮은 곳이라는 평.,borigunbbang,2026-11-19
+R-parnas-weilou-0030,parnas-weilou,map,,,,,,,meal,dinner,,,이름:북경오리구이,,,,,,꼭대기 층의 현대적이고 편안한 공간에서 본토 못지않은 오리 요리와 훌륭한 응대를 받았다며 추천함.,borigunbbang,2026-11-19
+R-parnas-weilou-0031,parnas-weilou,map,,,,,,,meal,,,,이름:코스,,,맛 기대 이하,,,초대받아 경치 좋은 곳에서 코스를 먹으며 오래 이야기를 나눴고 고기 냄새가 조금 아쉬웠다는 글.,borigunbbang,2026-11-19
+R-parnas-weilou-0032,parnas-weilou,map,,,,,,,meal,,,,이름:딤섬,,,,,yes,만두 요리가 지금껏 먹은 것 중 으뜸이라 다시 가고 싶다는 호평.,borigunbbang,2026-11-19
+R-parnas-weilou-0033,parnas-weilou,map,,,,,,,meal,,,,이름:볶음밥;이름:산라탕면;이름:새우;이름:짜장면;이름:탕수육,,,가격;맛 기대 이하,,,요리 대신 각자 면과 밥을 시켰는데 고기 냄새가 나고 전반적으로 평범해 돈이 아까웠다는 불만.,borigunbbang,2026-11-19
+R-parnas-weilou-0034,parnas-weilou,map,,,,,,,meal,dinner,,guest,이름:볶음밥;이름:식초 돼지;이름:우룡차,,투숙 중 편의,가격,,,출장 뒤 늦게 지쳐 묵는 호텔 꼭대기 식당을 찾았고 응대와 음식은 좋았으나 값이 높게 느껴졌다는 글.,borigunbbang,2026-11-19
+R-parnas-weilou-0035,parnas-weilou,map,,,,,,,meal,,,,이름:랍스타,,,,,,손질이 잘된 두툼한 바닷가재가 무척 맛있었다는 평.,borigunbbang,2026-11-19
+R-parnas-weilou-0036,parnas-weilou,map,,,,,,,meal,,,,이름:갈비튀김,,,,,,갈비 튀김은 좋았고 나머지는 다른 곳과 비슷했다는 평.,borigunbbang,2026-11-19
+R-parnas-weilou-0037,parnas-weilou,map,,비즈니스·접대,업무상 식사,,,,meal,dinner,,,이름:북경 오리,,,맛 기대 이하,,,학교 관계자를 모신 저녁 자리였는데 음식 수준이 기대에 못 미쳤다는 평.,borigunbbang,2026-11-19
+R-parnas-weilou-0040,parnas-weilou,map,,,,,,,meal,,,,chef-signature,,,,,,"아는 사람 덕에 셰프 대표 코스를 먹었고 모든 접시, 특히 오리 요리가 매우 만족스러웠다는 호평.",borigunbbang,2026-11-19
+R-parnas-weilou-0044,parnas-weilou,map,,,,,,,meal,,,,이름:짜장면,,,,이름:신라호텔 팔선,,수많은 짜장면을 먹어 본 입장에서 호텔 짜장면 가운데 이곳이 으뜸이라고 평가하는 글의 앞부분.,borigunbbang,2026-11-19
+R-parnas-weilou-0045,parnas-weilou,map,,,,,,,meal,,,,,,,맛 기대 이하,,,간이 지나치게 약했으나 시설과 응대는 좋았다는 평.,borigunbbang,2026-11-19
+R-parnas-weilou-0047,parnas-weilou,map,,,,,,,meal,,,,이름:북경 오리,,,,,,오리를 비롯해 모든 요리가 훌륭했다는 호평.,borigunbbang,2026-11-19
+R-parnas-weilou-0050,parnas-weilou,map,,,,,,,meal,,,,이름:북경오리,,맛,맛 기대 이하,,,메뉴가 바뀌었다는 소식에 겨울에 다시 찾았고 오리는 이날 조금 과하게 익었지만 여전히 좋았다는 글의 앞부분.,borigunbbang,2026-11-19
+R-parnas-weilou-0051,parnas-weilou,map,,,,,,,meal,,,,이름:북경오리,,,양,,,오리 요리 양이 예상보다 적었지만 맛은 좋았다는 평.,borigunbbang,2026-11-19
+R-parnas-weilou-0054,parnas-weilou,map,,,,,,,meal,,,,,,,맛 기대 이하,,,특별한 메뉴라 기대했으나 음식 수준이 낮아 주방장 인사에도 기분이 상했다는 혹평.,borigunbbang,2026-11-19
+R-parnas-weilou-0055,parnas-weilou,map,,,,,,,meal,,,,이름:탕수육,,,,,,튀김 요리와 수프가 맛있다며 추천하는 짧은 평.,borigunbbang,2026-11-19
+R-parnas-weilou-0056,parnas-weilou,map,,,,,,,meal,,,,,,,,이름:조선팰리스 홍연,,친절하고 음식이 다른 호텔 중식당보다 낫다는 짧은 평.,borigunbbang,2026-11-19
+R-parnas-weilou-0059,parnas-weilou,map,,,,,,,meal,lunch,,,이름:베이징덕,,,,,,오리 구이가 최고라는 짧은 평.,borigunbbang,2026-11-19
+R-parnas-weilou-0061,parnas-weilou,map,,,,,,,meal,,,,이름:베이징덕,,,,,,깔끔하고 맛있으며 값이 다소 높지만 응대와 맛이 그만하다는 평.,borigunbbang,2026-11-19
+R-parnas-weilou-0063,parnas-weilou,map,,,,,,,meal,dinner,,,이름:궁보랍스터;이름:대게살수프;이름:딤섬;이름:북경오리;이름:송이소고기;이름:짜장면;이름:탕수육,,맛,맛 기대 이하,,,"메뉴 개편 뒤 겨울에 다시 찾아 여러 요리를 하나씩 평가했고 오리가 조금 과하게 익은 것 말고는 음식과 응대, 밤 경치가 모두 훌륭했다는 글.",borigunbbang,2026-11-19
+R-parnas-weilou-0067,parnas-weilou,map,,,,,,,meal,,,,이름:기스면;이름:통후추 스테이크,,,,,,경치와 응대가 좋고 코스가 깔끔하며 후추 스테이크와 맑은 국수가 맛있었다는 평.,borigunbbang,2026-11-19
+R-parnas-weilou-0069,parnas-weilou,map,,,,,,,meal,,,,,,,서비스,,,응대가 아쉬웠다는 짧은 평.,borigunbbang,2026-11-19
+R-parnas-weilou-0070,parnas-weilou,map,,,,,,,meal,,,,,,,,,yes,밤 경치가 좋아 식사가 아니어도 술 한잔하러 다시 오고 싶다는 평.,borigunbbang,2026-11-19
+R-parnas-weilou-0071,parnas-weilou,map,,,,,,,meal,,,,chef-signature,,,가격,,,"밤에 셰프 대표 코스를 먹었고 수프와 오리, 알레르기 대응이 훌륭했지만 술 반입 요금이 과하다고 느꼈다는 후기.",borigunbbang,2026-11-19
+R-parnas-weilou-0072,parnas-weilou,map,,,,,,,meal,,,,,,,예약이 어려움,,,"고층 식당은 거의 처음이었고, 인기가 많아 자리 잡기가 힘들었다는 글.",borigunbbang,2026-11-19
+R-parnas-weilou-0076,parnas-weilou,map,,,,,,,meal,,,,이름:코스,,맛,맛 기대 이하,,,예전에 좋았던 터라 재방문해 코스를 먹었는데 전체적으로 밋밋했고 마지막 국수는 실망스러웠으나 조용히 먹기엔 좋다는 평.,borigunbbang,2026-11-19

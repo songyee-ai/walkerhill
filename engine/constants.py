@@ -25,9 +25,8 @@ def constant(constant_id: str) -> ConstantValue:
     return load_constants().value(constant_id)
 
 
-def used_constants(bundle: ConditionBundle) -> list[UsedConstant]:
-    """실행 기록에 남길 결정 상수: `engine/constants.json` 의 모두와, 방문 조건 묶음의 나누는 비율(`assumed_splits`)."""
-    used = [
+def _used(found: ConstantsFile, file: str) -> list[UsedConstant]:
+    return [
         UsedConstant(
             constant_id=c.constant_id,
             name=c.name,
@@ -36,10 +35,20 @@ def used_constants(bundle: ConditionBundle) -> list[UsedConstant]:
             grade=c.grade,
             source=c.source,
             checked_on=c.checked_on,
-            file="engine/constants.json",
+            file=file,
         )
-        for c in load_constants().constants
+        for c in found.constants
+        if c.in_use
     ]
+
+
+def used_constants(
+    bundle: ConditionBundle, summary_constants: ConstantsFile | None = None, summary_file: str | None = None
+) -> list[UsedConstant]:
+    """실행 기록에 남길 결정 상수: `engine/constants.json` 가운데 엔진이 지금 쓰는 것(`in_use`), 방문 조건 묶음의 나누는 비율(`assumed_splits`),
+    그리고 집계 파일 옆의 상수 파일(`summary_constants`, 한 개당 인원처럼 집계를 만들 때 쓴 값)이 있으면 그 모두.
+    """
+    used = _used(load_constants(), "engine/constants.json")
     used += [
         UsedConstant(
             constant_id=split.split_id,
@@ -53,4 +62,6 @@ def used_constants(bundle: ConditionBundle) -> list[UsedConstant]:
         )
         for split in bundle.assumed_splits
     ]
+    if summary_constants is not None and summary_file is not None:
+        used += _used(summary_constants, summary_file)
     return used

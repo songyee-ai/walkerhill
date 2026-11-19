@@ -72,6 +72,12 @@ def summary_path(root: Path, data_mode: str) -> Path:
     raise ValueError(f"모르는 data_mode 다: {data_mode!r}")
 
 
+def summary_constants_path(root: Path, data_mode: str) -> Path:
+    """집계 파일 옆의 상수 파일 (docs/FORMATS.md 6.1절). 집계를 만들 때 쓴 값(한 개당 인원 등)과 근거를 적는다. 없어도 된다."""
+    summary = summary_path(root, data_mode)
+    return summary.with_name(summary.stem + "_constants.json") if data_mode == "sample" else summary.with_name("summary_constants.json")
+
+
 def read_summary(path: Path) -> list[SummaryRow]:
     """집계 파일을 읽는다. 줄 하나라도 형식에 맞지 않으면 멈춘다 (틀린 줄을 빼고 돌리면 가중치가 조용히 틀린다)."""
     if not path.is_file():
