@@ -3578,6 +3578,8 @@ REVIEW_RULES 12절의 페르소나 담당 몫 넷은 모두 동의해(T101 알�
   borigunbbang: 검증의 답(`private/validation/`)도 같은 명령이 바꿉니다. 채점 프로그램이 엔진의 요청으로 답을 찾으므로 변환 뒤에 `--replay-only` 가 그대로 도는지 봐 주세요.
   (확인: borigunbbang 11-19, macOS. `git pull` 로 #184 를 받고 `private/` 와 `engine/samples/runs/` 를 압축해 둔 뒤 변환했고, 다시 `--check` 로 바꿀 답 0개, 원장 0줄.
   T19 채점을 `--replay-only` 로 다시 돌려 새로 부름 0건, 답 없음 0건이었고 결과 파일이 변환 전과 같았습니다 (만든 시각만 다름))
+  (확인: hojitea-ui 11-19, 윈도우 11. `git pull` 로 #184 를 받고 `uv run python -m tools.rehash_answers` 로 `engine/samples/runs` 답 5개·원장 5줄과 `private/` 의 받은 답 338개를 바꿨고, 다시 `--check` 로 바꿀 답 0개, 원장 0줄.
+  시연 상황 셋을 기준 실행에 붙여 `--replay-only` 로 다시 돌려 셋 모두 방문 48건, 새로 부름 0, 재생 48 이었습니다. 변환 전 압축은 그대로 두었습니다)
   세 분이 변환하고 확인하면 체크합니다.
 
 ## 실측 기록
