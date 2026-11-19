@@ -11,17 +11,20 @@
 | `docs/` | 전원 (자기 작업의 절만) | 진행 문서, 구조 문서, PRD, 데이터 형식 약속 |
 | `.github/` | songyee-ai | 자동 검사 |
 | `private/` | 각자 (깃에 올라가지 않음) | 내부 자료와 실행 결과(저장된 LLM 응답, 소비 원장, 기본 데이터 집계 파일, 대조 결과), 페르소나 정의의 비공개 층, 후기 주소 목록. 안내 파일 `README.md` 만 저장소에 있다 |
-| `engine/` | songyee-ai | 형식 약속을 코드로 옮긴 모델(`engine/formats/`), 후보 추리기와 검사 규칙, 방문 조건 묶음과 가중 합산(`engine/weights.py`), 소비 원장, LLM 연결(`engine/llm.py`), 실행기와 실행하는 명령(`python -m engine`), 가상 예시 값으로 만든 저장 응답 |
-| `tools/` | songyee-ai | 개발할 때 쓰는 도구. 형식 검사 도구(`tools/check_formats.py`) |
+| `engine/` | wilstein91 | 형식 약속을 코드로 옮긴 모델(`engine/formats/`), 후보 추리기와 검사 규칙, 방문 조건 묶음과 가중 합산(`engine/weights.py`), 소비 원장, LLM 연결(`engine/llm.py`), 실행기와 실행하는 명령(`python -m engine`), 가상 예시 값으로 만든 저장 응답 |
+| `tools/` | wilstein91 | 개발할 때 쓰는 도구. 형식 검사 도구(`tools/check_formats.py`), 저장된 답을 변환하는 도구(`tools/rehash_answers.py`) |
 | `tools/venue_data/` | hojitea-ui | 기본 데이터에서 집계 파일을 만드는 스크립트와 가상 예시 값을 만드는 스크립트. 코드만 두고 기본 데이터, 집계 결과, 바꾸는 표는 `private/` 에 둔다 (11-17 에 내줌. 기본 데이터를 가진 사람이 같은 집계를 다시 만들 수 있게 한다) |
-| `tests/` | songyee-ai | 테스트와 예시 파일 한 벌(`tests/fixtures/example/`). 다른 영역은 자기 테스트를 `tests/<자기 폴더 이름>/` 아래에 새 파일로 더한다 (예: `tests/app/`). 테스트에 쓸 예시 파일을 더할 때는 `tests/fixtures/<이름>/` 아래에 저장소와 같은 폴더 모양으로 둔다. 그 묶음도 저장소와 같은 형식 검사를 받는다 (`tests/fixtures/example/` 을 베껴서 고치면 된다) |
+| `tests/` | wilstein91 | 테스트와 예시 파일 한 벌(`tests/fixtures/example/`). 다른 영역은 자기 테스트를 `tests/<자기 폴더 이름>/` 아래에 새 파일로 더한다 (예: `tests/app/`). 테스트에 쓸 예시 파일을 더할 때는 `tests/fixtures/<이름>/` 아래에 저장소와 같은 폴더 모양으로 둔다. 그 묶음도 저장소와 같은 형식 검사를 받는다 (`tests/fixtures/example/` 을 베껴서 고치면 된다) |
 | `data/venues/`, `data/samples/`, `data/evidence/extra/` | hojitea-ui | 워커힐 8개 업장과 경쟁 업장의 정의 파일 (이용 상황, 상품과 가격, 판매 단위, 운영 정보, 출처), 가상 예시 값 |
 | `data/evidence/`, `personas/` | borigunbbang | 후기를 요약하고 라벨을 붙인 결과, 라벨 값 목록, 페르소나 정의의 공개 층, LLM 프롬프트(`personas/prompts/`) |
-| `app/` | wilstein91 | Streamlit 화면 |
-| `scenarios/` | wilstein91 | 상황 정의 (시연 시나리오) |
-| `slides/` | wilstein91 | 발표 자료 |
+| `app/` | songyee-ai | Streamlit 화면 |
+| `scenarios/` | songyee-ai | 상황 정의 (시연 시나리오) |
+| `slides/` | songyee-ai | 발표 자료 |
 
 폴더 이름은 11-13 에 확정했다. 담당은 [PROGRESS.md](PROGRESS.md) 의 역할 분담 표와 같다.
+11-19 에 엔진 쪽(`engine/`, `tools/`, `tests/`)과 화면 쪽(`app/`, `scenarios/`, `slides/`)의 주인을 맞바꿨다 (T122).
+그 전에는 엔진 쪽이 songyee-ai, 화면 쪽이 wilstein91 이었다. 넘겨받는 일은 T209 와 T123 에 있다.
+`tests/` 안에서도 `tests/app/` 은 화면(songyee-ai), `tests/venue_data/` 는 업장 데이터(hojitea-ui)의 것이다.
 폴더마다 주인과 담는 것, 베껴서 시작할 예시의 위치를 적은 안내 파일(`README.md`)이 있다.
 무엇을 `private/` 에 두고 무엇을 저장소에 두는지는 [PRD.md](PRD.md) 10절이 기준이다.
 데이터 폴더(`data/`, `personas/`, `scenarios/`, `engine/samples/`)에는 [FORMATS.md](FORMATS.md) 1절의 파일과 안내 파일만 둔다.
@@ -34,16 +37,16 @@
 | 파일 | 고치는 사람 | 비고 |
 |---|---|---|
 | `CLAUDE.md` | songyee-ai | 규칙을 바꾸자는 제안은 누구나 "알릴 것"에 적는다 |
-| `.gitignore`, `.gitattributes`, `.env.example` | songyee-ai | `.gitignore` 를 고치면 `tools/check_formats.py` 의 건너뛰는 목록(`ignored_by_git`)도 함께 고친다. 둘이 다르면 테스트가 실패한다 |
+| `.gitignore`, `.gitattributes`, `.env.example` | songyee-ai | `.gitignore` 를 고치면 `tools/check_formats.py` 의 건너뛰는 목록(`ignored_by_git`)도 함께 고친다. 둘이 다르면 테스트가 실패한다. 검사 도구는 wilstein91 의 것이라 미리 알리고 한 PR 로 함께 고친다. `.env.example` 의 LLM 설정은 wilstein91 과 맞춰 고친다 |
 | `.github/workflows/check.yml` | songyee-ai | |
 | `.github/pull_request_template.md` | songyee-ai | PR 을 열 때 뜨는 확인 양식 |
-| `pyproject.toml`, `uv.lock`, `.python-version` | songyee-ai | 패키지와 Python 버전. 필요한 패키지가 생기면 "알릴 것"에 적는다 |
-| `engine/formats/` | songyee-ai | 형식 약속을 코드로 옮긴 모델. 모든 영역이 가져다 쓴다 |
-| `tools/check_formats.py` | songyee-ai | 형식 검사 도구 |
-| `tests/conftest.py`, `tests/fixtures/example/` | songyee-ai | 테스트가 함께 쓰는 것과 예시 파일 한 벌 |
+| `pyproject.toml`, `uv.lock`, `.python-version` | wilstein91 | 패키지와 Python 버전. 필요한 패키지가 생기면 "알릴 것"에 적는다 |
+| `engine/formats/` | wilstein91 | 형식 약속을 코드로 옮긴 모델. 모든 영역이 가져다 쓴다 |
+| `tools/check_formats.py` | wilstein91 | 형식 검사 도구 |
+| `tests/conftest.py`, `tests/fixtures/example/` | wilstein91 | 테스트가 함께 쓰는 것과 예시 파일 한 벌 |
 | `.streamlit/config.toml` | songyee-ai | 화면의 설정. 이 PC 에서만 열리게 하고 사용 통계를 보내지 않는다 |
 | `README.md` | songyee-ai | 받는 법과 실행 방법 |
-| `docs/FORMATS.md` | songyee-ai | 형식을 바꾸자는 제안은 누구나 "알릴 것"에 적는다. 쓰는 사람이 모두 체크한 뒤 바꾼다 |
+| `docs/FORMATS.md` | wilstein91 | 형식을 바꾸자는 제안은 누구나 "알릴 것"에 적는다. 쓰는 사람이 모두 체크한 뒤 바꾼다 |
 
 형식을 바꿀 때는 `docs/FORMATS.md`, `engine/formats/`, `tests/fixtures/example/` 세 곳을 함께 고친다. 하나만 고치면 테스트가 실패한다.
 
@@ -55,13 +58,13 @@
 | 형식 | 만드는 사람 | 쓰는 사람 | `FORMATS.md` 의 절 |
 |---|---|---|---|
 | 업장 정의 (경쟁 업장 포함) | hojitea-ui | songyee-ai, wilstein91, borigunbbang | 3절 |
-| 후기 라벨, 라벨 값 목록, 후기 주소 목록 | borigunbbang (떼어 둔 후기는 hojitea-ui) | songyee-ai, hojitea-ui | 4절 |
+| 후기 라벨, 라벨 값 목록, 후기 주소 목록 | borigunbbang (떼어 둔 후기는 hojitea-ui) | wilstein91, hojitea-ui | 4절 |
 | 페르소나 정의 (공개 층과 비공개 층) | borigunbbang | songyee-ai, wilstein91 | 5절 |
-| 방문 조건 묶음 | songyee-ai | hojitea-ui, wilstein91 | 6절 |
-| 상황 정의 | wilstein91 | songyee-ai | 7절 |
-| 기본 데이터 집계 파일, 가상 예시 값 | hojitea-ui | songyee-ai, borigunbbang | 8절 |
-| 선택 요청과 응답 | songyee-ai (프롬프트의 문장은 borigunbbang) | songyee-ai | 9절 |
-| 실행 결과 (실행 기록, 소비 원장, 저장된 LLM 응답, 대조 결과) | songyee-ai | wilstein91, borigunbbang | 10절 |
+| 방문 조건 묶음 | wilstein91 | hojitea-ui, songyee-ai | 6절 |
+| 상황 정의 | songyee-ai | wilstein91 | 7절 |
+| 기본 데이터 집계 파일, 가상 예시 값 | hojitea-ui | wilstein91, borigunbbang | 8절 |
+| 선택 요청과 응답 | wilstein91 (프롬프트의 문장은 borigunbbang) | wilstein91 | 9절 |
+| 실행 결과 (실행 기록, 소비 원장, 저장된 LLM 응답, 대조 결과) | wilstein91 | songyee-ai, borigunbbang | 10절 |
 
 ## 알려진 함정
 
