@@ -17,7 +17,8 @@
 들어 있는 것 (11-17, hojitea-ui)
 
 - `build_summary.py` 기본 데이터에서 집계 파일을 만든다. `uv run python -m tools.venue_data.build_summary` (`--out <폴더>` 로 다른 곳에 쓸 수 있다)
-  - 읽는 것: `private/base/source.json` (기본 데이터 파일의 위치, 열 이름, 다이닝 줄을 고르는 값), 그 기본 데이터, `private/base/map.json` (상품 대응표), `data/venues/`
+  - 읽는 것: `private/base/source.json` (기본 데이터 파일의 위치, 열 이름, 다이닝 줄을 고르는 값), 그 기본 데이터, `private/base/map.json` (상품 대응표와 상품마다 한 개당 인원 `people_per_unit`), `data/venues/`
   - 쓰는 것: `private/base/summary.csv`, `private/base/meta.json`
-- `make_sample.py` 가상 예시 값을 만든다. 기본 데이터를 읽지 않는다. `uv run python -m tools.venue_data.make_sample` 는 검사만 하고, `--write` 를 붙이면 `data/samples/base_summary.csv` 를 덮어쓴다
+- `make_sample.py` 가상 예시 값을 만든다. 기본 데이터를 읽지 않는다. `uv run python -m tools.venue_data.make_sample` 는 검사만 하고, `--write` 를 붙이면 `data/samples/base_summary.csv` 를 덮어쓴다.
+  `--add-people` 은 지금 예시 파일의 값은 그대로 두고 인원(`people`) 열만 채운다 (형식에 `people` 이 들어온 뒤에만 돈다, T402)
 - 테스트: `tests/venue_data/test_venue_data_scripts.py`
