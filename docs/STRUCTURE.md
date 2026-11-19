@@ -37,7 +37,8 @@
 | 파일 | 고치는 사람 | 비고 |
 |---|---|---|
 | `CLAUDE.md` | songyee-ai | 규칙을 바꾸자는 제안은 누구나 "알릴 것"에 적는다 |
-| `.gitignore`, `.gitattributes`, `.env.example` | songyee-ai | `.gitignore` 를 고치면 `tools/check_formats.py` 의 건너뛰는 목록(`ignored_by_git`)도 함께 고친다. 둘이 다르면 테스트가 실패한다. 검사 도구는 wilstein91 의 것이라 미리 알리고 한 PR 로 함께 고친다. `.env.example` 의 LLM 설정은 wilstein91 과 맞춰 고친다 |
+| `.gitignore`, `.gitattributes` | songyee-ai | `.gitignore` 를 고치면 `tools/check_formats.py` 의 건너뛰는 목록(`ignored_by_git`)도 함께 고친다. 둘이 다르면 테스트가 실패한다. 검사 도구는 wilstein91 의 것이라 미리 알리고 한 PR 로 함께 고친다 |
+| `.env.example` | LLM 설정은 wilstein91, 그 밖의 줄은 songyee-ai | 11-19 에 나눴다 (T125). 공급자와 모델, 호출 상한 같은 엔진의 설정은 엔진 담당이 고친다 |
 | `.github/workflows/check.yml` | songyee-ai | |
 | `.github/pull_request_template.md` | songyee-ai | PR 을 열 때 뜨는 확인 양식 |
 | `pyproject.toml`, `uv.lock`, `.python-version` | wilstein91 | 패키지와 Python 버전. 필요한 패키지가 생기면 "알릴 것"에 적는다 |
@@ -45,7 +46,7 @@
 | `tools/check_formats.py` | wilstein91 | 형식 검사 도구 |
 | `tests/conftest.py`, `tests/fixtures/example/` | wilstein91 | 테스트가 함께 쓰는 것과 예시 파일 한 벌 |
 | `.streamlit/config.toml` | songyee-ai | 화면의 설정. 이 PC 에서만 열리게 하고 사용 통계를 보내지 않는다 |
-| `README.md` | songyee-ai | 받는 법과 실행 방법 |
+| `README.md` | "실행 방법"은 wilstein91, 그 밖의 절은 songyee-ai | 11-19 에 나눴다 (T125). 실행 방법은 엔진 명령의 설명이라 엔진이 바뀌는 PR 에서 엔진 담당이 함께 고친다 |
 | `docs/FORMATS.md` | wilstein91 | 형식을 바꾸자는 제안은 누구나 "알릴 것"에 적는다. 쓰는 사람이 모두 체크한 뒤 바꾼다 |
 
 형식을 바꿀 때는 `docs/FORMATS.md`, `engine/formats/`, `tests/fixtures/example/` 세 곳을 함께 고친다. 하나만 고치면 테스트가 실패한다.
