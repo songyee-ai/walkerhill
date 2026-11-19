@@ -23,6 +23,7 @@ from engine.weights import (
     base_profiles,
     condition_ratios,
     fill_prices,
+    group_people,
     group_revenue,
     read_summary,
     summary_path,
@@ -86,8 +87,13 @@ def only(*venue_ids: str) -> dict[str, Venue]:
 # ── 도우미 ──────────────────────────────────────────────────────────────
 
 
-def line(venue_id, product_id, meal, day_type, quantity, unit_net, *, month=5, occasion="meal", group=GROUP, unit="1인") -> dict:
-    """집계 파일의 한 줄 (지어낸 값). 매출은 하나씩 팔린 줄마다 반올림한 값을 더한 것처럼 짓는다."""
+def line(
+    venue_id, product_id, meal, day_type, quantity, unit_net, *, month=5, occasion="meal", group=GROUP, unit="1인", people=None
+) -> dict:
+    """집계 파일의 한 줄 (지어낸 값). 매출은 하나씩 팔린 줄마다 반올림한 값을 더한 것처럼 짓는다.
+
+    `people` 을 주지 않으면 수량과 같다 (한 개에 한 사람). 빈 칸으로 두려면 "" 를 준다.
+    """
     paid = round(unit_net * 1.1) * quantity
     return {
         "customer_group": group,
@@ -99,6 +105,7 @@ def line(venue_id, product_id, meal, day_type, quantity, unit_net, *, month=5, o
         "month": str(month),
         "unit": unit,
         "quantity": str(quantity),
+        "people": str(quantity if people is None else people),
         "paid": str(paid),
         "revenue_net": str(unit_net * quantity),
         "price_unconfirmed": "N",
@@ -346,31 +353,46 @@ def pick_by_persona(visit_id: str, request):
     return first_option(request, venue_id) if request.candidate(venue_id) else answer(request, None)
 
 
-def test_group_multiplier_makes_the_virtual_revenue_match_the_base_data(example_copy):
-    """기준 상황에서 고객군의 가상 매출 합이 기본 데이터의 그 고객군 매출과 같아진다 (docs/PRD.md 7.2절)."""
-    write_summary(example_copy, *RICH)
+def test_weights_come_from_the_people_before_the_visits(example_copy):
+    """가중치는 방문을 돌기 전에 집계 파일의 인원으로 정한다 (T210, docs/FORMATS.md 10.1절).
+
+    한 방문이 대표하는 팀 수 = 조건의 인원 × 몫 ÷ Σ(몫 × 일행 수). 그래서 대표 팀 수 × 일행 수를 다 더하면 고객군의 인원이다.
+    가상 매출을 기본 데이터 매출에 맞추지 않는다: AI 가 고른 금액이 실제와 다르면 그 차이가 그대로 남는다.
+    """
+    other = line("thebuffet", "lunch-adult", "lunch", "weekday", 10, 145455, group="다른 고객군")  # 페르소나가 없는 고객군
+    edit(example_copy / "data" / "evidence" / "vocab.json", lambda d: d["customer_group"].append("다른 고객군"))
+    write_summary(example_copy, *RICH, other)
     shutil.rmtree(example_copy / RUNS)  # 예시 묶음의 실행은 다른 집계 값으로 낸 것이라 뺀다
     played = play(example_copy, pick_by_persona, persona_ids=(ELDERS, KIDS), condition_ids=EIGHT)
     weights = played.record.weights
 
-    base_total = 100 * 136364 + 200 * 136364 + 50 * 181818 + 100 * 145455 + 40 * 81818  # 조식이 없고 모두 돌리는 조건이다
-    assert abs(weighted_total(played.rows) - base_total) <= len(played.rows)  # 줄마다 반올림한 만큼만 어긋난다
-    assert any(row.status == "failed" for row in played.visit(KIDS, "meal-lunch-weekday"))  # 실패한 방문은 세지 않았다
-    # 실패한 방문도 대표하는 크기는 적혀 있지만(비율이 0 이 아닌 조건이다), 업장별 방문의 크기에는 들지 않는다.
-    (failed,) = played.visit(KIDS, "meal-lunch-weekday")
-    assert failed.represented > 0
-    none_ok = sum(r.represented * r.counted_share for r in played.rows if r.status == "ok" and r.choice_kind == "none")
-    assert venue_shares(played.rows)["none"]["visits"] == pytest.approx(none_ok)
-
-    multiplier = weights.group_multiplier[GROUP]
-    assert multiplier > 0
-    assert weights.persona_weight == {ELDERS: multiplier * 0.5, KIDS: multiplier * 0.5}
-    assert weights.condition_ratio[GROUP]["meal-lunch-weekday"] == pytest.approx(0.5 * 100 * 136364 / base_total)
+    people = 100 + 200 + 50 + 100 + 40  # 조식이 없고 모두 돌리는 조건이다
+    parties = {ELDERS: 4, KIDS: 4}  # 예시 페르소나의 어른 + 아이
+    denominator = 0.5 * 4 + 0.5 * 4
+    assert weights.group_multiplier[GROUP] == pytest.approx(people / denominator)
+    assert weights.persona_weight == {ELDERS: weights.group_multiplier[GROUP] * 0.5, KIDS: weights.group_multiplier[GROUP] * 0.5}
+    # 끼니를 모르는 평일 코스 100명은 점심과 저녁에 반씩 든다.
+    assert weights.condition_ratio[GROUP]["meal-lunch-weekday"] == pytest.approx(50 / people)
     assert weights.condition_ratio[GROUP]["dessert-weekend"] == 0.0
     assert sum(weights.condition_ratio[GROUP].values()) == pytest.approx(1)
-    # 원장의 대표하는 크기는 가중치 × 묶음의 비율이다. 방문을 돈 뒤에 채웠다.
+    # 대표 팀 수 × 일행 수를 다 더하면 그 고객군의 인원이다.
+    teams = {
+        (p, c): weights.persona_weight[p] * weights.condition_ratio[GROUP][c] for p in (ELDERS, KIDS) for c in EIGHT
+    }
+    assert sum(size * parties[p] for (p, _), size in teams.items()) == pytest.approx(people)
+    # 페르소나가 없는 고객군의 인원은 가중치에 들지 않고, 덮는 몫에서 빠진다.
+    assert weights.people_coverage == pytest.approx(people / (people + 10))
+    # 원장의 대표하는 크기는 가중치 × 묶음의 비율이다. 실패한 방문에도 적혀 있다.
     for row in played.rows:
-        assert row.represented == weights.persona_weight[row.persona_id] * weights.condition_ratio[GROUP][row.condition_id]
+        assert row.represented == teams[(row.persona_id, row.condition_id)]
+    (failed,) = played.visit(KIDS, "meal-lunch-weekday")
+    assert failed.status == "failed" and failed.represented > 0
+    # 실패한 방문은 업장별 방문의 크기에 들지 않는다.
+    none_ok = sum(r.represented * r.counted_share for r in played.rows if r.status == "ok" and r.choice_kind == "none")
+    assert venue_shares(played.rows)["none"]["visits"] == pytest.approx(none_ok)
+    # 가상 매출은 기본 데이터 매출에 맞추지 않는다.
+    base_total = 100 * 136364 + 200 * 136364 + 50 * 181818 + 100 * 145455 + 40 * 81818
+    assert abs(weighted_total(played.rows) - base_total) > len(played.rows)
     assert weights.grades.model_dump() == {
         "group_multiplier": {GROUP: "assumption"},
         "persona_weight": {ELDERS: "assumption", KIDS: "assumption"},
@@ -388,8 +410,8 @@ def persona_like(root: Path, source: str, persona_id: str, group: str) -> None:
     save_json(persona_file(root, persona_id), data)
 
 
-def test_each_group_is_fitted_on_its_own(example_copy):
-    """고객군마다 따로 맞춘다. 일부 달에만 파는 상품을 고른 고객군도, 집계 파일에 없는 고객군도 섞이지 않는다.
+def test_each_group_is_weighed_on_its_own(example_copy):
+    """고객군마다 따로 정한다. 일부 달에만 파는 상품을 고른 고객군도, 집계 파일에 없는 고객군도 섞이지 않는다.
 
     - 가족·친족: 어르신 가족이 금룡을 고른다.
     - B: 더뷔페를 고른다. 저녁 상품은 6~8월에만 팔아 그 방문의 몫이 1/4 이다. 평일 점심에는 답을 두지 않는다(실패).
@@ -414,13 +436,13 @@ def test_each_group_is_fitted_on_its_own(example_copy):
 
     played = play(example_copy, pick, persona_ids=(ELDERS, "group-b", "group-c"), condition_ids=EIGHT)
     weights = played.record.weights
-    targets = {GROUP: 100 * 136364 + 200 * 136364 + 50 * 181818, "B 고객군": 100 * 145455 + 40 * 81818}
-    for group, target in targets.items():
-        rows = [row for row in played.rows if row.customer_group == group]
-        assert abs(weighted_total(rows) - target) <= len(rows), group
+    # 가족·친족은 어르신 가족(몫 0.5, 4명)만 돌린다. B 는 아이 동반 가족을 베낀 페르소나(몫 1, 4명)다.
+    expected = {GROUP: (100 + 200 + 50) / (0.5 * 4), "B 고객군": (100 + 40) / (1 * 4)}
+    for group, multiplier in expected.items():
+        assert weights.group_multiplier[group] == pytest.approx(multiplier), group
         assert weights.grades.group_multiplier[group] == "assumption"
     seasonal = [row for row in played.rows if row.persona_id == "group-b" and row.venue_id == "thebuffet" and row.counted_share == 0.25]
-    assert seasonal  # 일부 달에만 파는 상품의 몫이 배수에 들었다
+    assert seasonal  # 일부 달에만 파는 상품을 고르면 그 방문의 몫만큼 센다
     assert any(row.status == "failed" for row in played.visit("group-b", "meal-lunch-weekday"))
 
     # 집계 파일에 없는 고객군은 비율도 배수도 낼 수 없다.
@@ -437,15 +459,35 @@ def test_each_group_is_fitted_on_its_own(example_copy):
     assert shares["none"]["visits"] == pytest.approx(sum(v for (_, kind, _), v in once.items() if kind == "none"))
 
 
-def test_group_that_never_chose_walkerhill_gets_no_weight(example_copy):
+def test_weights_do_not_depend_on_what_the_visits_chose(example_copy):
+    """워커힐 업장을 고른 방문이 하나도 없어도 무게는 같다. 옛 방식은 이때 배수를 정하지 못해 0 이었다 (T210 에서 바뀜)."""
     shutil.rmtree(example_copy / RUNS)
     played = play(example_copy, lambda visit_id, request: answer(request, None))
     weights = played.record.weights
-    assert weights.group_multiplier == {GROUP: 0.0} and weights.grades.group_multiplier == {GROUP: "unknown"}
-    assert weights.persona_weight == {ELDERS: 0.0} and weights.grades.persona_weight == {ELDERS: "unknown"}
-    assert weights.condition_ratio[GROUP] == {DINNER: 1.0}  # 묶음의 비율은 기본 데이터로 낸다
-    assert all(row.represented == 0 for row in played.rows)
+    # 주말 저녁: 코스 B 180명 + 끼니를 모르는 주말 코스 A 480명의 반. 어르신 가족은 몫 0.5, 4명이다.
+    assert weights.group_multiplier == {GROUP: (180 + 240) / (0.5 * 4)}
+    assert weights.grades.group_multiplier == {GROUP: "assumption"}
+    assert weights.persona_weight == {ELDERS: (180 + 240) / 4}
+    assert weights.condition_ratio[GROUP] == {DINNER: 1.0}
+    assert all(row.represented == (180 + 240) / 4 for row in played.rows)
+    assert weighted_total(played.rows) == 0
     assert [str(p) for p in check(example_copy, strict=True)] == []
+
+
+def test_takeout_without_people_counts_one_team_and_add_ons_count_nobody():
+    """빈 칸인 포장은 한 개를 한 팀으로 보고 평균 일행 수를 곱한다. 빈 칸인 그 밖의 상품(추가 상품)은 0 명이다 (docs/FORMATS.md 8절)."""
+    rows = rows_of(
+        line("geumryong", "course-b", "dinner", "weekend", 10, 100),
+        line("geumryong", "course-a", "dinner", "weekend", 3, 100, people=""),  # 추가 상품처럼 빈 칸
+        line("thebuffet", "lunch-adult", None, "weekend", 6, 100, occasion="takeout", unit="개", people=""),
+        line("thebuffet", "lunch-adult", None, "weekend", 2, 100, occasion="takeout", unit="개", people="", group="다른 고객군"),
+    )
+    people = group_people(rows, BUNDLE.conditions, BUNDLE.assumed_splits, VENUES, {GROUP: 3.0, "셋째": 5.0})
+    assert dict(people[GROUP].by_condition) == {DINNER: 10, "takeout-weekend": 6 * 3.0}
+    # 일행 수를 모르는 고객군은 아는 고객군들의 평균(4)을 쓴다.
+    assert dict(people["다른 고객군"].by_condition) == {"takeout-weekend": 2 * 4.0}
+    # 달을 주면 그 달의 줄만 센다.
+    assert group_people(rows, BUNDLE.conditions, BUNDLE.assumed_splits, VENUES, {GROUP: 3.0}, month=6) == {}
 
 
 def test_persona_weight_grade_is_the_weaker_of_its_two_parts():
@@ -868,20 +910,21 @@ def command(root: Path, *more: str) -> int:
     )
 
 
-def test_command_tells_about_filled_prices_and_unfitted_groups(example_copy, quiet_env, capsys):
-    shutil.rmtree(example_copy / RUNS)  # 재생할 응답이 없어 방문이 실패한다. 그러면 배수를 정할 수 없다
+def test_command_tells_about_filled_prices_coverage_and_missing_groups(example_copy, quiet_env, capsys):
+    shutil.rmtree(example_copy / RUNS)  # 재생할 응답이 없어 방문이 실패한다. 무게는 그래도 정해진다
     assert command(example_copy) == cli.EXIT_OK
     said = capsys.readouterr()
     assert "기본 데이터의 요약 none · 가격을 집계 파일로 채운 상품 0개 · 채우지 못해 뺀 상품 0개" in said.out
-    assert f"고객군 배수를 정하지 못한 고객군이 있다: {GROUP}" in said.err
+    assert "페르소나가 있는 고객군이 집계 파일의 인원 가운데 100.0% 를 차지한다" in said.out
     assert "찾지 못한 고객군" not in said.err
 
-    # 페르소나의 고객군 이름이 집계 파일과 다르면 따로 알린다 (가장 흔한 까닭이다).
+    # 페르소나의 고객군 이름이 집계 파일과 다르면 알린다 (가장 흔한 까닭이다).
     edit(persona_file(example_copy, ELDERS), lambda d: d.update(customer_group="가족 친족"))
     quiet_env.setattr(cli, "datetime", type("Later", (), {"now": staticmethod(lambda: NOW.replace(tzinfo=None))}))
     assert command(example_copy) == cli.EXIT_OK
     said = capsys.readouterr()
-    assert "찾지 못한 고객군이 있다: 가족 친족" in said.err and "고객군 배수를 정하지 못한" not in said.err
+    assert "찾지 못한 고객군이 있다: 가족 친족" in said.err
+    assert "0.0% 를 차지한다" in said.out
 
     assert command(example_copy, "--base-profile", "bucketed") == cli.EXIT_FAILED
     assert "base_profile_mode 는 none" in capsys.readouterr().err

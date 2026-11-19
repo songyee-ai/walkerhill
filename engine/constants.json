@@ -1,0 +1,113 @@
+{
+  "format_version": 1,
+  "constants": [
+    {
+      "constant_id": "filled-price-unit",
+      "name": "집계 파일로 채운 단가의 반올림 단위",
+      "value": 100,
+      "unit": "원",
+      "used_in": "engine/weights.py 의 fill_prices (FORMATS 3절)",
+      "grade": "assumption",
+      "source": null,
+      "checked_on": "2026-11-15",
+      "note": "채운 단가는 후보의 가격으로 LLM 에 가므로, 기본 데이터의 평균 단가가 원 단위 그대로 남지 않게 한다 (11-15 팀장이 정함)",
+      "owner": "wilstein91"
+    },
+    {
+      "constant_id": "base-profile-top-products",
+      "name": "기본 데이터의 요약에 업장마다 적는 상품 수",
+      "value": 3,
+      "unit": "개",
+      "used_in": "engine/weights.py 의 base_profiles (FORMATS 5절 base_profile)",
+      "grade": "assumption",
+      "source": null,
+      "checked_on": "2026-11-15",
+      "note": "많이 산 순서로 이만큼까지만 LLM 에 보낸다. 순위만 보내고 수치는 보내지 않는다 (T11)",
+      "owner": "wilstein91"
+    },
+    {
+      "constant_id": "base-profile-bucket-high",
+      "name": "비중을 높음(high)으로 보는 선",
+      "value": 1.5,
+      "unit": "배",
+      "used_in": "engine/weights.py 의 base_profiles (FORMATS 5절 base_profile)",
+      "grade": "assumption",
+      "source": null,
+      "checked_on": "2026-11-15",
+      "note": "고르게 나눴을 때의 몫(1 ÷ 갈래의 수)의 이 배 이상이면 높음이다 (11-15 엔진 담당이 정함)",
+      "owner": "wilstein91"
+    },
+    {
+      "constant_id": "base-profile-bucket-mid",
+      "name": "비중을 보통(mid)으로 보는 선",
+      "value": 0.5,
+      "unit": "배",
+      "used_in": "engine/weights.py 의 base_profiles (FORMATS 5절 base_profile)",
+      "grade": "assumption",
+      "source": null,
+      "checked_on": "2026-11-15",
+      "note": "고르게 나눴을 때의 몫의 이 배 이상이면 보통, 그보다 작으면 낮음이다 (11-15 엔진 담당이 정함)",
+      "owner": "wilstein91"
+    },
+    {
+      "constant_id": "takeout-teams-per-item",
+      "name": "인원이 빈 칸인 포장 한 개가 나타내는 팀 수",
+      "value": 1,
+      "unit": "팀",
+      "used_in": "engine/weights.py 의 people_of (FORMATS 8절 people)",
+      "grade": "assumption",
+      "source": null,
+      "checked_on": "2026-11-19",
+      "note": "포장은 보통 한 집이 한 번 사 간다. 팀 수에 그 고객군의 평균 일행 수를 곱해 인원으로 바꾼다 (11-19 wilstein91 결정, T210)",
+      "owner": "wilstein91"
+    },
+    {
+      "constant_id": "add-on-people-per-item",
+      "name": "인원이 빈 칸인 추가 상품 한 개가 나타내는 사람 수",
+      "value": 0,
+      "unit": "명",
+      "used_in": "engine/weights.py 의 people_of (FORMATS 8절 people)",
+      "grade": "assumption",
+      "source": null,
+      "checked_on": "2026-11-19",
+      "note": "에이드 변경 같은 추가 상품은 다른 주문에 붙어 사는 것이라 사람으로 세지 않는다 (11-19 wilstein91 결정, T210)",
+      "owner": "wilstein91"
+    },
+    {
+      "constant_id": "calibration-top-venue-must-match",
+      "name": "보정 통과: 가장 큰 업장이 같아야 하는가",
+      "value": true,
+      "unit": null,
+      "used_in": "engine/calibration.py 의 compare (PRD 6.5절)",
+      "grade": "assumption",
+      "source": null,
+      "checked_on": "2026-11-17",
+      "note": "고객군마다 가상 매출과 기본 데이터 매출에서 비중이 가장 큰 워커힐 업장이 같아야 통과다 (T116)",
+      "owner": "wilstein91"
+    },
+    {
+      "constant_id": "calibration-max-diff-pp",
+      "name": "보정 통과: 업장별 비중 차이의 한도",
+      "value": 15,
+      "unit": "%p",
+      "used_in": "engine/calibration.py 의 compare (PRD 6.5절)",
+      "grade": "assumption",
+      "source": null,
+      "checked_on": "2026-11-17",
+      "note": "첫 대조(11-17) 뒤 한 번만 고칠 수 있고, 고치면 이유를 진행 문서의 T18 절에 적는다. 돌릴 때마다 바꿔 가며 통과시키지 못하게 한다",
+      "owner": "wilstein91"
+    },
+    {
+      "constant_id": "calibration-diff-min-personas",
+      "name": "보정 통과: 업장별 차이를 따지는 최소 페르소나 수",
+      "value": 2,
+      "unit": "명",
+      "used_in": "engine/calibration.py 의 calibrate (PRD 6.5절)",
+      "grade": "assumption",
+      "source": null,
+      "checked_on": "2026-11-17",
+      "note": "페르소나가 이보다 적은 고객군은 차이를 적기만 하고 통과를 가르지 않는다. 한 명이면 고르기 하나가 비중의 약 4분의 1 이다 (T18, T119)",
+      "owner": "wilstein91"
+    }
+  ]
+}
