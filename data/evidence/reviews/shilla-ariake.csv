@@ -1,0 +1,49 @@
+﻿review_id,venue_id,source_kind,posted_ym,customer_group,purpose,party,adults,children,occasion,meal,day_type,stay,ordered,paid_total,reasons_chosen,pain_points,compared_with,would_return,summary,labeler,labeled_on
+R-shilla-ariake-0001,shilla-ariake,map,,,,,,,meal,dinner,,,이름:오마카세,,평판·브랜드,맛 기대 이하;메뉴 구성;양;예약이 어려움,이름:제주신라,yes,"어렵게 예약한 카운터 코스가 양과 재료 구성, 소스 모두 단조로워 실망했고 다른 메뉴로는 또 와 볼 생각이라는 후기.",borigunbbang,2026-11-19
+R-shilla-ariake-0003,shilla-ariake,map,,,,,,,meal,,,,이름:사케;이름:코스,,,,이름:마츠모토,yes,"밥의 온도와 식감, 국내외 재료 손질, 코스의 흐름과 곁들인 술까지 하나하나 기록하며 생애 최고의 초밥 경험이었다고 극찬한 글.",borigunbbang,2026-11-19
+R-shilla-ariake-0004,shilla-ariake,map,,,,,,,meal,,,,이름:사시미;이름:스시,,,,,,셰프의 친절한 안내와 섬세한 회와 초밥에 다시 한번 감동했다는 호평.,borigunbbang,2026-11-19
+R-shilla-ariake-0005,shilla-ariake,map,,,,,,,meal,lunch,,,akine-lunch,,,가격;서비스,,,"계절 낮 코스는 무난했고 참치 김말이가 좋았지만, 값에 비해 감흥이 덜하고 설명과 소스 제공이 세심하지 못했다는 평.",borigunbbang,2026-11-19
+R-shilla-ariake-0007,shilla-ariake,map,,가족·친족,,,,,meal,dinner,,guest,이름:시그니처 신라 코스,,투숙 중 편의,가격;예약이 어려움,,,묵던 중 연말에 가족과 일반 코스를 먹었는데 일부 요리는 좋았으나 값어치가 부족했고 카운터 예약은 사실상 불가능했다는 후기.,borigunbbang,2026-11-19
+R-shilla-ariake-0010,shilla-ariake,map,,,,,,,meal,,,,이름:스시코스,,,맛 기대 이하;메뉴 구성;서비스,shilla-parkview,,"초밥 코스가 같은 호텔 뷔페 수준에 숙성도 부족했고, 방에 안내된 뒤 한참 동안 아무도 오지 않아 불쾌했다는 혹평.",borigunbbang,2026-11-19
+R-shilla-ariake-0012,shilla-ariake,map,,,,,,,meal,lunch,,,이름:카운터 오마카세,,,,,,카운터 코스가 매우 맛있었다는 짧은 평.,borigunbbang,2026-11-19
+R-shilla-ariake-0014,shilla-ariake,map,,,,,,,meal,dinner,,,이름:스페셜 코스,,,,,,초밥과 국이 번갈아 나오는 특별 코스가 정성스러워 상대적으로 값어치가 있었고 자리에서 보이는 경치도 좋았다는 평.,borigunbbang,2026-11-19
+R-shilla-ariake-0016,shilla-ariake,map,,,,,,,meal,,,,이름:오마카세 코스,,,,,,맡김 코스의 맛이 깊고 갈 때마다 즐겁다며 최고의 초밥집으로 꼽은 평.,borigunbbang,2026-11-19
+R-shilla-ariake-0017,shilla-ariake,map,,,,,,,meal,dinner,,,이름:솥밥,,,가격;맛 기대 이하;서비스,,no,가장 비싼 메뉴로 큰돈을 썼지만 응대와 맛이 아쉬웠고 재료와 밥만 좋아 다시 오진 않겠다는 평.,borigunbbang,2026-11-19
+R-shilla-ariake-0019,shilla-ariake,map,,,,,,,meal,lunch,,,이름:오마카세,,,예약이 어려움,,,회원 혜택을 쓰면 값어치가 뛰어나고 조리법이 독창적이지만 예약이 몹시 어려워 별 하나를 뺐다는 평.,borigunbbang,2026-11-19
+R-shilla-ariake-0023,shilla-ariake,map,,,,,,,meal,,,,이름:시메사바보우스시,,,,,,고등어 초절임 막대 초밥이 늘 훌륭하다는 한 줄 평.,borigunbbang,2026-11-19
+R-shilla-ariake-0025,shilla-ariake,map,,,,,,,meal,,,,이름:스시,,,,,,초밥이 하나같이 맛있었다는 한 줄 평.,borigunbbang,2026-11-19
+R-shilla-ariake-0026,shilla-ariake,map,,,,,,,meal,lunch,,,이름:초밥,,,,,,초밥이 아주 맛있어 적극 권한다는 평.,borigunbbang,2026-11-19
+R-shilla-ariake-0030,shilla-ariake,map,,,,,,,meal,,,,,,,주차·접근,,,"음식, 응대, 분위기 모두 완벽했으나 붐빌 때 대리 주차 대기가 길었다는 평.",borigunbbang,2026-11-19
+R-shilla-ariake-0032,shilla-ariake,map,,,,,,,meal,,,,이름:스시,,,,,,초밥이 모두 깔끔하고 맛있어 어느 초밥집보다 낫다고 자신하는 평.,borigunbbang,2026-11-19
+R-shilla-ariake-0035,shilla-ariake,map,,,,,,,meal,,,,,,,맛 기대 이하;서비스;예약이 어려움,이름:분스야,,남의 덕에 경험해 볼 가치는 있었으나 재료 차이가 크지 않고 응대가 밋밋한데 예약까지 어려워 굳이 찾진 않겠다는 투의 글.,borigunbbang,2026-11-19
+R-shilla-ariake-0038,shilla-ariake,map,,,,,,,meal,,,,,,,맛 기대 이하;서비스,,,전망은 좋지만 음식이 인상적이지 않았고 응대도 평범했다는 평.,borigunbbang,2026-11-19
+R-shilla-ariake-0039,shilla-ariake,map,,,,,,,meal,,,,이름:꽁치솥밥;이름:복지리;이름:주방장 특선 스시,,,양,,,생선 솥밥과 복어 맑은탕은 만족했지만 특선 초밥은 한 사람 몫으로도 양이 모자랐다는 평.,borigunbbang,2026-11-19
+R-shilla-ariake-0040,shilla-ariake,map,,,,,,,meal,,,,,,,서비스,,,음식은 좋지만 별실에서는 응대 수준이 확 떨어졌다는 평.,borigunbbang,2026-11-19
+R-shilla-ariake-0041,shilla-ariake,map,,,,,,,meal,,,,,,,예약이 어려움,,yes,자리만 잡힌다면 날마다 가고 싶을 만큼 좋다는 짧은 평.,borigunbbang,2026-11-19
+R-shilla-ariake-0044,shilla-ariake,map,,,,,,,meal,,,,lunch-special-set,,,,,,수조를 갖춰 회와 초밥이 신선하고 전골과 장어덮밥이 든 낮 특선 차림이 만족스러웠다는 평.,borigunbbang,2026-11-19
+R-shilla-ariake-0047,shilla-ariake,map,,,,,,,meal,,,,,,,가격;맛 기대 이하;서비스,,,실내가 단체 급식소처럼 밋밋하고 직원들이 무심했으며 명성과 값에 비해 맛도 별로였다는 혹평.,borigunbbang,2026-11-19
+R-shilla-ariake-0049,shilla-ariake,map,,,,,,,meal,,,,,,,가격;맛 기대 이하;주차·접근,,,직원은 친절했지만 맛은 평범하고 값이 비쌌으며 대리 주차 요금도 들었다는 짧은 평.,borigunbbang,2026-11-19
+R-shilla-ariake-0050,shilla-ariake,map,,,,,,,meal,,,,이름:사치정식,,,,,yes,밤에 정식 차림을 먹었는데 맛이 순하고 편안했으며 철이 바뀌면 또 오고 싶다는 평.,borigunbbang,2026-11-19
+R-shilla-ariake-0052,shilla-ariake,map,,,,,,,meal,dinner,,,,,,예약이 어려움,,,재료와 맛이 명성대로 훌륭하나 카운터 자리는 전화로만 받아 예약이 힘들다는 평.,borigunbbang,2026-11-19
+R-shilla-ariake-0062,shilla-ariake,map,,,,,,,meal,dinner,,,,,,가격,,,응대는 훌륭하고 음식도 괜찮았으나 값이 지나치게 높았다는 평.,borigunbbang,2026-11-19
+R-shilla-ariake-0064,shilla-ariake,map,,,,,,,meal,lunch,,,,,,맛 기대 이하,,,재료는 신선했지만 맛이 기대보다 평범했다는 평.,borigunbbang,2026-11-19
+R-shilla-ariake-0069,shilla-ariake,map,,,,,,,meal,,,,이름:코스,,,맛 기대 이하,,no,코스가 몹시 실망스러워 다시 갈 생각이 없고 자기 돈을 쓰지 않아 다행이었다는 글.,borigunbbang,2026-11-19
+R-shilla-ariake-0073,shilla-ariake,map,,,,,,,meal,,,,이름:런치코스,,,,,,낮 코스를 먹었고 값에 알맞은 수준이었다는 평.,borigunbbang,2026-11-19
+R-shilla-ariake-0074,shilla-ariake,map,,,,,,,meal,,,,,,,,,yes,서울 최고의 초밥이라며 다시 가고 싶다는 평.,borigunbbang,2026-11-19
+R-shilla-ariake-0077,shilla-ariake,map,,,,,,,meal,,,,,,,서비스,,,맛은 확실하지만 직원들의 요리 설명이 부족했다는 평.,borigunbbang,2026-11-19
+R-shilla-ariake-0081,shilla-ariake,map,,,,,,,meal,lunch,,,,,,메뉴 구성,,,예전엔 낱개로 골라 먹을 수 있었는데 맡김 코스로만 바뀌어 손님 취향을 존중하지 않는다며 아쉬워한 글.,borigunbbang,2026-11-19
+R-shilla-ariake-0083,shilla-ariake,map,,,,,,,meal,,,,이름:부리,,,,,,낮에 자주 오는데 이날 초밥이 유난히 훌륭했고 큰 새우와 조개 초밥이 특히 인상적이라 더 시키지 않은 걸 후회한다는 글.,borigunbbang,2026-11-19
+R-shilla-ariake-0084,shilla-ariake,map,,,,,,,meal,,,,이름:스시,,,,,,개보수 뒤 처음 가 보니 밥맛이 핵심이 되어 간장 없이도 될 만큼 초밥 수준이 높았다는 평.,borigunbbang,2026-11-19
+R-shilla-ariake-0088,shilla-ariake,map,,,,,,,meal,,,,이름:코스,,,,,,코스가 만족스러웠고 초밥 숙성이 좋았다는 짧은 평.,borigunbbang,2026-11-19
+R-shilla-ariake-0090,shilla-ariake,map,,,,,,,meal,lunch,,,,,,맛 기대 이하,,,여름이라 초밥 품질은 평범했지만 응대와 경치와 분위기는 늘 그렇듯 훌륭했다는 평.,borigunbbang,2026-11-19
+R-shilla-ariake-0091,shilla-ariake,map,,,,,,,meal,,,,,,,,,yes,응대와 음식이 고급스러웠고 다음엔 카운터 코스로 오고 싶다는 평.,borigunbbang,2026-11-19
+R-shilla-ariake-0092,shilla-ariake,map,,,,,,,meal,lunch,,,,,,,,yes,좋았다며 또 가고 싶다는 짧은 감탄.,borigunbbang,2026-11-19
+R-shilla-ariake-0094,shilla-ariake,map,,,,,,,meal,,,,,,혜택·할인,,,,회원 혜택으로 가볍게 갔다가 참치에서 비린 맛이 전혀 없어 편식까지 고쳐질 만큼 감동했다는 글.,borigunbbang,2026-11-19
+R-shilla-ariake-0095,shilla-ariake,map,,커플·기념일,기념일,부부·연인,,,meal,dinner,,,이름:오마카세,,,가격;맛 기대 이하;서비스;소음;양,,no,부부 기념일에 찾았으나 비싼 값에 비해 초밥 수가 적고 재료도 평범했으며 시끄럽고 일부 직원 태도가 불쾌해 다시 오지 않겠다는 혹평.,borigunbbang,2026-11-19
+R-shilla-ariake-0097,shilla-ariake,map,,가족·친족,가족 행사,3대 가족,,,meal,dinner,,,이름:매실주;이름:신라코스;이름:에스프레소;이름:진저에일,,,메뉴 구성,,,모친 생일에 조모까지 모시고 별실에서 코스를 먹었고 음식과 응대는 훌륭했으나 방의 전망과 캔 음료는 아쉬웠다는 후기.,borigunbbang,2026-11-19
+R-shilla-ariake-0098,shilla-ariake,map,,,,,,,meal,dinner,,,이름:오마카세,,,가격,,,밤 카운터 코스는 맛있지만 일인당 값이 비싸다는 짧은 평.,borigunbbang,2026-11-19
+R-shilla-ariake-0099,shilla-ariake,map,,,,,,,meal,,,,이름:스시,,,,,,초밥 재료가 신선했다는 한 줄 평.,borigunbbang,2026-11-19
+R-shilla-ariake-0100,shilla-ariake,map,,,,,,,meal,,,,이름:새우소바말이튀김,,,,,,새우와 메밀면을 말아 튀긴 요리가 깔끔했다는 평.,borigunbbang,2026-11-19
+R-shilla-ariake-0101,shilla-ariake,map,,,,,,,meal,dinner,,,,,,예약이 어려움,,,"카운터와 별실, 홀 식사 모두 만족스럽지만 예전과 달리 카운터 예약이 몹시 어려워진 점이 가장 불만이라는 평.",borigunbbang,2026-11-19
+R-shilla-ariake-0103,shilla-ariake,map,,,,,,,meal,,,,,,,예약이 어려움,,yes,예약은 무척 힘들었지만 그럴 만한 맛이었고 셰프가 친절하며 연말 디저트도 재치 있어 또 오겠다는 평.,borigunbbang,2026-11-19
+R-shilla-ariake-0104,shilla-ariake,map,,,,,,,meal,,,,,,,가격;맛 기대 이하,,,장소 덕에 즐겼지만 값에 비해 감동은 덜했고 응대는 최고였다는 평.,borigunbbang,2026-11-19
