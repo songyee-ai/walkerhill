@@ -1,6 +1,6 @@
 # scenarios — 상황 정의
 
-- 주인: wilstein91 (화면·실험·발표)
+- 주인: songyee-ai (화면·실험·발표. 11-19 에 wilstein91 에게서 넘겨받았다)
 - 담는 것: 비교하려고 돌리는 상황. 상황 하나가 파일 하나다 (`<scenario_id>.json`). 기준 상황은 `baseline.json` 이다.
 - 형식: [docs/FORMATS.md](../docs/FORMATS.md) 7절
 - 예시: [tests/fixtures/example/scenarios/](../tests/fixtures/example/scenarios/)
