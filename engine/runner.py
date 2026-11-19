@@ -16,6 +16,7 @@ from typing import Any
 
 from engine.answers import AnswerBook, old_style_folder, read_reply, save_rejected, save_response
 from engine.candidates import build_request, run_condition
+from engine.constants import CONSTANTS_PATH, used_constants
 from engine.formats.choice import ChoiceRequest, RunCondition, problems_in_response
 from engine.formats.conditions import MANUAL_CONDITION_PREFIX, ConditionBundle
 from engine.formats.evidence import Vocab
@@ -218,6 +219,7 @@ def load_inputs(
             "scenario": _hash_files([scenario_path]),
             "vocab": _hash_files([vocab_path]),
             "summary": _hash_files([summary_file]),
+            "constants": _hash_files([CONSTANTS_PATH]),
         },
     )
 
@@ -281,7 +283,7 @@ def _same_as_baseline(what: str, given: list[str] | None, base: list[str]) -> li
 def _changed_since_baseline(base: RunRecord, hashes: dict[str, str], provider: str, model: str, prompt_version: str) -> list[str]:
     """기준 실행 뒤에 달라진 것. 하나라도 있으면 상황 사이의 차이에 상황의 변경이 아닌 것이 섞인다."""
     # 집계 파일이 바뀌면 채운 단가와 기본 데이터의 요약이 달라진다. 그래서 집계 파일도 견준다.
-    keys = ("venues", "personas", "conditions", "vocab", "summary")
+    keys = ("venues", "personas", "conditions", "vocab", "summary", "constants")
     changed = [key for key in keys if base.inputs.get(key) != hashes[key]]
     # 프롬프트의 글은 LLM 을 부를 수 있게 돌린 실행에만 해시가 남는다. 둘 다 있을 때만 견준다.
     if "prompt" in base.inputs and "prompt" in hashes and base.inputs["prompt"] != hashes["prompt"]:
@@ -411,12 +413,12 @@ def _engine_commit(root: Path) -> str:
     `root` 는 엔진 코드가 있는 저장소다. 실행기는 자료의 폴더가 아니라 돌아가는 코드의 자리(`CODE_ROOT`)를 준다.
 
     `engine/` 아래에서도 코드가 아닌 것은 보지 않는다: 가상 예시의 실행 결과(`engine/samples/`)와 방문 조건 묶음
-    (`engine/conditions.json`. 입력이라 `inputs` 의 해시에 따로 남는다).
+    (`engine/conditions.json`, `engine/constants.json`. 입력이라 `inputs` 의 해시에 따로 남는다).
     """
     commit = _git(root, "rev-parse", "--short", "HEAD")
     if not commit:
         return "unknown"
-    code = ("engine", ":(exclude)engine/samples", ":(exclude)engine/conditions.json")
+    code = ("engine", ":(exclude)engine/samples", ":(exclude)engine/conditions.json", ":(exclude)engine/constants.json")
     return commit + ("+dirty" if _git(root, "status", "--porcelain", "--", *code) else "")
 
 
@@ -637,6 +639,7 @@ def run(
                 "weights_from": base.run_id if base else None,
                 "counts": {"visits": visits, "failed": failed},
                 "status": status,
+                "constants": used_constants(inputs.conditions),
             },
         )
     return run_dir

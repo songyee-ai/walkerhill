@@ -11,6 +11,7 @@ import argparse
 import sys
 from pathlib import Path
 
+from engine.constants import constant
 from engine.formats.io import read_csv, read_model, write_json
 from engine.formats.run import LEDGER_COLUMNS, RUN_ID_RE, Calibration, LedgerRow, RunRecord
 from engine.formats.scenario import BASELINE_ID
@@ -22,11 +23,12 @@ EXIT_OK, EXIT_FAILED = 0, 1
 
 # 통과 기준 (docs/PRD.md 6.5절). 첫 대조(11-17) 뒤 한 번만 고칠 수 있고, 고치면 이유를 진행 문서의 T18 절에 적는다.
 # 명령의 인자로 두지 않은 까닭: 돌릴 때마다 바꿔 가며 통과시키지 못하게 한다.
-TOP_VENUE_MUST_MATCH = True
-MAX_DIFF_PP = 15
+# 값과 근거는 engine/constants.json 에 있다 (T210).
+TOP_VENUE_MUST_MATCH = bool(constant("calibration-top-venue-must-match"))
+MAX_DIFF_PP = constant("calibration-max-diff-pp")
 # 11-17 의 첫 대조 뒤 한 번 고친 것 (T18, T119): 페르소나가 이 수보다 적은 고객군은 업장별 차이를 적기만 하고 통과를 가르지 않는다.
 # 페르소나가 한 명이면 고르기 하나가 그 고객군 비중의 약 4분의 1 이라, 차이를 맞추려면 끼니마다 업장을 적어 넣어야 한다.
-DIFF_MIN_PERSONAS = 2
+DIFF_MIN_PERSONAS = int(constant("calibration-diff-min-personas"))
 
 # 비중은 소수 넷째 자리, 차이(%p)는 둘째 자리까지 적는다. 통과 여부는 적힌 차이로 정한다.
 SHARE_DIGITS = 4
@@ -34,7 +36,7 @@ DIFF_DIGITS = 2
 
 # 기준 실행 뒤에 달라지면 대조가 어긋나는 입력. 업장을 골라 돌린 실행(`--venues`)도 여기서 걸린다 (읽은 업장이 달라 해시가 다르다).
 # 프롬프트는 견주지 않는다. 대조는 원장만 보고 LLM 을 부르지 않는다.
-COMPARED_INPUTS = ("venues", "personas", "conditions", "scenario", "vocab", "summary")
+COMPARED_INPUTS = ("venues", "personas", "conditions", "scenario", "vocab", "summary", "constants")
 
 
 def _top(shares: dict[str, float]) -> str | None:

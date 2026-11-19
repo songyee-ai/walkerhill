@@ -1501,7 +1501,7 @@ def test_sample_run_refuses_answers_kept_under_private(example_copy):
 
 def test_run_record_hashes_every_input_the_request_depends_on(example_copy):
     first = play(example_copy, pick_geumryong)
-    assert set(first.record.inputs) == {"venues", "personas", "conditions", "scenario", "vocab", "summary"}
+    assert set(first.record.inputs) == {"venues", "personas", "conditions", "scenario", "vocab", "summary", "constants"}
     edit(example_copy / "data" / "evidence" / "vocab.json", lambda d: d["pain_points"].append("새 라벨"))
     again = play(example_copy, pick_geumryong, now=NOW + timedelta(hours=1))
     assert again.record.inputs["vocab"] != first.record.inputs["vocab"]

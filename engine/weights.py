@@ -19,6 +19,7 @@ from typing import Any
 
 from pydantic import ValidationError
 
+from engine.constants import constant
 from engine.formats.codes import WALKERHILL_VENUE_IDS
 from engine.formats.conditions import AssumedSplit, Condition
 from engine.formats.io import read_csv
@@ -31,22 +32,35 @@ from engine.formats.venue import Venue
 # 끼니를 알 수 없는 식사 매출을 나누는 비율 (engine/conditions.json 의 assumed_splits 에서 이 split_id 를 쓴다).
 MEAL_SPLIT_ID = "meal-lunch-dinner"
 
-# 가격이 빈 상품의 단가를 반올림하는 단위 (11-15 팀장이 정함). 채운 단가는 후보의 가격으로 LLM 에 가므로,
-# 기본 데이터의 평균 단가가 원 단위 그대로 LLM 과 저장된 응답에 남지 않게 한다.
-FILLED_PRICE_UNIT = 100
-
+# 결정 상수는 engine/constants.json 에서 읽는다 (값과 근거는 그 파일에 있다, T210).
+# 가격이 빈 상품의 단가를 반올림하는 단위. 기본 데이터의 평균 단가가 원 단위 그대로 LLM 과 저장된 응답에 남지 않게 한다.
+FILLED_PRICE_UNIT = int(constant("filled-price-unit"))
 # 기본 데이터의 요약(base_profile)에서 업장마다 적는 상품의 수.
-TOP_PRODUCTS = 3
-
-# 비중을 범주로 바꾸는 기준. 고르게 나눴을 때의 몫(1 ÷ 갈래의 수)과 견준다 (11-15 엔진 담당이 정한 설계 가정).
-BUCKET_HIGH = 1.5
-BUCKET_MID = 0.5
+TOP_PRODUCTS = int(constant("base-profile-top-products"))
+# 비중을 범주로 바꾸는 기준. 고르게 나눴을 때의 몫(1 ÷ 갈래의 수)과 견준다.
+BUCKET_HIGH = float(constant("base-profile-bucket-high"))
+BUCKET_MID = float(constant("base-profile-bucket-mid"))
+# 인원이 빈 칸인 포장 한 개의 팀 수와, 인원이 빈 칸인 추가 상품 한 개의 사람 수.
+TAKEOUT_TEAMS_PER_ITEM = float(constant("takeout-teams-per-item"))
+ADD_ON_PEOPLE_PER_ITEM = float(constant("add-on-people-per-item"))
 
 # 비중을 범주로 바꿀 때의 갈래의 수. 업장은 워커힐 8곳, 이용 상황은 셋, 평일·주말은 둘이다.
 SHARE_SPLITS = {"venue_share": len(WALKERHILL_VENUE_IDS), "occasion_share": 3, "day_type_share": 2}
 
 # 근거 등급의 세기. 두 값을 곱한 값의 등급은 약한 쪽이다.
-GRADE_STRENGTH = {"internal": 3, "official": 3, "review": 2, "assumption": 1, "unknown": 0}
+# 우리 업장을 직접 확인한 것(내부 자료, 공식) > 공개된 관찰(학술 자료, 통계, 후기) > 수치나 방법이 약한 것(업계 보고서, 기사) > 설계 가정 > 미확인
+# (11-19 wilstein91 결정, T210).
+GRADE_STRENGTH = {
+    "internal": 3,
+    "official": 3,
+    "literature": 2,
+    "statistic": 2,
+    "review": 2,
+    "industry": 1.5,
+    "article": 1.5,
+    "assumption": 1,
+    "unknown": 0,
+}
 
 
 def summary_path(root: Path, data_mode: str) -> Path:
@@ -217,14 +231,14 @@ def average_parties(personas: list[Persona]) -> dict[str, float]:
 def people_of(row: SummaryRow, party: float) -> float:
     """집계 파일의 한 줄이 나타내는 사람 수 (docs/FORMATS.md 8절의 `people`).
 
-    `people` 이 있으면 그대로다. 빈 칸이면: 포장은 한 개를 한 팀으로 보고 그 고객군의 평균 일행 수(`party`)를 곱한다 (11-19 wilstein91 결정).
-    그 밖의 빈 칸(에이드 변경 같은 추가 상품)은 사람이 아니라 0 명이다.
+    `people` 이 있으면 그대로다. 빈 칸이면: 포장은 한 개를 `TAKEOUT_TEAMS_PER_ITEM` 팀으로 보고 그 고객군의 평균 일행 수(`party`)를 곱한다.
+    그 밖의 빈 칸(에이드 변경 같은 추가 상품)은 한 개를 `ADD_ON_PEOPLE_PER_ITEM` 명으로 센다 (둘 다 결정 상수, 11-19 wilstein91 결정).
     """
     if row.people is not None:
         return row.people
     if row.occasion == "takeout":
-        return row.quantity * party
-    return 0.0
+        return row.quantity * TAKEOUT_TEAMS_PER_ITEM * party
+    return row.quantity * ADD_ON_PEOPLE_PER_ITEM
 
 
 def group_people(

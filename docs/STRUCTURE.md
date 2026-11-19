@@ -43,6 +43,7 @@
 | `.github/pull_request_template.md` | songyee-ai | PR 을 열 때 뜨는 확인 양식 |
 | `pyproject.toml`, `uv.lock`, `.python-version` | wilstein91 | 패키지와 Python 버전. 필요한 패키지가 생기면 "알릴 것"에 적는다 |
 | `engine/formats/` | wilstein91 | 형식 약속을 코드로 옮긴 모델. 모든 영역이 가져다 쓴다 |
+| `engine/constants.json` | wilstein91 | 결정 상수: 결과에 영향을 주는 엔진의 숫자와 그 근거 (`FORMATS.md` 6.1절). 바꾸면 기준 상황부터 다시 돌린다. 값을 바꾸자는 제안은 "알릴 것"에 적는다 (11-19 wilstein91 결정, T210) |
 | `tools/check_formats.py` | wilstein91 | 형식 검사 도구 |
 | `tests/conftest.py`, `tests/fixtures/example/` | wilstein91 | 테스트가 함께 쓰는 것과 예시 파일 한 벌 |
 | `.streamlit/config.toml` | songyee-ai | 화면의 설정. 이 PC 에서만 열리게 하고 사용 통계를 보내지 않는다 |
@@ -62,6 +63,7 @@
 | 후기 라벨, 라벨 값 목록, 후기 주소 목록 | borigunbbang (떼어 둔 후기는 hojitea-ui) | wilstein91, hojitea-ui | 4절 |
 | 페르소나 정의 (공개 층과 비공개 층) | borigunbbang | songyee-ai, wilstein91 | 5절 |
 | 방문 조건 묶음 | wilstein91 | hojitea-ui, songyee-ai | 6절 |
+| 결정 상수 | wilstein91 | wilstein91, songyee-ai | 6.1절 |
 | 상황 정의 | songyee-ai | wilstein91 | 7절 |
 | 기본 데이터 집계 파일, 가상 예시 값 | hojitea-ui | wilstein91, borigunbbang | 8절 |
 | 선택 요청과 응답 | wilstein91 (프롬프트의 문장은 borigunbbang) | wilstein91 | 9절 |

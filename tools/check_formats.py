@@ -37,6 +37,7 @@ from pydantic import ValidationError
 from engine.formats.choice import problems_in_response
 from engine.formats.codes import WALKERHILL_VENUE_IDS
 from engine.formats.conditions import MANUAL_CONDITION_PREFIX, ConditionBundle
+from engine.formats.constants import ConstantsFile
 from engine.formats.evidence import FREE_NAME_PREFIX, REVIEW_COLUMNS, URL_LIST_FILENAMES, ReviewLabel, Vocab
 from engine.formats.io import read_csv
 from engine.formats.persona import EVIDENCE_KEYS, Persona
@@ -79,6 +80,8 @@ IGNORED_SUFFIXES = (".pyc", ".log")
 
 
 SAMPLE_RUNS = ("engine", "samples", "runs")
+# 공개 자료에서 가져온 값이라 출처를 꼭 적는 근거 등급 (결정 상수, 11-19 T210).
+SOURCED_GRADES = frozenset({"official", "literature", "statistic", "industry", "article"})
 
 
 def ignored_by_git(parts: tuple[str, ...], is_dir: bool, at_repo_root: bool = True) -> bool:
@@ -567,6 +570,21 @@ class Checker:
         path = self.root / "engine" / "conditions.json"
         if path.is_file():
             self.conditions = self._load(path, ConditionBundle)
+        self.check_constants()
+
+    # ── 결정 상수 (6.1절) ───────────────────────────────────────────────────
+
+    def check_constants(self) -> None:
+        """공개 자료에서 가져온 값(공식, 학술 자료, 통계, 업계 보고서, 기사)은 출처를 적는다 (11-19, T210)."""
+        path = self.root / "engine" / "constants.json"
+        if not path.is_file():
+            return
+        found = self._load(path, ConstantsFile)
+        if found is None:
+            return
+        for item in found.constants:
+            if item.grade in SOURCED_GRADES and item.source is None:
+                self.error(path, f"결정 상수 '{item.constant_id}' 의 등급이 {item.grade} 인데 source 가 비어 있다")
 
     # ── 상황 정의 (7절) ─────────────────────────────────────────────────────
 

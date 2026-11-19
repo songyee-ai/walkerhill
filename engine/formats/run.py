@@ -24,6 +24,7 @@ from engine.formats.codes import (
     Text,
     Won,
 )
+from engine.formats.constants import UsedConstant
 from engine.formats.io import blank_to_none, split_list
 from engine.formats.money import net_of_tax, weighted_amount
 
@@ -143,6 +144,8 @@ class RunRecord(FormatModel):
     weights_from: str | None
     counts: Counts
     status: Literal["ok", "stopped_by_limit", "failed"]
+    # 이 실행이 쓴 결정 상수와 그 값·근거 (docs/FORMATS.md 6.1절). 11-19(T210) 전의 실행 기록에는 없다.
+    constants: list[UsedConstant] | None = None
 
     @model_validator(mode="after")
     def _rules(self) -> Self:
