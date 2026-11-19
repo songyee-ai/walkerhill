@@ -57,10 +57,13 @@ def data_roots(repo_root: Path) -> list[DataRoot]:
 
 
 def make_example_copy(repo_root: Path) -> Path:
-    """예시 한 벌을 깃이 무시하는 private/ 에 베낀다. 이미 있으면 그대로 둔다 (앞서 돌린 실행을 지우지 않는다)."""
+    """예시 한 벌을 깃이 무시하는 private/ 에 베낀다. 이미 있으면 예시의 파일만 새것으로 덮고, 사본에만 있는 것은 그대로 둔다.
+
+    앞서 돌린 실행과 화면에서 만든 상황은 지우지 않는다. 예시 파일은 덮는다: 11-19 T210 에 집계 파일에 `people` 열이 생겼는데,
+    그 전에 만든 사본을 그대로 두어 "예시로 연습"이 "빠진 열 ['people']"로 멈췄다 (T124 에서 찾음).
+    """
     target = repo_root / EXAMPLE_COPY
-    if not target.exists():
-        shutil.copytree(repo_root / EXAMPLE_SOURCE, target)
+    shutil.copytree(repo_root / EXAMPLE_SOURCE, target, dirs_exist_ok=True)
     return target
 
 

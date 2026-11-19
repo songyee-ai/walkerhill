@@ -111,13 +111,17 @@ def test_key_ready_for_openai_needs_the_key_and_the_model(tmp_path: Path):
         assert not key_ready(tmp_path), wrong
 
 
-def test_example_copy_is_made_once(tmp_path: Path):
+def test_example_copy_keeps_runs_and_refreshes_example_files(tmp_path: Path):
     shutil.copytree(EXAMPLE, tmp_path / EXAMPLE_SOURCE)
     target = make_example_copy(tmp_path)
     marker = target / "engine" / "samples" / "runs" / "남겨 둘 실행"
     marker.mkdir()
+    # 예시의 형식이 바뀌기 전에 만든 사본 (11-19 T210 에 집계 파일에 people 열이 생겼다. T124 에서 찾음)
+    summary = target / "data" / "samples" / "base_summary.csv"
+    summary.write_text("customer_group,venue_id\n", encoding="utf-8")
     make_example_copy(tmp_path)
-    assert marker.exists()  # 이미 있으면 다시 베끼지 않아 앞서 돌린 실행이 남는다
+    assert marker.exists()  # 앞서 돌린 실행은 남는다
+    assert summary.read_bytes() == (tmp_path / EXAMPLE_SOURCE / "data" / "samples" / "base_summary.csv").read_bytes()
 
 
 def test_engine_runs_from_the_screen_without_a_key(tmp_path: Path):

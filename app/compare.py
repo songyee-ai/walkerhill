@@ -7,6 +7,7 @@
 from dataclasses import dataclass, field, replace
 from pathlib import Path
 
+from app.breakdown import Breakdown, average, load_breakdown
 from app.results import LoadedRun, condition_names, load_run, persona_names, visit_view
 from engine.formats import SUMMARY_COLUMNS
 from engine.formats.io import read_csv
@@ -40,7 +41,7 @@ class Move:
     before: Place
     after: Place
     move: str
-    # 그 방문이 대표하는 손님 수 (가상). 지도의 점 크기에 쓴다.
+    # 그 방문이 대표하는 방문 수(팀 수, 가상). 11-19 T210 뒤로 방문의 무게가 인원에서 낸 팀 수다. 지도의 점 크기에 쓴다.
     represented: float
     reason_after: str | None
     fail_reason: str | None = None
@@ -68,6 +69,8 @@ class Comparison:
     total_before: int
     total_after: int
     uncovered_groups: list[str] = field(default_factory=list)
+    # 엔진이 쓴 매출 변화 나누기 (app/breakdown.py, T124). 11-19 T210 전의 실행에는 없다.
+    breakdown: Breakdown | None = None
 
     def count(self, move: str) -> int:
         return sum(1 for m in self.moves if m.move == move)
@@ -179,7 +182,14 @@ def compare(
         shares_before["walkerhill_total"],
         shares_after["walkerhill_total"],
         uncovered,
+        _matching_breakdown(scen, base, shares_after["walkerhill_total"] - shares_before["walkerhill_total"]),
     )
+
+
+def _matching_breakdown(scen: LoadedRun, base: LoadedRun, diff: int) -> Breakdown | None:
+    """상황 실행의 매출 변화 나누기. 두 원장으로 낸 매출 변화와 같을 때만 쓴다 (빼는 방문이 같아야 같다. FORMATS.md 10.6절)."""
+    found = load_breakdown(scen.run_dir, scen.record.run_id, base.record.run_id)
+    return found if found is not None and found.total == diff else None
 
 
 def combine_months(per_month: list[tuple[int, "Comparison"]]) -> "Comparison":
@@ -188,7 +198,7 @@ def combine_months(per_month: list[tuple[int, "Comparison"]]) -> "Comparison":
     엔진은 달 하나로 돌고, 달을 주면 그 달의 인원으로 가중치를 낸다 (FORMATS.md 10.1절 "실행의 달". 11-19 T210 전에는 일 년 합계에 맞췄다).
     화면은 달마다의 매출을 더하지 않고 **달 평균**을 낸다 (한 달 규모). 같은 달의 기준과 상황끼리만 견준 값을 평균하므로
     "달이 다른 실행끼리 합계를 견주지 않는다"는 엔진 담당의 당부를 지킨다. 방문은 달을 붙여 모두 보이고,
-    손님 수가 달 수만큼 불지 않게 방문이 대표하는 손님 수도 달 수로 나눈다.
+    방문 수가 달 수만큼 불지 않게 방문이 대표하는 팀 수도 달 수로 나눈다.
     """
     if len(per_month) == 1:
         return per_month[0][1]
@@ -211,6 +221,7 @@ def combine_months(per_month: list[tuple[int, "Comparison"]]) -> "Comparison":
         for venue_id in sorted(before)
     ]
     first = per_month[0][1]
+    found = [c.breakdown for _, c in per_month]
     return Comparison(
         first.base,
         first.scen,
@@ -220,6 +231,8 @@ def combine_months(per_month: list[tuple[int, "Comparison"]]) -> "Comparison":
         round(sum(c.total_before for _, c in per_month) / n),
         round(sum(c.total_after for _, c in per_month) / n),
         first.uncovered_groups,
+        # 한 달이라도 나누기가 없으면 평균을 내지 않는다 (빠진 달이 0 으로 섞이면 갈래가 작아 보인다)
+        average([b for b in found if b is not None]) if all(found) else None,
     )
 
 
