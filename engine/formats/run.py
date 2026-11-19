@@ -146,6 +146,9 @@ class RunRecord(FormatModel):
     status: Literal["ok", "stopped_by_limit", "failed"]
     # 이 실행이 쓴 결정 상수와 그 값·근거 (docs/FORMATS.md 6.1절). 11-19(T210) 전의 실행 기록에는 없다.
     constants: list[UsedConstant] | None = None
+    # 기준이 아닌 상황에서, 바꾼 업장과 상관없어 원장을 기준의 답으로 적은 방문 (10.1절, T210 의 임시 규칙). 기준 상황은 null 이다.
+    # 11-19 전의 실행 기록에는 없다.
+    baseline_answers: list[Text] | None = None
 
     @model_validator(mode="after")
     def _rules(self) -> Self:

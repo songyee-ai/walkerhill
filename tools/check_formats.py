@@ -34,6 +34,8 @@ from typing import Any
 
 from pydantic import ValidationError
 
+from engine.changes import decompose
+from engine.formats.changes import Changes
 from engine.formats.choice import problems_in_response
 from engine.formats.codes import WALKERHILL_VENUE_IDS
 from engine.formats.conditions import MANUAL_CONDITION_PREFIX, ConditionBundle
@@ -201,6 +203,7 @@ RUN_RECORD = Kind("실행 기록", _RUN + r"/run\.json", _RUN_WHERE)
 # 검사에서 어긋난 응답(llm_rejected/)도 요청과 LLM 이 돌려준 글을 담고 있어 같은 종류로 본다.
 SAVED_RESPONSE = Kind("저장된 LLM 응답", _RUN + r"/llm(?:_rejected)?/[^/]+\.json", _RUN_WHERE)
 CALIBRATION = Kind("보정의 대조 결과", _RUN + r"/calibration\.json", _RUN_WHERE)
+CHANGES = Kind("매출 변화 나누기", _RUN + r"/changes\.json", _RUN_WHERE)
 
 # 표의 머리글이나 JSON 묶음의 키에 이 이름이 모두 있으면 그 종류다.
 # 표는 CSV·TSV·글 파일의 첫 줄과 마크다운 표의 머리글을 본다. JSON 은 맨 위뿐 아니라 안쪽의 묶음도 모두 본다
@@ -230,12 +233,13 @@ NAME_MARKS = {
     "run.json": RUN_RECORD,
     "ledger.csv": LEDGER,
     "calibration.json": CALIBRATION,
+    "changes.json": CHANGES,
     "validation.json": VALIDATION,
     "validation_reviews.csv": VALIDATION,
     **dict.fromkeys(URL_LIST_FILENAMES, URL_LIST),
 }
 # 실행 하나의 폴더에 둘 수 있는 파일. 검증 결과는 이름을 알아보고 따로 오류를 낸다.
-RUN_FILES = ("run.json", "ledger.csv", "calibration.json", "validation.json", "validation_reviews.csv")
+RUN_FILES = ("run.json", "ledger.csv", "calibration.json", "changes.json", "validation.json", "validation_reviews.csv")
 
 
 @dataclass(frozen=True)
@@ -372,7 +376,11 @@ class Checker:
             files=("vocab.json",),
             dirs=("reviews", "extra"),
         )
-        self._managed(data / "samples", "가상 예시 값 `base_summary.csv`", files=("base_summary.csv",))
+        self._managed(
+            data / "samples",
+            "가상 예시 값 `base_summary.csv` 와 그 옆의 상수 파일 `base_summary_constants.json`",
+            files=("base_summary.csv", "base_summary_constants.json"),
+        )
         self._managed(self.root / "engine" / "samples", "runs 폴더", dirs=("runs",))
 
     # ── 업장 정의 (3절) ─────────────────────────────────────────────────────
@@ -575,16 +583,16 @@ class Checker:
     # ── 결정 상수 (6.1절) ───────────────────────────────────────────────────
 
     def check_constants(self) -> None:
-        """공개 자료에서 가져온 값(공식, 학술 자료, 통계, 업계 보고서, 기사)은 출처를 적는다 (11-19, T210)."""
-        path = self.root / "engine" / "constants.json"
-        if not path.is_file():
-            return
-        found = self._load(path, ConstantsFile)
-        if found is None:
-            return
-        for item in found.constants:
-            if item.grade in SOURCED_GRADES and item.source is None:
-                self.error(path, f"결정 상수 '{item.constant_id}' 의 등급이 {item.grade} 인데 source 가 비어 있다")
+        """결정 상수 파일(엔진의 것, 가상 예시 집계 옆의 것). 공개 자료에서 가져온 값(공식, 학술 자료, 통계, 업계 보고서, 기사)은 출처를 적는다 (11-19, T210)."""
+        for path in (self.root / "engine" / "constants.json", self.root / "data" / "samples" / "base_summary_constants.json"):
+            if not path.is_file():
+                continue
+            found = self._load(path, ConstantsFile)
+            if found is None:
+                continue
+            for item in found.constants:
+                if item.grade in SOURCED_GRADES and item.source is None:
+                    self.error(path, f"결정 상수 '{item.constant_id}' 의 등급이 {item.grade} 인데 source 가 비어 있다")
 
     # ── 상황 정의 (7절) ─────────────────────────────────────────────────────
 
@@ -732,7 +740,7 @@ class Checker:
         for run_dir in run_dirs:
             self._managed(
                 run_dir,
-                "실행 기록, 소비 원장, 보정의 대조 결과와 저장된 응답의 llm 폴더, 어긋난 응답의 llm_rejected 폴더",
+                "실행 기록, 소비 원장, 보정의 대조 결과, 매출 변화 나누기와 저장된 응답의 llm 폴더, 어긋난 응답의 llm_rejected 폴더",
                 files=RUN_FILES,
                 dirs=("llm", "llm_rejected"),
             )
@@ -766,6 +774,7 @@ class Checker:
             rejected = self._check_rejected_responses(run_dir, record, stems)
             self._check_ledger(run_dir, record, stems, saved, rejected)
             self._check_calibration(run_dir, record)
+            self._check_changes(run_dir, record, records)
 
     def _check_run_record(self, path: Path, dir_name: str, record: RunRecord) -> None:
         if record.run_id != dir_name:
@@ -1145,6 +1154,31 @@ class Checker:
                 venue = self.venues.get(venue_id)
                 if venue is None or venue.is_competitor:
                     self.error(path, f"고객군 '{group}' — '{venue_id}' 가 워커힐 업장 정의에 없다")
+
+    def _check_changes(self, run_dir: Path, record: RunRecord, records: dict[str, RunRecord]) -> None:
+        """매출 변화 나누기(10.6절)는 상황 실행에만 있고, 두 실행의 원장으로 다시 낸 것과 같아야 한다."""
+        path = run_dir / "changes.json"
+        if not path.is_file():
+            return
+        changes = self._load(path, Changes)
+        if changes is None:
+            return
+        if record.weights_from is None:
+            self.error(path, "매출 변화 나누기는 기준이 아닌 상황의 실행에만 둔다")
+            return
+        if changes.run_id != record.run_id or changes.baseline_run_id != record.weights_from:
+            self.error(path, "run_id 나 baseline_run_id 가 실행 기록(run_id, weights_from)과 다르다")
+            return
+        base_ledger = run_dir.parent / record.weights_from / "ledger.csv"
+        if record.weights_from not in records or not base_ledger.is_file() or not (run_dir / "ledger.csv").is_file():
+            return  # 기준 실행이 없는 것은 위에서 따로 알린다
+        try:
+            rows = [LedgerRow.from_row(r) for r in read_csv(run_dir / "ledger.csv", LEDGER_COLUMNS)]
+            base_rows = [LedgerRow.from_row(r) for r in read_csv(base_ledger, LEDGER_COLUMNS)]
+        except (ValueError, ValidationError):
+            return  # 원장의 형식 오류는 원장 검사가 알린다
+        if decompose(base_rows, rows, record.weights_from, record.run_id) != changes:
+            self.error(path, "두 실행의 원장으로 다시 나눈 것과 다르다 (손으로 고치지 않는다. 엔진이 상황 실행을 쓸 때 함께 쓴다)")
 
     # ── 저장소에 올리면 안 되는 것 ──────────────────────────────────────────
 

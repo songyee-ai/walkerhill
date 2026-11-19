@@ -12,6 +12,7 @@ from pathlib import Path
 import streamlit as st
 
 from app.board import WALKERHILL_NAMES, index_text, pct_change, venue_cards
+from app.breakdown import NO_FILE_NOTE, PART_LABEL, Breakdown, share_text
 from app.compare import Comparison, combine_months, compare, summary_groups, zero_groups
 from app.icons import as_img, persona_icon
 from app.results import (
@@ -45,7 +46,7 @@ from app.scenario_builder import (
     our_price,
     write_scenario,
 )
-from app.street import AFTER_LABEL, BASE_LABEL, render_scene, scene_from_comparison
+from app.street import AFTER_LABEL, BASE_LABEL, money, render_scene, scene_from_comparison
 from app.validation import LIMITS_SOURCE, VALIDATION_LIMITS, limits_not_in, load_validation, validation_rows
 from engine.formats import KO, RunRecord, read_model
 
@@ -632,7 +633,7 @@ def show_comparison(
 ) -> None:
     names = {v.venue_id: v.name for v in catalog.values()} | comparison.names
     record = comparison.scen.record
-    # 기본 데이터 실행이면 금액과 손님 수를 가린다 (PRD 17절, 11-18 팀장 회신. app/results.py 의 `shows_numbers`)
+    # 기본 데이터 실행이면 금액과 방문 수를 가린다 (PRD 17절, 11-18 팀장 회신. app/results.py 의 `shows_numbers`)
     masked = not (shows_numbers(record) and shows_numbers(comparison.base.record))
     if masked:
         st.caption(MASKED_AMOUNT_NOTE)
@@ -654,6 +655,10 @@ def show_comparison(
     # 높이는 st.iframe 이 내용을 재어 맞춘다. 어림한 높이(height)를 주면 페르소나가 많을 때 안쪽에 스크롤이 생겼다.
     st.iframe(html, height="content")
 
+    _show_breakdown(comparison.breakdown, names, masked)
+    if note := kept_note(comparison):
+        st.caption(note)
+
     with st.expander("숫자와 카드로 자세히 보기"):
         _show_cards(comparison, catalog, names, allowed, masked)
     # 검증 결과는 그 안에 접는 칸이 있어 위의 접는 칸 밖에 둔다 (접는 칸 안에 접는 칸은 둘 수 없다).
@@ -667,6 +672,80 @@ def show_comparison(
             _show_person(dict(per_month)[pick])
         else:
             _show_person(comparison)
+
+
+def breakdown_amount(amount: int, before: int, masked: bool) -> str:
+    """갈래 하나의 값. 가리면 기본 시나리오 워커힐 가상 매출에 견준 몫(%p), 아니면 부호를 붙인 금액."""
+    if masked:
+        return share_text(amount, before)
+    if amount == 0:
+        return "0원"
+    return f"{'+' if amount > 0 else '−'}{money(abs(amount))}"
+
+
+def breakdown_note(found: Breakdown, masked: bool) -> str:
+    """갈래 아래의 안내: 다섯을 더하면 무엇인지, 가린 값은 무엇인지, 워커힐 안에서 옮긴 방문은 어디에 들었는지."""
+    total = share_text(found.total, found.before, "%") if masked else breakdown_amount(found.total, found.before, masked)
+    note = f"다섯 갈래를 더하면 워커힐 가상 매출의 변화{'율' if masked else ''}({total})입니다."
+    if masked:
+        note += " 갈래마다 기본 시나리오의 워커힐 가상 매출에 견준 몫이고, 금액은 가립니다."
+    moved_in, lost = found.inside
+    if moved_in or lost:
+        note += (
+            f" 워커힐 안에서 옮긴 방문은 옮겨 온 매출({breakdown_amount(moved_in, found.before, masked)})과 "
+            f"잃은 매출({breakdown_amount(lost, found.before, masked)})에 함께 들어 있어, "
+            f"워커힐 전체로는 그 차이({breakdown_amount(moved_in + lost, found.before, masked)})만 남습니다."
+        )
+    return note
+
+
+def breakdown_rows(found: Breakdown, names: dict[str, str], masked: bool) -> list[dict[str, str]]:
+    """업장마다의 갈래. 가리면 워커힐 전체의 기본 시나리오 매출에 견준 몫이라 업장들을 더하면 위의 값이다."""
+    names = WALKERHILL_NAMES | names
+    return [
+        {"업장": names.get(v.venue_id, v.venue_id)}
+        | {g.label: breakdown_amount(g.amount, found.before, masked) for g in v.groups}
+        | {"합계": breakdown_amount(v.parts_total, found.before, masked)}
+        for v in found.venues
+    ]
+
+
+# 기본 시나리오의 답을 그대로 쓴 방문 (T128, 11-19 팀장 결정). 방문 수는 페르소나 × 방문 조건의 개수라 기본 데이터 실행에서도 가리지 않는다.
+# 임시: T210 의 규칙(FORMATS.md 10.1절 "상관없는 방문의 답")이 T212 에서 없어지면 엔진이 목록을 쓰지 않아 이 줄도 나오지 않는다. 그때 이 코드를 지운다.
+KEPT_RULE = "AI 답의 작은 흔들림을 상황의 효과로 보지 않으려는 임시 규칙이고, 개선 2단계에서 없앱니다."
+KEPT_VISIT_NOTE = (
+    "이 방문은 상황이 바꾼 업장과 상관없어 기본 시나리오의 답을 그대로 썼습니다. 그래서 고른 곳과 이유가 기본 시나리오와 같습니다. " + KEPT_RULE
+)
+
+
+def kept_note(comparison: Comparison) -> str | None:
+    """기본 시나리오의 답을 그대로 쓴 방문이 몇 건인지. 없으면 None 이다."""
+    if not comparison.kept_count:
+        return None
+    return (
+        f"방문 {len(comparison.moves)}건 가운데 {comparison.kept_count}건은 이 상황이 바꾼 업장과 상관없어 "
+        f"기본 시나리오의 답을 그대로 썼습니다. {KEPT_RULE}"
+    )
+
+
+def _show_breakdown(found: Breakdown | None, names: dict[str, str], masked: bool) -> None:
+    """워커힐 가상 매출의 변화를 다섯 갈래로 (T124, PRD 8절의 1단계). 계산은 엔진이 했다 (changes.json, app/breakdown.py)."""
+    st.markdown("#### 워커힐 매출 변화는 어디서 왔나")
+    if found is None:
+        st.caption(NO_FILE_NOTE)
+        return
+    # 다섯 칸이 좁아 st.metric 은 "−5,72…" 처럼 값을 자른다. 글로 그려 줄을 바꾸게 한다 (T124 화면 확인).
+    for column, group in zip(st.columns(len(found.groups)), found.groups, strict=True):
+        detail = " · ".join(f"{PART_LABEL[p]} {breakdown_amount(a, found.before, masked)}" for p, a in group.parts.items() if a)
+        value = breakdown_amount(group.amount, found.before, masked)
+        color = "green" if group.amount > 0 else "red" if group.amount < 0 else "gray"
+        column.markdown(
+            f":small[{group.label}]  \n**:{color}[{value}]**",
+            help=group.note + (f" ({detail})" if len(group.parts) > 1 and detail else ""),
+        )
+    st.caption(breakdown_note(found, masked))
+    with st.expander("업장마다 나눠 보기"):
+        st.dataframe(breakdown_rows(found, names, masked), hide_index=True)
 
 
 def _show_cards(
@@ -721,13 +800,13 @@ def _show_cards(
         with columns[i % 3].container(border=True):
             st.markdown(f"**{card.name}**  \n:small[{card.kind_label}]")
             if masked:
-                # 금액과 손님 수 대신 기본 시나리오를 100 으로 둔 지수와 변화율 (PRD 17절)
+                # 금액과 방문 수 대신 기본 시나리오를 100 으로 둔 지수와 변화율 (PRD 17절)
                 revenue = card.revenue_before is not None
                 before = card.revenue_before if revenue else card.guests_before
                 after = card.revenue_after if revenue else card.guests_after
                 pct = pct_change(before, after)
                 st.metric(
-                    "가상 매출 (지수)" if revenue else "손님 (지수)",
+                    "가상 매출 (지수)" if revenue else "방문 (지수)",
                     index_text(before, after),
                     delta=pct if after != before else "변화 없음",
                     delta_color="normal" if after != before else "off",
@@ -742,10 +821,11 @@ def _show_cards(
                 )
             else:
                 change = card.guests_after - card.guests_before
+                # 방문이 대표하는 팀 수의 합이다 (11-19 T210 뒤로 방문의 무게가 인원에서 낸 팀 수다. 사람 수가 아니다, T124)
                 st.metric(
-                    "손님 수 (가상)",
-                    f"{card.guests_after:,.0f}명",
-                    delta=f"{change:+,.0f}명" if change else "변화 없음",
+                    "방문 수 (가상)",
+                    f"{card.guests_after:,.0f}팀",
+                    delta=f"{change:+,.0f}팀" if change else "변화 없음",
                     delta_color="normal" if change else "off",
                 )
             lines = [f":green-badge[▲ 새로 옴] {m.persona} (← {_place(m.before, names)})" for m in card.arrived]
@@ -760,6 +840,8 @@ def _show_person(comparison: Comparison) -> None:
     options = [(m.persona_id, m.condition_id) for m in comparison.moves]
     labels = {(m.persona_id, m.condition_id): f"{m.persona} · {m.condition}" for m in comparison.moves}
     pick = st.selectbox("방문", options, format_func=lambda o: labels[o], key="sim_detail")
+    if any(m.kept_baseline for m in comparison.moves if (m.persona_id, m.condition_id) == pick):
+        st.caption(KEPT_VISIT_NOTE)
     left, right = st.columns(2)
     for column, title, run in ((left, BASE_LABEL, comparison.base), (right, AFTER_LABEL, comparison.scen)):
         with column:

@@ -1,0 +1,21 @@
+﻿review_id,venue_id,source_kind,posted_ym,customer_group,purpose,party,adults,children,occasion,meal,day_type,stay,ordered,paid_total,reasons_chosen,pain_points,compared_with,would_return,summary,labeler,labeled_on
+R-josun-deli-0001,josun-deli,map,,,,,,,takeout,,,,이름:바나나 케이크,,,맛 기대 이하,,,"원래 다른 케이크를 원했지만 바나나 케이크를 골랐는데, 과일을 알맞게 익혀 맛있었으나 한 번에 많이 먹기엔 무거워 남겼다고 했다.",borigunbbang,2026-11-19
+R-josun-deli-0002,josun-deli,map,,,집에서 먹을 것 구매,,,,takeout,,,,이름:화이트 초콜릿 무스 타르트,,,,,,미리 주문해 찾아간 흰 초콜릿 타르트가 맛있었다고 했다.,borigunbbang,2026-11-19
+R-josun-deli-0003,josun-deli,map,,,,,,,takeout,,,,이름:바나나 케이크,,,,,,대표 상품인 바나나 케이크는 매우 맛있지만 축하 글씨를 넣을 수 없고 가져가는 것만 된다는 점이 아쉽다고 했다.,borigunbbang,2026-11-19
+R-josun-deli-0007,josun-deli,map,,,,,,,takeout,,,,,,,가격,,,이름값을 하는 맛이지만 비싸다는 짧은 평이다.,borigunbbang,2026-11-19
+R-josun-deli-0009,josun-deli,map,,,,,,,takeout,,,,이름:스콘;이름:초코칩쿠키;이름:피스타치오 에끌레어,,,맛 기대 이하,,,견과 크림 슈는 덜 달고 담백했고 치즈 스콘은 겉이 바삭해 좋았지만 초콜릿 쿠키가 별로여서 점수를 깎았다고 했다.,borigunbbang,2026-11-19
+R-josun-deli-0011,josun-deli,map,,,,,,,takeout,,,,이름:메론프레지에,,,가격;양,,,멜론 케이크의 과일이 달콤하고 케이크와 잘 어울렸지만 크기에 비해 값이 매우 비싸다고 했다.,borigunbbang,2026-11-19
+R-josun-deli-0014,josun-deli,map,,,집에서 먹을 것 구매,,,,takeout,,,,이름:콘브레드,,평판·브랜드,,,,"옥수수빵이 맛있다는 말을 듣고 전날 나오는 시간을 물어 갓 나온 것을 사 왔는데, 낮엔 금방 동난다고 했고 부드럽고 아주 맛있었다고 했다.",borigunbbang,2026-11-19
+R-josun-deli-0015,josun-deli,map,,,,,,,takeout,,,,,,,메뉴 구성,,,"호텔 1층의 포장 전용 매장으로 앉을 곳이 없고, 직원 응대는 좋으나 빵 가짓수가 적다고 했다.",borigunbbang,2026-11-19
+R-josun-deli-0016,josun-deli,map,,,,,,,takeout,,,,,,,가격,이름:세븐일레븐,,로비의 포장 식품 매장이 보기엔 좋지만 비싸서 근처 편의점이 낫겠다고 했다.,borigunbbang,2026-11-19
+R-josun-deli-0017,josun-deli,map,,,,,,,takeout,,,,이름:바나나케이크,,,,,,"요즘 케이크가 다 비싸 이곳도 그리 비싸게 느껴지지 않고, 바나나 케이크가 은은하게 달아 기분 좋은 맛이라고 했다.",borigunbbang,2026-11-19
+R-josun-deli-0018,josun-deli,map,,,,,,,takeout,,,,이름:메론빵,,,가격,,yes,"정성스러운 겉모습에 끌려 멜론빵을 샀는데 오후면 동난다는 안내를 받았고, 겉은 바삭하고 속은 촉촉하며 크림이 부드러웠지만 값이 너무 비싸 하나만 샀다고 했다.",borigunbbang,2026-11-19
+R-josun-deli-0019,josun-deli,map,,,집에서 먹을 것 구매,,,,takeout,,,,이름:케잌,,,,,,미리 주문한 케이크를 찾아왔는데 지나치게 달지 않고 맛있었다고 했다.,borigunbbang,2026-11-19
+R-josun-deli-0020,josun-deli,map,,,,,,,takeout,,,,이름:산도 쿠키,,,가격,,,"값은 비싸지만 맛이 워낙 좋아 할 말이 없고, 크림을 넣은 쿠키의 진한 향이 특히 좋았다고 했다.",borigunbbang,2026-11-19
+R-josun-deli-0021,josun-deli,map,,,,,,,takeout,,,,이름:레몬 마들렌;이름:아아;이름:플로랑땡,35000,,,,,"결혼식에 잠깐 들렀다가 빵을 참지 못해 견과 과자 두 가지와 레몬 구움과자, 찬 커피를 사 갔는데 아주 맛있었고 호텔치곤 값어치도 괜찮은 듯하다고 했다.",borigunbbang,2026-11-19
+R-josun-deli-0023,josun-deli,map,,,,,,,takeout,,,,이름:망고 케이크,,,,,,망고가 들어간 케이크를 사 먹었는데 향이 좋고 크림이 부드러워 작은 크기를 순식간에 다 먹었다고 했다.,borigunbbang,2026-11-19
+R-josun-deli-0024,josun-deli,map,,친구·모임,휴식·티타임,친구,2,,takeout,,,,이름:애프터눈티,,,가격;양,,,해외 생활 뒤 친구와 오후 차를 즐기러 갔는데 값에 비해 단 위에 담긴 간식이 빈약하고 실망스러웠다고 했다.,borigunbbang,2026-11-19
+R-josun-deli-0025,josun-deli,map,,,,,,,takeout,,,,이름:딸기케익,,혜택·할인,맛 기대 이하,이름:롯데,,"회원 쿠폰이 곧 끝나 쓰러 갔는데 딸기 케이크는 다른 호텔 것이 더 맛있었고, 이곳 케이크는 덜 단맛을 좋아하는 사람에게 맞을 것 같다고 했다.",borigunbbang,2026-11-19
+R-josun-deli-0026,josun-deli,map,,공항 이동·여행,,,,,takeout,dinner,,,이름:바질빵,,,,,,좋아하는 바질 빵을 공항 가는 길에 먹으려 했는데 가는 도중 벌써 다 먹었다고 했다.,borigunbbang,2026-11-19
+R-josun-deli-0029,josun-deli,map,,,,,,,takeout,,,,이름:메론빵,,평판·브랜드,가격;맛 기대 이하,,,"멜론빵이 이름났다고 해서 와 값에 망설이다 두 개를 샀는데, 빵을 별로 좋아하지 않는 입장에선 밀가루 맛이 나고 속이 약해 조금 아쉬웠고 함께 나눈 언니는 맛있다고 했다.",borigunbbang,2026-11-19
+R-josun-deli-0030,josun-deli,map,,,,,,,takeout,,,,이름:케이크,,,,,,케이크를 샀는데 디자인과 맛이 독특하고 정성이 느껴져 귀한 사람에게 줄 선물로 권한다고 했다.,borigunbbang,2026-11-19

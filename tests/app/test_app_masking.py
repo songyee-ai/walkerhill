@@ -91,8 +91,8 @@ def test_masked_picture_shows_change_rates_not_amounts(tmp_path: Path):
     args = (comparison, names, {}, ["geumryong"], ["examplehotel-chinese"], "할인")
     masked, _ = render_scene(scene_from_comparison(*args, masked=True))
     plain, _ = render_scene(scene_from_comparison(*args))
-    # 가리면 금액(억·만 원, 원)과 손님 수(명)가 없고, 지수와 변화율만 있다.
-    for amount in ("억원", "만원", "원 (가상)", "명 (가상)"):
+    # 가리면 금액(억·만 원, 원)과 방문 수(팀)가 없고, 지수와 변화율만 있다.
+    for amount in ("억원", "만원", "원 (가상)", "팀 (가상)"):
         assert amount not in masked, amount
     assert "지수 100" in masked and "금액은 가림" in masked and MASKED_AMOUNT_NOTE in masked
     assert "-100%" in masked  # 금룡의 매출이 모두 사라진 변화율은 그대로 보인다
