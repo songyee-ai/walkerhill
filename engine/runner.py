@@ -20,6 +20,7 @@ from engine.changes import decompose
 from engine.constants import CONSTANTS_PATH, used_constants
 from engine.formats.choice import ChoiceRequest, RunCondition, problems_in_response
 from engine.formats.conditions import MANUAL_CONDITION_PREFIX, ConditionBundle
+from engine.formats.constants import ConstantsFile
 from engine.formats.evidence import Vocab
 from engine.formats.io import read_csv, read_json, read_model, write_json
 from engine.formats.persona import Persona, merge_persona_layers, merged_persona
@@ -48,6 +49,7 @@ from engine.weights import (
     fill_prices,
     group_people,
     read_summary,
+    summary_constants_path,
     summary_path,
 )
 
@@ -400,6 +402,14 @@ def run_visit(
     return VisitResult(visit_rows(base, request, response, inputs.venues, "new", request_hash), skipped)
 
 
+def _summary_constants(root: Path, data_mode: str) -> tuple[ConstantsFile | None, str | None]:
+    """집계 파일 옆의 상수 파일과 실행 기록에 적을 그 자리. 없으면 (None, None) 이다."""
+    path = summary_constants_path(root, data_mode)
+    if not path.is_file():
+        return None, None
+    return read_model(path, ConstantsFile), path.relative_to(root).as_posix()
+
+
 def _chosen_venues(rows: list[LedgerRow]) -> set[str]:
     return {r.venue_id for r in rows if r.status == "ok" and r.choice_kind != "none" and r.venue_id}
 
@@ -679,7 +689,7 @@ def run(
                 "weights_from": base.run_id if base else None,
                 "counts": {"visits": visits, "failed": failed},
                 "status": status,
-                "constants": used_constants(inputs.conditions),
+                "constants": used_constants(inputs.conditions, *_summary_constants(root, data_mode)),
                 "baseline_answers": kept_baseline if base is not None else None,
             },
         )

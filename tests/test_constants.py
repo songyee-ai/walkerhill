@@ -82,3 +82,33 @@ def test_check_wants_a_source_for_values_from_public_material(example_copy):
     data["constants"][0].update(grade="assumption")
     save_json(target, data)
     assert [str(p) for p in check(example_copy, strict=True)] == []
+
+
+def test_constants_not_in_use_are_kept_out_of_the_run_record():
+    """정해 두었지만 아직 엔진이 쓰지 않는 값(in_use 가 false)은 실행 기록에 남지 않는다. 범위 값도 적을 수 있다."""
+    found = load_constants()
+    waiting = [c for c in found.constants if not c.in_use]
+    assert waiting, "2단계·4단계에서 쓸 값이 파일에 있다"
+    recorded = {c.constant_id for c in used_constants(read_model(EXAMPLE_ROOT / "engine" / "conditions.json", ConditionBundle))}
+    assert not recorded & {c.constant_id for c in waiting}
+    low = next(c for c in found.constants if c.constant_id == "price-sensitivity-threshold-low")
+    assert (low.value.min, low.value.max) == (15, 20)
+    data = json.loads(CONSTANTS_PATH.read_text(encoding="utf-8"))
+    data["constants"][0]["value"] = {"min": 2, "max": 1}
+    with pytest.raises(ValueError, match="min 이 max 보다 크다"):
+        ConstantsFile.model_validate(data)
+
+
+def test_constants_next_to_the_summary_are_recorded_with_their_file(example_copy):
+    """집계 파일 옆의 상수 파일(한 개당 인원 등)이 있으면 실행 기록에 그 자리와 함께 남는다 (가상 예시 값으로 시험)."""
+    data = json.loads(CONSTANTS_PATH.read_text(encoding="utf-8"))
+    item = dict(data["constants"][0], constant_id="people-per-unit-geumryong-course-a", name="금룡 코스 A 한 개당 인원", value=1, unit="명",
+                used_in="집계 파일의 people", note="지어낸 값", owner="hojitea-ui")
+    save_json(example_copy / "data" / "samples" / "base_summary_constants.json", {"format_version": 1, "constants": [item]})
+    played = play(example_copy, pick_geumryong)
+    by_id = {c.constant_id: c for c in played.record.constants}
+    assert by_id["people-per-unit-geumryong-course-a"].file == "data/samples/base_summary_constants.json"
+    assert [str(p) for p in check(example_copy, strict=True)] == []
+    item.update(grade="statistic")
+    save_json(example_copy / "data" / "samples" / "base_summary_constants.json", {"format_version": 1, "constants": [item]})
+    assert any("등급이 statistic 인데 source 가 비어 있다" in str(p) for p in check(example_copy, strict=True))

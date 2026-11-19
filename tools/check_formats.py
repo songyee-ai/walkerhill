@@ -376,7 +376,11 @@ class Checker:
             files=("vocab.json",),
             dirs=("reviews", "extra"),
         )
-        self._managed(data / "samples", "가상 예시 값 `base_summary.csv`", files=("base_summary.csv",))
+        self._managed(
+            data / "samples",
+            "가상 예시 값 `base_summary.csv` 와 그 옆의 상수 파일 `base_summary_constants.json`",
+            files=("base_summary.csv", "base_summary_constants.json"),
+        )
         self._managed(self.root / "engine" / "samples", "runs 폴더", dirs=("runs",))
 
     # ── 업장 정의 (3절) ─────────────────────────────────────────────────────
@@ -579,16 +583,16 @@ class Checker:
     # ── 결정 상수 (6.1절) ───────────────────────────────────────────────────
 
     def check_constants(self) -> None:
-        """공개 자료에서 가져온 값(공식, 학술 자료, 통계, 업계 보고서, 기사)은 출처를 적는다 (11-19, T210)."""
-        path = self.root / "engine" / "constants.json"
-        if not path.is_file():
-            return
-        found = self._load(path, ConstantsFile)
-        if found is None:
-            return
-        for item in found.constants:
-            if item.grade in SOURCED_GRADES and item.source is None:
-                self.error(path, f"결정 상수 '{item.constant_id}' 의 등급이 {item.grade} 인데 source 가 비어 있다")
+        """결정 상수 파일(엔진의 것, 가상 예시 집계 옆의 것). 공개 자료에서 가져온 값(공식, 학술 자료, 통계, 업계 보고서, 기사)은 출처를 적는다 (11-19, T210)."""
+        for path in (self.root / "engine" / "constants.json", self.root / "data" / "samples" / "base_summary_constants.json"):
+            if not path.is_file():
+                continue
+            found = self._load(path, ConstantsFile)
+            if found is None:
+                continue
+            for item in found.constants:
+                if item.grade in SOURCED_GRADES and item.source is None:
+                    self.error(path, f"결정 상수 '{item.constant_id}' 의 등급이 {item.grade} 인데 source 가 비어 있다")
 
     # ── 상황 정의 (7절) ─────────────────────────────────────────────────────
 

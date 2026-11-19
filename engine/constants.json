@@ -108,6 +108,125 @@
       "checked_on": "2026-11-17",
       "note": "페르소나가 이보다 적은 고객군은 차이를 적기만 하고 통과를 가르지 않는다. 한 명이면 고르기 하나가 비중의 약 4분의 1 이다 (T18, T119)",
       "owner": "wilstein91"
+    },
+    {
+      "constant_id": "price-sensitivity-threshold-high",
+      "name": "가격 민감도 높음: 망설이기 시작하는 인상 폭",
+      "value": 5,
+      "unit": "%",
+      "used_in": "아직 쓰지 않음. 2단계에서 엔진이 페르소나의 등급을 보고 요청에 넣는다 (T212)",
+      "grade": "assumption",
+      "source": "Toast 설문 (abc17news.com, 2026-11-16 게재); Raab 외 2009, JHTR 33(1):93-105",
+      "checked_on": "2026-11-19",
+      "note": "평소 금액(budget.typical)보다 이만큼 넘게 비싸지면 망설이고, 같은 이용 상황의 더 싼 대안이 있으면 그쪽을 고른다 (T306 ①). 다른 곳에서 잰 범위를 빌려 와 정한 값이다",
+      "owner": "borigunbbang",
+      "in_use": false
+    },
+    {
+      "constant_id": "price-sensitivity-threshold-mid",
+      "name": "가격 민감도 중간: 감수하는 인상 폭",
+      "value": 10,
+      "unit": "%",
+      "used_in": "아직 쓰지 않음. 2단계에서 엔진이 페르소나의 등급을 보고 요청에 넣는다 (T212)",
+      "grade": "assumption",
+      "source": "TouchBistro 2024 U.S. Diner Report (pmq.com, 2024-04-30 보도); Andreyeva, Long & Brownell 2010, AJPH 100(2)",
+      "checked_on": "2026-11-19",
+      "note": "평소 금액보다 이만큼까지는 감수하고, 그보다 비싸지면 고른 이유에서 크게 뒤지지 않는 더 싼 대안을 고른다 (T306 ①)",
+      "owner": "borigunbbang",
+      "in_use": false
+    },
+    {
+      "constant_id": "price-sensitivity-threshold-low",
+      "name": "가격 민감도 낮음: 감수하는 인상 폭",
+      "value": {
+        "min": 15,
+        "max": 20
+      },
+      "unit": "%",
+      "used_in": "아직 쓰지 않음. 2단계에서 엔진이 페르소나의 등급을 보고 요청에 넣는다 (T212)",
+      "grade": "assumption",
+      "source": "Raab 외 2009, JHTR 33(1); Dominique-Ferreira & Antunes 2020, EJMBE 29(2); Wakefield & Inman 2003, Journal of Retailing 79(4)",
+      "checked_on": "2026-11-19",
+      "note": "평소 금액보다 이만큼 비싸져도 자리·응대·자리의 의미가 맞으면 그대로 고른다 (T306 ①)",
+      "owner": "borigunbbang",
+      "in_use": false
+    },
+    {
+      "constant_id": "budget-spread-log-sd",
+      "name": "한 페르소나 안의 예산 퍼짐 (로그정규의 로그 표준편차)",
+      "value": {
+        "min": 0.1,
+        "max": 0.15
+      },
+      "unit": "로그 표준편차",
+      "used_in": "아직 쓰지 않음. 2단계에서 엔진이 페르소나의 등급을 보고 요청에 넣는다 (T212)",
+      "grade": "assumption",
+      "source": "이민아 2007, 한국식품영양과학회지 36(1); Raab 외 2009; Battistin, Blundell & Lewbel 2009, JPE 117(6)",
+      "checked_on": "2026-11-19",
+      "note": "예산은 budget.typical 을 가운데로 로그정규로 퍼뜨린다 (T306 ④). 2단계의 가상 고객을 만들 때 쓴다",
+      "owner": "borigunbbang",
+      "in_use": false
+    },
+    {
+      "constant_id": "budget-spread-clip-pct",
+      "name": "한 페르소나 안의 예산 퍼짐을 자르는 폭",
+      "value": 25,
+      "unit": "%",
+      "used_in": "아직 쓰지 않음. 2단계에서 엔진이 페르소나의 등급을 보고 요청에 넣는다 (T212)",
+      "grade": "assumption",
+      "source": "이민아 2007, 한국식품영양과학회지 36(1); Raab 외 2009",
+      "checked_on": "2026-11-19",
+      "note": "예산 퍼짐은 위아래 이만큼에서 자르고, 자른 위쪽도 budget.max 를 넘지 않는다 (T306 ④)",
+      "owner": "borigunbbang",
+      "in_use": false
+    },
+    {
+      "constant_id": "sensitivity-threshold-spread-pct",
+      "name": "한 페르소나 안의 민감도 문턱 퍼짐",
+      "value": {
+        "min": 10,
+        "max": 20
+      },
+      "unit": "%",
+      "used_in": "아직 쓰지 않음. 2단계에서 엔진이 페르소나의 등급을 보고 요청에 넣는다 (T212)",
+      "grade": "assumption",
+      "source": "Hensher & Greene 2003, Transportation 30",
+      "checked_on": "2026-11-19",
+      "note": "등급 안에서 위 문턱(%)을 이만큼 퍼뜨린다 (T306 ④)",
+      "owner": "borigunbbang",
+      "in_use": false
+    },
+    {
+      "constant_id": "price-elasticity-everyday-dining",
+      "name": "가격 탄력성: 일상 외식",
+      "value": {
+        "min": -1.0,
+        "max": -0.7
+      },
+      "unit": null,
+      "used_in": "아직 쓰지 않음. 4단계 상수 추정에서 시뮬레이션의 탄력성이 들어야 할 범위다",
+      "grade": "assumption",
+      "source": "Andreyeva, Long & Brownell 2010, AJPH 100(2); Okrent & Alston 2012, USDA ERS ERR-139; Law, Smith & Cornelsen 2022, Food Policy 107; 한국자료분석학회지 13(4) 2011",
+      "checked_on": "2026-11-19",
+      "note": "가격 10% 인상에 방문이 약 7 ~ 10% 준다 (T306 ②). 미국·영국·한국의 외식 전반이라 워커힐 다이닝에 그대로 맞는다는 근거는 없다 (PRD 5.3절·12절)",
+      "owner": "borigunbbang",
+      "in_use": false
+    },
+    {
+      "constant_id": "price-elasticity-upscale-weekday",
+      "name": "가격 탄력성: 평일에 가볍게 고르는 고급·풀서비스 외식",
+      "value": {
+        "min": -2.0,
+        "max": -1.0
+      },
+      "unit": null,
+      "used_in": "아직 쓰지 않음. 4단계 상수 추정에서 시뮬레이션의 탄력성이 들어야 할 범위다",
+      "grade": "assumption",
+      "source": "Okrent & Alston 2012, USDA ERS ERR-139; Law, Smith & Cornelsen 2022, Food Policy 107",
+      "checked_on": "2026-11-19",
+      "note": "미국·영국 추정치 (T306 ②). 기념일·성수기는 덜 민감하다는 방향만 있고 수치는 없다",
+      "owner": "borigunbbang",
+      "in_use": false
     }
   ]
 }

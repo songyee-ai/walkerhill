@@ -19,7 +19,8 @@
 | 4 | 후기 주소 목록 | `private/evidence/` 의 주소 목록 세 개 | 페르소나, 업장 데이터 | 페르소나, 업장 데이터 | `private/` |
 | 5 | 페르소나 정의 | `personas/<persona_id>.json` 과 `private/personas/<persona_id>.json` | 페르소나 | 엔진, 화면 | 공개 층은 저장소, 비공개 층은 `private/` |
 | 6 | 방문 조건 묶음 | `engine/conditions.json` | 엔진 | 업장 데이터, 화면 | 저장소 |
-| 6.1 | 결정 상수 | `engine/constants.json` | 엔진 | 엔진, 화면 | 저장소 |
+| 6.1 | 결정 상수 | `engine/constants.json` | 엔진 (페르소나 전체에 걸린 값은 페르소나가 정한다) | 엔진, 화면 | 저장소 |
+| 6.1 | 집계 파일 옆의 상수 파일 (없어도 된다) | `private/base/summary_constants.json` | 업장 데이터 | 엔진 | `private/`. 가상 예시는 `data/samples/base_summary_constants.json` |
 | 7 | 상황 정의 | `scenarios/<scenario_id>.json` | 화면 | 엔진 | 저장소 |
 | 8 | 기본 데이터 집계 파일 | `private/base/summary.csv` | 업장 데이터 | 엔진, 페르소나 | `private/`. 가상 예시는 `data/samples/base_summary.csv` |
 | 9 | 선택 요청과 응답 | 파일이 아니다. 엔진이 LLM 을 부를 때의 형식이다 | 엔진(요청), 페르소나(프롬프트) | 엔진 | — |
@@ -557,17 +558,24 @@ R-geumryong-0027,geumryong,map,2026-03,,,,,,meal,dinner,,,,,,대기,,no,예약�
 |---|---|
 | `constant_id` | 상수의 식별자. 영어 소문자, 숫자, 하이픈. 파일 안에서 겹치지 않는다 |
 | `name` | 사람이 읽는 이름 |
-| `value` | 값. 숫자이거나 참·거짓이다 |
+| `value` | 값. 숫자, 참·거짓, 범위(`{"min": .., "max": ..}`) 가운데 하나다 |
 | `unit` | 값의 단위 (원, 개, 배, %p, 팀, 명). 참·거짓이면 `null` |
 | `used_in` | 이 값을 쓰는 곳 (코드의 함수와 이 문서의 절) |
 | `grade` | 근거 등급 (2절의 코드 값) |
 | `source` | 근거의 출처 (자료 이름이나 주소). 팀이 정한 값이면 `null` |
 | `checked_on` | 출처를 확인한 날. 출처가 없으면 정한 날 |
 | `note` | 왜 이 값인지, 누가 언제 정했는지 |
-| `owner` | 이 값을 고치는 사람 |
+| `owner` | 이 값을 고치는 사람 (값을 정하는 사람) |
+| `in_use` | 엔진이 지금 이 값을 쓰는가. 빠지면 `true`. 정해 두었지만 아직 쓰지 않는 값(다음 단계에서 쓸 값)은 `false` 이고 실행 기록에 남지 않는다 (10.1절) |
 
-- **넣는 것**: 결과(고르는 후보, 가중치, 보정의 통과)를 바꾸는 숫자. 지금은 채운 단가의 반올림 단위, 기본 데이터의 요약에 적는 상품 수와 비중의 범주를 가르는 선,
+- **넣는 것**: 결과(고르는 후보, 가중치, 보정의 통과)를 바꾸는 숫자. 엔진이 쓰는 것(`in_use` 가 `true`)은 채운 단가의 반올림 단위, 기본 데이터의 요약에 적는 상품 수와 비중의 범주를 가르는 선,
   인원이 빈 포장·추가 상품 한 개의 팀 수·사람 수, 보정의 통과 기준 셋이다.
+- **페르소나 전체에 걸린 상수**도 이 파일에 둔다. `personas/` 에 두지 않는다 (11-19 wilstein91 결정, T213). 지금은 진행 문서 T306 의 값이다:
+  가격 민감도 등급마다의 문턱, 한 페르소나 안의 예산 퍼짐과 문턱 퍼짐, 가격 탄력성이 들어야 할 범위 둘. 모두 `in_use` 가 `false` 이고 `owner` 는 `borigunbbang` 이다.
+  값은 페르소나 담당(borigunbbang)이 정하고, 바꿀 때는 "알릴 것"에 적어 엔진 담당에게 고쳐 달라고 한다 (11-19 wilstein91 결정, T213).
+- **2단계(T212)**: 엔진이 페르소나의 가격 민감도 등급에 맞는 문턱을 이 파일에서 꺼내 요청에 넣는다. 프롬프트에는 그 숫자를 적지 않는다 (값은 이 파일 한 곳에만 둔다. 11-19 wilstein91 결정, T213).
+- **범위 값**: 다른 곳에서 잰 범위를 빌려 온 값은 범위로 적는다 (예: 가격 민감도 낮음 15 ~ 20%, 가격 탄력성 −1.0 ~ −0.7). `min` 이 `max` 보다 크면 오류다.
+  4단계(상수 추정)에서 범위 안의 값을 바꿔 가며 돌린다 (11-19 wilstein91 결정, T213).
 - **넣지 않는 것**: 프로그램이 도는 데만 쓰는 숫자(호출 시간 제한, 호출 상한, 연달아 실패한 호출 수 같은 것)는 코드에 둔다.
   끼니를 알 수 없는 식사 매출을 나누는 비율은 6절의 `assumed_splits` 에 그대로 둔다 (실행 기록에는 결정 상수와 함께 남는다, 10.1절).
 - **등급**: 2절의 코드 값을 쓴다. 그 대상을 직접 다룬 학술 자료, 공공 통계, 업계 보고서, 기사, 공식 발표에서 온 값은 그 등급으로 적고 `source` 를 비우지 않는다 (형식 검사가 본다, 11절).
@@ -578,7 +586,15 @@ R-geumryong-0027,geumryong,map,2026-03,,,,,,meal,dinner,,,,,,대기,,no,예약�
 - **읽는 곳**: 엔진 코드가 있는 저장소의 것을 읽는다. `--root` 로 다른 폴더의 자료를 돌려도 이 파일은 바뀌지 않는다 (엔진 코드와 같다).
   입력이라 `engine_commit` 의 `+dirty` 를 가를 때는 보지 않는다 (10.1절).
 
-예시 — `engine/constants.json` 의 아홉 개 가운데 둘이다.
+**집계 파일 옆의 상수 파일** (11-19 wilstein91 결정, T213) — 집계 파일(8절)을 만들 때 쓴 값(상품 한 개당 인원 같은 것)과 근거를 집계 파일 옆에 같은 모양(`ConstantsFile`)으로 적는다. 없어도 된다.
+
+- 자리: 기본 데이터는 `private/base/summary_constants.json`, 가상 예시는 `data/samples/base_summary_constants.json` 이다. 기본 데이터의 값은 `private/` 에만 두고, 가상 예시에는 지어낸 값만 적는다.
+- 주인은 업장 데이터 담당(hojitea-ui)이다. 집계 파일을 만드는 도구가 집계 파일과 함께 쓴다.
+- 엔진은 돌린 데이터의 이 파일이 있으면 그 상수(`in_use` 가 `true` 인 것)를 모두 실행 기록의 `constants` 에 남긴다. `file` 은 저장소 맨 위에서 본 그 파일의 자리다 (10.1절).
+  해시는 `inputs` 에 남기지 않는다.
+- 가상 예시의 것은 형식 검사가 엔진의 것과 같은 규칙(출처)으로 본다 (11절).
+
+예시 — `engine/constants.json` 의 열일곱 개(엔진이 쓰는 아홉 개와 아직 쓰지 않는 여덟 개) 가운데 셋이다. 셋째는 범위 값이고 아직 쓰지 않는 값이다.
 
 ```json
 {
@@ -607,6 +623,22 @@ R-geumryong-0027,geumryong,map,2026-03,,,,,,meal,dinner,,,,,,대기,,no,예약�
       "checked_on": "2026-11-17",
       "note": "첫 대조(11-17) 뒤 한 번만 고칠 수 있고, 고치면 이유를 진행 문서의 T18 절에 적는다. 돌릴 때마다 바꿔 가며 통과시키지 못하게 한다",
       "owner": "wilstein91"
+    },
+    {
+      "constant_id": "price-sensitivity-threshold-low",
+      "name": "가격 민감도 낮음: 감수하는 인상 폭",
+      "value": {
+        "min": 15,
+        "max": 20
+      },
+      "unit": "%",
+      "used_in": "아직 쓰지 않음. 2단계에서 엔진이 페르소나의 등급을 보고 요청에 넣는다 (T212)",
+      "grade": "assumption",
+      "source": "Raab 외 2009, JHTR 33(1); Dominique-Ferreira & Antunes 2020, EJMBE 29(2); Wakefield & Inman 2003, Journal of Retailing 79(4)",
+      "checked_on": "2026-11-19",
+      "note": "평소 금액보다 이만큼 비싸져도 자리·응대·자리의 의미가 맞으면 그대로 고른다 (T306 ①)",
+      "owner": "borigunbbang",
+      "in_use": false
     }
   ]
 }
@@ -715,6 +747,7 @@ R-geumryong-0027,geumryong,map,2026-03,,,,,,meal,dinner,,,,,,대기,,no,예약�
 
 - 기본 데이터의 업장 이름·상품 번호를 `venue_id`·`product_id` 로 바꾸는 표는 `private/base/map.json` 에 둔다. 기본 데이터의 이름이 들어 있으므로 저장소에 올리지 않는다.
 - 함께 두는 `private/base/meta.json` 에 기준 기간, 만든 날, 줄 수, 식별자로 바꾸지 못한 줄 수를 적는다.
+- 집계를 만들 때 쓴 값(상품 한 개당 인원 같은 것)은 옆의 `private/base/summary_constants.json` 에 근거와 함께 적는다. 모양과 규칙은 6.1절의 "집계 파일 옆의 상수 파일" (11-19 wilstein91 결정, T213).
 - **가상 예시**: `data/samples/base_summary.csv` 는 같은 열을 가진 지어낸 값이다. 기본 데이터의 수치를 따오지 않는다. 키나 기본 데이터가 없는 PC 는 이 파일로 돌린다.
 - 업장 정의의 파는 달 밖에서 팔린 줄(예: 더파빌리온 빙수)도 그대로 둔다. 엔진은 그 줄도 고객군의 매출과 업장별 비중에 넣는다 (11-15 팀장이 정함.
   보정은 일 년 합계만 쓰므로 그 매출이 어느 달에 팔렸는지는 상관없다. 11-19(T210)부터 달을 준 실행의 가중치는 그 달의 줄만 쓴다). 형식 검사는 가상 예시 값에서만 이것을 오류로 본다.
@@ -981,7 +1014,7 @@ customer_group,venue_id,product_id,occasion,meal,day_type,month,unit,quantity,pe
 | `weights_from` | 가중치를 정한 기준 상황의 `run_id`. 기준 상황 자신이면 `null` |
 | `counts` | `visits` 돌린 수, `failed` 실패한 수 |
 | `status` | `ok`, `stopped_by_limit`, `failed` |
-| `constants` | 이 실행이 쓴 결정 상수와 그 값·근거의 목록. 하나마다 `constant_id`, `name`, `value`, `unit`, `grade`, `source`, `checked_on`, `file` (적힌 파일). 아래 "쓴 결정 상수" |
+| `constants` | 이 실행이 쓴 결정 상수와 그 값·근거의 목록. 엔진이 쓰는 것(`in_use`)만 남고, 집계 파일 옆의 상수 파일이 있으면 그것도 들어간다 (6.1절). 하나마다 `constant_id`, `name`, `value`, `unit`, `grade`, `source`, `checked_on`, `file` (적힌 파일). 아래 "쓴 결정 상수" |
 | `baseline_answers` | 기준이 아닌 상황에서, 바꾼 업장이 기준과 상황 어느 선택에도 끼지 않아 원장을 기준의 답으로 적은 방문의 `visit_id` 목록. 기준 상황은 `null`. 11-19(T210) 전의 실행 기록에는 없다. 아래 "상관없는 방문의 답" |
 
 - 묶음의 조건으로 돌린 실행은 `weights` 에 페르소나마다의 가중치와, 고객군과 조건마다의 비율이 빠짐없이 있어야 한다. 없으면 원장의 `represented` 를 확인할 수 없다.
@@ -994,9 +1027,11 @@ customer_group,venue_id,product_id,occasion,meal,day_type,month,unit,quantity,pe
 
 **쓴 결정 상수** (11-19 wilstein91 결정, T210) — 실행마다 엔진이 쓴 상수를 값까지 `constants` 에 남긴다 (11-19 팀 결정: 값까지 모두 남기기).
 
-- 들어가는 것: `engine/constants.json` 의 상수 모두(6.1절. `file` 은 `engine/constants.json`)와, 방문 조건 묶음의 `assumed_splits` 모두(6절. `file` 은 `engine/conditions.json`).
+- 들어가는 것: `engine/constants.json` 의 상수 가운데 엔진이 쓰는 것(`in_use` 가 `true`. 6.1절. `file` 은 `engine/constants.json`)과, 방문 조건 묶음의 `assumed_splits` 모두(6절. `file` 은 `engine/conditions.json`),
+  그리고 집계 파일 옆의 상수 파일이 있으면 그 상수(6.1절. `file` 은 `data/samples/base_summary_constants.json` 이나 `private/base/summary_constants.json`).
+  `in_use` 가 `false` 인 상수는 남지 않는다 (11-19 wilstein91 결정, T213).
   나누는 비율은 `constant_id` 가 `split_id`, `name` 이 `applies_when`, `value` 가 갈래마다의 비율(`parts`), `checked_on` 이 `decided_on` 이고 `unit`·`source` 는 `null` 이다.
-- `value` 는 숫자나 참·거짓이다. 나누는 비율만 갈래 이름을 키로 둔 묶음이다.
+- `value` 는 숫자, 참·거짓, 범위(`{"min": .., "max": ..}`)다. 나누는 비율만 갈래 이름을 키로 둔 묶음이다.
 - 11-19(T210) 전에 돌린 실행 기록에는 이 칸과 `inputs.constants` 가 없다. 읽히지만, `inputs.constants` 가 없어 그 기준 실행으로는 상황도 보정의 대조도 돌지 않는다. 기준 상황부터 다시 돌린다.
 - 화면이 이 목록을 보여 준다 (어떻게 보일지는 화면 담당이 정한다). 기본 데이터로 돌린 실행은 화면의 기존 가림 규칙을 따른다.
 
@@ -1138,7 +1173,7 @@ customer_group,venue_id,product_id,occasion,meal,day_type,month,unit,quantity,pe
     "scenario": "7f0c40802f158f2c",
     "vocab": "8198206734bb16a5",
     "summary": "b2e533d5aec19534",
-    "constants": "7a4f07ea30f833ec",
+    "constants": "38af19f087377bc0",
     "prompt": "9fee7d4f42a62d8b"
   },
   "weights": {
@@ -1532,6 +1567,7 @@ uv run python -m tools.check_formats --strict   # 다 만든 뒤의 기준으로
 - 상품의 `occasion` 이 업장의 `occasions` 안에 있다. 워커힐 업장마다 경쟁 업장이 하나 이상 있다.
 - 업장 정의의 모든 `source_id` 가 `sources` 에 있고 `checked_on` 이 있다.
 - 결정 상수(6.1절) 가운데 등급이 `official`, `literature`, `statistic`, `industry`, `article` 인 것은 `source` 가 비어 있지 않다 (11-19, T210).
+  `engine/constants.json` 과 가상 예시 집계 옆의 `data/samples/base_summary_constants.json` 을 같은 규칙으로 본다. 범위 값은 `min` 이 `max` 보다 크지 않다 (11-19, T213).
 - 라벨(방문 목적, 동행, 고른 이유, 걸린 점, 고객군)이 값 목록에 있다. 후기 라벨의 방문 목적과 동행은 비어 있어도 된다.
 - 후기 라벨의 줄마다 근거가 되는 칸이 하나 이상 있다 (4.1절). `ordered` 와 `compared_with` 의 `이름:` 뒤에는 이름이 있다.
 - 페르소나의 `evidence` 에 묶음 일곱 개가 모두 있고, 한 고객군의 `share_in_group.value` 를 더하면 1 이다.
