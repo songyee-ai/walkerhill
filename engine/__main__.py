@@ -134,24 +134,20 @@ def main(argv: list[str] | None = None) -> int:
         f"기본 데이터의 요약 {record.base_profile_mode} · "
         f"가격을 집계 파일로 채운 상품 {len(record.filled_products)}개 · 채우지 못해 뺀 상품 {len(record.skipped_products)}개"
     )
+    if record.weights.people_coverage is not None:
+        print(
+            f"페르소나가 있는 고객군이 집계 파일의 인원 가운데 {record.weights.people_coverage:.1%} 를 차지한다 "
+            "(나머지 고객군은 시뮬레이션에 나오지 않는다)"
+        )
     if record.weights_from is None:
-        # 배수를 정하지 못한 고객군은 가중치가 0 이라 그 고객군의 방문이 가상 매출에 들지 않는다. 상황에도 그대로 간다.
+        # 인원이 없는 고객군은 가중치가 0 이라 그 고객군의 방문이 가상 매출에 들지 않는다. 상황에도 그대로 간다.
+        # 가장 흔한 까닭은 페르소나의 고객군 이름이 집계 파일과 다른 것이다.
         grades = record.weights.grades
-        unfitted = [group for group, grade in grades.group_multiplier.items() if grade == "unknown"]
-        # 묶음의 비율도 낼 수 없었으면 집계 파일에 그 고객군의 매출이 없는 것이다. 가장 흔한 까닭은 고객군 이름이 다른 것이다.
-        missing = [g for g in unfitted if set(grades.condition_ratio.get(g, {}).values()) <= {"unknown"}]
-        unchosen = [g for g in unfitted if g not in missing]
+        missing = [group for group, grade in grades.group_multiplier.items() if grade == "unknown"]
         if missing:
             print(
-                f"집계 파일에서 이 실행의 조건에 해당하는 매출을 찾지 못한 고객군이 있다: {', '.join(missing)}. "
+                f"집계 파일에서 이 실행의 조건에 해당하는 인원을 찾지 못한 고객군이 있다: {', '.join(missing)}. "
                 "페르소나의 customer_group 이 집계 파일의 고객군 이름과 글자까지 같은지 본다. 그 고객군의 가중치는 0 이다.",
-                file=sys.stderr,
-            )
-        if unchosen:
-            print(
-                f"고객군 배수를 정하지 못한 고객군이 있다: {', '.join(unchosen)}. "
-                "이 실행에서 그 고객군이 묶음의 비율이 0 이 아닌 조건에서 워커힐 업장을 고른 방문이 없다 (실패한 방문은 세지 않는다). "
-                "그 고객군의 가중치는 0 이다.",
                 file=sys.stderr,
             )
     print(

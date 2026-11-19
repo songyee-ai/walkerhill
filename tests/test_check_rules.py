@@ -60,6 +60,14 @@ def edit_csv(root: Path, relative: Path, change, bom: bool = True) -> None:
     save_csv(root / relative, rows, bom=bom)
 
 
+def weighted(row: dict, revenue_net: int, share: float = 1.0) -> str:
+    """원장 줄의 represented 로 낸 가중 매출 (revenue_net × represented × counted_share).
+
+    예시 실행의 가중치가 바뀌어도 고친 줄의 계산이 맞도록, 숫자를 박아 넣지 않고 그 줄에서 읽는다.
+    """
+    return str(round(revenue_net * float(row["represented"]) * share))
+
+
 def found(problems: list[Problem], text: str, level: str = "error") -> bool:
     return any(p.level == level and text in str(p) for p in problems)
 
@@ -478,7 +486,7 @@ def test_competitor_choice_has_no_walkerhill_revenue(example_copy):
     edit_csv(
         example_copy,
         RUNS / COMPETITOR_RUN / "ledger.csv",
-        lambda rows: rows[0].update(revenue_net="458182", weighted_revenue="54981840"),
+        lambda rows: rows[0].update(revenue_net="458182", weighted_revenue=weighted(rows[0], 458182)),
     )
     problems = check(example_copy)
     assert found(problems, "경쟁 업장과 이용하지 않음의 revenue_net 은 0 이다"), messages(problems)
@@ -1136,9 +1144,8 @@ def test_checker_walks_exactly_the_files_git_can_upload():
 
 def test_ledger_must_match_the_saved_response(example_copy):
     # 줄 하나만 보면 계산이 맞는다. 그러나 저장된 응답이 고른 것은 코스 A 다.
-    change = {"product_id": "course-b", "list_price": "200000", "paid": "800000"}
-    change |= {"revenue_net": "727273", "weighted_revenue": "87272760"}
-    edit_csv(example_copy, LEDGER, lambda rows: rows[0].update(change))
+    change = {"product_id": "course-b", "list_price": "200000", "paid": "800000", "revenue_net": "727273"}
+    edit_csv(example_copy, LEDGER, lambda rows: rows[0].update(change, weighted_revenue=weighted(rows[0], 727273)))
     problems = check(example_copy)
     assert found(problems, "원장의 줄이 저장된 응답에서 고른 주문과 다르다"), messages(problems)
     assert not found(problems, "paid 가"), messages(problems)
@@ -1197,25 +1204,26 @@ def test_ledger_rows_for_added_products_are_matched_too(example_copy):
     rows = load_csv(example_copy / LEDGER)
     rows[0]["request_hash"] = saved["request_hash"]
     added = {**rows[0], "product_id": "tea", "quantity": "2", "unit": "잔", "list_price": "8000"}
-    added |= {"discount": "0", "paid": "16000", "revenue_net": "14545", "weighted_revenue": "1745400"}
+    added |= {"discount": "0", "paid": "16000", "revenue_net": "14545", "weighted_revenue": weighted(rows[0], 14545)}
     save_csv(example_copy / LEDGER, [rows[0], added])
     assert [str(p) for p in check(example_copy, strict=True)] == []
 
     # 수량이 응답과 다르면 잡는다.
-    wrong = {**added, "quantity": "3", "paid": "24000", "revenue_net": "21818", "weighted_revenue": "2618160"}
+    wrong = {**added, "quantity": "3", "paid": "24000", "revenue_net": "21818", "weighted_revenue": weighted(added, 21818)}
     save_csv(example_copy / LEDGER, [rows[0], wrong])
     assert found(check(example_copy), "원장의 줄이 저장된 응답에서 고른 주문과 다르다")
 
     # 추가 상품의 줄에 할인이 있으면 잡는다. 추가 상품에는 프로모션 할인을 적용하지 않는다 (11-16 회의. FORMATS 9절).
     # 할인을 뺀 낸 금액, 매출, 가중 매출은 서로 맞게 적어 이 검사만 걸리게 한다.
-    discounted = {**added, "discount": "1600", "paid": "14400", "revenue_net": "13091", "weighted_revenue": "1570920"}
+    discounted = {**added, "discount": "1600", "paid": "14400", "revenue_net": "13091"}
+    discounted["weighted_revenue"] = weighted(added, 13091)
     save_csv(example_copy / LEDGER, [rows[0], discounted])
     problems = check(example_copy)
     assert found(problems, "원장의 줄이 저장된 응답에서 고른 주문과 다르다"), messages(problems)
     assert len(problems) == 1, messages(problems)
 
     # 할인은 0 인데 낸 금액만 수량 × 표시가와 다른 줄도 잡는다.
-    overpaid = {**added, "paid": "17000", "revenue_net": "15455", "weighted_revenue": "1854600"}
+    overpaid = {**added, "paid": "17000", "revenue_net": "15455", "weighted_revenue": weighted(added, 15455)}
     save_csv(example_copy / LEDGER, [rows[0], overpaid])
     problems = check(example_copy)
     assert found(problems, "원장의 줄이 저장된 응답에서 고른 주문과 다르다"), messages(problems)
@@ -1331,8 +1339,8 @@ def test_ledger_venue_must_be_the_one_the_response_chose(example_copy):
 def test_row_that_chose_a_venue_needs_a_saved_response(example_copy):
     # 해시를 비우면 저장된 응답과 견줄 수 없다. 그런 줄은 어디서 나왔는지 확인할 수 없으므로 받지 않는다.
     change = {"request_hash": "", "llm_call": "", "product_id": "course-b", "list_price": "200000"}
-    change |= {"paid": "800000", "revenue_net": "727273", "weighted_revenue": "87272760", "reason_labels": "맛"}
-    edit_csv(example_copy, LEDGER, lambda rows: rows[0].update(change))
+    change |= {"paid": "800000", "revenue_net": "727273", "reason_labels": "맛"}
+    edit_csv(example_copy, LEDGER, lambda rows: rows[0].update(change, weighted_revenue=weighted(rows[0], 727273)))
     problems = check(example_copy)
     assert found(problems, "업장을 고른 줄에는 request_hash 가 있어야 한다"), messages(problems)
 
@@ -1387,7 +1395,7 @@ def test_finished_run_has_every_planned_visit(example_copy):
 def season_rows(root: Path, share: str, gap: dict | None) -> list[dict]:
     """일부 달에만 파는 곳을 고른 방문의 줄들. 고른 줄의 몫을 `share` 로 하고, `gap` 이 있으면 보탬 줄을 더한다."""
     chosen = load_csv(root / LEDGER)[0]
-    chosen |= {"counted_share": share, "weighted_revenue": str(round(545455 * 120 * float(share)))}
+    chosen |= {"counted_share": share, "weighted_revenue": weighted(chosen, int(chosen["revenue_net"]), float(share))}
     if gap is None:
         return [chosen]
     rest = chosen | {"choice_kind": "none", "venue_id": "", "product_id": "", "quantity": "0", "unit": ""}
@@ -1427,7 +1435,7 @@ def test_rows_of_one_visit_must_agree(example_copy):
     assert found(problems, "같은 방문의 줄인데 request_hash 가 서로 다르다"), messages(problems)
 
     # 고른 줄들의 몫이 서로 다르다.
-    half = chosen | {"counted_share": "0.5", "weighted_revenue": str(round(545455 * 120 * 0.5))}
+    half = chosen | {"counted_share": "0.5", "weighted_revenue": weighted(chosen, int(chosen["revenue_net"]), 0.5)}
     save_csv(example_copy / LEDGER, [chosen, half])
     problems = check(example_copy)
     assert found(problems, "한 방문에서 고른 줄들의 counted_share 가 서로 다르다"), messages(problems)

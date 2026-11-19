@@ -3,13 +3,15 @@
 엔진은 집계 파일 하나에서 아래를 낸다. 기본 데이터로 돌릴 때는 `private/base/summary.csv`,
 가상 예시로 돌릴 때는 `data/samples/base_summary.csv` 를 읽는다.
 
-- 고객군마다 묶음의 비율과, 고객군 배수를 맞출 매출 (`group_revenue`, `condition_ratios`)
-- 고객군 배수와 페르소나의 가중치 (`fit_weights`. 기준 상황을 다 돌린 뒤에 원장으로 맞춘다)
+- 고객군마다, 조건마다의 인원과 묶음의 비율 (`group_people`, `condition_ratios`)
+- 고객군 배수와 페르소나의 가중치 (`decide_weights`. 방문을 돌기 전에 인원으로 정한다, T210)
+- 보정의 대조에 쓰는 고객군·업장별 매출 (`group_revenue`, `group_venue_revenue`)
 - 가격이 빈 상품의 단가 (`fill_prices`)
 - LLM 에 보낼 기본 데이터의 요약 (`base_profiles`)
 """
 
 from collections import defaultdict
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from decimal import Decimal
 from pathlib import Path
@@ -18,11 +20,11 @@ from typing import Any
 from pydantic import ValidationError
 
 from engine.formats.codes import WALKERHILL_VENUE_IDS
-from engine.formats.conditions import MANUAL_CONDITION_PREFIX, AssumedSplit, Condition
+from engine.formats.conditions import AssumedSplit, Condition
 from engine.formats.io import read_csv
 from engine.formats.money import round_half_up
 from engine.formats.persona import Persona
-from engine.formats.run import LedgerRow, Weights
+from engine.formats.run import Weights
 from engine.formats.summary import SUMMARY_COLUMNS, SummaryRow
 from engine.formats.venue import Venue
 
@@ -80,7 +82,10 @@ def weaker(*grades: str) -> str:
 
 @dataclass
 class GroupRevenue:
-    """한 고객군의 기본 데이터 매출(세금을 뺀 것)을 묶음의 조건마다 나눈 것."""
+    """한 고객군의 기본 데이터 값(인원, 또는 세금을 뺀 매출)을 묶음의 조건마다 나눈 것.
+
+    인원으로 셀 때(`group_people`)와 매출로 셀 때(`group_revenue`) 같은 모양이다. 이름은 매출로만 세던 때의 것이다.
+    """
 
     by_condition: dict[str, float] = field(default_factory=lambda: defaultdict(float))
     # 팀이 정한 비율(assumed_splits)로 나눈 매출이 든 조건.
@@ -145,19 +150,25 @@ def _parts(
     return found
 
 
-def group_revenue(
-    rows: list[SummaryRow], conditions: list[Condition], splits: list[AssumedSplit], venues: dict[str, Venue]
+def _group_totals(
+    rows: list[SummaryRow],
+    conditions: list[Condition],
+    splits: list[AssumedSplit],
+    venues: dict[str, Venue],
+    amount: Callable[[SummaryRow], float],
 ) -> dict[str, GroupRevenue]:
-    """고객군마다, 돌리는 조건마다의 기본 데이터 매출. 읽은 워커힐 업장(`venues` 가운데 경쟁 업장이 아닌 것)의 줄만 쓴다.
+    """고객군마다, 돌리는 조건마다 `amount` 를 더한다. 읽은 워커힐 업장(`venues` 가운데 경쟁 업장이 아닌 것)의 줄만 쓴다.
 
-    이 매출이 묶음의 비율(`condition_ratios`)과 고객군 배수(`fit_weights`)의 기준이 된다.
-    조식과 돌리지 않는 조건의 매출은 들지 않는다. 업장 정의는 끼니가 빈 줄의 끼니를 정하는 데도 쓴다.
+    조식과 돌리지 않는 조건의 몫은 들지 않는다. 업장 정의는 끼니가 빈 줄의 끼니를 정하는 데도 쓴다. 값이 0 인 줄은 건너뛴다.
     """
     split = next((s for s in splits if s.split_id == MEAL_SPLIT_ID), None)
     ours = {venue_id: venue for venue_id, venue in venues.items() if not venue.is_competitor}
     groups: dict[str, GroupRevenue] = defaultdict(GroupRevenue)
     for row in rows:
-        if row.venue_id not in ours or row.revenue_net == 0:
+        if row.venue_id not in ours:
+            continue
+        value = amount(row)
+        if value == 0:
             continue
         parts = _parts(row, conditions, split, ours)
         used = [(condition_id, part, assumed) for condition_id, part, assumed in parts if condition_id is not None]
@@ -167,12 +178,75 @@ def group_revenue(
         if split is not None:
             group.split_grade = split.grade
         for condition_id, part, assumed in used:
-            group.by_condition[condition_id] += row.revenue_net * part
+            group.by_condition[condition_id] += value * part
             if assumed:
                 group.assumed.add(condition_id)
         if any(assumed for _, _, assumed in parts) and len(used) < len(parts):
             group.split_partly_used = True
     return dict(groups)
+
+
+def group_revenue(
+    rows: list[SummaryRow], conditions: list[Condition], splits: list[AssumedSplit], venues: dict[str, Venue]
+) -> dict[str, GroupRevenue]:
+    """고객군마다, 돌리는 조건마다의 기본 데이터 매출 (세금을 뺀 것). 보정의 대조가 견주는 기본 데이터 쪽 매출의 합계다.
+
+    `group_venue_revenue` 의 업장별 매출을 더하면 이것과 같다.
+    """
+    return _group_totals(rows, conditions, splits, venues, lambda row: row.revenue_net)
+
+
+def party_size(persona: Persona) -> int:
+    """페르소나의 일행 수 (어른 + 아이)."""
+    return persona.visit.party.adults + persona.visit.party.children
+
+
+def average_parties(personas: list[Persona]) -> dict[str, float]:
+    """고객군마다 한 팀의 평균 인원 = Σ(고객군 안의 몫 × 일행 수) ÷ Σ(몫). 돌리는 페르소나로만 낸다.
+
+    고객군 안의 몫은 팀(방문)의 비율이다 (docs/FORMATS.md 5절). 몫을 다 더하면 1 이라 보통은 Σ(몫 × 일행 수) 와 같다.
+    """
+    weighted: dict[str, float] = defaultdict(float)
+    shares: dict[str, float] = defaultdict(float)
+    for persona in personas:
+        weighted[persona.customer_group] += persona.share_in_group.value * party_size(persona)
+        shares[persona.customer_group] += persona.share_in_group.value
+    return {group: weighted[group] / shares[group] for group in weighted if shares[group] > 0}
+
+
+def people_of(row: SummaryRow, party: float) -> float:
+    """집계 파일의 한 줄이 나타내는 사람 수 (docs/FORMATS.md 8절의 `people`).
+
+    `people` 이 있으면 그대로다. 빈 칸이면: 포장은 한 개를 한 팀으로 보고 그 고객군의 평균 일행 수(`party`)를 곱한다 (11-19 wilstein91 결정).
+    그 밖의 빈 칸(에이드 변경 같은 추가 상품)은 사람이 아니라 0 명이다.
+    """
+    if row.people is not None:
+        return row.people
+    if row.occasion == "takeout":
+        return row.quantity * party
+    return 0.0
+
+
+def group_people(
+    rows: list[SummaryRow],
+    conditions: list[Condition],
+    splits: list[AssumedSplit],
+    venues: dict[str, Venue],
+    parties: dict[str, float],
+    month: int | None = None,
+) -> dict[str, GroupRevenue]:
+    """고객군마다, 돌리는 조건마다의 인원 (T210). 묶음의 비율과 고객군 배수(`decide_weights`)의 기준이 된다.
+
+    - `parties`: 고객군마다 한 팀의 평균 인원 (`average_parties`). 빈 칸인 포장을 사람 수로 바꾸는 데 쓴다.
+      없는 고객군은 `parties` 의 값 모두의 평균을 쓴다 (그 고객군은 가중치에 들지 않고 `people_coverage` 에만 든다).
+    - `month`: 주면 그 달의 줄만 센다 (docs/FORMATS.md 10.1절의 "실행의 달"). 주지 않으면 일 년 전체다.
+    """
+    # 일행 수를 모르는 고객군(돌리는 페르소나가 없는 고객군)의 포장 한 개는 아는 고객군들의 평균 일행 수로 본다 (설계 가정).
+    fallback = sum(parties.values()) / len(parties) if parties else 1.0
+    picked = [row for row in rows if month is None or row.month == month]
+    return _group_totals(
+        picked, conditions, splits, venues, lambda row: people_of(row, parties.get(row.customer_group, fallback))
+    )
 
 
 def group_venue_revenue(
@@ -181,7 +255,7 @@ def group_venue_revenue(
     """고객군마다, 워커힐 업장마다의 기본 데이터 매출. 보정의 대조에서 기본 데이터 쪽의 업장별 비중을 내는 데 쓴다 (docs/PRD.md 6.5절).
 
     `group_revenue` 와 같은 줄을 같은 몫으로 센다: 읽은 워커힐 업장의 줄만, 돌리는 조건에 드는 몫만 넣고 조식과 돌리지 않는 조건은 뺀다.
-    그래서 한 고객군의 업장별 매출을 더하면 `group_revenue` 의 그 고객군 합계와 같다 (가상 매출을 맞춘 바로 그 매출이다).
+    그래서 한 고객군의 업장별 매출을 더하면 `group_revenue` 의 그 고객군 합계와 같다.
     """
     split = next((s for s in splits if s.split_id == MEAL_SPLIT_ID), None)
     ours = {venue_id: venue for venue_id, venue in venues.items() if not venue.is_competitor}
@@ -204,11 +278,11 @@ def _grade(data_mode: str, found: "GroupRevenue", leans_on_split: bool) -> str:
 def condition_ratios(
     revenue: dict[str, GroupRevenue], groups: list[str], condition_ids: list[str], data_mode: str
 ) -> tuple[dict[str, dict[str, float]], dict[str, dict[str, str]]]:
-    """고객군마다 묶음의 비율과 그 등급. 비율은 돌리는 조건 안에서 더하면 1 이다.
+    """고객군마다 묶음의 비율과 그 등급. 비율은 돌리는 조건 안에서 더하면 1 이다. `revenue` 는 `group_people` 의 인원이다 (T210).
 
-    등급: 기본 데이터로 돌리면 `internal`. 팀이 정한 비율로 나눈 매출이 든 조건은 그 비율의 등급(지금은 `assumption`)과 견줘 약한 것이다.
-    나눈 매출의 일부만 돌리는 조건에 든 고객군(예: 저녁만 돌림)은 합계가 그 비율에 기대므로 모든 조건이 그렇다.
-    가상 예시로 돌리면 `internal` 대신 `assumption` 이다 (지어낸 값이다). 그 고객군의 매출이 없으면 비율은 0, 등급은 `unknown` 이다.
+    등급: 기본 데이터로 돌리면 `internal`. 팀이 정한 비율로 나눈 값이 든 조건은 그 비율의 등급(지금은 `assumption`)과 견줘 약한 것이다.
+    나눈 값의 일부만 돌리는 조건에 든 고객군(예: 저녁만 돌림)은 합계가 그 비율에 기대므로 모든 조건이 그렇다.
+    가상 예시로 돌리면 `internal` 대신 `assumption` 이다 (지어낸 값이다). 그 고객군의 값이 없으면 비율은 0, 등급은 `unknown` 이다.
     """
     ratios: dict[str, dict[str, float]] = {}
     grades: dict[str, dict[str, str]] = {}
@@ -226,49 +300,44 @@ def condition_ratios(
     return ratios, grades
 
 
-def fit_weights(
+def decide_weights(
     personas: list[Persona],
-    ratios: dict[str, dict[str, float]],
-    ratio_grades: dict[str, dict[str, str]],
-    revenue: dict[str, GroupRevenue],
-    rows: list[LedgerRow],
+    people: dict[str, GroupRevenue],
+    condition_ids: list[str],
     data_mode: str,
 ) -> Weights:
-    """기준 상황의 원장으로 고객군 배수를 맞추고 페르소나의 가중치를 낸다 (docs/PRD.md 7.2절).
+    """방문을 돌기 전에 인원으로 가중치를 정한다 (T210, docs/PRD.md 7.2절, docs/FORMATS.md 10.1절의 "가중치를 내는 법").
 
-    고객군 배수 = 그 고객군의 기본 데이터 매출 ÷ (그 고객군 방문들의 세금을 뺀 워커힐 매출 × 고객군 안의 몫 × 묶음의 비율 × 몫의 합).
-    그러면 기준 상황에서 그 고객군의 가상 매출 합이 기본 데이터의 매출과 같아진다. 페르소나의 가중치 = 고객군 배수 × 고객군 안의 몫.
+    한 방문이 대표하는 팀 수 = 그 조건의 고객군 인원 × 페르소나의 몫 ÷ Σ(그 고객군 페르소나들의 몫 × 일행 수).
+    이것을 실행 기록의 모양으로 나누면:
+    - 고객군 배수 = 고객군의 인원 합 ÷ Σ(몫 × 일행 수)
+    - 페르소나의 가중치 = 고객군 배수 × 몫
+    - 묶음의 비율 = 조건의 인원 ÷ 고객군의 인원 합
+    그래서 고객군마다 "대표 팀 수 × 일행 수"를 더하면 그 고객군의 인원과 같다. AI 가 무엇을 고르든 무게는 바뀌지 않고,
+    가상 매출과 기본 데이터 매출의 차이는 맞추지 않고 그대로 남는다 (옛 방식은 그 차이를 배수로 없앴다).
 
-    맞출 수 없는 고객군(기본 데이터에 매출이 없거나, 기준 상황에서 워커힐 업장을 고른 방문이 없다)은 배수가 0, 등급이 `unknown` 이다.
-    배수의 등급은 기본 데이터면 `internal` 이다. 다만 팀이 정한 비율로 나눈 매출의 일부만 돌리는 조건에 들었으면 맞출 매출이 그 비율에 기대므로
-    그 비율의 등급과 견줘 약한 것이다.
-    실패한 방문과 화면에서 직접 넣은 조건의 방문은 세지 않는다.
+    `people` 은 `group_people` 의 인원이다. 페르소나가 없는 고객군도 들어 있어 `people_coverage` 를 낸다.
+    인원이 없는 고객군은 배수가 0, 등급이 `unknown` 이다. 배수의 등급은 기본 데이터면 `internal` 이다.
+    다만 팀이 정한 비율로 나눈 인원의 일부만 돌리는 조건에 들었으면 그 비율의 등급과 견줘 약한 것이다.
     """
-    by_id = {p.persona_id: p for p in personas}
     groups = sorted({p.customer_group for p in personas})
-    simulated: dict[str, Decimal] = defaultdict(Decimal)
-    for row in rows:
-        if row.status != "ok" or row.choice_kind != "walkerhill" or row.condition_id.startswith(MANUAL_CONDITION_PREFIX):
-            continue
-        persona = by_id[row.persona_id]
-        ratio = ratios[persona.customer_group][row.condition_id]
-        simulated[persona.customer_group] += (
-            Decimal(row.revenue_net)
-            * Decimal(str(persona.share_in_group.value))
-            * Decimal(str(ratio))
-            * Decimal(str(row.counted_share))
-        )
+    ratios, ratio_grades = condition_ratios(people, groups, condition_ids, data_mode)
+    denominator: dict[str, float] = defaultdict(float)
+    for persona in personas:
+        denominator[persona.customer_group] += persona.share_in_group.value * party_size(persona)
 
     multiplier: dict[str, float] = {}
     multiplier_grades: dict[str, str] = {}
     for group in groups:
-        target = revenue[group].total() if group in revenue else 0.0
-        if target > 0 and simulated[group] > 0:
-            multiplier[group] = float(Decimal(str(target)) / simulated[group])
-            multiplier_grades[group] = _grade(data_mode, revenue[group], revenue[group].split_partly_used)
+        total = people[group].total() if group in people else 0.0
+        if total > 0 and denominator[group] > 0:
+            multiplier[group] = total / denominator[group]
+            multiplier_grades[group] = _grade(data_mode, people[group], people[group].split_partly_used)
         else:
             multiplier[group], multiplier_grades[group] = 0.0, "unknown"
 
+    everyone = sum(found.total() for found in people.values())
+    covered = sum(people[group].total() for group in groups if group in people)
     return Weights.model_validate(
         {
             "group_multiplier": multiplier,
@@ -281,6 +350,7 @@ def fit_weights(
                 },
                 "condition_ratio": {group: ratio_grades[group] for group in groups},
             },
+            "people_coverage": min(1.0, covered / everyone) if everyone > 0 else None,
         }
     )
 

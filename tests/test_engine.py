@@ -1347,29 +1347,32 @@ def test_run_with_a_month_runs_the_bundle_conditions_in_that_month(example_copy)
     assert any("counted_share 가 1 이 아니다" in problem for problem in found)
 
 
-def test_group_multiplier_is_fitted_again_on_the_run_with_a_month(example_copy):
-    """달을 준 기준 실행도 고객군 배수를 그 실행의 원장으로 맞춘다. 그래서 고객군의 워커힐 가상 매출 합은 어느 달이든 일 년 합계와 같다.
+def test_run_with_a_month_weighs_visits_with_the_people_of_that_month(example_copy):
+    """달을 준 기준 실행은 그 달의 인원으로 무게를 낸다 (11-19 wilstein91 결정, T210). 일 년 전체는 모든 달의 합이다.
 
-    묶음의 비율은 집계 파일의 일 년 합계에서 내 달과 상관없다. 달끼리 매출의 합을 견줄 수 없다는 것을 문서에 적어 두었다
-    (docs/FORMATS.md 10.1절의 "실행의 달").
+    무게는 AI 가 무엇을 고르든 같다. 그래서 달끼리 대표 팀 수를 견줄 수 있다 (docs/FORMATS.md 10.1절의 "실행의 달").
     """
-    edit(venue_file(example_copy, "geumryong"), lambda d: product_of(d, "course-a").update(months=[4, 5, 6]))
+    summary = example_copy / "data" / "samples" / "base_summary.csv"
+    text = summary.read_text(encoding="utf-8-sig")
+    # 5월의 주말 저녁 코스 B 180명을 7월에도 판 것으로 더한다 (지어낸 값). 줄의 첫 ",5," 가 달이다.
+    july_rows = [row.replace(",5,", ",7,", 1) for row in text.splitlines()[1:] if ",course-b," in row]
+    summary.write_text(text + "\n".join(july_rows) + "\n", encoding="utf-8-sig", newline="")
     group = "가족·친족"
     year = play(example_copy, pick_geumryong)
     may = play(example_copy, pick_geumryong, now=NOW + timedelta(hours=1), month=5)
     july = play(example_copy, pick_geumryong, now=NOW + timedelta(hours=2), month=7)
+    august = play(example_copy, pick_geumryong, now=NOW + timedelta(hours=3), month=8)
 
-    def total(played: Played) -> float:
-        return sum(row.weighted_revenue for row in played.rows)
-
-    assert [r.product_id for r in may.rows] == ["course-a"] and [r.product_id for r in july.rows] == ["course-b"]
-    assert total(year) > 0
-    assert total(may) == pytest.approx(total(year), abs=1) and total(july) == pytest.approx(total(year), abs=1)
-    assert may.record.weights.condition_ratio == july.record.weights.condition_ratio == year.record.weights.condition_ratio
+    # 주말 저녁의 인원: 5월은 코스 B 180명 + 끼니를 모르는 주말 코스 A 480명의 반, 7월은 코스 B 180명. 어르신 가족은 몫 0.5, 4명이다.
+    may_people, july_people = 180 + 240, 180
     multipliers = [p.record.weights.group_multiplier[group] for p in (year, may, july)]
-    # 일 년 전체로는 코스 A 의 몫이 석 달 ÷ 열두 달이라, 5월로 돌리면 배수가 4분의 1 이다. 7월에는 다른 상품을 골라 또 다르다.
-    assert multipliers[1] == pytest.approx(multipliers[0] / 4)
-    assert multipliers[2] not in (pytest.approx(multipliers[0]), pytest.approx(multipliers[1]))
+    assert multipliers == [pytest.approx((may_people + july_people) / 2), pytest.approx(may_people / 2), pytest.approx(july_people / 2)]
+    for played in (year, may, july):
+        assert played.record.weights.condition_ratio == {group: {DINNER: 1.0}}
+        assert [row.represented for row in played.rows] == [played.record.weights.persona_weight["family-elders"]]
+    # 그 달에 인원이 없으면 무게를 낼 수 없다.
+    assert august.record.weights.group_multiplier == {group: 0.0}
+    assert august.record.weights.grades.group_multiplier == {group: "unknown"}
 
 
 def test_audit_and_format_check_compare_the_month_with_the_run_record(example_copy):
