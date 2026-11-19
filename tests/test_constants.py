@@ -78,3 +78,7 @@ def test_check_wants_a_source_for_values_from_public_material(example_copy):
     data["constants"][0].update(source="Andreyeva, Long & Brownell, 2010, AJPH 100(2)")
     save_json(target, data)
     assert [str(p) for p in check(example_copy, strict=True)] == []
+    # 다른 곳에서 잰 범위를 빌려 와 정한 값은 설계 가정이고, 빌려 온 자료를 source 에 적을 수 있다 (11-19 songyee-ai 지적).
+    data["constants"][0].update(grade="assumption")
+    save_json(target, data)
+    assert [str(p) for p in check(example_copy, strict=True)] == []

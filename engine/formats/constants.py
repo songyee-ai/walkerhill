@@ -27,7 +27,8 @@ class Constant(FormatModel):
     # 이 값을 쓰는 곳 (코드의 함수나 절).
     used_in: Text
     grade: Grade
-    # 근거의 출처 (자료 이름이나 주소). 팀이 정한 값이면 null 이다.
+    # 근거의 출처 (자료 이름이나 주소). 그 대상을 직접 다룬 자료면 그 등급으로 적는다. 다른 곳에서 잰 범위를 빌려 와 정한 값은
+    # `assumption` 으로 적고 여기에 빌려 온 자료를 적는다. 빌려 온 자료 없이 팀이 정한 값이면 null 이다 (FORMATS 2절·6.1절).
     source: Text | None
     # 출처를 확인한 날. 출처가 없으면 정한 날이다.
     checked_on: date
