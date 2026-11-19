@@ -80,12 +80,14 @@ def won(amount: int | float) -> str:
 # 발표 화면에서 기본 데이터의 수치를 보일지 (PRD 17절). 11-18 화면 담당과 팀장이 "가림"을 추천했고 나머지 두 사람의 동의를 기다린다
 # ("알릴 것"의 11-18 줄). 정하기 전에도 가리는 쪽을 기본으로 둔다. 보이기로 정하면 이 값만 True 로 바꾼다.
 # 기본 데이터로 돌린 실행에서 가리는 것 (가리는 곳은 팀장이 화면 코드를 따라가 찾아 준 셋. 11-18 팀장 회신):
-# - 가상 매출의 금액: 고객군 배수로 고객군 합이 기본 데이터의 매출과 같아지게 맞춘 값이라 실제 매출 규모가 드러난다. 변화율과 지수만 보인다.
+# - 가상 매출의 금액: 방문의 무게(팀 수)를 기본 데이터의 인원으로 정해, 금액에서 실제 손님 규모가 드러난다. 변화율과 지수만 보인다.
+#   (11-19, T210 뒤로 고침. 그 전에는 고객군 합을 기본 데이터의 매출과 같아지게 맞춘 값이라 실제 매출 규모가 드러났다)
 # - 손님 수: 가중치 × 묶음 비율이라 근거 보기에서 가린 가중치를 다시 계산할 수 있다. 변화율과 지수만 보인다.
 # - 집계 파일로 채운 단가(`filled_products`): 내부 자료의 평균 단가다. 그 단가가 든 금액은 "가격 미확인"으로 보인다.
+# - 엔진이 남긴 말 속의 인원 몫(`people_coverage`): 기본 데이터의 인원에서 낸 비율이다 (11-19, T210 뒤로 엔진이 적는다. T127).
 # 가상 예시 값의 실행은 지어낸 값이라 그대로 보인다.
 SHOW_BASE_NUMBERS = False
-MASKED_AMOUNT_NOTE = "기본 데이터의 매출 규모에 맞춘 값이라 금액은 가립니다. 변화율과, 기본 시나리오를 100 으로 둔 지수만 보입니다."
+MASKED_AMOUNT_NOTE = "기본 데이터의 인원으로 정한 방문 수에서 나온 값이라 금액은 가립니다. 변화율과, 기본 시나리오를 100 으로 둔 지수만 보입니다."
 FILLED_PRICE = "가격 미확인 (내부 자료로 채움)"
 # 큰 숫자 칸(st.metric)에는 긴 글이 잘려 보여 짧게 쓰고, 까닭은 도움말에 둔다
 FILLED_PRICE_SHORT = "가격 미확인"
@@ -100,6 +102,22 @@ MASKED_IN_TEXT = "(금액 가림)"
 def mask_amounts(text: str | None) -> str | None:
     """글 안의 금액을 "(금액 가림)"으로 바꾼다. 저장된 답은 그대로 두고 보여 줄 때만 바꾼다 (재생이 깨지지 않게)."""
     return AMOUNT_RE.sub(MASKED_IN_TEXT, text) if text else text
+
+
+# 엔진이 남긴 말 가운데 기본 데이터에서 낸 수치: "집계 파일의 인원 가운데 NN.N% 를 차지한다" (engine/__main__.py, T210)
+ENGINE_COVERAGE_RE = re.compile(r"(인원 가운데 )\d+(?:\.\d+)?%")
+MASKED_SHARE = "(가림)"
+
+
+def engine_output_for_screen(text: str, data_mode: str | None) -> str:
+    """엔진이 남긴 말을 화면에 보일 모양으로 바꾼다.
+
+    남긴 말은 고쳐 쓰지 않고 그대로 보여 준다 (팀장 요청, 11-16). 다만 기본 데이터로 돌렸으면 기본 데이터에서 낸 수치만 가린다
+    (PRD 17절의 가림 규칙, T127). 어느 자료로 돌렸는지 모르면 가린다.
+    """
+    if not text or data_mode == "sample" or SHOW_BASE_NUMBERS:
+        return text
+    return ENGINE_COVERAGE_RE.sub(lambda m: m.group(1) + MASKED_SHARE, text)
 
 
 def shows_numbers(record: RunRecord) -> bool:
