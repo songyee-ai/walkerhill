@@ -18,6 +18,7 @@ from engine.formats.summary import SUMMARY_COLUMNS
 from engine.ledger import venue_shares
 from engine.llm import LlmReply
 from engine.runner import load_inputs, run
+from engine.scenarios import ScenarioError, apply_scenario, apply_with_prices
 from engine.weights import (
     MEAL_SPLIT_ID,
     base_profiles,
@@ -54,7 +55,14 @@ from tests.test_engine import (
     venue_file,
 )
 from tests.test_llm import Clock, Fake
-from tests.test_scenarios import COMPETITOR_DISCOUNT, LLM_ENV, run_scenario, write_scenario
+from tests.test_scenarios import (
+    COMPETITOR_DISCOUNT,
+    LLM_ENV,
+    new_product,
+    run_scenario,
+    scenario,
+    write_scenario,
+)
 from tools.check_formats import check
 
 GROUP = "가족·친족"
@@ -555,26 +563,163 @@ def test_price_is_filled_from_the_summary_and_rounded_to_hundreds(example_copy):
     assert load_inputs(example_copy, "private").venues["geumryong"].product("course-b").grade == "internal"
 
 
-def test_scenario_is_applied_before_prices_are_filled(example_copy):
-    """상황을 먼저 적용한다. 업장의 모든 상품을 퍼센트로 바꿔도 채운 단가는 그대로다 (docs/FORMATS.md 3절)."""
-    without_price(example_copy)
-    scenario_id = write_scenario(
+def test_percent_change_reaches_filled_prices(example_copy):
+    """단가를 먼저 채우고 상황을 적용한다. 업장 전체와 상품 하나의 퍼센트 변경이 채운 단가에도 걸린다 (docs/FORMATS.md 3절, T223)."""
+    without_price(example_copy)  # 코스 B 는 가상 예시 값으로 채우면 200,000원이다
+    every = write_scenario(
         example_copy,
         "our_price",
         {"op": "change_price_pct", "venue_id": "geumryong", "product_id": None, "pct": 10},
         scenario_id="geumryong-all-up",
     )
-    venue = load_inputs(example_copy, "sample", scenario_id).venues["geumryong"]
-    assert (venue.product("course-a").price, venue.product("course-b").price) == (165000, 200000)
-    # 값을 정하려면 set_price 를 쓴다. 그러면 채우지 않는다.
-    set_id = write_scenario(
+    inputs = load_inputs(example_copy, "sample", every)
+    venue = inputs.venues["geumryong"]
+    assert (venue.product("course-a").price, venue.product("course-b").price) == (165000, 220000)
+    # 오른 값도 채운 단가다. 등급과 가격 표기는 채울 때의 것 그대로다.
+    assert (venue.product("course-b").price_basis, venue.product("course-b").grade) == ("included", "assumption")
+    assert inputs.filled == ["geumryong:course-b"]
+
+    one = write_scenario(
         example_copy,
         "our_price",
-        {"op": "set_price", "venue_id": "geumryong", "product_id": "course-b", "price": 210000},
-        scenario_id="geumryong-course-b-price",
+        {"op": "change_price_pct", "venue_id": "geumryong", "product_id": "course-b", "pct": -10},
+        scenario_id="geumryong-course-b-down",
     )
-    inputs = load_inputs(example_copy, "sample", set_id)
-    assert inputs.venues["geumryong"].product("course-b").price == 210000 and inputs.filled == []
+    inputs = load_inputs(example_copy, "sample", one)
+    assert inputs.venues["geumryong"].product("course-b").price == 180000 and inputs.filled == ["geumryong:course-b"]
+    # 형식 검사도 같은 순서로 적용해 본다. 가상 예시 값으로 채우는 상품이라 상품 하나를 가리켜도 막지 않는다.
+    scenario_problems = [str(p) for p in check(example_copy) if p.path.startswith("scenarios/")]
+    assert scenario_problems == []
+
+    # 집계 파일에 없어 채우지 못하는 상품을 상품 하나로 가리키면 형식 검사가 막는다 (엔진도 멈춘다).
+    summary = example_copy / "data" / "samples" / "base_summary.csv"
+    summary.write_text(
+        "".join(row for row in summary.read_text(encoding="utf-8-sig").splitlines(keepends=True) if ",course-b," not in row),
+        encoding="utf-8-sig",
+        newline="",
+    )
+    found = [p.message for p in check(example_copy) if p.path == "scenarios/geumryong-course-b-down.json"]
+    assert len(found) == 1 and "가격이 비어 있어" in found[0]
+    with pytest.raises(ScenarioError, match="가격이 비어 있어"):
+        load_inputs(example_copy, "sample", one)
+
+
+def test_format_check_says_when_it_applied_without_filled_prices(example_copy):
+    """가상 예시 값을 읽지 못하면 형식 검사는 단가를 채우지 않고 적용한다. 그때 나온 상황 오류에는 그 사실을 붙인다 (T223)."""
+    without_price(example_copy)
+    one = write_scenario(
+        example_copy,
+        "our_price",
+        {"op": "change_price_pct", "venue_id": "geumryong", "product_id": "course-b", "pct": 10},
+        scenario_id="geumryong-course-b-up",
+    )
+    where = f"scenarios/{one}.json"
+    assert [p for p in check(example_copy) if p.path == where] == []  # 읽을 수 있으면 채워서 적용해 통과한다
+
+    summary = example_copy / "data" / "samples" / "base_summary.csv"
+    header, first, *rest = summary.read_text(encoding="utf-8-sig").splitlines(keepends=True)
+    cells = first.rstrip("\n").split(",")
+    cells[SUMMARY_COLUMNS.index("quantity")] = "많음"  # 숫자가 아니라 읽지 못한다
+    summary.write_text("".join([header, ",".join(cells) + "\n", *rest]), encoding="utf-8-sig", newline="")
+    found = [p.message for p in check(example_copy) if p.path == where]
+    assert len(found) == 1 and "가격이 비어 있어" in found[0]
+    assert found[0].endswith("(가상 예시 값을 읽지 못해 단가를 채우지 않고 적용함)")
+
+
+def unpriced_with_basis(product_id: str = "course-b", basis: str = "excluded_vat") -> dict[str, Venue]:
+    """금룡의 상품 하나를 가격이 빈 상품으로 바꾼다. 채우면 표기가 included 로 바뀌는 것을 보려고 표기를 다르게 둔다."""
+    data = VENUES["geumryong"].model_dump(mode="json")
+    product_of(data, product_id).update(price=None, grade="unknown", price_basis=basis)
+    return {"geumryong": Venue.model_validate(data)}
+
+
+SET_B = {"op": "set_price", "venue_id": "geumryong", "product_id": "course-b", "price": 210000}
+EVERY_UP = {"op": "change_price_pct", "venue_id": "geumryong", "product_id": None, "pct": 10}
+REMOVE_B = {"op": "remove_product", "venue_id": "geumryong", "product_id": "course-b"}
+
+
+ADD_B = {"op": "add_product", "venue_id": "geumryong", "product": new_product("course-b", price=None, grade="unknown")}
+
+
+@pytest.mark.parametrize(
+    "kind, changes",
+    [
+        ("our_price", [SET_B]),
+        ("our_price", [SET_B, EVERY_UP]),
+        ("our_price", [SET_B, {"op": "change_price_pct", "venue_id": "geumryong", "product_id": "course-b", "pct": -10}]),
+        ("our_price", [SET_B, REMOVE_B]),
+        ("our_price", [REMOVE_B]),
+        ("our_price", [{"op": "set_price", "venue_id": "geumryong", "product_id": "course-a", "price": 140000}]),
+        ("our_price", [EVERY_UP, SET_B]),
+        ("our_promo", [REMOVE_B, ADD_B]),
+        ("our_promo", [SET_B, REMOVE_B, ADD_B]),
+        ("our_promo", [REMOVE_B, ADD_B, SET_B]),
+    ],
+    ids=[
+        "set",
+        "set-then-every",
+        "set-then-one",
+        "set-then-remove",
+        "remove",
+        "set-priced",
+        "every-then-set",
+        "remove-then-add",
+        "set-remove-add",
+        "remove-add-set",
+    ],
+)
+def test_set_price_gives_the_same_result_as_the_old_order(kind, changes):
+    """set_price 로 값을 정한 상품은 채운 상품이 아니다. 상황을 먼저 적용하고 채우던 때(11-20 까지)와 결과가 같다 (T223)."""
+    venues = unpriced_with_basis()
+    rows = rows_of(line("geumryong", "course-b", "dinner", "weekday", 10, 100000))
+    applied = scenario(kind, *changes)
+    old = fill_prices(apply_scenario(venues, applied), rows, "private")
+    assert apply_with_prices(venues, applied, rows, "private") == old
+
+
+def test_set_price_on_a_filled_product_keeps_the_venue_grade_and_basis():
+    venues = unpriced_with_basis()
+    rows = rows_of(line("geumryong", "course-b", "dinner", "weekday", 10, 100000))
+    applied, filled = apply_with_prices(venues, scenario("our_price", SET_B), rows, "private")
+    course = applied["geumryong"].product("course-b")
+    assert (course.price, course.price_basis, course.grade) == (210000, "excluded_vat", "unknown") and filled == []
+    # 값을 정하지 않으면 채운 단가에 퍼센트가 걸리고 채운 상품으로 남는다.
+    applied, filled = apply_with_prices(venues, scenario("our_price", EVERY_UP), rows, "private")
+    course = applied["geumryong"].product("course-b")
+    assert (course.price, course.price_basis, course.grade) == (121000, "included", "internal")
+    assert filled == ["geumryong:course-b"]
+
+
+def test_product_added_without_a_price_is_filled_after_the_scenario():
+    """상황이 더한 가격 빈 상품은 다 적용한 뒤에 채운다. 그래서 그 상황의 퍼센트 변경은 받지 않는다 (docs/FORMATS.md 3절)."""
+    venues = {"geumryong": VENUES["geumryong"]}
+    rows = rows_of(line("geumryong", "tea", "dinner", "weekday", 10, 10000))
+    added = scenario(
+        "our_promo",
+        {"op": "add_product", "venue_id": "geumryong", "product": new_product("tea", price=None, grade="unknown")},
+        EVERY_UP,
+    )
+    applied, filled = apply_with_prices(venues, added, rows, "sample")
+    tea = applied["geumryong"].product("tea")
+    assert (tea.price, tea.price_basis, tea.grade) == (11000, "included", "assumption") and filled == ["geumryong:tea"]
+    assert applied["geumryong"].product("course-a").price == 165000
+    # 집계 파일에 없으면 채우지 못해 가격이 빈 채로 남는다 (후보에서 빠진다).
+    applied, filled = apply_with_prices(venues, added, [], "sample")
+    assert applied["geumryong"].product("tea").price is None and filled == []
+
+
+def test_percent_change_on_a_price_nobody_could_fill_stops():
+    venues = unpriced_with_basis()
+    one = scenario("our_price", {"op": "change_price_pct", "venue_id": "geumryong", "product_id": "course-b", "pct": 10})
+    with pytest.raises(ScenarioError, match="가격이 비어 있어"):
+        apply_with_prices(venues, one, [], "sample")
+    # 업장 전체는 가격이 있는 상품만 바꾼다. 바꿀 것이 하나도 없으면 멈춘다.
+    applied, filled = apply_with_prices(venues, scenario("our_price", EVERY_UP), [], "sample")
+    assert [p.price for p in applied["geumryong"].products] == [165000, None] and filled == []
+    data = venues["geumryong"].model_dump(mode="json")
+    product_of(data, "course-a").update(price=None, grade="unknown")
+    with pytest.raises(ScenarioError, match="바뀌는 것이 없다"):
+        apply_with_prices({"geumryong": Venue.model_validate(data)}, scenario("our_price", EVERY_UP), [], "sample")
 
 
 def unpriced(venue: Venue, *product_ids: str) -> Venue:
