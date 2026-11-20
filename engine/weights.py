@@ -78,6 +78,15 @@ def summary_constants_path(root: Path, data_mode: str) -> Path:
     return summary.with_name(summary.stem + "_constants.json") if data_mode == "sample" else summary.with_name("summary_constants.json")
 
 
+def estimated_constants_path(root: Path, data_mode: str) -> Path:
+    """추정한 상수 파일의 자리 (docs/FORMATS.md 6.1절, T212): 집계 파일 옆이다.
+
+    기본 데이터는 `private/base/estimated_constants.json`, 가상 예시는 `data/samples/base_estimated_constants.json`. 없어도 된다 (`engine.estimate` 가 쓴다).
+    """
+    summary = summary_path(root, data_mode)
+    return summary.with_name("base_estimated_constants.json" if data_mode == "sample" else "estimated_constants.json")
+
+
 def read_summary(path: Path) -> list[SummaryRow]:
     """집계 파일을 읽는다. 줄 하나라도 형식에 맞지 않으면 멈춘다 (틀린 줄을 빼고 돌리면 가중치가 조용히 틀린다)."""
     if not path.is_file():
@@ -286,6 +295,34 @@ def group_venue_revenue(
         used = sum(part for condition_id, part, _ in _parts(row, conditions, split, ours) if condition_id is not None)
         if used:
             groups[row.customer_group][row.venue_id] += row.revenue_net * used
+    return {group: dict(by_venue) for group, by_venue in groups.items()}
+
+
+def group_venue_people(
+    rows: list[SummaryRow],
+    conditions: list[Condition],
+    splits: list[AssumedSplit],
+    venues: dict[str, Venue],
+    parties: dict[str, float],
+) -> dict[str, dict[str, float]]:
+    """고객군마다, 워커힐 업장마다의 기본 데이터 인원. 상수 추정(`engine.estimate`, T212)에서 맞출 업장 몫의 기준이다.
+
+    `group_people` 과 같은 줄을 같은 몫으로 센다 (돌리는 조건에 드는 몫만, 조식과 돌리지 않는 조건은 뺀다, 빈 칸인 포장은 팀 × 평균 일행 수).
+    그래서 한 고객군의 업장별 인원을 더하면 `group_people` 의 그 고객군 합계와 같다.
+    """
+    fallback = sum(parties.values()) / len(parties) if parties else 1.0
+    split = next((s for s in splits if s.split_id == MEAL_SPLIT_ID), None)
+    ours = {venue_id: venue for venue_id, venue in venues.items() if not venue.is_competitor}
+    groups: dict[str, dict[str, float]] = defaultdict(lambda: defaultdict(float))
+    for row in rows:
+        if row.venue_id not in ours:
+            continue
+        people = people_of(row, parties.get(row.customer_group, fallback))
+        if people == 0:
+            continue
+        used = sum(part for condition_id, part, _ in _parts(row, conditions, split, ours) if condition_id is not None)
+        if used:
+            groups[row.customer_group][row.venue_id] += people * used
     return {group: dict(by_venue) for group, by_venue in groups.items()}
 
 
