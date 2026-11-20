@@ -110,6 +110,18 @@
       "owner": "wilstein91"
     },
     {
+      "constant_id": "share-sharpness-k",
+      "name": "방문의 몫을 낼 때 AI 점수에 거는 지수 (날카로움 k)",
+      "value": 1,
+      "unit": null,
+      "used_in": "engine/shares.py 의 places (FORMATS 10.2절의 choice_share, T212)",
+      "grade": "assumption",
+      "sources": [],
+      "checked_on": "2026-11-20",
+      "note": "그곳의 몫 = (AI 점수^k) × 업장 상수를 합이 1 이 되게 나눈 것. 1 은 점수를 그대로 몫으로 쓴다. 상수 추정(T212) 전의 처음 값이다. 업장 상수(share-venue-constant-<venue_id>)가 적히지 않은 곳과 이용하지 않음은 1 이다. 점수가 없는 답(1단계 방식)에는 쓰이지 않는다",
+      "owner": "wilstein91"
+    },
+    {
       "constant_id": "price-sensitivity-threshold-high",
       "name": "가격 민감도 높음: 망설이기 시작하는 인상 폭",
       "value": 5,

@@ -27,7 +27,7 @@ from dotenv import load_dotenv
 
 from engine.answers import read_reply
 from engine.candidates import build_request, run_condition
-from engine.formats.choice import ChoiceRequest, problems_in_response
+from engine.formats.choice import ChoiceRequest, problems_in_response, scores_required
 from engine.formats.persona import Persona
 from engine.ledger import amount_problems
 from engine.llm import (
@@ -92,7 +92,13 @@ def score_problems(scores: Any, places: list[str]) -> list[str]:
 
 
 def ask_once(provider: Provider, system: str, request: ChoiceRequest, venues: dict, with_scores: bool) -> dict[str, Any]:
-    """한 번 묻는다. 고른 곳, 점수, 어긋난 점, 토큰을 돌려준다. 호출이 실패해도 결과에 남긴다 (LlmFatal 만 위로 올린다)."""
+    """한 번 묻는다. 고른 곳, 점수, 어긋난 점, 토큰을 돌려준다. 호출이 실패해도 결과에 남긴다 (LlmFatal 만 위로 올린다).
+
+    점수를 묻는 판(`p4` 처럼 `SINGLE_ANSWER_PROMPTS` 밖, T212)이면 본 실행과 같은 응답의 모양(`scores`)으로 묻고, 지시를 덧붙이지 않는다
+    (그 판의 프롬프트에 지시가 있다). 그때는 여러 번 묻기도 점수를 함께 받는다.
+    """
+    if scores_required(request.prompt_version):
+        return _ask_scoring_prompt(provider, system, request, venues)
     schema = score_schema(request) if with_scores else response_schema(request)
     try:
         reply = provider.complete(system + (SCORE_NOTE if with_scores else ""), user_message(request), schema)
@@ -119,6 +125,27 @@ def ask_once(provider: Provider, system: str, request: ChoiceRequest, venues: di
     return {
         "chosen": chosen,
         "scores": {s["venue_id"]: s["percent"] for s in scores} if isinstance(scores, list) else None,
+        "problems": problems,
+        "tokens_in": reply.input_tokens,
+        "tokens_out": reply.output_tokens,
+        "raw": reply.text,
+    }
+
+
+def _ask_scoring_prompt(provider: Provider, system: str, request: ChoiceRequest, venues: dict) -> dict[str, Any]:
+    """점수를 묻는 판으로 한 번 묻는다. 답의 검사는 본 실행과 같다 (`problems_in_response`, `amount_problems`)."""
+    try:
+        reply = provider.complete(system, user_message(request), response_schema(request))
+    except LlmError as exc:
+        if isinstance(exc, LlmFatal):
+            raise
+        return {"chosen": None, "scores": None, "problems": [str(exc)], "tokens_in": 0, "tokens_out": 0, "raw": None}
+    response, problems = read_reply(reply.text)
+    if response is not None:
+        problems = problems_in_response(request, response) or amount_problems(request, response, venues)
+    return {
+        "chosen": (response.choice.venue_id or NONE) if response is not None else None,
+        "scores": {(s.venue_id or NONE): s.percent for s in response.scores} if response is not None and response.scores else None,
         "problems": problems,
         "tokens_in": reply.input_tokens,
         "tokens_out": reply.output_tokens,

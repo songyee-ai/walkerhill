@@ -132,6 +132,10 @@ def violations(
     `month` 에는 그 실행의 달(실행 기록의 `month`)을 꼭 준다. 일 년 전체로 돌린 실행이면 None 이다.
     빼먹고 볼 수 없게 기본값을 두지 않았다 (달을 주고 돌린 실행을 None 으로 보면 모든 방문이 "조건 불일치"로 나온다).
 
+    방문이 몫으로 나뉘어 여러 업장에 갔으면 (점수가 있는 답, docs/FORMATS.md 10.2절, T212) 업장마다 따로 본다:
+    주문의 규칙, 예산(그 업장의 주문만), 파는 달의 몫과 그 업장의 "파는 달이 아님" 줄(`season_gap_of`). 그 업장은 저장된 응답의
+    `scores` 에서 점수가 0 보다 커야 한다. 점수가 없는 답(1단계 방식)은 고른 곳 하나이고 "이용하지 않음" 줄은 모두 그 곳의 나머지 몫이다.
+
     `status` 가 ok 인 줄만 본다. 방문의 조건은 그 줄의 `request_hash` 가 가리키는 저장된 응답의 요청에서 읽되,
     그 조건이 페르소나 정의와 묶음에서 나온 것인지도 따로 견준다. 예산의 한도는 페르소나 정의에서 낸다.
 
@@ -155,106 +159,128 @@ def violations(
             found.append(f"{visit_id} — {kind}: {detail}")
 
         entry = saved.get(bought[0].request_hash or "")
-        venue = venues.get(bought[0].venue_id or "")
         if entry is None:
             bad("응답 없음", "저장된 응답이 없는 방문이 업장을 골랐다")
             continue
-        if venue is None:
-            bad("없는 업장", f"'{bought[0].venue_id}'")
-            continue
-        condition: RunCondition = entry.request.condition
-        for problem in _condition_problems(
-            bought[0], condition, entry.request.persona.get("persona_id"), personas, bundle, month
-        ):
-            bad("조건 불일치", problem)
-        people = condition.adults + condition.children
-
-        if condition.occasion not in venue.occasions:
-            bad("다른 이용 상황의 업장", f"'{venue.venue_id}' 에는 {condition.occasion} 가 없다")
-        if venue.hours is not None and not any(
-            h.meal == condition.meal and h.day_type in (condition.day_type, "all") for h in venue.hours
-        ):
-            bad("운영 시간 밖", f"'{venue.venue_id}' 는 그 끼니·요일에 영업하지 않는다")
-        if condition.month is not None and venue.months is not None and condition.month not in venue.months:
-            bad("파는 달이 아님", f"'{venue.venue_id}' 는 {condition.month}월에 영업하지 않는다")
-        if venue.reservation is not None:
-            low, high = venue.reservation.party_min, venue.reservation.party_max
-            if high is not None and people > high:
-                bad("인원 초과", f"{people}명인데 '{venue.venue_id}' 는 {high}명까지 받는다")
-            if low is not None and people < low:
-                bad("예약 조건 위반", f"{people}명인데 '{venue.venue_id}' 는 {low}명부터 받는다")
-
-        mains: list[Product] = []
-        main_rows: list[LedgerRow] = []
-        extras: list[Product] = []
-        covered = {"adult": False, "child": False}
+        # 방문은 몫으로 나뉘어 여러 곳에 갈 수 있다 (docs/FORMATS.md 10.2절, T212). 업장마다 따로 본다.
+        first = bought[0]
+        places: dict[str, list[LedgerRow]] = defaultdict(list)
         for row in bought:
-            product = venue.product(row.product_id or "")
-            if product is None:
-                bad("없는 상품", f"'{row.product_id}' 가 '{venue.venue_id}' 에 없다")
+            places[row.venue_id or ""].append(row)
+        scores = entry.response.scores
+        nothing = [row for row in visit_rows if row.choice_kind == "none"]
+        condition: RunCondition = entry.request.condition
+        checked = False
+        for venue_id, place in places.items():
+            venue = venues.get(venue_id)
+            if venue is None:
+                bad("없는 업장", f"'{venue_id}'")
                 continue
-            if product.occasion != condition.occasion:
-                bad("다른 이용 상황의 업장", f"상품 '{product.product_id}' 는 {product.occasion} 상품이다")
-            if not any(s.meal == condition.meal and s.day_type in (condition.day_type, "all") for s in product.slots):
-                bad("운영 시간 밖", f"상품 '{product.product_id}' 는 그 끼니·요일에 팔지 않는다")
-            if condition.month is not None and condition.month not in _months(venue, product):
-                bad("파는 달이 아님", f"상품 '{product.product_id}' 는 {condition.month}월에 팔지 않는다")
-            if product.price is None or row.list_price != _paid_price(product.price, product.price_basis):
-                bad("금액 불일치", f"상품 '{product.product_id}' 의 표시가가 업장 정의와 다르다")
-            if row.unit != product.unit:
-                bad("금액 불일치", f"상품 '{product.product_id}' 의 단위가 업장 정의와 다르다")
+            # 조건은 방문에 하나라 한 번만 본다.
+            if not checked:
+                checked = True
+                for problem in _condition_problems(
+                    first, condition, entry.request.persona.get("persona_id"), personas, bundle, month
+                ):
+                    bad("조건 불일치", problem)
+            if scores is None:
+                # 점수가 없는 답(1단계 방식)은 고른 곳 하나뿐이라 "이용하지 않음" 줄은 모두 그 곳의 나머지 몫이다.
+                # 고른 곳과 원장의 업장이 다른지는 형식 검사가 본다 (점수가 없는 답의 점검은 11-20 전과 같게 둔다).
+                gaps = nothing
+            else:
+                # 점수가 있는 답: 그 업장의 줄은 scores 에서 점수가 0 보다 큰 곳의 주문이고,
+                # 그 업장의 "파는 달이 아님" 줄은 season_gap_of 로 가른다 ("이용하지 않음"의 몫을 센 줄은 season_gap_of 가 빈 칸).
+                score = entry.response.score(venue_id)
+                if score is None or score.percent == 0:
+                    bad("응답과 다른 곳", f"저장된 응답의 scores 에서 '{venue_id}' 의 점수가 없거나 0 이다")
+                gaps = [row for row in nothing if row.season_gap_of == venue_id]
+            people = condition.adults + condition.children
 
-            if product.qty_rule == "choice":
-                extras.append(product)
-                if row.quantity > (product.qty_max or 0):
-                    bad("수량 초과", f"상품 '{product.product_id}' 를 qty_max 보다 많이 샀다")
-                # 추가 상품에는 프로모션 할인을 적용하지 않는다 (11-16 회의. FORMATS 3절). 0 이어야 한다.
-                if row.discount != 0:
-                    bad("금액 불일치", f"추가 상품 '{product.product_id}' 의 줄에 할인이 있다")
-                continue
-            mains.append(product)
-            main_rows.append(row)
-            heads = {"adult": condition.adults, "child": condition.children, "all": people}[product.audience]
-            wanted = heads if product.qty_rule == "per_person" else int(
-                (Decimal(heads) / product.serves).to_integral_value(rounding=ROUND_CEILING)
+            if condition.occasion not in venue.occasions:
+                bad("다른 이용 상황의 업장", f"'{venue.venue_id}' 에는 {condition.occasion} 가 없다")
+            if venue.hours is not None and not any(
+                h.meal == condition.meal and h.day_type in (condition.day_type, "all") for h in venue.hours
+            ):
+                bad("운영 시간 밖", f"'{venue.venue_id}' 는 그 끼니·요일에 영업하지 않는다")
+            if condition.month is not None and venue.months is not None and condition.month not in venue.months:
+                bad("파는 달이 아님", f"'{venue.venue_id}' 는 {condition.month}월에 영업하지 않는다")
+            if venue.reservation is not None:
+                low, high = venue.reservation.party_min, venue.reservation.party_max
+                if high is not None and people > high:
+                    bad("인원 초과", f"{people}명인데 '{venue.venue_id}' 는 {high}명까지 받는다")
+                if low is not None and people < low:
+                    bad("예약 조건 위반", f"{people}명인데 '{venue.venue_id}' 는 {low}명부터 받는다")
+
+            mains: list[Product] = []
+            main_rows: list[LedgerRow] = []
+            extras: list[Product] = []
+            covered = {"adult": False, "child": False}
+            for row in place:
+                product = venue.product(row.product_id or "")
+                if product is None:
+                    bad("없는 상품", f"'{row.product_id}' 가 '{venue.venue_id}' 에 없다")
+                    continue
+                if product.occasion != condition.occasion:
+                    bad("다른 이용 상황의 업장", f"상품 '{product.product_id}' 는 {product.occasion} 상품이다")
+                if not any(s.meal == condition.meal and s.day_type in (condition.day_type, "all") for s in product.slots):
+                    bad("운영 시간 밖", f"상품 '{product.product_id}' 는 그 끼니·요일에 팔지 않는다")
+                if condition.month is not None and condition.month not in _months(venue, product):
+                    bad("파는 달이 아님", f"상품 '{product.product_id}' 는 {condition.month}월에 팔지 않는다")
+                if product.price is None or row.list_price != _paid_price(product.price, product.price_basis):
+                    bad("금액 불일치", f"상품 '{product.product_id}' 의 표시가가 업장 정의와 다르다")
+                if row.unit != product.unit:
+                    bad("금액 불일치", f"상품 '{product.product_id}' 의 단위가 업장 정의와 다르다")
+
+                if product.qty_rule == "choice":
+                    extras.append(product)
+                    if row.quantity > (product.qty_max or 0):
+                        bad("수량 초과", f"상품 '{product.product_id}' 를 qty_max 보다 많이 샀다")
+                    # 추가 상품에는 프로모션 할인을 적용하지 않는다 (11-16 회의. FORMATS 3절). 0 이어야 한다.
+                    if row.discount != 0:
+                        bad("금액 불일치", f"추가 상품 '{product.product_id}' 의 줄에 할인이 있다")
+                    continue
+                mains.append(product)
+                main_rows.append(row)
+                heads = {"adult": condition.adults, "child": condition.children, "all": people}[product.audience]
+                wanted = heads if product.qty_rule == "per_person" else int(
+                    (Decimal(heads) / product.serves).to_integral_value(rounding=ROUND_CEILING)
+                )
+                if row.quantity != wanted:
+                    bad("금액 불일치", f"상품 '{product.product_id}' 의 수량이 수량 규칙과 다르다")
+                for who in ("adult", "child"):
+                    covered[who] = covered[who] or product.audience in (who, "all")
+
+            # 주문의 줄에 적힌 할인이 업장 정의의 프로모션으로 낸 값과 같은가. 할인이 틀리면 낸 금액도, 아래의 예산도 틀린다.
+            for row, cut in zip(main_rows, _expected_discounts(venue, condition, main_rows, mains), strict=True):
+                if row.discount != cut:
+                    bad("금액 불일치", f"상품 '{row.product_id}' 의 할인이 프로모션 규칙으로 낸 값({cut}원)과 다르다")
+
+            # 예산의 max 는 산 것 전부(주문 + 추가 상품)와 견준다 (docs/FORMATS.md 9절).
+            # 한도는 요청이 아니라 페르소나 정의에서 낸다. 요청의 예산이 틀렸으면 그 틀린 한도로는 넘은 것을 알 수 없다.
+            # 화면에서 직접 넣은 조건(manual-)과 정의가 없는 페르소나는 견줄 정의가 없어 요청의 값을 쓴다.
+            persona = None if first.condition_id.startswith(MANUAL_CONDITION_PREFIX) else personas.get(first.persona_id)
+            budget = persona.budget if persona else condition.budget
+            heads = persona.visit.party.adults + persona.visit.party.children if persona else people
+            spent = sum(row.paid for row in place)
+            limit = budget.max * heads if budget.basis == "per_person" else budget.max
+            if spent > limit:
+                bad("예산 초과", f"{spent}원을 냈는데 예산의 max 로는 {limit}원까지다")
+            if mains and not (covered["adult"] and (covered["child"] or condition.children == 0)):
+                bad("인원 초과", "일행 가운데 몫이 없는 사람이 있다")
+
+            # 방문의 몫: 주문(없으면 산 추가 상품)을 모두 함께 파는 달 수 ÷ 12. 조건에 달이 있으면 1 이다 (10.2절).
+            months = _EVERY_MONTH
+            for product in mains or extras:
+                months &= _months(venue, product)
+            share = 1.0 if condition.month is not None else len(months) / 12
+            gap_ok = (
+                not gaps if share > 1 - _SHARE_TOLERANCE
+                else len(gaps) == 1 and abs(gaps[0].counted_share - (1 - share)) <= _SHARE_TOLERANCE
             )
-            if row.quantity != wanted:
-                bad("금액 불일치", f"상품 '{product.product_id}' 의 수량이 수량 규칙과 다르다")
-            for who in ("adult", "child"):
-                covered[who] = covered[who] or product.audience in (who, "all")
-
-        # 주문의 줄에 적힌 할인이 업장 정의의 프로모션으로 낸 값과 같은가. 할인이 틀리면 낸 금액도, 아래의 예산도 틀린다.
-        for row, cut in zip(main_rows, _expected_discounts(venue, condition, main_rows, mains), strict=True):
-            if row.discount != cut:
-                bad("금액 불일치", f"상품 '{row.product_id}' 의 할인이 프로모션 규칙으로 낸 값({cut}원)과 다르다")
-
-        # 예산의 max 는 산 것 전부(주문 + 추가 상품)와 견준다 (docs/FORMATS.md 9절).
-        # 한도는 요청이 아니라 페르소나 정의에서 낸다. 요청의 예산이 틀렸으면 그 틀린 한도로는 넘은 것을 알 수 없다.
-        # 화면에서 직접 넣은 조건(manual-)과 정의가 없는 페르소나는 견줄 정의가 없어 요청의 값을 쓴다.
-        persona = None if bought[0].condition_id.startswith(MANUAL_CONDITION_PREFIX) else personas.get(bought[0].persona_id)
-        budget = persona.budget if persona else condition.budget
-        heads = persona.visit.party.adults + persona.visit.party.children if persona else people
-        spent = sum(row.paid for row in bought)
-        limit = budget.max * heads if budget.basis == "per_person" else budget.max
-        if spent > limit:
-            bad("예산 초과", f"{spent}원을 냈는데 예산의 max 로는 {limit}원까지다")
-        if mains and not (covered["adult"] and (covered["child"] or condition.children == 0)):
-            bad("인원 초과", "일행 가운데 몫이 없는 사람이 있다")
-
-        # 방문의 몫: 주문(없으면 산 추가 상품)을 모두 함께 파는 달 수 ÷ 12. 조건에 달이 있으면 1 이다 (10.2절).
-        months = _EVERY_MONTH
-        for product in mains or extras:
-            months &= _months(venue, product)
-        share = 1.0 if condition.month is not None else len(months) / 12
-        gaps = [row for row in visit_rows if row.choice_kind == "none"]
-        gap_ok = (
-            not gaps if share > 1 - _SHARE_TOLERANCE
-            else len(gaps) == 1 and abs(gaps[0].counted_share - (1 - share)) <= _SHARE_TOLERANCE
-        )
-        if any(abs(row.counted_share - share) > _SHARE_TOLERANCE for row in bought) or not gap_ok:
-            bad("몫 불일치", f"그 업장의 것으로 세는 몫은 {share} 여야 하고, 나머지는 '이용하지 않음' 줄 하나여야 한다")
-        if condition.month is None and mains:
-            for product in extras:
-                if not months <= _months(venue, product):
-                    bad("몫 불일치", f"추가 상품 '{product.product_id}' 는 주문을 파는 달 가운데 팔지 않는 달이 있다")
+            if any(abs(row.counted_share - share) > _SHARE_TOLERANCE for row in place) or not gap_ok:
+                bad("몫 불일치", f"그 업장의 것으로 세는 몫은 {share} 여야 하고, 나머지는 '이용하지 않음' 줄 하나여야 한다")
+            if condition.month is None and mains:
+                for product in extras:
+                    if not months <= _months(venue, product):
+                        bad("몫 불일치", f"추가 상품 '{product.product_id}' 는 주문을 파는 달 가운데 팔지 않는 달이 있다")
     return found

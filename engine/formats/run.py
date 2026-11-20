@@ -149,6 +149,10 @@ class RunRecord(FormatModel):
     # 기준이 아닌 상황에서, 바꾼 업장과 상관없어 원장을 기준의 답으로 적은 방문 (10.1절, T210 의 임시 규칙). 기준 상황은 null 이다.
     # 11-19 전의 실행 기록에는 없다.
     baseline_answers: list[Text] | None = None
+    # 방문의 몫을 낸 방식 (T212): `single` 모든 방문이 답 하나(점수 없음, 1단계 방식)라 고른 곳의 몫이 1,
+    # `scores` 모든 방문이 점수를 받은 답(2단계 방식), `mixed` 둘이 섞였다. 답이 하나도 없으면(후보 없음·실패뿐) `single` 이다.
+    # 11-20 전의 실행 기록에는 없다 (그 실행은 모두 1단계 방식이다).
+    share_method: Literal["single", "scores", "mixed"] | None = None
 
     @model_validator(mode="after")
     def _rules(self) -> Self:
@@ -190,6 +194,9 @@ LEDGER_COLUMNS = [
     "revenue_net",
     "represented",
     "counted_share",
+    "choice_share",
+    "score",
+    "season_gap_of",
     "weighted_revenue",
     "reason_labels",
     "reason_text",
@@ -221,6 +228,13 @@ class LedgerRow(FormatModel):
     revenue_net: Won
     represented: float = Field(ge=0)
     counted_share: float = Field(ge=0, le=1)
+    # 이 곳으로 간 방문의 몫 (2단계 방식, T212). 답 하나로 고른 방문(1단계 방식)은 1 이다.
+    # 11-20 전의 원장에는 이 열이 없어 1 로 읽는다 (`engine.formats.io.ADDED_LATER`).
+    choice_share: float = Field(default=1.0, ge=0, le=1)
+    # 이 곳에 AI 가 적은 점수 (0 ~ 100). 1단계 방식의 답과 응답 없이 엔진이 정한 줄은 빈 칸이다.
+    score: int | None = Field(default=None, ge=0, le=100)
+    # 일부 달에만 파는 곳의 나머지 몫을 센 "이용하지 않음" 줄이면 그 곳의 venue_id. 그 밖에는 빈 칸이다.
+    season_gap_of: Id | None = None
     weighted_revenue: float = Field(ge=0)
     reason_labels: list[str]
     reason_text: str | None
@@ -250,6 +264,8 @@ class LedgerRow(FormatModel):
             return self
         if self.fail_reason:
             raise ValueError("fail_reason 은 실패한 줄에만 적는다")
+        if self.season_gap_of is not None and self.choice_kind != "none":
+            raise ValueError("season_gap_of 는 파는 달이 아닌 몫을 센 '이용하지 않음' 줄에만 적는다")
         if self.quantity * self.list_price - self.discount != self.paid:
             raise ValueError("paid 가 수량 × 표시가 − 할인과 다르다")
         if self.choice_kind == "none":
@@ -266,9 +282,9 @@ class LedgerRow(FormatModel):
         if self.choice_kind != "walkerhill" and self.revenue_net != 0:
             raise ValueError("경쟁 업장과 이용하지 않음의 revenue_net 은 0 이다")
         # 원장에는 원 단위로 반올림한 값을 적는다. 그래서 반올림 폭(0.5)까지는 같은 것으로 본다.
-        expected = weighted_amount(self.revenue_net, self.represented, self.counted_share)
+        expected = weighted_amount(self.revenue_net, self.represented, self.counted_share, self.choice_share)
         if abs(expected - Decimal(str(self.weighted_revenue))) > Decimal("0.5"):
-            raise ValueError("weighted_revenue 가 revenue_net × represented × counted_share 와 다르다")
+            raise ValueError("weighted_revenue 가 revenue_net × represented × counted_share × choice_share 와 다르다")
         return self
 
     @classmethod

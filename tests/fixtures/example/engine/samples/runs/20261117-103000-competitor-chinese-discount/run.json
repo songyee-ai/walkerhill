@@ -29,7 +29,7 @@
     "scenario": "0e8b0c3142b42966",
     "vocab": "8198206734bb16a5",
     "summary": "b2e533d5aec19534",
-    "constants": "4564161ba53d7ed6",
+    "constants": "a45c688652baa74c",
     "prompt": "9fee7d4f42a62d8b"
   },
   "weights": {
@@ -159,6 +159,16 @@
       "file": "engine/constants.json"
     },
     {
+      "constant_id": "share-sharpness-k",
+      "name": "방문의 몫을 낼 때 AI 점수에 거는 지수 (날카로움 k)",
+      "value": 1,
+      "unit": null,
+      "grade": "assumption",
+      "sources": [],
+      "checked_on": "2026-11-20",
+      "file": "engine/constants.json"
+    },
+    {
       "constant_id": "meal-lunch-dinner",
       "name": "집계 파일에서 끼니가 비어 있는 식사 매출",
       "value": {
@@ -172,5 +182,6 @@
       "file": "engine/conditions.json"
     }
   ],
-  "baseline_answers": []
+  "baseline_answers": [],
+  "share_method": "single"
 }

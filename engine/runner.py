@@ -17,7 +17,7 @@ from typing import Any
 from engine.answers import AnswerBook, old_style_folder, read_reply, save_rejected, save_response
 from engine.candidates import build_request, run_condition
 from engine.changes import decompose
-from engine.constants import used_constants, values_hash
+from engine.constants import load_constants, used_constants, values_hash
 from engine.formats.choice import ChoiceRequest, RunCondition, problems_in_response
 from engine.formats.conditions import MANUAL_CONDITION_PREFIX, ConditionBundle
 from engine.formats.constants import ConstantsFile
@@ -41,6 +41,7 @@ from engine.llm import (
     user_message,
 )
 from engine.scenarios import apply_scenario
+from engine.shares import ShareParams, share_params
 from engine.weights import (
     average_parties,
     base_profiles,
@@ -117,6 +118,8 @@ class Inputs:
     # 가격이 비어 있어 집계 파일로 단가를 채운 상품 (`<venue_id>:<product_id>`).
     filled: list[str]
     hashes: dict[str, str]
+    # 방문의 몫을 내는 k 와 업장 상수 (`engine/constants.json`, T212).
+    shares: ShareParams
 
 
 def runs_folder(root: Path, data_mode: str) -> Path:
@@ -224,6 +227,7 @@ def load_inputs(
             "summary": _hash_files([summary_file]),
             "constants": values_hash(),  # 결과를 바꾸는 부분만 본다 (T214)
         },
+        shares=share_params(load_constants()),
     )
 
 
@@ -372,7 +376,7 @@ def run_visit(
             usage = saved.usage
             row = rejected("replay", saved.raw_text, problems, usage.input_tokens, usage.output_tokens)
             return VisitResult([row], skipped, used_saved=True)
-        rows = visit_rows(base, request, saved.response, inputs.venues, "replay", request_hash)
+        rows = visit_rows(base, request, saved.response, inputs.venues, "replay", request_hash, inputs.shares)
         return VisitResult(rows, skipped, replayed=path, used_saved=True)
 
     if session is None:
@@ -399,7 +403,31 @@ def run_visit(
     save_response(
         run_dir / "llm", book.provider, book.model, request, response, now, reply.text, reply.input_tokens, reply.output_tokens
     )
-    return VisitResult(visit_rows(base, request, response, inputs.venues, "new", request_hash), skipped)
+    rows = visit_rows(base, request, response, inputs.venues, "new", request_hash, inputs.shares)
+    return VisitResult(rows, skipped)
+
+
+def answer_scored(rows: list[LedgerRow]) -> bool | None:
+    """방문의 원장 줄이 점수가 있는 답에서 나왔는가 (실행 기록의 `share_method`, T212). 답 없이 끝난 방문(후보 없음, 실패)은 None 이다.
+
+    점수가 있는 답의 줄은 모두 `score` 가 적혀 있고, 점수가 없는 답의 줄은 모두 비어 있다 (FORMATS 10.2절).
+    """
+    if any(r.status != "ok" for r in rows) or not any(r.request_hash for r in rows):
+        return None
+    return any(r.score is not None for r in rows)
+
+
+def _by_visit(rows: list[LedgerRow]) -> list[list[LedgerRow]]:
+    grouped: dict[str, list[LedgerRow]] = {}
+    for row in rows:
+        grouped.setdefault(row.visit_id, []).append(row)
+    return list(grouped.values())
+
+
+def share_method(visit_rows: list[list[LedgerRow]]) -> str:
+    """방문들의 원장 줄로 실행 기록의 `share_method` 를 낸다."""
+    found = {answer_scored(rows) for rows in visit_rows} - {None}
+    return "mixed" if found == {True, False} else "scores" if found == {True} else "single"
 
 
 def _summary_constants(root: Path, data_mode: str) -> tuple[ConstantsFile | None, str | None]:
@@ -691,6 +719,8 @@ def run(
                 "status": status,
                 "constants": used_constants(inputs.conditions, *_summary_constants(root, data_mode)),
                 "baseline_answers": kept_baseline if base is not None else None,
+                # 몫 방식은 원장에 적힌 줄(기준의 답으로 바꾼 방문이면 그 줄)로 낸다.
+                "share_method": share_method(_by_visit(rows)),
             },
         )
         if base is not None:
