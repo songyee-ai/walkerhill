@@ -1430,7 +1430,8 @@ run_id,scenario_id,visit_id,persona_id,customer_group,condition_id,choice_kind,v
 
 상황 실행(기준이 아닌 실행)이 끝나면 엔진이 그 실행 폴더에 함께 쓴다 (`engine/changes.py`, T210). 기준 실행(`weights_from`)과 견준 워커힐의 가상 매출 변화를
 워커힐 업장마다 갈래로 나눈 것이다 (PRD 8절의 1단계). LLM 을 부르지 않는다. 기준 실행에는 없다.
-화면이 읽는다. 11-19 현재 화면(`app/compare.py`)은 두 원장을 따로 견주고 있고, 이 파일을 읽게 바꾸는 것은 화면 담당의 일이다.
+화면이 읽는다 (`app/breakdown.py`, T124). 화면은 이 파일의 합이 두 원장으로 낸 변화와 다르면 나누기를 보이지 않는다.
+11-19 현재 방문마다의 갈래(`visits`)는 화면이 아직 쓰지 않는다.
 
 ```json
 {
