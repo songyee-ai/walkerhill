@@ -655,6 +655,8 @@ class Checker:
 
             known_products = products[venue.venue_id]
             known_promos = promos[venue.venue_id]
+            # 지도로 잰 출처(T221)는 거리에만 쓴다. 상황이 더하는 상품·프로모션도 같다.
+            measured = {s.source_id for s in venue.sources if s.kind == "measurement"}
             if change.op in ("set_price", "remove_product") or (
                 change.op == "change_price_pct" and change.product_id is not None
             ):
@@ -670,6 +672,8 @@ class Checker:
                     self.error(path, f"{where} — 상품의 occasion 이 업장의 occasions 에 없다")
                 if product.source_id is not None and product.source_id not in {s.source_id for s in venue.sources}:
                     self.error(path, f"{where} — 상품의 source_id 가 업장의 sources 에 없다")
+                if product.source_id in measured:
+                    self.error(path, f"{where} — 상품의 출처가 measurement 자료다 (지도로 잰 출처는 거리에만 쓴다)")
                 known_products.add(product.product_id)
             elif change.op == "add_promotion":
                 promotion = change.promotion
@@ -682,6 +686,8 @@ class Checker:
                     s.source_id for s in venue.sources
                 }:
                     self.error(path, f"{where} — 프로모션의 source_id 가 업장의 sources 에 없다")
+                if promotion.source_id in measured:
+                    self.error(path, f"{where} — 프로모션의 출처가 measurement 자료다 (지도로 잰 출처는 거리에만 쓴다)")
                 known_promos.add(promotion.promo_id)
             elif change.op == "remove_promotion":
                 if change.promo_id not in known_promos:

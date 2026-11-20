@@ -92,5 +92,27 @@
       "checked_on": "2026-11-13"
     }
   ],
-  "default_source_id": "S1"
+  "default_source_id": "S1",
+  "traits": {
+    "location": {
+      "value": "예시 건물 2층",
+      "source_id": null
+    },
+    "seats": {
+      "value": 80,
+      "source_id": null
+    },
+    "private_rooms": {
+      "count": 3,
+      "max_people": 12,
+      "source_id": null
+    },
+    "view": null,
+    "booking": {
+      "opens_months_before": 2,
+      "deposit": null,
+      "source_id": null
+    },
+    "distance_km": null
+  }
 }

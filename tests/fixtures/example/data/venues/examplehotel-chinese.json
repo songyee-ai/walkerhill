@@ -48,7 +48,31 @@
       "title": "예시호텔 메뉴 안내 (예시)",
       "url": "https://example.com/competitor-menu",
       "checked_on": "2026-11-13"
+    },
+    {
+      "source_id": "S2",
+      "title": "지도 경로 서버로 잰 자동차 경로, 그랜드 워커힐에서 예시호텔까지 (예시)",
+      "url": "https://example.com/route",
+      "checked_on": "2026-11-19",
+      "kind": "measurement"
     }
   ],
-  "default_source_id": "S1"
+  "default_source_id": "S1",
+  "traits": {
+    "location": {
+      "value": "예시호텔 본관 3층",
+      "source_id": null
+    },
+    "seats": null,
+    "private_rooms": null,
+    "view": {
+      "value": "도심이 내려다보이는 창가 좌석",
+      "source_id": null
+    },
+    "booking": null,
+    "distance_km": {
+      "value": 12.5,
+      "source_id": "S2"
+    }
+  }
 }
