@@ -42,6 +42,7 @@ from engine.llm import (
     user_message,
 )
 from engine.runner import BASE_PROFILE_CONFIRMED_ENV, load_inputs
+from engine.thresholds import with_price_threshold
 
 NONE = "none"
 
@@ -240,7 +241,7 @@ def main(argv: list[str] | None = None) -> int:
             condition = run_condition(inputs.conditions.condition(condition_id), persona)
             request, _ = build_request(
                 prompt_version=args.prompt,
-                persona=persona_json,
+                persona=with_price_threshold(persona_json, args.prompt, inputs.thresholds),
                 condition=condition,
                 venues=list(inputs.venues.values()),
                 vocab=inputs.vocab,
