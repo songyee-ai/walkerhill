@@ -134,6 +134,9 @@ class RunRecord(FormatModel):
     # 실행의 달 (명령의 `--month`). 묶음의 조건을 모두 이 달의 방문으로 돌렸다. 일 년 전체로 돌렸으면 null 이다.
     # 이 칸이 생기기 전(T112, 11-17)에 돌린 실행 기록에는 없다. 그 실행은 달을 주지 않고 돌린 것이라 null 로 읽는다.
     month: Month | None = None
+    # 집계 파일을 이 달까지만 읽었다 (명령의 `--data-until`, 6단계의 되돌려 맞혀 보기, T224). 일 년 전체를 읽었으면 null 이다.
+    # 이 칸이 생기기 전(11-20)의 실행 기록에는 없다. 그 실행은 일 년 전체를 읽은 것이라 null 로 읽는다.
+    data_until: Annotated[int, Field(ge=1, le=11)] | None = None
     llm: LlmInfo
     base_profile_mode: BaseProfileMode
     inputs: dict[str, str]

@@ -211,6 +211,12 @@ SAVED_RESPONSE = Kind("저장된 LLM 응답", _RUN + r"/llm(?:_rejected)?/[^/]+\
 CALIBRATION = Kind("보정의 대조 결과", _RUN + r"/calibration\.json", _RUN_WHERE)
 CHANGES = Kind("매출 변화 나누기", _RUN + r"/changes\.json", _RUN_WHERE)
 CROSSCHECK = Kind("다른 고객군에 써 보기와 단순 기준", _RUN + r"/crosscheck\.json", _RUN_WHERE)
+# 되돌려 맞혀 보기의 결과와 사건 후보 (T224, 10.9절). 집계 파일에서 낸 변화와 가격이 들어 있어 저장소 어디에도 두지 않는다.
+BACKTEST = Kind(
+    "되돌려 맞혀 보기의 결과나 사건 후보",
+    None,
+    "기본 데이터로 낸 것은 private/backtest/ 에, 가상 예시로 낸 것은 깃이 무시하는 engine/samples/runs/backtest/ 에 둔다",
+)
 
 # 표의 머리글이나 JSON 묶음의 키에 이 이름이 모두 있으면 그 종류다.
 # 표는 CSV·TSV·글 파일의 첫 줄과 마크다운 표의 머리글을 본다. JSON 은 맨 위뿐 아니라 안쪽의 묶음도 모두 본다
@@ -225,6 +231,8 @@ NAME_SET_MARKS = (
     (frozenset({"request_hash", "raw_text"}), SAVED_RESPONSE),
     (frozenset({"criteria", "groups", "uncovered_groups"}), CALIBRATION),
     (frozenset({"no_constants", "held_out", "misplaced_pct"}), CROSSCHECK),
+    (frozenset({"summary_hash", "criteria", "events"}), BACKTEST),
+    (frozenset({"price_changes", "temporary"}), BACKTEST),
 )
 
 PRIVATE_RUN_NOTE = "기본 데이터로 돌린 실행 기록이 들어 있다 (data_mode 가 private). 그런 결과는 private/runs/ 에만 둔다"
@@ -387,8 +395,14 @@ class Checker:
         )
         self._managed(
             data / "samples",
-            "가상 예시 값 `base_summary.csv` 와 그 옆의 상수 파일 `base_summary_constants.json`, 추정한 상수 파일 `base_estimated_constants.json`",
-            files=("base_summary.csv", "base_summary_constants.json", "base_estimated_constants.json"),
+            "가상 예시 값 `base_summary.csv` 와 그 옆의 상수 파일 `base_summary_constants.json`, 추정한 상수 파일 `base_estimated_constants.json`"
+            " (그 달까지의 자료로 추정한 것은 `base_estimated_constants.until-<두 자리 달>.json`, T224)",
+            files=(
+                "base_summary.csv",
+                "base_summary_constants.json",
+                "base_estimated_constants.json",
+                *(f"base_estimated_constants.until-{m:02d}.json" for m in range(1, 12)),
+            ),
         )
         self._managed(self.root / "engine" / "samples", "runs 폴더", dirs=("runs",))
 
@@ -596,8 +610,11 @@ class Checker:
 
         추정한 상수 파일(T212)에는 업장 상수(`share-venue-constant-<venue_id>`)만 두고, 그 업장은 워커힐 업장 정의에 있어야 한다.
         """
-        estimated = self.root / "data" / "samples" / "base_estimated_constants.json"
-        if estimated.is_file():
+        samples = self.root / "data" / "samples"
+        # 그 달까지의 자료로 추정한 파일(`.until-<달>`, T224)도 같은 규칙이다.
+        for estimated in [samples / "base_estimated_constants.json", *sorted(samples.glob("base_estimated_constants.until-*.json"))]:
+            if not estimated.is_file():
+                continue
             found = self._load(estimated, ConstantsFile)
             for item in found.constants if found is not None else []:
                 venue_id = item.constant_id.removeprefix(VENUE_CONSTANT_PREFIX)
@@ -795,6 +812,8 @@ class Checker:
                         self.error(path, "weights 가 weights_from 의 실행과 다르다 (가중치는 기준 상황에서 한 번 정하고 그대로 쓴다)")
                     if base.month != record.month:
                         self.error(path, "month 가 weights_from 의 실행과 다르다 (상황은 기준 실행과 같은 달로 돌린다)")
+                    if base.data_until != record.data_until:
+                        self.error(path, "data_until 이 weights_from 의 실행과 다르다 (상황은 기준 실행과 같은 자료로 돌린다, T224)")
             stems, saved = self._check_saved_responses(run_dir, record)
             rejected = self._check_rejected_responses(run_dir, record, stems)
             self._check_ledger(run_dir, record, stems, saved, rejected)

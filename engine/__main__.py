@@ -64,6 +64,14 @@ def main(argv: list[str] | None = None) -> int:
         help="실행의 달. 묶음의 조건을 모두 그 달의 방문으로 돌린다. 적지 않으면 일 년 전체로 본다. "
         "기준이 아닌 상황은 달이 같은 가장 새 기준 실행을 고른다 (--baseline 으로 가리키면 그 실행의 달을 따른다)",
     )
+    parser.add_argument(
+        "--data-until",
+        type=int,
+        choices=range(1, 12),
+        metavar="1~11",
+        help="집계 파일을 이 달까지만 읽는다 (6단계의 되돌려 맞혀 보기, T224). 사건이 있던 달의 앞 달을 준다. "
+        "기준이 아닌 상황은 data_until 이 같은 가장 새 기준 실행을 고른다",
+    )
     parser.add_argument("--answers", type=Path, action="append", default=[], metavar="폴더", help="저장된 응답을 더 찾을 폴더")
     parser.add_argument("--replay-only", action="store_true", help="LLM 을 부르지 않고 저장된 응답만 재생한다 (키가 없어도 된다)")
     parser.add_argument("--limit", type=int, metavar="N", help="새로 부를 수 있는 횟수. 적지 않으면 LLM_CALL_LIMIT")
@@ -98,9 +106,11 @@ def main(argv: list[str] | None = None) -> int:
         weights_from = args.baseline
         if weights_from is None and args.scenario != BASELINE_ID:
             # 달이 같은 기준 실행만 고른다. 달을 적지 않았으면 일 년 전체로 돌린 것이다 (적지 않은 달이 조용히 따라오지 않게 한다).
-            weights_from = latest_baseline_run(root, args.data, args.month)
+            weights_from = latest_baseline_run(root, args.data, args.month, args.data_until)
             if weights_from is None:
                 how = "" if args.month is None else f" --month {args.month} 로"
+                if args.data_until is not None:
+                    how += f" --data-until {args.data_until} 로"
                 raise ValueError(
                     f"{month_label(args.month)}로 끝까지 돈 기준 실행이 없다. 기준 상황을{how} 먼저 끝까지 돌린다 "
                     "(다른 달로 돌린 기준 실행을 쓰려면 --month 나 --baseline 으로 가리킨다)"
@@ -126,6 +136,7 @@ def main(argv: list[str] | None = None) -> int:
             base_profile_confirmed_for=os.environ.get(BASE_PROFILE_CONFIRMED_ENV, "").strip() or None,
             receiver=receiver_of(settings),
             before_estimate=args.before_estimate,
+            data_until=args.data_until,
         )
     except (LlmFatal, FileNotFoundError, FileExistsError, ValueError) as exc:
         print(f"돌리지 못했다: {exc}", file=sys.stderr)
@@ -137,6 +148,8 @@ def main(argv: list[str] | None = None) -> int:
         print(f"상황 {record.scenario_id} · 페르소나, 방문 조건, 가중치는 기준 실행 {record.weights_from} 의 것")
     print(f"공급자 {record.llm.provider} · 모델 {record.llm.model} · 프롬프트 {record.llm.prompt_version}")
     print(f"달 {month_label(record.month)}")
+    if record.data_until is not None:
+        print(f"집계 파일은 {record.data_until}월까지만 읽음 (되돌려 맞혀 보기)")
     print(
         f"기본 데이터의 요약 {record.base_profile_mode} · "
         f"가격을 집계 파일로 채운 상품 {len(record.filled_products)}개 · 채우지 못해 뺀 상품 {len(record.skipped_products)}개"

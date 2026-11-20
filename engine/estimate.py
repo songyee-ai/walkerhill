@@ -200,12 +200,16 @@ def fit(
     )
 
 
-def _record(root: Path, data_mode: str, run_id: str | None) -> RunRecord:
-    """추정할 기준 실행의 실행 기록. 끝까지 돌았고, 달을 주지 않았고, 실패한 방문이 없어야 한다 (보정의 대조와 같다)."""
+def _record(root: Path, data_mode: str, run_id: str | None, data_until: int | None = None) -> RunRecord:
+    """추정할 기준 실행의 실행 기록. 끝까지 돌았고, 달을 주지 않았고, 실패한 방문이 없어야 한다 (보정의 대조와 같다).
+
+    `run_id` 를 주지 않으면 `data_until` 이 같은 가장 새 기준 실행이다. 주면 그 실행의 `data_until` 로 추정한다 (T224).
+    """
     if run_id is None:
-        run_id = latest_baseline_run(root, data_mode, month=None)
+        run_id = latest_baseline_run(root, data_mode, month=None, data_until=data_until)
         if run_id is None:
-            raise ValueError("일 년 전체로 끝까지 돈 기준 실행이 없다. 기준 상황을 먼저 돌린다")
+            what = "일 년 전체" if data_until is None else f"{data_until}월까지의 자료"
+            raise ValueError(f"{what}로 끝까지 돈 기준 실행이 없다. 기준 상황을 먼저 돌린다")
     if not RUN_ID_RE.match(run_id):
         raise ValueError(f"run_id 가 아니다: {run_id!r}")
     path = runs_folder(root, data_mode) / run_id / "run.json"
@@ -220,19 +224,29 @@ def _record(root: Path, data_mode: str, run_id: str | None) -> RunRecord:
         raise ValueError(f"기준 실행 '{run_id}' 는 {month_label(record.month)}로 돌린 것이다. 상수 추정은 달을 주지 않은 기준 실행으로 한다")
     if record.counts.failed:
         raise ValueError(f"기준 실행 '{run_id}' 에 실패한 방문이 {record.counts.failed}건 있어 추정하지 않는다. 그 방문이 빠지면 몫이 어긋난다")
+    if data_until is not None and record.data_until != data_until:
+        raise ValueError(f"기준 실행 '{run_id}' 의 data_until 은 {record.data_until} 인데 {data_until} 을 주었다")
     return record
 
 
-def estimate(root: Path, data_mode: str, run_id: str | None = None, today: date | None = None) -> tuple[Path, Estimate, RunRecord, dict]:
-    """기준 실행 하나로 업장 상수를 추정해 추정한 상수 파일을 쓴다. (파일 자리, 추정, 실행 기록, 화면에 보일 고객군별 몫)을 돌려준다."""
-    record = _record(root, data_mode, run_id)
+def estimate(
+    root: Path, data_mode: str, run_id: str | None = None, today: date | None = None, data_until: int | None = None
+) -> tuple[Path, Estimate, RunRecord, dict]:
+    """기준 실행 하나로 업장 상수를 추정해 추정한 상수 파일을 쓴다. (파일 자리, 추정, 실행 기록, 화면에 보일 고객군별 몫)을 돌려준다.
+
+    기준 실행이 집계 파일을 어느 달까지 읽었으면(`data_until`, T224) 같은 달까지의 자료로 맞추고, 그 달의 추정한 상수 파일에 쓴다.
+    """
+    record = _record(root, data_mode, run_id, data_until)
+    until = record.data_until
     if record.share_method not in ("scores", "mixed"):
         raise ValueError(
             f"기준 실행 '{record.run_id}' 에는 점수를 받은 답이 없다 (share_method 가 {record.share_method or '없음'}). "
             "점수를 묻는 판의 프롬프트로 기준 상황을 돌린 뒤에 추정한다"
         )
     # 이미 있는 추정한 상수 파일은 읽지 않는다 (추정은 점수에서 처음부터 다시 맞추고, 깨진 파일이 있어도 다시 추정해 고칠 수 있게).
-    inputs = load_inputs(root, data_mode, BASELINE_ID, None, record.persona_ids, record.base_profile_mode, with_estimated=False)
+    inputs = load_inputs(
+        root, data_mode, BASELINE_ID, None, record.persona_ids, record.base_profile_mode, with_estimated=False, data_until=until
+    )
     changed = [key for key in COMPARED_INPUTS if record.inputs.get(key) != inputs.hashes[key]]
     if changed:
         raise ValueError(
@@ -243,7 +257,9 @@ def estimate(root: Path, data_mode: str, run_id: str | None = None, today: date 
     if None in conditions:
         raise ValueError("방문 조건 묶음에 없는 조건이 실행 기록에 있다. 화면에서 조건을 직접 넣어 돌린 실행은 추정하지 않는다")
     # 페르소나나 조건을 일부만 돌린 시험 실행으로 상수를 정하지 않는다 (보정의 대조와 같다).
-    everyone = load_inputs(root, data_mode, BASELINE_ID, None, None, record.base_profile_mode, with_estimated=False).personas
+    everyone = load_inputs(
+        root, data_mode, BASELINE_ID, None, None, record.base_profile_mode, with_estimated=False, data_until=until
+    ).personas
     missing_personas = sorted(set(everyone) - set(record.persona_ids))
     missing_conditions = sorted({c.condition_id for c in inputs.conditions.conditions} - set(record.condition_ids))
     if missing_personas or missing_conditions:
@@ -273,7 +289,7 @@ def estimate(root: Path, data_mode: str, run_id: str | None = None, today: date 
         }
         for group in found.groups
     }
-    path = estimated_constants_path(root, data_mode)
+    path = estimated_constants_path(root, data_mode, until)
     write_json(path, _file(found, record, inputs.venues, data_mode, k, today or date.today()).model_dump(mode="json"))
     return path, found, record, shown
 
@@ -285,6 +301,7 @@ def _file(found: Estimate, record: RunRecord, venues: dict, data_mode: str, k: f
         f"상수 추정 (engine/estimate.py): 기준 실행 {record.run_id} 의 AI 점수로 낸 몫을 고객군 {', '.join(found.groups)} 의 "
         f"워커힐 업장 사람 수 몫(모든 이용 상황, 고객군을 사람 수로 더함)에 맞춤. k={k:g}. "
         "추정에 쓴 자료로 다시 맞았다고 하지 않는다 (PRD 12절)"
+        + ("" if record.data_until is None else f" 집계 파일은 {record.data_until}월까지만 읽음 (되돌려 맞혀 보기, T224).")
     )
     return ConstantsFile.model_validate(
         {
@@ -312,10 +329,17 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="python -m engine.estimate", description="업장 상수를 기본 데이터의 업장 몫에 맞춰 추정한 상수 파일을 쓴다 (T212).")
     parser.add_argument("--data", choices=("sample", "private"), required=True, help="sample 가상 예시 값, private 기본 데이터")
     parser.add_argument("--run", metavar="RUN_ID", help="추정할 기준 실행. 적지 않으면 일 년 전체로 끝까지 돈 가장 새 기준 실행")
+    parser.add_argument(
+        "--data-until",
+        type=int,
+        choices=range(1, 12),
+        metavar="1~11",
+        help="이 달까지의 자료로 돈 기준 실행으로 추정한다 (6단계의 되돌려 맞혀 보기, T224). --run 을 주면 그 실행의 값을 따른다",
+    )
     parser.add_argument("--root", type=Path, default=Path.cwd(), help="자료를 읽고 결과를 쓸 폴더 (기본은 지금 폴더)")
     args = parser.parse_args(argv)
     try:
-        path, found, record, shown = estimate(args.root.resolve(), args.data, args.run)
+        path, found, record, shown = estimate(args.root.resolve(), args.data, args.run, data_until=args.data_until)
     except (FileNotFoundError, ValueError) as exc:
         print(f"추정하지 못했다: {exc}", file=sys.stderr)
         return EXIT_FAILED
