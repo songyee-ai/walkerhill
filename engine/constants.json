@@ -8,7 +8,7 @@
       "unit": "원",
       "used_in": "engine/weights.py 의 fill_prices (FORMATS 3절)",
       "grade": "assumption",
-      "source": null,
+      "sources": [],
       "checked_on": "2026-11-15",
       "note": "채운 단가는 후보의 가격으로 LLM 에 가므로, 기본 데이터의 평균 단가가 원 단위 그대로 남지 않게 한다 (11-15 팀장이 정함)",
       "owner": "wilstein91"
@@ -20,7 +20,7 @@
       "unit": "개",
       "used_in": "engine/weights.py 의 base_profiles (FORMATS 5절 base_profile)",
       "grade": "assumption",
-      "source": null,
+      "sources": [],
       "checked_on": "2026-11-15",
       "note": "많이 산 순서로 이만큼까지만 LLM 에 보낸다. 순위만 보내고 수치는 보내지 않는다 (T11)",
       "owner": "wilstein91"
@@ -32,7 +32,7 @@
       "unit": "배",
       "used_in": "engine/weights.py 의 base_profiles (FORMATS 5절 base_profile)",
       "grade": "assumption",
-      "source": null,
+      "sources": [],
       "checked_on": "2026-11-15",
       "note": "고르게 나눴을 때의 몫(1 ÷ 갈래의 수)의 이 배 이상이면 높음이다 (11-15 엔진 담당이 정함)",
       "owner": "wilstein91"
@@ -44,7 +44,7 @@
       "unit": "배",
       "used_in": "engine/weights.py 의 base_profiles (FORMATS 5절 base_profile)",
       "grade": "assumption",
-      "source": null,
+      "sources": [],
       "checked_on": "2026-11-15",
       "note": "고르게 나눴을 때의 몫의 이 배 이상이면 보통, 그보다 작으면 낮음이다 (11-15 엔진 담당이 정함)",
       "owner": "wilstein91"
@@ -56,7 +56,7 @@
       "unit": "팀",
       "used_in": "engine/weights.py 의 people_of (FORMATS 8절 people)",
       "grade": "assumption",
-      "source": null,
+      "sources": [],
       "checked_on": "2026-11-19",
       "note": "포장은 보통 한 집이 한 번 사 간다. 팀 수에 그 고객군의 평균 일행 수를 곱해 인원으로 바꾼다 (11-19 wilstein91 결정, T210)",
       "owner": "wilstein91"
@@ -68,7 +68,7 @@
       "unit": "명",
       "used_in": "engine/weights.py 의 people_of (FORMATS 8절 people)",
       "grade": "assumption",
-      "source": null,
+      "sources": [],
       "checked_on": "2026-11-19",
       "note": "에이드 변경 같은 추가 상품은 다른 주문에 붙어 사는 것이라 사람으로 세지 않는다 (11-19 wilstein91 결정, T210)",
       "owner": "wilstein91"
@@ -80,7 +80,7 @@
       "unit": null,
       "used_in": "engine/calibration.py 의 compare (PRD 6.5절)",
       "grade": "assumption",
-      "source": null,
+      "sources": [],
       "checked_on": "2026-11-17",
       "note": "고객군마다 가상 매출과 기본 데이터 매출에서 비중이 가장 큰 워커힐 업장이 같아야 통과다 (T116)",
       "owner": "wilstein91"
@@ -92,7 +92,7 @@
       "unit": "%p",
       "used_in": "engine/calibration.py 의 compare (PRD 6.5절)",
       "grade": "assumption",
-      "source": null,
+      "sources": [],
       "checked_on": "2026-11-17",
       "note": "첫 대조(11-17) 뒤 한 번만 고칠 수 있고, 고치면 이유를 진행 문서의 T18 절에 적는다. 돌릴 때마다 바꿔 가며 통과시키지 못하게 한다",
       "owner": "wilstein91"
@@ -104,7 +104,7 @@
       "unit": "명",
       "used_in": "engine/calibration.py 의 calibrate (PRD 6.5절)",
       "grade": "assumption",
-      "source": null,
+      "sources": [],
       "checked_on": "2026-11-17",
       "note": "페르소나가 이보다 적은 고객군은 차이를 적기만 하고 통과를 가르지 않는다. 한 명이면 고르기 하나가 비중의 약 4분의 1 이다 (T18, T119)",
       "owner": "wilstein91"
@@ -116,7 +116,18 @@
       "unit": "%",
       "used_in": "아직 쓰지 않음. 2단계에서 엔진이 페르소나의 등급을 보고 요청에 넣는다 (T212)",
       "grade": "assumption",
-      "source": "Toast 설문 (abc17news.com, 2026-11-16 게재); Raab 외 2009, JHTR 33(1):93-105",
+      "sources": [
+        {
+          "title": "Raab 외 2009, Journal of Hospitality & Tourism Research 33(1):93-105",
+          "kind": "literature",
+          "url": "https://vtechworks.lib.vt.edu/handle/10919/97044"
+        },
+        {
+          "title": "Toast 설문 (abc17news.com, 2026-11-16 게재)",
+          "kind": "article",
+          "url": null
+        }
+      ],
       "checked_on": "2026-11-19",
       "note": "평소 금액(budget.typical)보다 이만큼 넘게 비싸지면 망설이고, 같은 이용 상황의 더 싼 대안이 있으면 그쪽을 고른다 (T306 ①). 다른 곳에서 잰 범위를 빌려 와 정한 값이다",
       "owner": "borigunbbang",
@@ -129,7 +140,18 @@
       "unit": "%",
       "used_in": "아직 쓰지 않음. 2단계에서 엔진이 페르소나의 등급을 보고 요청에 넣는다 (T212)",
       "grade": "assumption",
-      "source": "TouchBistro 2024 U.S. Diner Report (pmq.com, 2024-04-30 보도); Andreyeva, Long & Brownell 2010, AJPH 100(2)",
+      "sources": [
+        {
+          "title": "Andreyeva, Long & Brownell 2010, American Journal of Public Health 100(2)",
+          "kind": "literature",
+          "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC2804646"
+        },
+        {
+          "title": "TouchBistro 2024 U.S. Diner Report (pmq.com, 2024-04-30 보도)",
+          "kind": "article",
+          "url": null
+        }
+      ],
       "checked_on": "2026-11-19",
       "note": "평소 금액보다 이만큼까지는 감수하고, 그보다 비싸지면 고른 이유에서 크게 뒤지지 않는 더 싼 대안을 고른다 (T306 ①)",
       "owner": "borigunbbang",
@@ -145,7 +167,23 @@
       "unit": "%",
       "used_in": "아직 쓰지 않음. 2단계에서 엔진이 페르소나의 등급을 보고 요청에 넣는다 (T212)",
       "grade": "assumption",
-      "source": "Raab 외 2009, JHTR 33(1); Dominique-Ferreira & Antunes 2020, EJMBE 29(2); Wakefield & Inman 2003, Journal of Retailing 79(4)",
+      "sources": [
+        {
+          "title": "Raab 외 2009, Journal of Hospitality & Tourism Research 33(1):93-105",
+          "kind": "literature",
+          "url": "https://vtechworks.lib.vt.edu/handle/10919/97044"
+        },
+        {
+          "title": "Dominique-Ferreira & Antunes 2020, European Journal of Management and Business Economics 29(2) (emerald.com)",
+          "kind": "literature",
+          "url": null
+        },
+        {
+          "title": "Wakefield & Inman 2003, Journal of Retailing 79(4):199-212",
+          "kind": "literature",
+          "url": null
+        }
+      ],
       "checked_on": "2026-11-19",
       "note": "평소 금액보다 이만큼 비싸져도 자리·응대·자리의 의미가 맞으면 그대로 고른다 (T306 ①)",
       "owner": "borigunbbang",
@@ -161,7 +199,23 @@
       "unit": "로그 표준편차",
       "used_in": "아직 쓰지 않음. 2단계에서 엔진이 페르소나의 등급을 보고 요청에 넣는다 (T212)",
       "grade": "assumption",
-      "source": "이민아 2007, 한국식품영양과학회지 36(1); Raab 외 2009; Battistin, Blundell & Lewbel 2009, JPE 117(6)",
+      "sources": [
+        {
+          "title": "이민아 2007, 「외국인의 한식당에 대한 가격민감성 분석」, 한국식품영양과학회지 36(1) (koreascience.kr JAKO200708506280497)",
+          "kind": "literature",
+          "url": null
+        },
+        {
+          "title": "Raab 외 2009, Journal of Hospitality & Tourism Research 33(1):93-105",
+          "kind": "literature",
+          "url": "https://vtechworks.lib.vt.edu/handle/10919/97044"
+        },
+        {
+          "title": "Battistin, Blundell & Lewbel 2009, Journal of Political Economy 117(6)",
+          "kind": "literature",
+          "url": "https://discovery.ucl.ac.uk/4075"
+        }
+      ],
       "checked_on": "2026-11-19",
       "note": "예산은 budget.typical 을 가운데로 로그정규로 퍼뜨린다 (T306 ④). 2단계의 가상 고객을 만들 때 쓴다",
       "owner": "borigunbbang",
@@ -174,7 +228,18 @@
       "unit": "%",
       "used_in": "아직 쓰지 않음. 2단계에서 엔진이 페르소나의 등급을 보고 요청에 넣는다 (T212)",
       "grade": "assumption",
-      "source": "이민아 2007, 한국식품영양과학회지 36(1); Raab 외 2009",
+      "sources": [
+        {
+          "title": "이민아 2007, 「외국인의 한식당에 대한 가격민감성 분석」, 한국식품영양과학회지 36(1) (koreascience.kr JAKO200708506280497)",
+          "kind": "literature",
+          "url": null
+        },
+        {
+          "title": "Raab 외 2009, Journal of Hospitality & Tourism Research 33(1):93-105",
+          "kind": "literature",
+          "url": "https://vtechworks.lib.vt.edu/handle/10919/97044"
+        }
+      ],
       "checked_on": "2026-11-19",
       "note": "예산 퍼짐은 위아래 이만큼에서 자르고, 자른 위쪽도 budget.max 를 넘지 않는다 (T306 ④)",
       "owner": "borigunbbang",
@@ -190,7 +255,13 @@
       "unit": "%",
       "used_in": "아직 쓰지 않음. 2단계에서 엔진이 페르소나의 등급을 보고 요청에 넣는다 (T212)",
       "grade": "assumption",
-      "source": "Hensher & Greene 2003, Transportation 30",
+      "sources": [
+        {
+          "title": "Hensher & Greene 2003, Transportation 30 (pages.stern.nyu.edu/~wgreene)",
+          "kind": "literature",
+          "url": null
+        }
+      ],
       "checked_on": "2026-11-19",
       "note": "등급 안에서 위 문턱(%)을 이만큼 퍼뜨린다 (T306 ④)",
       "owner": "borigunbbang",
@@ -206,7 +277,28 @@
       "unit": null,
       "used_in": "아직 쓰지 않음. 4단계 상수 추정에서 시뮬레이션의 탄력성이 들어야 할 범위다",
       "grade": "assumption",
-      "source": "Andreyeva, Long & Brownell 2010, AJPH 100(2); Okrent & Alston 2012, USDA ERS ERR-139; Law, Smith & Cornelsen 2022, Food Policy 107; 한국자료분석학회지 13(4) 2011",
+      "sources": [
+        {
+          "title": "Andreyeva, Long & Brownell 2010, American Journal of Public Health 100(2)",
+          "kind": "literature",
+          "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC2804646"
+        },
+        {
+          "title": "Okrent & Alston 2012, USDA ERS ERR-139 (ers.usda.gov)",
+          "kind": "statistic",
+          "url": null
+        },
+        {
+          "title": "Law, Smith & Cornelsen 2022, Food Policy 107:102215",
+          "kind": "literature",
+          "url": "https://researchonline.lshtm.ac.uk/id/eprint/4664323"
+        },
+        {
+          "title": "한국자료분석학회지 13(4) 2011, 「외식과 보건의료지출간의 상호관계에 관한 연구」",
+          "kind": "literature",
+          "url": "https://scholar.kyobobook.co.kr/article/detail/4010027894647"
+        }
+      ],
       "checked_on": "2026-11-19",
       "note": "가격 10% 인상에 방문이 약 7 ~ 10% 준다 (T306 ②). 미국·영국·한국의 외식 전반이라 워커힐 다이닝에 그대로 맞는다는 근거는 없다 (PRD 5.3절·12절)",
       "owner": "borigunbbang",
@@ -222,7 +314,18 @@
       "unit": null,
       "used_in": "아직 쓰지 않음. 4단계 상수 추정에서 시뮬레이션의 탄력성이 들어야 할 범위다",
       "grade": "assumption",
-      "source": "Okrent & Alston 2012, USDA ERS ERR-139; Law, Smith & Cornelsen 2022, Food Policy 107",
+      "sources": [
+        {
+          "title": "Okrent & Alston 2012, USDA ERS ERR-139 (ers.usda.gov)",
+          "kind": "statistic",
+          "url": null
+        },
+        {
+          "title": "Law, Smith & Cornelsen 2022, Food Policy 107:102215",
+          "kind": "literature",
+          "url": "https://researchonline.lshtm.ac.uk/id/eprint/4664323"
+        }
+      ],
       "checked_on": "2026-11-19",
       "note": "미국·영국 추정치 (T306 ②). 기념일·성수기는 덜 민감하다는 방향만 있고 수치는 없다",
       "owner": "borigunbbang",

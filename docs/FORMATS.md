@@ -76,7 +76,7 @@
 - 세기: `internal`·`official` (3) > `literature`·`statistic`·`review` (2) > `industry`·`article` (1.5) > `assumption` (1) > `unknown` (0).
   우리 업장을 직접 확인한 것 > 공개된 관찰 > 수치나 방법이 약한 공개 자료 > 설계 가정 > 미확인 순이다. 세기가 같으면 앞에 둔 값의 등급을 쓴다.
 - 새 등급(`literature`, `statistic`, `industry`, `article`)은 **그 대상을 직접 다룬 자료**에서 온 값에 쓴다. 예: 더뷔페의 예약 마감을 전한 기사.
-- 다른 곳에서 잰 범위를 빌려 와 우리 값으로 쓰는 것(가격 탄력성의 범위, 가격 민감도의 문턱, 예산의 퍼짐 같은 것)은 `assumption` 으로 적고 `source` 에 빌려 온 자료를 적는다.
+- 다른 곳에서 잰 범위를 빌려 와 우리 값으로 쓰는 것(가격 탄력성의 범위, 가격 민감도의 문턱, 예산의 퍼짐 같은 것)은 `assumption` 으로 적고 `sources` 에 빌려 온 자료를 하나씩 종류와 함께 적는다 (6.1절).
   PRD 5.3절·12절대로 4단계의 반응 크기는 설계 가정이다. 미국 외식 전반의 범위가 워커힐 다이닝에 그대로 맞는다는 근거가 없어, 등급만 보고 직접 잰 값으로 읽히지 않게 한다
   (11-19 songyee-ai 지적으로 고침. 처음에는 "가져온 값은 `assumption` 으로 적지 않는다"였다).
 
@@ -562,7 +562,7 @@ R-geumryong-0027,geumryong,map,2026-03,,,,,,meal,dinner,,,,,,대기,,no,예약�
 | `unit` | 값의 단위 (원, 개, 배, %p, 팀, 명). 참·거짓이면 `null` |
 | `used_in` | 이 값을 쓰는 곳 (코드의 함수와 이 문서의 절) |
 | `grade` | 근거 등급 (2절의 코드 값) |
-| `source` | 근거의 출처 (자료 이름이나 주소). 팀이 정한 값이면 `null` |
+| `sources` | 근거의 출처 자료 목록. 하나마다 `title`(자료 이름. 논문은 저자·연도·학술지, 기사·보고서는 매체와 날짜), `kind`(자료의 종류, 아래), `url`(원문 주소. 정확한 주소가 없으면 `null` 이고 아는 만큼은 `title` 에 적는다). 센 자료부터 적는다. 팀이 정한 값이면 빈 목록 (11-20, T214. 그 전에는 글 한 줄 `source` 였다) |
 | `checked_on` | 출처를 확인한 날. 출처가 없으면 정한 날 |
 | `note` | 왜 이 값인지, 누가 언제 정했는지 |
 | `owner` | 이 값을 고치는 사람 (값을 정하는 사람) |
@@ -578,11 +578,15 @@ R-geumryong-0027,geumryong,map,2026-03,,,,,,meal,dinner,,,,,,대기,,no,예약�
   4단계(상수 추정)에서 범위 안의 값을 바꿔 가며 돌린다 (11-19 wilstein91 결정, T213).
 - **넣지 않는 것**: 프로그램이 도는 데만 쓰는 숫자(호출 시간 제한, 호출 상한, 연달아 실패한 호출 수 같은 것)는 코드에 둔다.
   끼니를 알 수 없는 식사 매출을 나누는 비율은 6절의 `assumed_splits` 에 그대로 둔다 (실행 기록에는 결정 상수와 함께 남는다, 10.1절).
-- **등급**: 2절의 코드 값을 쓴다. 그 대상을 직접 다룬 학술 자료, 공공 통계, 업계 보고서, 기사, 공식 발표에서 온 값은 그 등급으로 적고 `source` 를 비우지 않는다 (형식 검사가 본다, 11절).
-  팀이 정한 값은 `assumption` 이다. 다른 곳에서 잰 범위를 빌려 와 정한 값도 `assumption` 이고, 이때는 `source` 에 빌려 온 자료를 적는다. 빌려 온 자료가 없으면 `source` 는 `null` 이다.
+- **등급**: 2절의 코드 값을 쓴다. 그 대상을 직접 다룬 학술 자료, 공공 통계, 업계 보고서, 기사, 공식 발표에서 온 값은 그 등급으로 적고 `sources` 에 그 종류의 자료를 하나 이상 적는다 (형식 검사가 본다, 11절).
+  팀이 정한 값은 `assumption` 이다. 다른 곳에서 잰 범위를 빌려 와 정한 값도 `assumption` 이고, 이때는 `sources` 에 빌려 온 자료를 적는다. 빌려 온 자료가 없으면 `sources` 는 빈 목록이다.
+- **출처 자료의 종류**(`kind`, 11-20 wilstein91 결정, T214): `official`(공식), `literature`(학술 자료), `statistic`(공공 통계), `industry`(업계 보고서), `article`(기사), `measurement`(공개 도구로 직접 잰 값. 예: 지도 경로 서버로 잰 거리).
+  앞의 다섯은 2절의 등급과 같은 뜻이다. 목록은 센 것부터 적는다: `official` > `literature` = `statistic` > `industry` = `article` > `measurement` (어기면 형식 오류다).
+  화면은 `assumption` 이면서 출처가 있는 값을 "설계 가정 · 학술 자료, 기사"처럼 등급과 종류를 함께 보인다 (T130 ⑥).
 - **고치는 사람**: 이 파일은 엔진 담당(wilstein91)의 것이고 공통 틀이다 (`STRUCTURE.md`). 값을 바꾸자는 제안은 "알릴 것"에 적는다.
   보정의 통과 기준 셋은 첫 대조(11-17) 뒤 한 번만 고칠 수 있다 (10.4절).
-- **바꾸면 기준 상황부터 다시 돌린다.** 엔진은 이 파일의 해시를 실행 기록의 `inputs.constants` 에 남기고, 기준 실행 뒤에 바뀌었으면 상황도 보정의 대조도 돌리지 않는다 (10.1절, 10.4절).
+- **값을 바꾸면 기준 상황부터 다시 돌린다.** 엔진은 이 파일의 해시를 실행 기록의 `inputs.constants` 에 남기고, 기준 실행 뒤에 바뀌었으면 상황도 보정의 대조도 돌리지 않는다 (10.1절, 10.4절).
+  해시는 결과를 바꾸는 부분(`constant_id`, `value`, `unit`, `in_use`)으로만 낸다. `sources`, `note`, `checked_on` 같은 근거와 설명만 고치면 해시가 그대로라 다시 돌리지 않아도 된다 (`engine/constants.py` 의 `values_hash`, 11-20 wilstein91 결정, T214).
 - **읽는 곳**: 엔진 코드가 있는 저장소의 것을 읽는다. `--root` 로 다른 폴더의 자료를 돌려도 이 파일은 바뀌지 않는다 (엔진 코드와 같다).
   입력이라 `engine_commit` 의 `+dirty` 를 가를 때는 보지 않는다 (10.1절).
 
@@ -594,7 +598,7 @@ R-geumryong-0027,geumryong,map,2026-03,,,,,,meal,dinner,,,,,,대기,,no,예약�
   해시는 `inputs` 에 남기지 않는다.
 - 가상 예시의 것은 형식 검사가 엔진의 것과 같은 규칙(출처)으로 본다 (11절).
 
-예시 — `engine/constants.json` 의 열일곱 개(엔진이 쓰는 아홉 개와 아직 쓰지 않는 여덟 개) 가운데 셋이다. 셋째는 범위 값이고 아직 쓰지 않는 값이다.
+예시 — `engine/constants.json` 의 열일곱 개(엔진이 쓰는 아홉 개와 아직 쓰지 않는 여덟 개) 가운데 셋이다. 셋째는 아직 쓰지 않는 값이고, 빌려 온 자료가 학술 자료와 기사 둘이다.
 
 ```json
 {
@@ -607,7 +611,7 @@ R-geumryong-0027,geumryong,map,2026-03,,,,,,meal,dinner,,,,,,대기,,no,예약�
       "unit": "원",
       "used_in": "engine/weights.py 의 fill_prices (FORMATS 3절)",
       "grade": "assumption",
-      "source": null,
+      "sources": [],
       "checked_on": "2026-11-15",
       "note": "채운 단가는 후보의 가격으로 LLM 에 가므로, 기본 데이터의 평균 단가가 원 단위 그대로 남지 않게 한다 (11-15 팀장이 정함)",
       "owner": "wilstein91"
@@ -619,24 +623,32 @@ R-geumryong-0027,geumryong,map,2026-03,,,,,,meal,dinner,,,,,,대기,,no,예약�
       "unit": "%p",
       "used_in": "engine/calibration.py 의 compare (PRD 6.5절)",
       "grade": "assumption",
-      "source": null,
+      "sources": [],
       "checked_on": "2026-11-17",
       "note": "첫 대조(11-17) 뒤 한 번만 고칠 수 있고, 고치면 이유를 진행 문서의 T18 절에 적는다. 돌릴 때마다 바꿔 가며 통과시키지 못하게 한다",
       "owner": "wilstein91"
     },
     {
-      "constant_id": "price-sensitivity-threshold-low",
-      "name": "가격 민감도 낮음: 감수하는 인상 폭",
-      "value": {
-        "min": 15,
-        "max": 20
-      },
+      "constant_id": "price-sensitivity-threshold-high",
+      "name": "가격 민감도 높음: 망설이기 시작하는 인상 폭",
+      "value": 5,
       "unit": "%",
       "used_in": "아직 쓰지 않음. 2단계에서 엔진이 페르소나의 등급을 보고 요청에 넣는다 (T212)",
       "grade": "assumption",
-      "source": "Raab 외 2009, JHTR 33(1); Dominique-Ferreira & Antunes 2020, EJMBE 29(2); Wakefield & Inman 2003, Journal of Retailing 79(4)",
+      "sources": [
+        {
+          "title": "Raab 외 2009, Journal of Hospitality & Tourism Research 33(1):93-105",
+          "kind": "literature",
+          "url": "https://vtechworks.lib.vt.edu/handle/10919/97044"
+        },
+        {
+          "title": "Toast 설문 (abc17news.com, 2026-11-16 게재)",
+          "kind": "article",
+          "url": null
+        }
+      ],
       "checked_on": "2026-11-19",
-      "note": "평소 금액보다 이만큼 비싸져도 자리·응대·자리의 의미가 맞으면 그대로 고른다 (T306 ①)",
+      "note": "평소 금액(budget.typical)보다 이만큼 넘게 비싸지면 망설이고, 같은 이용 상황의 더 싼 대안이 있으면 그쪽을 고른다 (T306 ①). 다른 곳에서 잰 범위를 빌려 와 정한 값이다",
       "owner": "borigunbbang",
       "in_use": false
     }
@@ -1014,13 +1026,15 @@ customer_group,venue_id,product_id,occasion,meal,day_type,month,unit,quantity,pe
 | `weights_from` | 가중치를 정한 기준 상황의 `run_id`. 기준 상황 자신이면 `null` |
 | `counts` | `visits` 돌린 수, `failed` 실패한 수 |
 | `status` | `ok`, `stopped_by_limit`, `failed` |
-| `constants` | 이 실행이 쓴 결정 상수와 그 값·근거의 목록. 엔진이 쓰는 것(`in_use`)만 남고, 집계 파일 옆의 상수 파일이 있으면 그것도 들어간다 (6.1절). 하나마다 `constant_id`, `name`, `value`, `unit`, `grade`, `source`, `checked_on`, `file` (적힌 파일). 아래 "쓴 결정 상수" |
+| `constants` | 이 실행이 쓴 결정 상수와 그 값·근거의 목록. 엔진이 쓰는 것(`in_use`)만 남고, 집계 파일 옆의 상수 파일이 있으면 그것도 들어간다 (6.1절). 하나마다 `constant_id`, `name`, `value`, `unit`, `grade`, `sources` (6.1절과 같은 모양), `checked_on`, `file` (적힌 파일). 아래 "쓴 결정 상수" |
 | `baseline_answers` | 기준이 아닌 상황에서, 바꾼 업장이 기준과 상황 어느 선택에도 끼지 않아 원장을 기준의 답으로 적은 방문의 `visit_id` 목록. 기준 상황은 `null`. 11-19(T210) 전의 실행 기록에는 없다. 아래 "상관없는 방문의 답" |
 
 - 묶음의 조건으로 돌린 실행은 `weights` 에 페르소나마다의 가중치와, 고객군과 조건마다의 비율이 빠짐없이 있어야 한다. 없으면 원장의 `represented` 를 확인할 수 없다.
   화면에서 조건을 직접 넣어 돌린 방문(`manual-`)에는 가중치가 없다.
 - 기준이 아닌 상황의 `weights` 는 `weights_from` 에 적은 기준 상황의 값과 같다. 가중치는 기준 상황에서 한 번 정하고 그대로 쓴다 (PRD 7.2절).
 - T11(11-15) 전에 돌린 실행 기록은 등급의 모양과 `filled_products` 가 달라 읽히지 않는다. 기준 상황부터 다시 돌린다.
+- 11-20(T214) 전에 돌린 실행 기록은 출처를 글 한 줄(`source`)로 적었고 모두 `null` 이었다. 엔진과 화면은 그 기록을 `sources` 가 빈 목록인 것으로 읽는다 (임시 호환. 없애는 조건은 진행 문서 T212).
+  또 그 전의 `inputs.constants` 는 파일 전체의 해시라 새 해시와 달라, 그 기준 실행으로는 상황도 보정의 대조도 돌지 않는다. 기준 상황을 한 번 다시 돌린다 (저장된 답을 재생한다).
 - `month` 가 생기기 전(T112, 11-17)에 돌린 실행 기록에는 이 칸이 없다. 달을 주지 않고 돌린 것이라 `null` 로 읽는다. 다시 돌리지 않아도 된다.
 - T210(11-19) 전에 돌린 실행 기록은 가중치를 매출로 맞춘 것이고 `people_coverage` 가 없다. 읽히지만 가중치의 뜻이 다르다.
   집계 파일에 `people` 이 더해져 해시가 달라졌으므로 그 기준 실행으로는 상황이 돌지 않는다. 기준 상황부터 다시 돌린다.
@@ -1030,7 +1044,7 @@ customer_group,venue_id,product_id,occasion,meal,day_type,month,unit,quantity,pe
 - 들어가는 것: `engine/constants.json` 의 상수 가운데 엔진이 쓰는 것(`in_use` 가 `true`. 6.1절. `file` 은 `engine/constants.json`)과, 방문 조건 묶음의 `assumed_splits` 모두(6절. `file` 은 `engine/conditions.json`),
   그리고 집계 파일 옆의 상수 파일이 있으면 그 상수(6.1절. `file` 은 `data/samples/base_summary_constants.json` 이나 `private/base/summary_constants.json`).
   `in_use` 가 `false` 인 상수는 남지 않는다 (11-19 wilstein91 결정, T213).
-  나누는 비율은 `constant_id` 가 `split_id`, `name` 이 `applies_when`, `value` 가 갈래마다의 비율(`parts`), `checked_on` 이 `decided_on` 이고 `unit`·`source` 는 `null` 이다.
+  나누는 비율은 `constant_id` 가 `split_id`, `name` 이 `applies_when`, `value` 가 갈래마다의 비율(`parts`), `checked_on` 이 `decided_on` 이고 `unit` 은 `null`, `sources` 는 빈 목록이다.
 - `value` 는 숫자, 참·거짓, 범위(`{"min": .., "max": ..}`)다. 나누는 비율만 갈래 이름을 키로 둔 묶음이다.
 - 11-19(T210) 전에 돌린 실행 기록에는 이 칸과 `inputs.constants` 가 없다. 읽히지만, `inputs.constants` 가 없어 그 기준 실행으로는 상황도 보정의 대조도 돌지 않는다. 기준 상황부터 다시 돌린다.
 - 화면이 이 목록을 보여 준다 (어떻게 보일지는 화면 담당이 정한다). 기본 데이터로 돌린 실행은 화면의 기존 가림 규칙을 따른다.
@@ -1173,7 +1187,7 @@ customer_group,venue_id,product_id,occasion,meal,day_type,month,unit,quantity,pe
     "scenario": "7f0c40802f158f2c",
     "vocab": "8198206734bb16a5",
     "summary": "b2e533d5aec19534",
-    "constants": "38af19f087377bc0",
+    "constants": "4564161ba53d7ed6",
     "prompt": "9fee7d4f42a62d8b"
   },
   "weights": {
@@ -1193,16 +1207,16 @@ customer_group,venue_id,product_id,occasion,meal,day_type,month,unit,quantity,pe
   "counts": {"visits": 1, "failed": 0},
   "status": "ok",
   "constants": [
-    {"constant_id": "filled-price-unit", "name": "집계 파일로 채운 단가의 반올림 단위", "value": 100, "unit": "원", "grade": "assumption", "source": null, "checked_on": "2026-11-15", "file": "engine/constants.json"},
-    {"constant_id": "base-profile-top-products", "name": "기본 데이터의 요약에 업장마다 적는 상품 수", "value": 3, "unit": "개", "grade": "assumption", "source": null, "checked_on": "2026-11-15", "file": "engine/constants.json"},
-    {"constant_id": "base-profile-bucket-high", "name": "비중을 높음(high)으로 보는 선", "value": 1.5, "unit": "배", "grade": "assumption", "source": null, "checked_on": "2026-11-15", "file": "engine/constants.json"},
-    {"constant_id": "base-profile-bucket-mid", "name": "비중을 보통(mid)으로 보는 선", "value": 0.5, "unit": "배", "grade": "assumption", "source": null, "checked_on": "2026-11-15", "file": "engine/constants.json"},
-    {"constant_id": "takeout-teams-per-item", "name": "인원이 빈 칸인 포장 한 개가 나타내는 팀 수", "value": 1, "unit": "팀", "grade": "assumption", "source": null, "checked_on": "2026-11-19", "file": "engine/constants.json"},
-    {"constant_id": "add-on-people-per-item", "name": "인원이 빈 칸인 추가 상품 한 개가 나타내는 사람 수", "value": 0, "unit": "명", "grade": "assumption", "source": null, "checked_on": "2026-11-19", "file": "engine/constants.json"},
-    {"constant_id": "calibration-top-venue-must-match", "name": "보정 통과: 가장 큰 업장이 같아야 하는가", "value": true, "unit": null, "grade": "assumption", "source": null, "checked_on": "2026-11-17", "file": "engine/constants.json"},
-    {"constant_id": "calibration-max-diff-pp", "name": "보정 통과: 업장별 비중 차이의 한도", "value": 15, "unit": "%p", "grade": "assumption", "source": null, "checked_on": "2026-11-17", "file": "engine/constants.json"},
-    {"constant_id": "calibration-diff-min-personas", "name": "보정 통과: 업장별 차이를 따지는 최소 페르소나 수", "value": 2, "unit": "명", "grade": "assumption", "source": null, "checked_on": "2026-11-17", "file": "engine/constants.json"},
-    {"constant_id": "meal-lunch-dinner", "name": "집계 파일에서 끼니가 비어 있는 식사 매출", "value": {"lunch": 0.5, "dinner": 0.5}, "unit": null, "grade": "assumption", "source": null, "checked_on": "2026-11-13", "file": "engine/conditions.json"}
+    {"constant_id": "filled-price-unit", "name": "집계 파일로 채운 단가의 반올림 단위", "value": 100, "unit": "원", "grade": "assumption", "sources": [], "checked_on": "2026-11-15", "file": "engine/constants.json"},
+    {"constant_id": "base-profile-top-products", "name": "기본 데이터의 요약에 업장마다 적는 상품 수", "value": 3, "unit": "개", "grade": "assumption", "sources": [], "checked_on": "2026-11-15", "file": "engine/constants.json"},
+    {"constant_id": "base-profile-bucket-high", "name": "비중을 높음(high)으로 보는 선", "value": 1.5, "unit": "배", "grade": "assumption", "sources": [], "checked_on": "2026-11-15", "file": "engine/constants.json"},
+    {"constant_id": "base-profile-bucket-mid", "name": "비중을 보통(mid)으로 보는 선", "value": 0.5, "unit": "배", "grade": "assumption", "sources": [], "checked_on": "2026-11-15", "file": "engine/constants.json"},
+    {"constant_id": "takeout-teams-per-item", "name": "인원이 빈 칸인 포장 한 개가 나타내는 팀 수", "value": 1, "unit": "팀", "grade": "assumption", "sources": [], "checked_on": "2026-11-19", "file": "engine/constants.json"},
+    {"constant_id": "add-on-people-per-item", "name": "인원이 빈 칸인 추가 상품 한 개가 나타내는 사람 수", "value": 0, "unit": "명", "grade": "assumption", "sources": [], "checked_on": "2026-11-19", "file": "engine/constants.json"},
+    {"constant_id": "calibration-top-venue-must-match", "name": "보정 통과: 가장 큰 업장이 같아야 하는가", "value": true, "unit": null, "grade": "assumption", "sources": [], "checked_on": "2026-11-17", "file": "engine/constants.json"},
+    {"constant_id": "calibration-max-diff-pp", "name": "보정 통과: 업장별 비중 차이의 한도", "value": 15, "unit": "%p", "grade": "assumption", "sources": [], "checked_on": "2026-11-17", "file": "engine/constants.json"},
+    {"constant_id": "calibration-diff-min-personas", "name": "보정 통과: 업장별 차이를 따지는 최소 페르소나 수", "value": 2, "unit": "명", "grade": "assumption", "sources": [], "checked_on": "2026-11-17", "file": "engine/constants.json"},
+    {"constant_id": "meal-lunch-dinner", "name": "집계 파일에서 끼니가 비어 있는 식사 매출", "value": {"lunch": 0.5, "dinner": 0.5}, "unit": null, "grade": "assumption", "sources": [], "checked_on": "2026-11-13", "file": "engine/conditions.json"}
   ],
   "baseline_answers": null
 }
@@ -1567,7 +1581,7 @@ uv run python -m tools.check_formats --strict   # 다 만든 뒤의 기준으로
 - 다른 파일을 가리키는 식별자가 실제로 있다: 경쟁 업장의 `competes_with`, 페르소나의 `compares_with`, 상황의 `venue_id`·`product_id`, 후기의 `venue_id`.
 - 상품의 `occasion` 이 업장의 `occasions` 안에 있다. 워커힐 업장마다 경쟁 업장이 하나 이상 있다.
 - 업장 정의의 모든 `source_id` 가 `sources` 에 있고 `checked_on` 이 있다.
-- 결정 상수(6.1절) 가운데 등급이 `official`, `literature`, `statistic`, `industry`, `article` 인 것은 `source` 가 비어 있지 않다 (11-19, T210).
+- 결정 상수(6.1절) 가운데 등급이 `official`, `literature`, `statistic`, `industry`, `article` 인 것은 `sources` 에 그 등급과 같은 종류의 자료가 있다 (11-19 T210, 11-20 T214).
   `engine/constants.json` 과 가상 예시 집계 옆의 `data/samples/base_summary_constants.json` 을 같은 규칙으로 본다. 범위 값은 `min` 이 `max` 보다 크지 않다 (11-19, T213).
 - 라벨(방문 목적, 동행, 고른 이유, 걸린 점, 고객군)이 값 목록에 있다. 후기 라벨의 방문 목적과 동행은 비어 있어도 된다.
 - 후기 라벨의 줄마다 근거가 되는 칸이 하나 이상 있다 (4.1절). `ordered` 와 `compared_with` 의 `이름:` 뒤에는 이름이 있다.
