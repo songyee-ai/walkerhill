@@ -1045,6 +1045,29 @@ class Checker:
             method = "mixed" if kinds == {True, False} else "scores" if kinds == {True} else "single"
             if method != record.share_method:
                 self.error(path, f"원장으로 다시 낸 몫 방식은 {method} 인데 실행 기록의 share_method 는 {record.share_method} 다")
+        # 상수마다 이 실행의 계산에 쓰였는가(10.1절의 applied, T212): 엔진은 모두 적는다. 11-20 전의 기록은 모두 비어 있다.
+        # 실행 기록과 원장으로 다시 낼 수 있는 것(채운 단가, 요약, 몫)은 견준다.
+        applied = [item.applied for item in record.constants or []]
+        if None in applied and any(value is not None for value in applied):
+            self.error(path, "실행 기록의 constants 에 applied 가 적힌 상수와 없는 상수가 섞여 있다 (엔진은 모두 적는다)")
+        elif applied and None not in applied:
+            ok_rows = [row for visit_rows in visits.values() for _, row in visit_rows if row.status == "ok"]
+            scored_venues = {row.venue_id for row in ok_rows if row.score is not None and row.venue_id}
+            for item in record.constants or []:
+                if item.constant_id == "filled-price-unit":
+                    expected = bool(record.filled_products)
+                elif item.constant_id == "base-profile-top-products":
+                    expected = record.base_profile_mode != "none"
+                elif item.constant_id.startswith("base-profile-bucket-"):
+                    expected = record.base_profile_mode == "bucketed"
+                elif item.constant_id == SHARPNESS_ID:
+                    expected = any(row.score is not None for row in ok_rows)
+                elif item.constant_id.startswith(VENUE_CONSTANT_PREFIX):
+                    expected = item.constant_id.removeprefix(VENUE_CONSTANT_PREFIX) in scored_venues
+                else:
+                    continue
+                if item.applied != expected:
+                    self.error(path, f"결정 상수 '{item.constant_id}' 의 applied 가 {item.applied} 인데 실행 기록과 원장으로 다시 내면 {expected} 다")
         if record.status == "ok":
             planned = {
                 f"{persona_id}{VISIT_ID_SEPARATOR}{condition_id}"
