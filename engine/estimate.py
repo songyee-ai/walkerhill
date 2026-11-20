@@ -28,6 +28,7 @@ from dataclasses import dataclass, field
 from datetime import date
 from pathlib import Path
 
+from engine.formats.codes import BASE_SEGMENT
 from engine.formats.constants import ConstantsFile
 from engine.formats.io import read_csv, read_model, write_json
 from engine.formats.persona import Persona
@@ -65,6 +66,7 @@ def scored_visits(rows: list[LedgerRow], personas: dict[str, Persona]) -> tuple[
 
     원장에는 점수가 0 보다 큰 곳마다 줄이 있다 (FORMATS 10.2절). 그래서 원장만으로 어떤 k·상수로도 몫을 다시 낼 수 있다.
     실패한 방문, 후보가 없던 방문, 점수가 없는 답(1단계 방식)의 방문은 뺀다.
+    워커힐 고객이 아닌 페르소나의 방문도 뺀다. 기본 데이터의 사람 수와 맞추는 데 쓰기 때문이다 (11-20 T220. 뺀 수에는 세지 않는다).
     """
     by_visit: dict[str, list[LedgerRow]] = defaultdict(list)
     for row in rows:
@@ -79,6 +81,8 @@ def scored_visits(rows: list[LedgerRow], personas: dict[str, Persona]) -> tuple[
         persona = personas.get(first.persona_id)
         if persona is None:
             raise ValueError(f"원장의 페르소나 '{first.persona_id}' 의 정의가 없다")
+        if persona.segment != BASE_SEGMENT:
+            continue
         visit = ScoredVisit(group=first.customer_group, people=first.represented * party_size(persona))
         for row in visit_rows:
             if row.choice_kind == "none":

@@ -37,11 +37,11 @@ from pydantic import ValidationError
 from engine.changes import decompose
 from engine.formats.changes import Changes
 from engine.formats.choice import Choice, ChoiceRequest, Score, problems_in_response
-from engine.formats.codes import WALKERHILL_VENUE_IDS
+from engine.formats.codes import KO, WALKERHILL_VENUE_IDS
 from engine.formats.conditions import MANUAL_CONDITION_PREFIX, ConditionBundle
 from engine.formats.constants import ConstantsFile
 from engine.formats.evidence import FREE_NAME_PREFIX, REVIEW_COLUMNS, URL_LIST_FILENAMES, ReviewLabel, Vocab
-from engine.formats.io import read_csv
+from engine.formats.io import read_csv, read_json
 from engine.formats.persona import EVIDENCE_KEYS, Persona
 from engine.formats.run import (
     LEDGER_COLUMNS,
@@ -526,17 +526,22 @@ class Checker:
                 self.error(path, f"파일 이름이 persona_id '{persona.persona_id}' 와 다르다")
             if persona.overridden_by_private:
                 self.error(path, "overridden_by_private 는 파일에 적지 않는다 (엔진이 두 층을 합칠 때 채운다)")
+            if read_json(path).get("segment") == "walkerhill":
+                # 기본값을 굳이 적으면 요청이 달라져 받아 둔 답이 재생되지 않는다 (FORMATS 5절의 "무리 segment", T220).
+                self.warning(path, "segment 가 walkerhill 이면 적지 않는다 (적으면 요청이 달라져 받아 둔 답이 재생되지 않는다)")
             self.personas[persona.persona_id] = persona
             self._check_persona(path, persona)
 
-        shares: dict[str, float] = defaultdict(float)
+        # 몫은 무리(segment)와 고객군을 함께 묶어 더한다 (11-20 T220). 경쟁 호텔 고객의 가족·친족이 워커힐 고객의 가족·친족 몫에 더해지지 않는다.
+        shares: dict[tuple[str, str], float] = defaultdict(float)
         for persona in self.personas.values():
-            shares[persona.customer_group] += persona.share_in_group.value
-        for group, total in shares.items():
+            shares[persona.segment, persona.customer_group] += persona.share_in_group.value
+        for (segment, group), total in shares.items():
+            where = f"고객군 '{group}'({KO['segment'][segment]})"
             if total > 1 + SHARE_TOLERANCE:
-                self.error(folder, f"고객군 '{group}' 의 몫을 더하면 {total:g} 다. 1 을 넘을 수 없다")
+                self.error(folder, f"{where}의 몫을 더하면 {total:g} 다. 1 을 넘을 수 없다")
             elif total < 1 - SHARE_TOLERANCE:
-                self.warning(folder, f"고객군 '{group}' 의 몫을 더하면 {total:g} 다. 다 만들면 1 이어야 한다")
+                self.warning(folder, f"{where}의 몫을 더하면 {total:g} 다. 다 만들면 1 이어야 한다")
 
     def _check_persona(self, path: Path, persona: Persona) -> None:
         for target in persona.compares_with:

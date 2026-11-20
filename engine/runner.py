@@ -12,13 +12,14 @@ import subprocess
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, get_args
 
 from engine.answers import AnswerBook, old_style_folder, read_reply, save_rejected, save_response
 from engine.candidates import build_request, run_condition
 from engine.changes import decompose
 from engine.constants import load_constants, used_constants, used_from, values_hash
 from engine.formats.choice import ChoiceRequest, RunCondition, problems_in_response, scores_required
+from engine.formats.codes import BASE_SEGMENT, Segment
 from engine.formats.conditions import MANUAL_CONDITION_PREFIX, ConditionBundle
 from engine.formats.constants import ConstantsFile
 from engine.formats.evidence import Vocab
@@ -76,6 +77,11 @@ ANY_MONTH = "any"
 # 기본 데이터의 요약을 그곳으로 보내도 된다고 확인했음을 적는 환경 변수 (`.env`). 값은 확인한 받는 곳의 이름이다 (`engine.llm.receiver_of`).
 # 받는 곳의 이름을 적게 해서, 받는 회사나 주소가 바뀌면 다시 확인하게 한다 (CLAUDE.md 의 "스택", docs/MEETING_1117.md ③).
 BASE_PROFILE_CONFIRMED_ENV = "BASE_PROFILE_CONFIRMED_FOR"
+
+# 엔진이 돌리는 무리 (docs/FORMATS.md 5절의 `segment`, 11-20 T220). 개선 3단계가 다른 무리의 크기(가중치)를 정해 켜기 전까지는 워커힐 고객만 돌린다.
+# 다른 무리의 페르소나 파일은 저장소에 있어도 읽지 않는다. 그래서 돌리는 페르소나, 가중치, 요청, 입력의 해시가 그 파일이 없을 때와 같고,
+# 저장된 답과 앞선 기준 실행을 그대로 쓸 수 있다. 건너뛴 페르소나는 실행하는 명령이 무리마다 보여 준다 (`skipped_by_segment`).
+RUN_SEGMENTS = frozenset({BASE_SEGMENT})
 
 
 @dataclass
@@ -151,6 +157,23 @@ def default_base_profile_mode(data_mode: str) -> str:
     return "bucketed" if data_mode == "private" else "none"
 
 
+def skipped_by_segment(root: Path) -> dict[str, list[str]]:
+    """저장소의 페르소나 가운데 돌리지 않는 무리(`RUN_SEGMENTS` 밖)의 것을 무리마다 모은다 (11-20 T220). 공개 층의 `segment` 로 가른다.
+
+    읽지 못하는 파일이나 모르는 무리의 값은 여기서 건너뛰지 않는다. 돌릴 때 형식 오류로 멈추게 둔다 (틀린 파일이 조용히 빠지지 않게).
+    """
+    found: dict[str, list[str]] = {}
+    for path in sorted((root / "personas").glob("*.json")):
+        try:
+            data = read_json(path)
+        except (OSError, ValueError):
+            continue
+        segment = data.get("segment") if isinstance(data, dict) else None
+        if segment in get_args(Segment) and segment not in RUN_SEGMENTS:
+            found.setdefault(segment, []).append(path.stem)
+    return found
+
+
 def load_inputs(
     root: Path,
     data_mode: str,
@@ -168,6 +191,8 @@ def load_inputs(
     `venue_ids` 로 업장을 골랐으면 상황이 바꾸는 업장도 그 안에 있어야 한다.
     `base_profile_mode` 가 `bucketed` 나 `raw` 면 페르소나마다 그 고객군의 기본 데이터 요약을 `base_profile` 로 붙인다 (기본 데이터로 돌릴 때만).
     주지 않으면 실행과 같은 기본값이다 (`default_base_profile_mode`). 그래야 다른 영역이 이 함수로 만든 요청이 실행의 요청과 같다.
+    기본 데이터의 요약은 워커힐 고객 페르소나에만 붙인다. 다른 무리는 기본 데이터에 없는 손님이다 (11-20 T220).
+    돌리지 않는 무리(`RUN_SEGMENTS` 밖)의 페르소나는 읽지 않고 입력의 해시에도 넣지 않는다. `persona_ids` 로 가리키면 멈춘다.
     """
     runs_folder(root, data_mode)  # data_mode 가 맞는지 먼저 본다
     if base_profile_mode is None:
@@ -180,8 +205,14 @@ def load_inputs(
     venue_paths = sorted((root / "data" / "venues").glob("*.json"))
     if venue_ids is not None:
         venue_paths = [p for p in venue_paths if p.stem in venue_ids]
-    persona_paths = sorted((root / "personas").glob("*.json"))
+    not_run = {persona_id for ids in skipped_by_segment(root).values() for persona_id in ids}
+    persona_paths = [p for p in sorted((root / "personas").glob("*.json")) if p.stem not in not_run]
     if persona_ids is not None:
+        asked = sorted(not_run & set(persona_ids))
+        if asked:
+            raise ValueError(
+                f"워커힐 고객이 아닌 페르소나는 개선 3단계가 무리의 크기를 정하기 전까지 돌리지 않는다: {asked} (docs/FORMATS.md 5절의 segment)"
+            )
         persona_paths = [p for p in persona_paths if p.stem in persona_ids]
     for wanted, found, what in ((venue_ids, venue_paths, "업장"), (persona_ids, persona_paths, "페르소나")):
         missing = set(wanted or []) - {p.stem for p in found}
@@ -215,7 +246,8 @@ def load_inputs(
     if base_profile_mode != "none":
         profiles = base_profiles(summary, base_profile_mode)
         for persona_id, layered in persona_json.items():
-            layered["base_profile"] = profiles.get(personas[persona_id].customer_group, empty_profile())
+            if personas[persona_id].segment == BASE_SEGMENT:
+                layered["base_profile"] = profiles.get(personas[persona_id].customer_group, empty_profile())
     filled_venues, filled = fill_prices(apply_scenario(venues, scenario), summary, data_mode)
     shares = share_params(load_constants())
     estimated_path = estimated_constants_path(root, data_mode)

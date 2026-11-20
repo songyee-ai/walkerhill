@@ -12,6 +12,7 @@ import sys
 from pathlib import Path
 
 from engine.constants import constant
+from engine.formats.codes import BASE_SEGMENT
 from engine.formats.io import read_csv, read_model, write_json
 from engine.formats.run import LEDGER_COLUMNS, RUN_ID_RE, Calibration, LedgerRow, RunRecord
 from engine.formats.scenario import BASELINE_ID
@@ -120,7 +121,7 @@ def calibrate(root: Path, data_mode: str, run_id: str | None = None) -> tuple[Pa
     - 가상 매출 쪽은 원장의 `weighted_revenue`, 기본 데이터 쪽은 같은 줄과 몫으로 센 매출이다 (`engine.weights.group_venue_revenue`).
       견주는 것은 고객군마다 매출이 업장 사이에 나뉜 모양(비중)이다. 11-19(T210)부터 가중치를 인원으로 정해,
       고객군의 합계는 두 쪽이 같지 않을 수 있다 (그 차이는 맞추지 않고 남긴다).
-    - 대조하는 고객군은 저장소에 페르소나가 있는 고객군 모두다 (docs/PRD.md 6.5절). 그 고객군의 페르소나 가운데 실행에 빠진 것이 있으면
+    - 대조하는 고객군은 저장소에 워커힐 고객 페르소나가 있는 고객군 모두다 (docs/PRD.md 6.5절, 다른 무리는 넣지 않는다 T220). 그 고객군의 페르소나 가운데 실행에 빠진 것이 있으면
       비중은 돌린 페르소나만으로 적되 통과가 아니다. 한 고객군을 일부 페르소나로 맞춘 결과는 보정의 근거가 아니기 때문이다.
     """
     record = _record(root, data_mode, run_id)
@@ -135,7 +136,9 @@ def calibrate(root: Path, data_mode: str, run_id: str | None = None) -> tuple[Pa
             "실행 뒤에 입력을 고쳤거나 업장을 골라 돌린 실행이다. 기준 상황을 업장을 고르지 않고 다시 돌린 뒤에 대조한다"
         )
     run_dir = runs_folder(root, data_mode) / record.run_id
-    rows = [LedgerRow.from_row(row) for row in read_csv(run_dir / "ledger.csv", LEDGER_COLUMNS)]
+    # 기본 데이터와 견주는 것은 워커힐 고객 페르소나의 방문뿐이다. 다른 무리는 기본 데이터에 없는 손님이다 (11-20 T220).
+    base_ids = {persona_id for persona_id, persona in inputs.personas.items() if persona.segment == BASE_SEGMENT}
+    rows = [row for row in (LedgerRow.from_row(r) for r in read_csv(run_dir / "ledger.csv", LEDGER_COLUMNS)) if row.persona_id in base_ids]
     conditions = [inputs.conditions.condition(condition_id) for condition_id in record.condition_ids]
     if None in conditions:
         raise ValueError(
@@ -146,7 +149,11 @@ def calibrate(root: Path, data_mode: str, run_id: str | None = None) -> tuple[Pa
     venue_ids = [venue_id for venue_id, venue in inputs.venues.items() if not venue.is_competitor]
     base = group_venue_revenue(inputs.summary, conditions, inputs.conditions.assumed_splits, inputs.venues)
     # 저장소의 페르소나를 모두 읽어, 고객군마다 실행에 빠진 페르소나를 찾는다. 실행은 페르소나의 일부만 돌렸을 수 있다.
-    everyone = load_inputs(root, data_mode, BASELINE_ID, None, None, record.base_profile_mode).personas
+    everyone = {
+        persona_id: persona
+        for persona_id, persona in load_inputs(root, data_mode, BASELINE_ID, None, None, record.base_profile_mode).personas.items()
+        if persona.segment == BASE_SEGMENT
+    }
     not_run: dict[str, list[str]] = {}
     for persona_id, persona in everyone.items():
         if persona_id not in inputs.personas:

@@ -20,7 +20,7 @@ from typing import Any
 from pydantic import ValidationError
 
 from engine.constants import constant
-from engine.formats.codes import WALKERHILL_VENUE_IDS
+from engine.formats.codes import BASE_SEGMENT, WALKERHILL_VENUE_IDS
 from engine.formats.conditions import AssumedSplit, Condition
 from engine.formats.io import read_csv
 from engine.formats.money import round_half_up
@@ -234,10 +234,11 @@ def average_parties(personas: list[Persona]) -> dict[str, float]:
     """고객군마다 한 팀의 평균 인원 = Σ(고객군 안의 몫 × 일행 수) ÷ Σ(몫). 돌리는 페르소나로만 낸다.
 
     고객군 안의 몫은 팀(방문)의 비율이다 (docs/FORMATS.md 5절). 몫을 다 더하면 1 이라 보통은 Σ(몫 × 일행 수) 와 같다.
+    집계 파일의 인원을 세는 데 쓰므로 워커힐 고객 페르소나만 본다 (11-20 T220. 다른 무리는 기본 데이터에 없는 손님이다).
     """
     weighted: dict[str, float] = defaultdict(float)
     shares: dict[str, float] = defaultdict(float)
-    for persona in personas:
+    for persona in (p for p in personas if p.segment == BASE_SEGMENT):
         weighted[persona.customer_group] += persona.share_in_group.value * party_size(persona)
         shares[persona.customer_group] += persona.share_in_group.value
     return {group: weighted[group] / shares[group] for group in weighted if shares[group] > 0}
@@ -376,7 +377,9 @@ def decide_weights(
     `people` 은 `group_people` 의 인원이다. 페르소나가 없는 고객군도 들어 있어 `people_coverage` 를 낸다.
     인원이 없는 고객군은 배수가 0, 등급이 `unknown` 이다. 배수의 등급은 기본 데이터면 `internal` 이다.
     다만 팀이 정한 비율로 나눈 인원의 일부만 돌리는 조건에 들었으면 그 비율의 등급과 견줘 약한 것이다.
+    워커힐 고객 페르소나만 집계 파일의 인원에 맞춘다 (11-20 T220). 다른 무리의 크기는 개선 3단계에서 따로 정해, 여기서는 가중치가 없다.
     """
+    personas = [p for p in personas if p.segment == BASE_SEGMENT]
     groups = sorted({p.customer_group for p in personas})
     ratios, ratio_grades = condition_ratios(people, groups, condition_ids, data_mode)
     denominator: dict[str, float] = defaultdict(float)
