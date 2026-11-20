@@ -21,6 +21,8 @@ class _Visit:
     # 워커힐 업장마다의 가중 매출과, 고른 상품·수량 (가격 효과와 주문 변화를 가른다).
     revenue: dict[str, float] = field(default_factory=lambda: defaultdict(float))
     items: dict[str, list[tuple[str, int, float]]] = field(default_factory=lambda: defaultdict(list))
+    # 워커힐 업장에서 받은 할인이 있는가 (원장의 `discount`, 가중치를 곱하기 전).
+    discounted: bool = False
 
 
 def _visits(rows: list[LedgerRow]) -> dict[str, _Visit]:
@@ -35,6 +37,7 @@ def _visits(rows: list[LedgerRow]) -> dict[str, _Visit]:
             visit.kind, visit.venue_id = "walkerhill", row.venue_id
             visit.revenue[row.venue_id] += row.weighted_revenue
             visit.items[row.venue_id].append((row.product_id or "", row.quantity, row.counted_share))
+            visit.discounted = visit.discounted or row.discount > 0
         elif row.choice_kind == "competitor" and visit.kind != "walkerhill":
             visit.kind, visit.venue_id = "competitor", row.venue_id
     return out
@@ -52,6 +55,13 @@ def _part_out(after_kind: str) -> Part:
     if after_kind == "none":
         return "to_none"
     return "to_competitor" if after_kind == "competitor" else "to_walkerhill"
+
+
+def _promo(b: _Visit, a: _Visit) -> str:
+    """상황에서 워커힐 업장의 할인을 받은 방문이, 기준에서도 그 업장에 오던 방문인가 (FORMATS 10.6절의 `promo`, T215)."""
+    if a.kind != "walkerhill" or not a.discounted:
+        return "none"
+    return "would_come" if b.kind == "walkerhill" and b.venue_id == a.venue_id else "drawn"
 
 
 def decompose(base_rows: list[LedgerRow], scen_rows: list[LedgerRow], baseline_run_id: str, run_id: str) -> Changes:
@@ -93,6 +103,7 @@ def decompose(base_rows: list[LedgerRow], scen_rows: list[LedgerRow], baseline_r
                 "before": {"kind": b.kind, "venue_id": b.venue_id},
                 "after": {"kind": a.kind, "venue_id": a.venue_id},
                 "parts": parts,
+                "promo": _promo(b, a),
             }
         )
     venues = [

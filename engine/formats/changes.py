@@ -8,6 +8,11 @@
 - 잃은 매출 (`lost`): 기준에서 이 업장을 고르던 방문이 경쟁 업장(`to_competitor`), 다른 워커힐 업장(`to_walkerhill`), 이용하지 않음(`to_none`)으로 갔다. 음수다.
 - 가격 효과 (`price`): 두 실행에서 같은 업장의 같은 상품을 같은 수량으로 골랐고, 가격이나 할인만 달랐다.
 - 주문 변화 (`order`): 두 실행에서 같은 업장을 골랐지만 상품이나 수량이 달랐다.
+
+방문마다 상황에서 워커힐 업장의 할인을 받았는지도 적는다 (`promo`, 11-20 T215, T130 ③):
+- `none`: 상황에서 워커힐 업장의 할인을 받지 않았다.
+- `would_come`: 기준에서도 그 업장을 고르던 방문이 할인을 받았다 ("혜택이 없어도 올 고객", PRD 3절).
+- `drawn`: 기준에서는 그 업장을 고르지 않던 방문이 할인을 받으며 그 업장을 골랐다 (새로 들어오거나 옮겨 온 방문).
 """
 
 from typing import Literal, Self
@@ -16,6 +21,8 @@ from pydantic import Field, model_validator
 
 from engine.formats.codes import FormatModel, Id, Text
 
+# 상황에서 받은 워커힐 업장의 할인으로 본 방문의 구분 (모듈 설명).
+Promo = Literal["none", "would_come", "drawn"]
 Part = Literal["new", "from_competitor", "from_walkerhill", "to_competitor", "to_walkerhill", "to_none", "price", "order"]
 PARTS: tuple[Part, ...] = ("new", "from_competitor", "from_walkerhill", "to_competitor", "to_walkerhill", "to_none", "price", "order")
 # 잃은 매출의 갈래. 금액이 0 이하다.
@@ -86,6 +93,7 @@ class VisitChange(FormatModel):
     before: Place
     after: Place
     parts: list[VisitChangePart]
+    promo: Promo
 
 
 class Changes(FormatModel):
