@@ -40,7 +40,7 @@ from engine.llm import (
     response_schema,
     user_message,
 )
-from engine.scenarios import apply_scenario
+from engine.scenarios import apply_with_prices
 from engine.shares import VENUE_CONSTANT_PREFIX, ShareParams, share_params
 from engine.thresholds import grade_thresholds, with_price_threshold
 from engine.weights import (
@@ -49,7 +49,6 @@ from engine.weights import (
     decide_weights,
     empty_profile,
     estimated_constants_path,
-    fill_prices,
     group_people,
     read_summary,
     summary_constants_path,
@@ -163,8 +162,9 @@ def load_inputs(
     """입력 파일을 읽는다. `venue_ids`, `persona_ids` 를 주면 그것만 읽는다.
 
     가상 예시(`sample`)로 돌릴 때는 `private/` 를 읽지 않는다. 페르소나는 공개 층만 쓰고, 집계 파일은 가상 예시 값을 쓴다.
-    돌려주는 업장 정의는 상황의 `changes` 를 적용한 뒤 가격이 빈 상품을 집계 파일로 채운 사본이다.
-    업장 정의 파일은 바뀌지 않는다 (docs/FORMATS.md 3절·7절). 상황을 먼저 적용하므로 `change_price_pct` 는 채운 단가를 바꾸지 않는다.
+    돌려주는 업장 정의는 가격이 빈 상품을 집계 파일로 채운 뒤 상황의 `changes` 를 적용한 사본이다 (`engine.scenarios.apply_with_prices`).
+    업장 정의 파일은 바뀌지 않는다 (docs/FORMATS.md 3절·7절). 단가를 먼저 채우므로 `change_price_pct` 는 채운 단가도 바꾼다 (T223).
+    `set_price` 로 값을 정한 상품은 채운 상품이 아니고, 상황이 더한 가격 빈 상품은 다 적용한 뒤에 채운다.
     `venue_ids` 로 업장을 골랐으면 상황이 바꾸는 업장도 그 안에 있어야 한다.
     `base_profile_mode` 가 `bucketed` 나 `raw` 면 페르소나마다 그 고객군의 기본 데이터 요약을 `base_profile` 로 붙인다 (기본 데이터로 돌릴 때만).
     주지 않으면 실행과 같은 기본값이다 (`default_base_profile_mode`). 그래야 다른 영역이 이 함수로 만든 요청이 실행의 요청과 같다.
@@ -216,7 +216,7 @@ def load_inputs(
         profiles = base_profiles(summary, base_profile_mode)
         for persona_id, layered in persona_json.items():
             layered["base_profile"] = profiles.get(personas[persona_id].customer_group, empty_profile())
-    filled_venues, filled = fill_prices(apply_scenario(venues, scenario), summary, data_mode)
+    filled_venues, filled = apply_with_prices(venues, scenario, summary, data_mode)
     shares = share_params(load_constants())
     estimated_path = estimated_constants_path(root, data_mode)
     # `with_estimated` 가 거짓이면 추정한 상수 파일을 읽지 않는다 (상수를 다시 추정할 때, `engine.estimate`).
