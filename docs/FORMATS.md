@@ -1500,7 +1500,8 @@ run_id,scenario_id,visit_id,persona_id,customer_group,condition_id,choice_kind,v
           "part": "to_competitor",
           "amount": -57272775
         }
-      ]
+      ],
+      "promo": "none"
     }
   ]
 }
@@ -1518,6 +1519,7 @@ run_id,scenario_id,visit_id,persona_id,customer_group,condition_id,choice_kind,v
 | `visits[].visit_id`, `visits[].represented` | 방문(페르소나 × 조건)과 그 방문이 대표하는 팀 수. 두 실행에서 같다 |
 | `visits[].before`, `visits[].after` | 방문이 간 곳. `kind` 는 `walkerhill`, `competitor`, `none` 이고, `venue_id` 는 `none` 이면 `null` 이다 |
 | `visits[].parts` | 그 방문이 든 갈래: `venue_id`, `part`(갈래의 키), `amount`(원). 금액이 바뀌지 않은 방문도 적는다 (`parts` 가 비거나 금액이 0 이다) |
+| `visits[].promo` | 상황에서 워커힐 업장의 할인을 받았는지로 본 방문의 구분 (11-20 wilstein91 결정, T215. 화면의 "혜택이 없어도 올 고객", PRD 3절): `none` 상황에서 워커힐 업장의 할인을 받지 않았다, `would_come` 기준에서도 그 업장을 고르던 방문이 할인을 받았다, `drawn` 기준에서는 그 업장을 고르지 않던 방문이 할인을 받으며 그 업장을 골랐다. 할인은 원장의 `discount` 가 0 보다 큰 줄이 있는지로 본다 (기존 프로모션의 할인도 든다) |
 
 **갈래** — 방문 하나가 기준에서 상황으로 어디에 갔나로 정한다. 금액은 원 단위 정수이고 세금을 뺀 가상 매출이다.
 

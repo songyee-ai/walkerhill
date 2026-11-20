@@ -179,3 +179,17 @@ def test_visit_that_chooses_the_changed_venue_keeps_its_own_answer(example_copy)
     assert played.record.baseline_answers == []
     assert {r.venue_id for r in played.rows} == {"geumryong"}
     assert [str(p) for p in check(example_copy, strict=True)] == []
+
+
+def test_promo_tells_whether_a_discounted_visit_would_have_come_anyway():
+    """상황에서 워커힐 업장의 할인을 받은 방문이 기준에서도 그 업장에 오던 방문인가 (T215, T130 ③, PRD 3절의 "혜택이 없어도 올 고객")."""
+    from engine.changes import _promo, _Visit
+
+    at_geumryong = _Visit(kind="walkerhill", venue_id="geumryong")
+    with_discount = _Visit(kind="walkerhill", venue_id="geumryong", discounted=True)
+    assert _promo(at_geumryong, with_discount) == "would_come"
+    assert _promo(_Visit(kind="competitor", venue_id="examplehotel-chinese"), with_discount) == "drawn"
+    assert _promo(_Visit(), with_discount) == "drawn"
+    assert _promo(_Visit(kind="walkerhill", venue_id="thebuffet"), with_discount) == "drawn"
+    assert _promo(at_geumryong, at_geumryong) == "none"
+    assert _promo(at_geumryong, _Visit(kind="competitor", venue_id="examplehotel-chinese")) == "none"

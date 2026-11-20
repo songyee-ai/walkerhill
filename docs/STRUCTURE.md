@@ -19,7 +19,7 @@
 | `data/evidence/`, `personas/` | borigunbbang | 후기를 요약하고 라벨을 붙인 결과, 라벨 값 목록, 페르소나 정의의 공개 층, LLM 프롬프트(`personas/prompts/`) |
 | `app/` | songyee-ai | Streamlit 화면 |
 | `scenarios/` | songyee-ai | 상황 정의 (시연 시나리오) |
-| `slides/` | songyee-ai | 발표 자료 |
+| `slides/` | songyee-ai | 발표 자료 안내 (자료 자체는 11-20 부터 저장소 밖에서 주고받는다) |
 
 폴더 이름은 11-13 에 확정했다. 담당은 [PROGRESS.md](PROGRESS.md) 의 역할 분담 표와 같다.
 11-19 에 엔진 쪽(`engine/`, `tools/`, `tests/`)과 화면 쪽(`app/`, `scenarios/`, `slides/`)의 주인을 맞바꿨다 (T122).

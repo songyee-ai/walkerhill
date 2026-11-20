@@ -136,6 +136,60 @@ def test_make_sample_add_people_keeps_values():
     assert all(r["people"] == "" or int(r["people"]) >= int(float(r["quantity"])) for r in rows)
 
 
+def _venue_with_sources(tmp_path):
+    """상수 파일 테스트용 지어낸 업장 정의 하나 (상품 셋: 세트, 판, 1인)."""
+    d = tmp_path / "cvenues"
+    d.mkdir(parents=True)
+    venue = {
+        "venue_id": "v1", "name": "가게", "default_source_id": "S1",
+        "sources": [{"source_id": "S1", "title": "지어낸 메뉴판", "url": "https://example.com/menu", "checked_on": "2026-11-01"}],
+        "products": [
+            {"product_id": "set2", "name": "두 사람 세트", "source_id": None},
+            {"product_id": "pie", "name": "큰 판", "source_id": None},
+            {"product_id": "one", "name": "한 사람 코스", "source_id": None},
+        ],
+    }
+    (d / "v1.json").write_text(json.dumps(venue, ensure_ascii=False), encoding="utf-8")
+    return d
+
+
+def test_build_constants(tmp_path):
+    """한 개당 인원이 1 이 아닌 상품만 상수가 되고, 근거 구분대로 등급과 출처가 붙는다."""
+    from engine.formats.constants import ConstantsFile
+
+    mapping = {"products": [
+        {"venue_id": "v1", "product_id": "set2", "people_per_unit": 2, "people_basis": "official"},
+        {"venue_id": "v1", "product_id": "pie", "people_per_unit": 3, "people_basis": "internal"},
+        {"venue_id": "v1", "product_id": "one", "people_per_unit": 1},
+    ]}
+    out = build_summary.build_constants(mapping, _venue_with_sources(tmp_path), made_on="2026-11-20")
+    assert [(c["constant_id"], c["value"], c["grade"]) for c in out] == [
+        ("people-per-unit-v1-set2", 2, "official"), ("people-per-unit-v1-pie", 3, "internal")]
+    assert out[0]["sources"] == [{"title": "지어낸 메뉴판", "kind": "official", "url": "https://example.com/menu"}]
+    assert out[0]["checked_on"] == "2026-11-01" and out[1]["sources"] == [] and out[1]["checked_on"] == "2026-11-20"
+    ConstantsFile.model_validate({"format_version": 1, "constants": out})
+    with pytest.raises(ValueError, match="people_basis"):
+        build_summary.build_constants({"products": [{"venue_id": "v1", "product_id": "pie", "people_per_unit": 3}]},
+                                      _venue_with_sources(tmp_path / "again"))
+
+
+def test_make_sample_constants_follow_venue_definitions():
+    """저장소의 예시 파일로 만든 상수: per_serves 상품의 인원은 업장 정의의 serves 와 같고 형식에 맞는다."""
+    from engine.formats.constants import ConstantsFile
+
+    out = make_sample.sample_constants()
+    ConstantsFile.model_validate({"format_version": 1, "constants": out})
+    venues = {json.loads(f.read_text(encoding="utf-8"))["venue_id"]: json.loads(f.read_text(encoding="utf-8"))
+              for f in (make_sample.ROOT / "data" / "venues").glob("*.json")}
+    for c in out:
+        if not c["constant_id"].startswith("people-per-unit-"):
+            continue
+        product = next(p for v in venues.values() for p in v["products"]
+                       if c["constant_id"] == f"people-per-unit-{v['venue_id']}-{p['product_id']}")
+        assert c["value"] == product["serves"] and product["qty_rule"] == "per_serves"
+        assert (c["grade"] == "official") == (product["grade"] == "official")
+
+
 def test_load_source_needs_every_key(tmp_path):
     broken = {**SOURCE, "columns": {k: v for k, v in SOURCE["columns"].items() if k != "paid"}}
     path = tmp_path / "source.json"
