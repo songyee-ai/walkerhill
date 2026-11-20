@@ -3,13 +3,17 @@
 결정 상수는 엔진 코드와 같은 저장소의 `engine/constants.json` 에 있다. `--root` 로 다른 폴더의 자료를 돌려도 이 파일을 쓴다
 (엔진 코드가 그 폴더의 것이 아닌 것과 같다). 엔진은 이 파일의 해시를 실행 기록의 `inputs.constants` 에 남기고,
 기준 실행 뒤에 바뀌면 상황을 돌리지 않는다.
+해시는 파일 전체가 아니라 결과를 바꾸는 부분(식별자, 값, 단위, 쓰는지)으로만 낸다. 출처·설명·주인만 고치면 해시가 그대로라
+기준 상황을 다시 돌리지 않아도 된다 (11-20 wilstein91 결정, T214).
 """
 
+import hashlib
+import json
 from functools import cache
 from pathlib import Path
 
 from engine.formats.conditions import ConditionBundle
-from engine.formats.constants import ConstantsFile, ConstantValue, UsedConstant
+from engine.formats.constants import ConstantsFile, ConstantValue, Range, UsedConstant
 from engine.formats.io import read_model
 
 CONSTANTS_PATH = Path(__file__).resolve().parent / "constants.json"
@@ -18,6 +22,16 @@ CONSTANTS_PATH = Path(__file__).resolve().parent / "constants.json"
 @cache
 def load_constants(path: Path = CONSTANTS_PATH) -> ConstantsFile:
     return read_model(path, ConstantsFile)
+
+
+def values_hash(path: Path = CONSTANTS_PATH) -> str:
+    """결정 상수 파일의 해시. 결과를 바꾸는 부분만 본다 (모듈 설명). 고친 파일을 바로 보도록 캐시하지 않고 다시 읽는다."""
+    found = read_model(path, ConstantsFile)
+    rows = sorted(
+        [c.constant_id, c.value.model_dump() if isinstance(c.value, Range) else c.value, c.unit, c.in_use] for c in found.constants
+    )
+    text = json.dumps(rows, ensure_ascii=False, separators=(",", ":"))
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()[:16]
 
 
 def constant(constant_id: str) -> ConstantValue:
@@ -33,7 +47,7 @@ def _used(found: ConstantsFile, file: str) -> list[UsedConstant]:
             value=c.value,
             unit=c.unit,
             grade=c.grade,
-            source=c.source,
+            sources=c.sources,
             checked_on=c.checked_on,
             file=file,
         )
@@ -56,7 +70,7 @@ def used_constants(
             value=dict(split.parts),
             unit=None,
             grade=split.grade,
-            source=None,
+            sources=[],
             checked_on=split.decided_on,
             file="engine/conditions.json",
         )
