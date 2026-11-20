@@ -164,10 +164,14 @@
   - 그 상품의 모든 줄(고객군, 달, 조건)의 `paid` 합 ÷ `quantity` 합을 **백 원 단위로 반올림**한다 (11-15 팀장이 정함).
     채운 단가는 후보의 가격으로 LLM 에 가므로(9절), 기본 데이터의 평균 단가가 원 단위 그대로 LLM 과 저장된 응답에 남지 않게 한다.
     반올림해 0 원이 되면 채우지 않는다.
-  - 그 상품의 줄에 업장 정의와 다른 단위(`unit`)가 있으면 엔진이 멈춘다. 단위가 다른 수량을 더하면 단가가 틀린다 (8절: 집계 파일의 `unit` 은 업장 정의의 단위로 적는다).
+  - 그 상품의 줄에 업장 정의와 다른 단위(`unit`)가 있으면 엔진이 멈춘다. 상황이 빼는 상품도 그렇다 (상황을 적용하기 전에 채우기 때문이다). 단위가 다른 수량을 더하면 단가가 틀린다 (8절: 집계 파일의 `unit` 은 업장 정의의 단위로 적는다).
   - `paid` 는 할인이 빠진 금액이라, 채운 단가에 프로모션 할인이 걸리면 할인이 한 번 더 들어간다. 가격이 빈 상품에는 프로모션을 걸지 않는다.
   - 채운 상품의 가격 표기는 `included` 다 (`paid` 가 세금이 든 금액이다). 업장 정의 파일은 바뀌지 않는다. 엔진이 읽은 사본에만 채운다.
-  - 상황(7절)을 먼저 적용하고 그 뒤에 채운다. 그래서 `change_price_pct` 는 채운 단가를 바꾸지 않는다. 가격이 빈 상품의 값을 정하려면 `set_price` 를 쓴다.
+  - 먼저 채우고 그 뒤에 상황(7절)을 적용한다. 그래서 `change_price_pct` 는 채운 단가도 바꾼다 (업장 전체든 상품 하나든). 바뀐 상품도 채운 상품이다.
+    `set_price` 로 값을 정한 상품은 채운 상품이 아니다. 등급과 가격 표기는 업장 정의의 것(`unknown`, 적힌 표기)으로 둔다.
+    퍼센트로 바뀐 채운 단가는 7절대로 원 단위로 반올림한다. 퍼센트는 공개된 상황 파일에 있어 거꾸로 계산해도 백 원 단위의 채운 단가만 나오므로, 내부 자료의 평균 단가가 원 단위로 드러나지 않는다.
+    상황이 더한 가격 빈 상품은 다 적용한 뒤에 채운다. 그래서 그 상황의 `change_price_pct` 는 그 상품에 걸리지 않는다. 더하는 상품은 가격을 적어 더한다.
+    (11-20 wilstein91 이 바꿨다, T223. 그 전에는 상황을 먼저 적용해, 업장 전체를 올려도 채운 단가는 그대로여서 화면의 "우리 가격 바꾸기"가 일부 상품만 올렸다)
   - 채운 상품과 채우지 못한 상품은 실행 기록의 `filled_products`, `skipped_products` 에 남는다 (10.1절).
 
 **파는 때를 적는 규칙** (`slots`)
@@ -765,12 +769,14 @@ R-geumryong-0027,geumryong,map,2026-03,,,,,,meal,dinner,,,,,,대기,,no,예약�
 - `change_price_pct` 의 바뀐 가격은 가격 × (100 + `pct`) ÷ 100 을 원 단위로 반올림한 값이다. 바뀐 폭을 먼저 반올림해서 더하거나 빼지 않는다.
   그렇게 하면 내릴 때 1원 어긋난다 (15원을 10% 내리면 14원이다). 코드에서는 `engine.formats.change_price` 를 쓴다.
 - `set_price` 의 `price` 와 `change_price_pct` 가 바꾸는 값은 업장 정의의 `price` (출처에 표시된 가격)다. 가격 표기(`price_basis`)는 바꾸지 않는다.
-- `change_price_pct` 의 `product_id` 가 `null` 이면 가격이 있는 모든 상품을 바꾼다. 가격이 비어 있는 상품 하나를 가리켜 퍼센트로 바꿀 수는 없다 (`set_price` 로 값을 정한다).
+- `change_price_pct` 의 `product_id` 가 `null` 이면 가격이 있는 모든 상품을 바꾼다. 집계 파일로 채운 단가도 가격이 있는 것으로 본다 (3절).
+  집계 파일로도 채우지 못해 가격이 비어 있는 상품 하나를 가리켜 퍼센트로 바꿀 수는 없다 (`set_price` 로 값을 정한다).
+  형식 검사는 가상 예시 값으로 채운 단가 위에 적용해 본다. 기본 데이터로 돌릴 때 채우지 못하는 상품이면 그때 엔진이 멈춘다.
 
 **엔진이 상황을 적용하는 법** (11-14 에 정함. `engine/scenarios.py`)
 
 - 바꾸려는 업장, 상품, 프로모션이 없거나 더하려는 것이 이미 있으면 실행을 멈춘다. 적용하지 못한 채 돌리면 기준과 같은 결과가 조용히 나오기 때문이다.
-  `change_price_pct` 로 업장의 모든 상품을 바꾸라고 했는데 가격이 있는 상품이 하나도 없을 때도 멈춘다.
+  `change_price_pct` 로 업장의 모든 상품을 바꾸라고 했는데 가격이 있는 상품이 하나도 없을 때도 멈춘다 (채운 단가도 가격이 있는 것으로 본다).
   읽을 업장을 골라 돌릴 때(`--venues`)는 상황이 바꾸는 업장도 넣고, 기준 상황도 같은 업장으로 돌려 둔다
   (업장을 다르게 고르면 읽은 업장 정의가 기준 실행과 달라 10.1절의 검사가 `venues` 가 달라졌다며 막는다).
 - 다 적용한 업장 정의도 3절의 규칙을 지켜야 한다 (예: 뺀 상품을 가리키는 프로모션이 남아 있으면 안 된다). 형식 검사도 엔진과 같은 코드로 적용해 본다.
@@ -1145,12 +1151,12 @@ customer_group,venue_id,product_id,occasion,meal,day_type,month,unit,quantity,pe
 | `base_profile_mode` | 기본 데이터의 요약(5절의 `base_profile`)을 LLM 에 어떻게 보냈나: `none` 보내지 않음, `bucketed` 범주로 바꿔 보냄, `raw` 그대로 보냄. 기본 데이터로 돌릴 때의 기본값은 `bucketed` 다 (11-13 결정). 가상 예시로 돌릴 때는 늘 `none` 이다. 명령의 `--base-profile` 로 바꾼다. 기준이 아닌 상황은 기준 실행의 값을 따른다 요약을 보내는 실행(`bucketed`, `raw`)은 그 공급자로 보내도 된다고 확인한 PC 에서만 돈다 (아래 "요약을 보내기 전의 확인") |
 | `inputs` | 입력 파일들의 해시. 같은 입력인지 견줄 때 쓴다. 읽은 것만 적는다: `venues`, `personas`, `conditions`, `scenario`, `vocab`, 집계 파일 `summary` (늘 읽는다), 결정 상수 `constants` (6.1절. 늘 읽는다. 11-19 부터), 추정한 상수 파일이 있으면 `estimated` (6.1절. 11-20 부터, T212), LLM 을 부를 수 있게 돌렸으면 프롬프트 파일의 `prompt` (재생만 하는 실행은 프롬프트를 읽지 않는다) |
 | `weights` | `group_multiplier` 고객군 배수, `persona_weight` 페르소나의 가중치, `condition_ratio` 고객군마다 묶음의 비율, `grades` 각 값의 근거 등급, `people_coverage` 집계 파일의 인원 가운데 페르소나가 있는 고객군의 몫 (0 ~ 1. 집계 파일에 인원이 없으면 `null`). 등급은 값마다 적는다 (고객군 배수는 고객군마다, 가중치는 페르소나마다, 묶음의 비율은 고객군과 조건마다). 내는 법은 아래 "가중치를 내는 법" |
-| `filled_products` | 가격이 비어 있어 집계 파일로 단가를 채운 상품의 목록 (3절). `<venue_id>:<product_id>` 로 적는다. 채운 단가는 적지 않는다 |
+| `filled_products` | 가격이 비어 있어 집계 파일로 단가를 채운 상품의 목록 (3절). `<venue_id>:<product_id>` 로 적는다. 채운 단가는 적지 않는다. 상황의 `change_price_pct` 로 바뀐 상품은 넣고, `set_price` 로 값을 정했거나 뺀 상품은 넣지 않는다 |
 | `skipped_products` | 가격을 채우지 못해 후보에서 뺀 상품의 목록. `<venue_id>:<product_id>` 로 적는다 |
 | `weights_from` | 가중치를 정한 기준 상황의 `run_id`. 기준 상황 자신이면 `null` |
 | `counts` | `visits` 돌린 수, `failed` 실패한 수 |
 | `status` | `ok`, `stopped_by_limit`, `failed` |
-| `constants` | 이 실행이 쓴 결정 상수와 그 값·근거의 목록. 엔진이 쓰는 것(`in_use`)만 남고, 집계 파일 옆의 상수 파일이 있으면 그것도 들어간다 (6.1절). 하나마다 `constant_id`, `name`, `value`, `unit`, `grade`, `sources` (6.1절과 같은 모양), `checked_on`, `file` (적힌 파일). 아래 "쓴 결정 상수" |
+| `constants` | 이 실행이 쓴 결정 상수와 그 값·근거의 목록. 엔진이 쓰는 것(`in_use`)만 남고, 집계 파일 옆의 상수 파일이 있으면 그것도 들어간다 (6.1절). 하나마다 `constant_id`, `name`, `value`, `unit`, `grade`, `sources` (6.1절과 같은 모양), `checked_on`, `file` (적힌 파일), `applied` (이 실행의 계산에 쓰였는가. 11-20 부터). 아래 "쓴 결정 상수" |
 | `baseline_answers` | 기준이 아닌 상황에서, 바꾼 업장이 기준과 상황 어느 선택에도 끼지 않아 원장을 기준의 답으로 적은 방문의 `visit_id` 목록. 기준 상황은 `null`. 11-19(T210) 전의 실행 기록에는 없다. 아래 "상관없는 방문의 답" |
 | `share_method` | 방문의 몫을 낸 방식 (11-20, T212. 9절의 "점수와 몫"): `single` 모든 방문의 답에 점수가 없어 고른 곳의 몫이 1 이다 (1단계 방식, 답 하나), `scores` 모든 방문의 답에 점수가 있어 몫으로 나눴다 (2단계 방식), `mixed` 둘이 섞였다. 답이 하나도 없는 실행(후보 없음·실패뿐)은 `single` 이다. 화면은 이 값으로 "1단계 방식 (답 하나)"과 "2단계 방식 (몫)"을 가른다. 11-20 전의 실행 기록에는 없고, 그 실행은 모두 1단계 방식이다 |
 
@@ -1172,6 +1178,30 @@ customer_group,venue_id,product_id,occasion,meal,day_type,month,unit,quantity,pe
   나누는 비율은 `constant_id` 가 `split_id`, `name` 이 `applies_when`, `value` 가 갈래마다의 비율(`parts`), `checked_on` 이 `decided_on` 이고 `unit` 은 `null`, `sources` 는 빈 목록이다.
 - `value` 는 숫자, 참·거짓, 범위(`{"min": .., "max": ..}`)다. 나누는 비율만 갈래 이름을 키로 둔 묶음이다.
 - 11-19(T210) 전에 돌린 실행 기록에는 이 칸과 `inputs.constants` 가 없다. 읽히지만, `inputs.constants` 가 없어 그 기준 실행으로는 상황도 보정의 대조도 돌지 않는다. 기준 상황부터 다시 돌린다.
+- **`applied`: 이 실행의 계산에 쓰였는가** (11-20 wilstein91 결정, T212·T130 ②). `true` 면 그 값이 이 실행의 계산에 실제로 들어갔고, `false` 면 기록에는 남았지만 이 실행에서는 쓰이지 않았다.
+  "값을 바꿨다면 결과가 달라졌는가"가 아니다 (그것은 값을 바꿔 다시 돌려야 안다). 화면은 이 칸으로 결과 아래에 보일 상수를 추린다.
+  11-20 전에 돌린 실행 기록에는 이 칸이 없어 `null` 로 읽는다 (모름). 엔진은 상수마다 모두 적으므로, 한 기록 안에서 적힌 것과 `null` 이 섞이지 않는다 (형식 검사).
+  엔진이 가르는 규칙 (`engine/constants.py` 의 `RunUse`. 규칙이 없는 상수는 실행을 멈추지 않고 `true` 로 적으며 경고를 낸다. `engine/constants.json` 의 모든 상수에 규칙이 있는지는 테스트가 본다):
+
+  | 상수 | `true` 인 때 |
+  |---|---|
+  | `filled-price-unit` | 집계 파일로 단가를 채운 상품이 있다 (`filled_products` 가 비어 있지 않다) |
+  | `base-profile-top-products` | 기본 데이터의 요약을 보냈다 (`base_profile_mode` 가 `none` 이 아니다) |
+  | `base-profile-bucket-*` | 요약을 범주로 보냈다 (`base_profile_mode` 가 `bucketed`. `raw` 는 소수로 보내 범주의 선을 쓰지 않는다) |
+  | `takeout-teams-per-item`, `add-on-people-per-item` | 가중치를 낼 때 인원(`people`)이 빈 칸인 포장 줄, 그 밖의 줄을 그 상수로 셌다. 가중치를 내는 줄(그 달, 읽은 워커힐 업장, 돌리는 조건에 드는 몫이 있는 줄)만 본다 |
+  | 나누는 비율 (`assumed_splits`, 예: `meal-lunch-dinner`) | 가중치를 낼 때 그 비율로 나눈 집계 파일의 줄이 돌리는 조건에 들었다 |
+  | `calibration-*` | 늘 `false`. 보정의 대조(10.4절)가 쓰고 실행의 계산에는 들지 않는다 |
+  | `share-sharpness-k` | 점수가 있는 답으로 몫을 낸 방문이 있다 (`share_method` 가 `scores` 나 `mixed`) |
+  | `share-venue-constant-<venue_id>` (엔진 상수 파일이나 추정한 상수 파일) | 점수가 있는 답에서 그 업장에 몫이 갔다 (원장에 `score` 가 적힌 그 업장의 줄이 있다) |
+  | `price-threshold-*` (가격 민감도의 문턱 분포, 9절) | 점수를 묻는 판으로 요청을 만들었다 (문턱은 그 판의 요청에만 들어간다) |
+  | `price-sensitivity-threshold-*` | 늘 `false`. 처음 정한 등급별 문턱으로, 위의 분포(`price-threshold-*`)로 바뀌어 쓰지 않는다. 지금은 `in_use` 가 `false` 라 기록에 남지 않는다 |
+  | `budget-spread-*`, `sensitivity-threshold-spread-*` | 점수를 묻는 판으로 요청을 만들었다. 지금은 `in_use` 가 `false` 라 기록에 남지 않는다 (2단계에서 켬) |
+  | `price-elasticity-*` | 늘 `false`. 4단계 상수 추정의 잣대다. 지금은 기록에 남지 않는다 |
+  | 집계 파일 옆의 상수 파일의 상수 | 늘 `true`. 그 값은 집계 파일에 이미 들어 있고, 실행은 늘 집계 파일을 읽어 쓴다 |
+
+  기준이 아닌 상황은 기준 실행의 가중치를 쓰므로, 가중치 쪽 상수(인원이 빈 줄의 두 상수와 나누는 비율)는 기준 실행의 `applied` 를 따른다.
+  기준 실행에 `applied` 가 없으면(11-20 전) 기준 실행과 같은 입력(상황을 적용하지 않은 업장 정의, 같은 집계 파일·조건·달)으로 다시 낸다. 기준의 답으로 바꾼 방문의 원장 줄도 같은 상수로 낸 것이다 (상수의 해시가 같아야 상황이 돈다).
+  형식 검사는 실행 기록과 원장으로 다시 낼 수 있는 것(`filled-price-unit`, `base-profile-*`, `share-sharpness-k`, 업장 상수)을 견준다.
 - 화면이 이 목록을 보여 준다 (어떻게 보일지는 화면 담당이 정한다). 기본 데이터로 돌린 실행은 화면의 기존 가림 규칙을 따른다.
 
 **요약을 보내기 전의 확인** (11-17 에 넣음, T115) — 기본 데이터의 요약이 밖의 LLM 으로 나가는 실행을 엔진이 가려 막는다.
@@ -1332,19 +1362,19 @@ customer_group,venue_id,product_id,occasion,meal,day_type,month,unit,quantity,pe
   "counts": {"visits": 1, "failed": 0},
   "status": "ok",
   "constants": [
-    {"constant_id": "filled-price-unit", "name": "집계 파일로 채운 단가의 반올림 단위", "value": 100, "unit": "원", "grade": "assumption", "sources": [], "checked_on": "2026-11-15", "file": "engine/constants.json"},
-    {"constant_id": "base-profile-top-products", "name": "기본 데이터의 요약에 업장마다 적는 상품 수", "value": 3, "unit": "개", "grade": "assumption", "sources": [], "checked_on": "2026-11-15", "file": "engine/constants.json"},
-    {"constant_id": "base-profile-bucket-high", "name": "비중을 높음(high)으로 보는 선", "value": 1.5, "unit": "배", "grade": "assumption", "sources": [], "checked_on": "2026-11-15", "file": "engine/constants.json"},
-    {"constant_id": "base-profile-bucket-mid", "name": "비중을 보통(mid)으로 보는 선", "value": 0.5, "unit": "배", "grade": "assumption", "sources": [], "checked_on": "2026-11-15", "file": "engine/constants.json"},
-    {"constant_id": "takeout-teams-per-item", "name": "인원이 빈 칸인 포장 한 개가 나타내는 팀 수", "value": 1, "unit": "팀", "grade": "assumption", "sources": [], "checked_on": "2026-11-19", "file": "engine/constants.json"},
-    {"constant_id": "add-on-people-per-item", "name": "인원이 빈 칸인 추가 상품 한 개가 나타내는 사람 수", "value": 0, "unit": "명", "grade": "assumption", "sources": [], "checked_on": "2026-11-19", "file": "engine/constants.json"},
-    {"constant_id": "calibration-top-venue-must-match", "name": "보정 통과: 가장 큰 업장이 같아야 하는가", "value": true, "unit": null, "grade": "assumption", "sources": [], "checked_on": "2026-11-17", "file": "engine/constants.json"},
-    {"constant_id": "calibration-max-diff-pp", "name": "보정 통과: 업장별 비중 차이의 한도", "value": 15, "unit": "%p", "grade": "assumption", "sources": [], "checked_on": "2026-11-17", "file": "engine/constants.json"},
-    {"constant_id": "calibration-diff-min-personas", "name": "보정 통과: 업장별 차이를 따지는 최소 페르소나 수", "value": 2, "unit": "명", "grade": "assumption", "sources": [], "checked_on": "2026-11-17", "file": "engine/constants.json"},
-    {"constant_id": "share-sharpness-k", "name": "방문의 몫을 낼 때 AI 점수에 거는 지수 (날카로움 k)", "value": 1, "unit": null, "grade": "assumption", "sources": [], "checked_on": "2026-11-20", "file": "engine/constants.json"},
-    {"constant_id": "price-threshold-median-pct", "name": "고급 외식 손님이 망설이기 시작하는 인상 폭의 가운데 값", "value": 10, "unit": "%", "grade": "assumption", "sources": [{"title": "Andreyeva, Long & Brownell 2010, American Journal of Public Health 100(2)", "kind": "literature", "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC2804646"}, {"title": "TouchBistro 2024 U.S. Diner Report (pmq.com, 2024-04-30 보도)", "kind": "article", "url": null}], "checked_on": "2026-11-20", "file": "engine/constants.json"},
-    {"constant_id": "price-threshold-90pct-range", "name": "고급 외식 손님 90% 의 망설이는 인상 폭이 드는 범위", "value": {"min": 5.0, "max": 20.0}, "unit": "%", "grade": "assumption", "sources": [{"title": "Raab 외 2009, Journal of Hospitality & Tourism Research 33(1):93-105", "kind": "literature", "url": "https://vtechworks.lib.vt.edu/handle/10919/97044"}, {"title": "Dominique-Ferreira & Antunes 2020, European Journal of Management and Business Economics 29(2) (emerald.com)", "kind": "literature", "url": null}, {"title": "Wakefield & Inman 2003, Journal of Retailing 79(4):199-212", "kind": "literature", "url": null}, {"title": "Toast 설문 (abc17news.com, 2026-11-16 게재)", "kind": "article", "url": null}], "checked_on": "2026-11-20", "file": "engine/constants.json"},
-    {"constant_id": "meal-lunch-dinner", "name": "집계 파일에서 끼니가 비어 있는 식사 매출", "value": {"lunch": 0.5, "dinner": 0.5}, "unit": null, "grade": "assumption", "sources": [], "checked_on": "2026-11-13", "file": "engine/conditions.json"}
+    {"constant_id": "filled-price-unit", "name": "집계 파일로 채운 단가의 반올림 단위", "value": 100, "unit": "원", "grade": "assumption", "sources": [], "checked_on": "2026-11-15", "file": "engine/constants.json", "applied": false},
+    {"constant_id": "base-profile-top-products", "name": "기본 데이터의 요약에 업장마다 적는 상품 수", "value": 3, "unit": "개", "grade": "assumption", "sources": [], "checked_on": "2026-11-15", "file": "engine/constants.json", "applied": false},
+    {"constant_id": "base-profile-bucket-high", "name": "비중을 높음(high)으로 보는 선", "value": 1.5, "unit": "배", "grade": "assumption", "sources": [], "checked_on": "2026-11-15", "file": "engine/constants.json", "applied": false},
+    {"constant_id": "base-profile-bucket-mid", "name": "비중을 보통(mid)으로 보는 선", "value": 0.5, "unit": "배", "grade": "assumption", "sources": [], "checked_on": "2026-11-15", "file": "engine/constants.json", "applied": false},
+    {"constant_id": "takeout-teams-per-item", "name": "인원이 빈 칸인 포장 한 개가 나타내는 팀 수", "value": 1, "unit": "팀", "grade": "assumption", "sources": [], "checked_on": "2026-11-19", "file": "engine/constants.json", "applied": false},
+    {"constant_id": "add-on-people-per-item", "name": "인원이 빈 칸인 추가 상품 한 개가 나타내는 사람 수", "value": 0, "unit": "명", "grade": "assumption", "sources": [], "checked_on": "2026-11-19", "file": "engine/constants.json", "applied": false},
+    {"constant_id": "calibration-top-venue-must-match", "name": "보정 통과: 가장 큰 업장이 같아야 하는가", "value": true, "unit": null, "grade": "assumption", "sources": [], "checked_on": "2026-11-17", "file": "engine/constants.json", "applied": false},
+    {"constant_id": "calibration-max-diff-pp", "name": "보정 통과: 업장별 비중 차이의 한도", "value": 15, "unit": "%p", "grade": "assumption", "sources": [], "checked_on": "2026-11-17", "file": "engine/constants.json", "applied": false},
+    {"constant_id": "calibration-diff-min-personas", "name": "보정 통과: 업장별 차이를 따지는 최소 페르소나 수", "value": 2, "unit": "명", "grade": "assumption", "sources": [], "checked_on": "2026-11-17", "file": "engine/constants.json", "applied": false},
+    {"constant_id": "share-sharpness-k", "name": "방문의 몫을 낼 때 AI 점수에 거는 지수 (날카로움 k)", "value": 1, "unit": null, "grade": "assumption", "sources": [], "checked_on": "2026-11-20", "file": "engine/constants.json", "applied": false},
+    {"constant_id": "price-threshold-median-pct", "name": "고급 외식 손님이 망설이기 시작하는 인상 폭의 가운데 값", "value": 10, "unit": "%", "grade": "assumption", "sources": [{"title": "Andreyeva, Long & Brownell 2010, American Journal of Public Health 100(2)", "kind": "literature", "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC2804646"}, {"title": "TouchBistro 2024 U.S. Diner Report (pmq.com, 2024-04-30 보도)", "kind": "article", "url": null}], "checked_on": "2026-11-20", "file": "engine/constants.json", "applied": false},
+    {"constant_id": "price-threshold-90pct-range", "name": "고급 외식 손님 90% 의 망설이는 인상 폭이 드는 범위", "value": {"min": 5.0, "max": 20.0}, "unit": "%", "grade": "assumption", "sources": [{"title": "Raab 외 2009, Journal of Hospitality & Tourism Research 33(1):93-105", "kind": "literature", "url": "https://vtechworks.lib.vt.edu/handle/10919/97044"}, {"title": "Dominique-Ferreira & Antunes 2020, European Journal of Management and Business Economics 29(2) (emerald.com)", "kind": "literature", "url": null}, {"title": "Wakefield & Inman 2003, Journal of Retailing 79(4):199-212", "kind": "literature", "url": null}, {"title": "Toast 설문 (abc17news.com, 2026-11-16 게재)", "kind": "article", "url": null}], "checked_on": "2026-11-20", "file": "engine/constants.json", "applied": false},
+    {"constant_id": "meal-lunch-dinner", "name": "집계 파일에서 끼니가 비어 있는 식사 매출", "value": {"lunch": 0.5, "dinner": 0.5}, "unit": null, "grade": "assumption", "sources": [], "checked_on": "2026-11-13", "file": "engine/conditions.json", "applied": true}
   ],
   "baseline_answers": null,
   "share_method": "single"
