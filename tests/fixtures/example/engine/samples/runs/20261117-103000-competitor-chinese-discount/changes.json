@@ -44,6 +44,20 @@
         "kind": "competitor",
         "venue_id": "examplehotel-chinese"
       },
+      "before_shares": [
+        {
+          "kind": "walkerhill",
+          "venue_id": "geumryong",
+          "share": 1.0
+        }
+      ],
+      "after_shares": [
+        {
+          "kind": "competitor",
+          "venue_id": "examplehotel-chinese",
+          "share": 1.0
+        }
+      ],
       "parts": [
         {
           "venue_id": "geumryong",
@@ -51,7 +65,11 @@
           "amount": -57272775
         }
       ],
-      "promo": "none"
+      "promo": "none",
+      "promo_shares": {
+        "would_come": 0.0,
+        "drawn": 0.0
+      }
     }
   ]
 }

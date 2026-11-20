@@ -8,7 +8,7 @@ import hashlib
 import json
 import re
 from decimal import Decimal
-from typing import Any, Literal, Self
+from typing import Annotated, Any, Literal, Self
 
 from pydantic import AwareDatetime, Field, model_validator
 
@@ -149,6 +149,10 @@ class RunRecord(FormatModel):
     # 기준이 아닌 상황에서, 바꾼 업장과 상관없어 원장을 기준의 답으로 적은 방문 (10.1절, T210 의 임시 규칙). 기준 상황은 null 이다.
     # 11-19 전의 실행 기록에는 없다.
     baseline_answers: list[Text] | None = None
+    # 방문의 몫을 낸 방식 (T212): `single` 모든 방문이 답 하나(점수 없음, 1단계 방식)라 고른 곳의 몫이 1,
+    # `scores` 모든 방문이 점수를 받은 답(2단계 방식), `mixed` 둘이 섞였다. 답이 하나도 없으면(후보 없음·실패뿐) `single` 이다.
+    # 11-20 전의 실행 기록에는 없다 (그 실행은 모두 1단계 방식이다).
+    share_method: Literal["single", "scores", "mixed"] | None = None
 
     @model_validator(mode="after")
     def _rules(self) -> Self:
@@ -190,6 +194,9 @@ LEDGER_COLUMNS = [
     "revenue_net",
     "represented",
     "counted_share",
+    "choice_share",
+    "score",
+    "season_gap_of",
     "weighted_revenue",
     "reason_labels",
     "reason_text",
@@ -221,6 +228,13 @@ class LedgerRow(FormatModel):
     revenue_net: Won
     represented: float = Field(ge=0)
     counted_share: float = Field(ge=0, le=1)
+    # 이 곳으로 간 방문의 몫 (2단계 방식, T212). 답 하나로 고른 방문(1단계 방식)은 1 이다.
+    # 11-20 전의 원장에는 이 열이 없어 1 로 읽는다 (`engine.formats.io.ADDED_LATER`).
+    choice_share: float = Field(default=1.0, ge=0, le=1)
+    # 이 곳에 AI 가 적은 점수 (0 ~ 100). 1단계 방식의 답과 응답 없이 엔진이 정한 줄은 빈 칸이다.
+    score: int | None = Field(default=None, ge=0, le=100)
+    # 일부 달에만 파는 곳의 나머지 몫을 센 "이용하지 않음" 줄이면 그 곳의 venue_id. 그 밖에는 빈 칸이다.
+    season_gap_of: Id | None = None
     weighted_revenue: float = Field(ge=0)
     reason_labels: list[str]
     reason_text: str | None
@@ -250,6 +264,8 @@ class LedgerRow(FormatModel):
             return self
         if self.fail_reason:
             raise ValueError("fail_reason 은 실패한 줄에만 적는다")
+        if self.season_gap_of is not None and self.choice_kind != "none":
+            raise ValueError("season_gap_of 는 파는 달이 아닌 몫을 센 '이용하지 않음' 줄에만 적는다")
         if self.quantity * self.list_price - self.discount != self.paid:
             raise ValueError("paid 가 수량 × 표시가 − 할인과 다르다")
         if self.choice_kind == "none":
@@ -266,9 +282,9 @@ class LedgerRow(FormatModel):
         if self.choice_kind != "walkerhill" and self.revenue_net != 0:
             raise ValueError("경쟁 업장과 이용하지 않음의 revenue_net 은 0 이다")
         # 원장에는 원 단위로 반올림한 값을 적는다. 그래서 반올림 폭(0.5)까지는 같은 것으로 본다.
-        expected = weighted_amount(self.revenue_net, self.represented, self.counted_share)
+        expected = weighted_amount(self.revenue_net, self.represented, self.counted_share, self.choice_share)
         if abs(expected - Decimal(str(self.weighted_revenue))) > Decimal("0.5"):
-            raise ValueError("weighted_revenue 가 revenue_net × represented × counted_share 와 다르다")
+            raise ValueError("weighted_revenue 가 revenue_net × represented × counted_share × choice_share 와 다르다")
         return self
 
     @classmethod
@@ -345,6 +361,71 @@ class Calibration(FormatModel):
     groups: dict[str, GroupCalibration]
     uncovered_groups: list[str]
     passed: bool = Field(alias="pass")
+
+
+# 다른 고객군에 써 보기·단순 기준과 견주기에서 견주는 방법 (docs/FORMATS.md 10.7절, T212).
+CrossCheckMethod = Literal["no_constants", "held_out", "simple"]
+
+
+class GroupCrossCheck(FormatModel):
+    """한 고객군의 견주기. 몫은 워커힐 업장의 사람 수 몫이고, 잴 수 없는 방법은 null 이다."""
+
+    actual: dict[str, Annotated[float, Field(ge=0, le=1)]]
+    no_constants: dict[str, Annotated[float, Field(ge=0, le=1)]]
+    held_out: dict[str, Annotated[float, Field(ge=0, le=1)]] | None
+    simple: dict[str, Annotated[float, Field(ge=0, le=1)]] | None
+    max_diff_pp: dict[CrossCheckMethod, Annotated[float, Field(ge=0, le=100)] | None]
+    misplaced_pct: dict[CrossCheckMethod, Annotated[float, Field(ge=0, le=100)] | None]
+    # 단순 기준을 낸 공개 후기의 수.
+    simple_reviews: int = Field(ge=0)
+    # 다른 고객군으로 상수를 추정하지 못했으면 그 까닭.
+    held_out_note: str | None
+
+    @model_validator(mode="after")
+    def _rules(self) -> Self:
+        for name in ("max_diff_pp", "misplaced_pct"):
+            found = getattr(self, name)
+            if set(found) != {"no_constants", "held_out", "simple"}:
+                raise ValueError(f"{name} 에는 세 방법이 모두 있어야 한다")
+            if found["no_constants"] is None:
+                raise ValueError(f"{name}.no_constants 는 늘 적는다")
+            for method in ("held_out", "simple"):
+                if (getattr(self, method) is None) != (found[method] is None):
+                    raise ValueError(f"{name}.{method} 는 {method} 의 몫이 있을 때만 적는다")
+        if (self.held_out is None) != (self.held_out_note is not None):
+            raise ValueError("held_out 이 null 이면 held_out_note 에 까닭을 적고, 아니면 null 이다")
+        if (self.simple is None) != (self.simple_reviews == 0):
+            raise ValueError("simple 은 공개 후기가 있을 때만 적는다")
+        return self
+
+
+class CrossCheck(FormatModel):
+    """다른 고객군에 써 보기와 단순 기준과 견주기 `crosscheck.json` (docs/FORMATS.md 10.7절, T212). 점수를 받은 기준 실행에만 있다."""
+
+    format_version: Literal[1]
+    run_id: Text
+    k: float = Field(gt=0)
+    # 그 기준 실행이 기본 데이터의 요약을 LLM 에 보냈는가 (10.1절). `none` 이 아니면 페르소나마다 자기 고객군의 업장 몫 요약이 프롬프트에 들어가,
+    # "다른 고객군으로 추정"도 완전히 떼어 둔 검증이 아니다 (10.7절).
+    base_profile_mode: BaseProfileMode
+    venues: list[Id] = Field(min_length=1)
+    groups: dict[str, GroupCrossCheck] = Field(min_length=2)
+
+    @model_validator(mode="after")
+    def _venues(self) -> Self:
+        if self.venues != sorted(set(self.venues)):
+            raise ValueError("venues 는 겹치지 않고 차례대로 적는다")
+        for group, found in self.groups.items():
+            for name in ("actual", "no_constants", "held_out", "simple"):
+                value = getattr(found, name)
+                if value is not None and set(value) != set(self.venues):
+                    raise ValueError(f"고객군 '{group}' 의 {name} 업장이 venues 와 다르다")
+        return self
+
+    def held_out_better_than_simple(self) -> tuple[int, int]:
+        """(다른 고객군으로 추정한 상수의 어긋난 몫이 단순 기준보다 작은 고객군 수, 둘 다 잴 수 있는 고객군 수)."""
+        both = [g for g in self.groups.values() if g.misplaced_pct["held_out"] is not None and g.misplaced_pct["simple"] is not None]
+        return sum(g.misplaced_pct["held_out"] < g.misplaced_pct["simple"] for g in both), len(both)
 
 
 class VenueValidation(FormatModel):

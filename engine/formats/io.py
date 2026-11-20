@@ -35,11 +35,25 @@ def write_json(path: Path, data: Any) -> None:
     path.write_text(text, encoding="utf-8", newline="\n")
 
 
+# 나중에 더한 열과, 그 열이 없던 옛 파일을 읽을 때 채울 값. 머리글이 약속에서 이 열들만 뺀 것이면 옛 파일로 보고 채운다.
+# 소비 원장의 몫 열 셋 (11-20, T212. 옛 원장은 모두 답 하나로 고른 1단계 방식이라 고른 몫이 1 이다).
+# 임시 호환이다 (`CLAUDE.md` "임시 허용"): 팀이 쓰는 실행을 점수를 받는 판으로 다시 돌린 뒤 없앤다. 조건과 확인은 진행 문서 T212 의 완료 조건에 있다.
+ADDED_LATER = {"choice_share": "1", "score": "", "season_gap_of": ""}
+
+
 def read_csv(path: Path, columns: list[str]) -> list[dict[str, str]]:
-    """CSV 를 읽어 줄마다 사전으로 돌려준다. 머리글이 약속한 열과 다르면 오류를 낸다."""
+    """CSV 를 읽어 줄마다 사전으로 돌려준다. 머리글이 약속한 열과 다르면 오류를 낸다 (나중에 더한 열만 빠진 옛 파일은 채워 읽는다)."""
     with path.open(encoding=CSV_ENCODING, newline="") as f:
         reader = csv.DictReader(f)
         header = reader.fieldnames or []
+        later = {c: ADDED_LATER[c] for c in columns if c in ADDED_LATER}
+        if later and header == [c for c in columns if c not in later]:
+            rows = []
+            for number, row in enumerate(reader, start=2):
+                if None in row or any(value is None for value in row.values()):
+                    raise ValueError(f"{number}번째 줄의 칸 수가 머리글과 다르다")
+                rows.append({c: row[c] if c in row else later[c] for c in columns})
+            return rows
         if header != columns:
             missing = [c for c in columns if c not in header]
             extra = [c for c in header if c not in columns]

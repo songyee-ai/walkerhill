@@ -56,6 +56,11 @@ def _used(found: ConstantsFile, file: str) -> list[UsedConstant]:
     ]
 
 
+def used_from(found: ConstantsFile, file: str) -> list[UsedConstant]:
+    """한 상수 파일에서 엔진이 쓰는 것(`in_use`)을 실행 기록에 남길 모양으로 (추정한 상수 파일 등)."""
+    return _used(found, file)
+
+
 def used_constants(
     bundle: ConditionBundle, summary_constants: ConstantsFile | None = None, summary_file: str | None = None
 ) -> list[UsedConstant]:

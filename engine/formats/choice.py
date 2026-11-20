@@ -218,12 +218,49 @@ class Rejected(FormatModel):
     text: Text
 
 
+# 점수의 합 (docs/FORMATS.md 9절의 `scores`). "이 손님이 같은 상황을 백 번 맞는다면 몇 번".
+SCORE_TOTAL = 100
+
+# 점수를 묻지 않고 답 하나만 받던 프롬프트 판 (11-20, T212 의 1단계 방식). 이 판의 답에는 `scores` 가 없어도 되고,
+# 엔진은 고른 곳을 100점으로 읽는다. 그 밖의 판은 `scores` 가 꼭 있어야 한다.
+# 임시 호환이다 (`CLAUDE.md` "임시 허용"): 팀이 쓰는 답과 예시 묶음을 점수를 받는 판으로 다시 받은 뒤 없앤다.
+# 없애는 조건과 확인은 진행 문서 T212 의 완료 조건에 있다.
+SINGLE_ANSWER_PROMPTS = frozenset({"p1", "p2", "p3"})
+
+
+def scores_required(prompt_version: str) -> bool:
+    """이 판의 답에 `scores` 가 꼭 있어야 하는가."""
+    return prompt_version not in SINGLE_ANSWER_PROMPTS
+
+
+class Score(FormatModel):
+    """후보 하나(또는 "이용하지 않음")의 점수와, 그곳에 간다면 고를 주문 (11-20 wilstein91 결정, T212).
+
+    "이용하지 않음"이면 `venue_id` 가 null 이다. 점수가 0 인 곳은 주문을 적지 않아도 된다 (`option_id` null, `addons` 빈 목록).
+    점수가 0 보다 큰 곳의 주문은 `choice` 와 같은 규칙으로 검사한다 (`problems_in_response`).
+    """
+
+    venue_id: Id | None
+    percent: int = Field(ge=0, le=SCORE_TOTAL)
+    option_id: str | None
+    addons: list[AddonChoice]
+
+    def as_choice(self) -> Choice:
+        return Choice(venue_id=self.venue_id, option_id=self.option_id, addons=self.addons)
+
+
 class ChoiceResponse(FormatModel):
     choice: Choice
     reason_labels: list[Text] = Field(min_length=1)
     reason_text: Text
     used_attributes: list[Text]
     rejected: list[Rejected]
+    # 후보마다(이용하지 않음 포함)의 점수와 주문 (2단계 방식, T212). 점수를 묻지 않던 판(`SINGLE_ANSWER_PROMPTS`)의 답에는 없다.
+    # 없으면 저장할 때도 적지 않는다 (옛 답과 같은 모양으로 남게).
+    scores: list[Score] | None = Field(default=None, exclude_if=lambda value: value is None)
+
+    def score(self, venue_id: str | None) -> Score | None:
+        return next((s for s in self.scores or [] if s.venue_id == venue_id), None)
 
 
 def problems_in_response(request: ChoiceRequest, response: ChoiceResponse) -> list[str]:
@@ -231,42 +268,10 @@ def problems_in_response(request: ChoiceRequest, response: ChoiceResponse) -> li
 
     금액을 업장 정의로 다시 계산하는 검사는 여기 없다. 업장 정의가 필요해서 엔진이 따로 한다.
     """
-    problems: list[str] = []
     choice = response.choice
     chose_none = choice.venue_id is None
-
-    if not chose_none:
-        candidate = request.candidate(choice.venue_id)
-        if candidate is None:
-            problems.append(f"고른 업장 '{choice.venue_id}' 가 후보에 없다")
-        else:
-            addons = {a.product_id: a for a in candidate.addons}
-            if candidate.options:
-                if choice.option_id is None:
-                    problems.append(f"업장 '{choice.venue_id}' 는 주문을 하나 골라야 한다 (추가 상품만 고를 수 없다)")
-                elif choice.option_id not in {o.option_id for o in candidate.options}:
-                    problems.append(f"고른 주문 '{choice.option_id}' 가 업장 '{choice.venue_id}' 의 주문에 없다")
-            else:
-                # 주문이 없는 후보: 추가 상품만 고른다. 하나도 안 사면 "이용하지 않음"과 구분되지 않는다.
-                if choice.option_id is not None:
-                    problems.append(f"업장 '{choice.venue_id}' 에는 주문이 없는데 option_id 가 있다")
-                if not any(picked.quantity > 0 for picked in choice.addons):
-                    problems.append(f"업장 '{choice.venue_id}' 를 골랐는데 산 추가 상품이 없다")
-            if has_duplicates([picked.product_id for picked in choice.addons]):
-                problems.append("choice.addons 에 같은 추가 상품이 두 번 있다")
-            for picked in choice.addons:
-                addon = addons.get(picked.product_id)
-                if addon is None:
-                    problems.append(f"추가 상품 '{picked.product_id}' 가 업장 '{choice.venue_id}' 의 addons 에 없다")
-                elif picked.quantity > addon.qty_max:
-                    problems.append(f"추가 상품 '{picked.product_id}' 의 수량이 qty_max 를 넘는다")
-            # 예산의 max 는 산 것 전부와 견준다: 고른 주문의 total 에 추가 상품의 금액을 더한 값이다.
-            option = candidate.option(choice.option_id)
-            spent = (option.total if option else 0) + sum(
-                p.quantity * addons[p.product_id].unit_price for p in choice.addons if p.product_id in addons
-            )
-            if spent > request.condition.budget_limit():
-                problems.append("고른 주문과 추가 상품의 금액을 더한 값이 예산의 max 를 넘는다")
+    problems = order_problems(request, choice)
+    problems += score_problems(request, response)
 
     allowed = request.vocab.pain_points if chose_none else request.vocab.reasons_chosen
     for label in response.reason_labels:
@@ -296,6 +301,89 @@ def problems_in_response(request: ChoiceRequest, response: ChoiceResponse) -> li
         if not has_path(request.persona, path):
             problems.append(f"used_attributes 의 '{path}' 가 페르소나에 없는 속성이다")
     return problems
+
+
+def order_problems(request: ChoiceRequest, choice: Choice, where: str = "") -> list[str]:
+    """고른 업장의 주문 하나가 요청에서 고를 수 있는 것인가. "이용하지 않음"이면 볼 것이 없다.
+
+    `choice` 의 주문과, 점수가 0 보다 큰 곳의 주문(`scores`)에 같은 규칙을 쓴다. `where` 는 문장 앞에 붙일 자리다.
+    """
+    if choice.venue_id is None:
+        return []
+    problems: list[str] = []
+    candidate = request.candidate(choice.venue_id)
+    if candidate is None:
+        return [f"{where}고른 업장 '{choice.venue_id}' 가 후보에 없다"]
+    addons = {a.product_id: a for a in candidate.addons}
+    if candidate.options:
+        if choice.option_id is None:
+            problems.append(f"{where}업장 '{choice.venue_id}' 는 주문을 하나 골라야 한다 (추가 상품만 고를 수 없다)")
+        elif choice.option_id not in {o.option_id for o in candidate.options}:
+            problems.append(f"{where}고른 주문 '{choice.option_id}' 가 업장 '{choice.venue_id}' 의 주문에 없다")
+    else:
+        # 주문이 없는 후보: 추가 상품만 고른다. 하나도 안 사면 "이용하지 않음"과 구분되지 않는다.
+        if choice.option_id is not None:
+            problems.append(f"{where}업장 '{choice.venue_id}' 에는 주문이 없는데 option_id 가 있다")
+        if not any(picked.quantity > 0 for picked in choice.addons):
+            problems.append(f"{where}업장 '{choice.venue_id}' 를 골랐는데 산 추가 상품이 없다")
+    if has_duplicates([picked.product_id for picked in choice.addons]):
+        problems.append(f"{where or 'choice.'}addons 에 같은 추가 상품이 두 번 있다")
+    for picked in choice.addons:
+        addon = addons.get(picked.product_id)
+        if addon is None:
+            problems.append(f"{where}추가 상품 '{picked.product_id}' 가 업장 '{choice.venue_id}' 의 addons 에 없다")
+        elif picked.quantity > addon.qty_max:
+            problems.append(f"{where}추가 상품 '{picked.product_id}' 의 수량이 qty_max 를 넘는다")
+    # 예산의 max 는 산 것 전부와 견준다: 고른 주문의 total 에 추가 상품의 금액을 더한 값이다.
+    option = candidate.option(choice.option_id)
+    spent = (option.total if option else 0) + sum(
+        p.quantity * addons[p.product_id].unit_price for p in choice.addons if p.product_id in addons
+    )
+    if spent > request.condition.budget_limit():
+        problems.append(f"{where}고른 주문과 추가 상품의 금액을 더한 값이 예산의 max 를 넘는다")
+    return problems
+
+
+def score_problems(request: ChoiceRequest, response: ChoiceResponse) -> list[str]:
+    """점수(`scores`)가 약속대로인가 (docs/FORMATS.md 9절, T212).
+
+    후보마다 하나와 "이용하지 않음" 하나가 있고, 합이 100 이며, 점수가 0 보다 큰 곳의 주문을 고를 수 있고,
+    `choice` 에 적은 곳은 점수가 0 보다 크고 그 주문이 `choice` 와 같다. 점수를 묻지 않던 판이면 없어도 된다.
+    """
+    if response.scores is None:
+        return ["scores 가 없다 (이 판의 답에는 후보마다의 점수가 있어야 한다)"] if scores_required(request.prompt_version) else []
+    problems: list[str] = []
+    places: list[str | None] = [c.venue_id for c in request.candidates] + [None]
+    seen = [s.venue_id for s in response.scores]
+    if has_duplicates([str(v) for v in seen]):
+        problems.append("scores 에 같은 곳이 두 번 있다")
+    for venue_id in seen:
+        if venue_id not in places:
+            problems.append(f"scores 의 업장 '{venue_id}' 가 후보에 없다")
+    for venue_id in places:
+        if venue_id not in seen:
+            problems.append(f"scores 에 '{venue_id or '이용하지 않음'}' 이 없다")
+    if sum(s.percent for s in response.scores) != SCORE_TOTAL:
+        problems.append(f"scores 의 percent 를 더하면 {SCORE_TOTAL} 이어야 한다")
+    for entry in response.scores:
+        label = entry.venue_id or "이용하지 않음"
+        if entry.venue_id is None:
+            if entry.option_id is not None or entry.addons:
+                problems.append("scores 의 '이용하지 않음' 에는 주문이 없다 (option_id null, addons 빈 목록)")
+        elif entry.percent > 0 and entry.venue_id in places:
+            problems += order_problems(request, entry.as_choice(), f"scores 의 '{label}' — ")
+    chosen = response.score(response.choice.venue_id)
+    if chosen is not None:
+        if chosen.percent == 0:
+            problems.append("choice 에 적은 곳의 점수가 0 이다")
+        elif _bought(chosen.as_choice()) != _bought(response.choice):
+            problems.append("choice 의 주문이 scores 에 적은 그곳의 주문과 다르다")
+    return problems
+
+
+def _bought(choice: Choice) -> tuple[str | None, str | None, list[tuple[str, int]]]:
+    """산 것만 남긴 주문: 업장, 주문, 수량이 0 보다 큰 추가 상품 (적은 순서와 수량 0 인 항목은 보지 않는다)."""
+    return choice.venue_id, choice.option_id, sorted((a.product_id, a.quantity) for a in choice.addons if a.quantity > 0)
 
 
 def has_path(data: dict[str, Any], dotted: str) -> bool:

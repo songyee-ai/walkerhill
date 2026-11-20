@@ -27,7 +27,7 @@ from typing import Any, Protocol
 import anthropic
 
 from engine.answers import request_as_json
-from engine.formats.choice import ChoiceRequest, has_path
+from engine.formats.choice import ChoiceRequest, has_path, scores_required
 
 DEFAULT_PROVIDER = "anthropic"
 # 모델 이름을 적는 곳은 여기 하나다. 바꿀 때는 코드를 고치지 않고 .env 의 LLM_MODEL 에 적는다 (CLAUDE.md 의 "스택").
@@ -128,6 +128,25 @@ def response_schema(request: ChoiceRequest) -> dict[str, Any]:
     rejected = schema["properties"]["rejected"]["items"]["properties"]
     rejected["venue_id"] = _one_of(venues)
     rejected["pain_labels"]["items"] = _one_of(list(request.vocab.pain_points))
+    if scores_required(request.prompt_version):
+        # 후보마다(이용하지 않음은 null)의 점수와 그곳에 간다면 고를 주문 (FORMATS 9절의 `scores`, T212).
+        # 후보마다 하나씩인지, 합이 100 인지, 주문이 그 업장의 것인지는 엔진이 답을 받은 뒤에 검사한다.
+        schema["properties"]["scores"] = {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "venue_id": {"anyOf": [_one_of(venues), {"type": "null"}]},
+                    # 범위(0 ~ 100)는 스키마에 넣지 않는다. 숫자 제약을 받지 않는 공급자가 있어, 엔진이 답을 받은 뒤에 검사한다.
+                    "percent": {"type": "integer"},
+                    "option_id": {"anyOf": [_one_of(options), {"type": "null"}]},
+                    "addons": json.loads(json.dumps(choice["addons"])),
+                },
+                "required": ["venue_id", "percent", "option_id", "addons"],
+                "additionalProperties": False,
+            },
+        }
+        schema["required"] = [*schema["required"], "scores"]
     return schema
 
 

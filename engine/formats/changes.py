@@ -13,6 +13,9 @@
 - `none`: 상황에서 워커힐 업장의 할인을 받지 않았다.
 - `would_come`: 기준에서도 그 업장을 고르던 방문이 할인을 받았다 ("혜택이 없어도 올 고객", PRD 3절).
 - `drawn`: 기준에서는 그 업장을 고르지 않던 방문이 할인을 받으며 그 업장을 골랐다 (새로 들어오거나 옮겨 온 방문).
+
+방문이 몫으로 나뉘어 여러 곳에 가면(2단계 방식, T212) 곳마다의 몫(`before_shares`, `after_shares`)과 할인을 받은 몫(`promo_shares`)을 함께 적는다.
+그때 `before`, `after` 는 몫이 가장 큰 곳이고, `promo` 는 할인을 받은 몫 가운데 큰 쪽이다.
 """
 
 from typing import Literal, Self
@@ -85,15 +88,35 @@ class VisitChangePart(FormatModel):
     amount: int
 
 
+class PlaceShare(Place):
+    """방문이 간 곳과 그곳의 몫 (원장의 `choice_share`, T212)."""
+
+    share: float = Field(ge=0, le=1)
+
+
+class PromoShares(FormatModel):
+    """상황에서 워커힐 업장의 할인을 받은 몫: 기준에서도 그 업장에 오던 몫과 새로 온 몫 (T215, T212)."""
+
+    would_come: float = Field(ge=0, le=1)
+    drawn: float = Field(ge=0, le=1)
+
+
 class VisitChange(FormatModel):
-    """방문 하나의 변화. 금액이 바뀌지 않은 방문도 적는다 (`parts` 가 비거나 0 이다)."""
+    """방문 하나의 변화. 금액이 바뀌지 않은 방문도 적는다 (`parts` 가 비거나 0 이다).
+
+    `before`, `after` 는 몫이 가장 큰 곳이다. 답 하나로 고른 방문(1단계 방식)은 그 곳의 몫이 1 이다.
+    `before_shares`, `after_shares`, `promo_shares` 는 11-20 전의 파일에는 없다 (그 파일의 방문은 모두 몫이 1 인 곳 하나다).
+    """
 
     visit_id: Text
     represented: float = Field(ge=0)
     before: Place
     after: Place
+    before_shares: list[PlaceShare] | None = None
+    after_shares: list[PlaceShare] | None = None
     parts: list[VisitChangePart]
     promo: Promo
+    promo_shares: PromoShares | None = None
 
 
 class Changes(FormatModel):

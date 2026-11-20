@@ -75,6 +75,12 @@ def main(argv: list[str] | None = None) -> int:
         "기준이 아닌 상황은 기준 실행의 방식을 따른다",
     )
     parser.add_argument(
+        "--before-estimate",
+        action="store_true",
+        help="기본 데이터로 점수를 묻는 판을 돌리는데 추정한 상수 파일(private/base/estimated_constants.json)이 없어도 돌린다. "
+        "업장 상수를 모두 1 로 본다. 상수 추정에 쓸 첫 기준 실행에만 쓴다 (T212)",
+    )
+    parser.add_argument(
         "--root", type=Path, default=Path.cwd(), help="자료를 읽고 결과를 쓸 폴더 (기본은 지금 폴더). .env 는 늘 지금 폴더의 것을 읽는다"
     )
     args = parser.parse_args(argv)
@@ -119,6 +125,7 @@ def main(argv: list[str] | None = None) -> int:
             # 기본 데이터의 요약을 보내도 된다고 확인한 받는 곳 (.env). 지금 받는 곳과 다르면 요약을 보내는 실행을 멈춘다.
             base_profile_confirmed_for=os.environ.get(BASE_PROFILE_CONFIRMED_ENV, "").strip() or None,
             receiver=receiver_of(settings),
+            before_estimate=args.before_estimate,
         )
     except (LlmFatal, FileNotFoundError, FileExistsError, ValueError) as exc:
         print(f"돌리지 못했다: {exc}", file=sys.stderr)
