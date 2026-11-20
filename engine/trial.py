@@ -13,6 +13,7 @@
 """
 
 import argparse
+import copy
 import json
 import math
 import os
@@ -27,6 +28,7 @@ from dotenv import load_dotenv
 from engine.answers import read_reply
 from engine.candidates import build_request, run_condition
 from engine.formats.choice import ChoiceRequest, problems_in_response
+from engine.formats.persona import Persona
 from engine.ledger import amount_problems
 from engine.llm import (
     LlmError,
@@ -124,6 +126,26 @@ def ask_once(provider: Provider, system: str, request: ChoiceRequest, venues: di
     }
 
 
+def adjusted(persona: Persona, persona_json: dict[str, Any], patch: dict[str, Any], budget_scale: float) -> tuple[Persona, dict[str, Any]]:
+    """이 실험에서만 쓸 페르소나: 고칠 자리에 값을 넣고 예산에 배수를 곱한다. 요청의 페르소나와 조건의 예산이 같게 둘 다 고친다."""
+    data = copy.deepcopy(persona_json)
+    for path, value in patch.items():
+        node = data
+        *parents, last = path.split(".")
+        for key in parents:
+            node = node[key]
+        if last not in node:
+            raise KeyError(f"페르소나 '{persona.persona_id}' 에 '{path}' 가 없다")
+        node[last] = value
+    budget = persona.budget
+    if budget_scale != 1.0:
+        budget = budget.model_copy(
+            update={"typical": int(round(budget.typical * budget_scale, -3)), "max": int(round(budget.max * budget_scale, -3))}
+        )
+        data["budget"] = {**data["budget"], "typical": budget.typical, "max": budget.max}
+    return persona.model_copy(update={"budget": budget}), data
+
+
 def summarize(places: list[str], asks: list[dict], scores: list[dict]) -> list[dict[str, Any]]:
     """후보마다: 여러 번 묻기의 비율과 그 흔들림(표준 오차), 점수의 평균·가장 작은 값·가장 큰 값."""
     chosen = Counter(a["chosen"] for a in asks if a["chosen"] is not None)
@@ -158,6 +180,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--score", type=int, default=2, help="점수 받기의 횟수 (방문마다)")
     parser.add_argument("--limit", type=int, required=True, help="이 실험에서 부를 수 있는 가장 많은 수")
     parser.add_argument("--prompt", default="p3")
+    parser.add_argument("--persona-patch", type=Path, help="요청에 넣을 페르소나를 이 실험에서만 고친다: {persona_id: {\"점.으로.이은.자리\": 값}} (파일은 고치지 않는다)")
+    parser.add_argument("--budget-scale", type=float, default=1.0, help="이 실험에서만 페르소나의 예산(typical, max)에 곱한다 (천 원 단위로 반올림)")
     args = parser.parse_args(argv)
 
     load_dotenv(Path.cwd() / ".env")
@@ -175,6 +199,7 @@ def main(argv: list[str] | None = None) -> int:
     inputs = load_inputs(root, args.data, persona_ids=args.personas)
     provider = make_provider(settings)
     system = load_prompt(root, args.prompt)
+    patches = json.loads(args.persona_patch.read_text(encoding="utf-8")) if args.persona_patch else {}
     out = root / "private" / "trials" / datetime.now().strftime("%Y%m%d-%H%M%S")
     out.mkdir(parents=True)
     print(f"실험 폴더: {out}")
@@ -183,12 +208,12 @@ def main(argv: list[str] | None = None) -> int:
     visits = []
     calls = 0
     for persona_id in args.personas:
-        persona = inputs.personas[persona_id]
+        persona, persona_json = adjusted(inputs.personas[persona_id], inputs.persona_json[persona_id], patches.get(persona_id, {}), args.budget_scale)
         for condition_id in args.conditions:
             condition = run_condition(inputs.conditions.condition(condition_id), persona)
             request, _ = build_request(
                 prompt_version=args.prompt,
-                persona=inputs.persona_json[persona_id],
+                persona=persona_json,
                 condition=condition,
                 venues=list(inputs.venues.values()),
                 vocab=inputs.vocab,
@@ -218,7 +243,7 @@ def main(argv: list[str] | None = None) -> int:
         "ask": [r["tokens_out"] for v in visits for r in v["asks"] if r["tokens_out"]],
         "score": [r["tokens_out"] for v in visits for r in v["scores"] if r["tokens_out"]],
     }
-    result = {"data": args.data, "prompt": args.prompt, "calls": calls, "tokens_in": tokens_in, "tokens_out": tokens_out, "visits": visits}
+    result = {"data": args.data, "prompt": args.prompt, "persona_patch": patches, "budget_scale": args.budget_scale, "calls": calls, "tokens_in": tokens_in, "tokens_out": tokens_out, "visits": visits}
     (out / "trial.json").write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n")
 
     for visit in visits:

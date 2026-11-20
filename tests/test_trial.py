@@ -89,3 +89,19 @@ def test_trial_on_base_data_needs_the_same_confirmation_as_the_engine(copy_root,
     monkeypatch.delenv("BASE_PROFILE_CONFIRMED_FOR", raising=False)
     code = trial.main(["--root", str(copy_root), "--data", "private", "--personas", PERSONA, "--conditions", CONDITION, "--ask", "1", "--score", "0", "--limit", "1"])
     assert code == 1 and fake.calls == []
+
+
+def test_adjusted_changes_only_the_request_copy():
+    """이 실험에서만 페르소나를 고친다: 고칠 자리에 값을 넣고 예산에 배수를 곱하며, 읽은 페르소나는 그대로다."""
+    from engine.runner import load_inputs
+
+    inputs = load_inputs(EXAMPLE_ROOT, "sample", persona_ids=[PERSONA])
+    persona, data = inputs.personas[PERSONA], inputs.persona_json[PERSONA]
+    before = json.dumps(data, ensure_ascii=False)
+    new, new_data = trial.adjusted(persona, data, {"preferences.cuisines_like": ["뷔페"]}, 1.15)
+    assert new_data["preferences"]["cuisines_like"] == ["뷔페"]
+    assert new.budget.typical == new_data["budget"]["typical"] == int(round(persona.budget.typical * 1.15, -3))
+    assert isinstance(new.budget.max, int) and new.budget.max == new_data["budget"]["max"]
+    assert json.dumps(data, ensure_ascii=False) == before
+    with pytest.raises(KeyError):
+        trial.adjusted(persona, data, {"preferences.no_such": 1}, 1.0)
