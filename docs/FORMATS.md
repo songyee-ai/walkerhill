@@ -111,8 +111,31 @@
 | `reservation` | 예약 조건: `required` 필수인지, `party_min`·`party_max` 받을 수 있는 인원, `note`, `source_id` | 모르면 `null`. `source_id` 가 `null` 이면 `default_source_id` 를 쓴다 |
 | `products` | 상품 목록 (아래 표) | |
 | `promotions` | 지금 진행 중인 프로모션 (아래 표) | 없으면 빈 목록 |
-| `sources` | 출처 목록: `source_id`, `title`, `url`, `checked_on` | 확인일은 그 값을 마지막으로 확인한 날 |
+| `sources` | 출처 목록: `source_id`, `title`, `url`, `checked_on`, `kind` | 확인일은 그 값을 마지막으로 확인한 날이다 (직접 잰 값이면 잰 날). `kind` 는 자료의 종류(6.1절과 같은 값)이고 빠져도 된다. 지금은 지도로 잰 거리의 출처에만 `measurement` 를 적는다 (11-20, T221) |
 | `default_source_id` | 항목에 `source_id` 가 없을 때 쓰는 출처 | |
+| `traits` | 업장 특성 (아래 표). 개선 3·5단계에서 쓴다 | 빠져도 된다 (11-20 전의 업장 정의에는 없다). **지금은 LLM 요청에 싣지 않는다** |
+
+**업장 특성** (`traits`. 11-20 wilstein91 결정, T221. hojitea-ui 의 T402 제안)
+
+다섯 칸은 업장의 공식 페이지에서 옮기고, 거리는 지도 서비스로 잰다. 칸마다 `source_id` 로 출처를 단다 (`null` 이면 `default_source_id`).
+**공식 페이지에 없는 값은 `null` 로 두고 지어내지 않는다.** `traits` 가 있으면 여섯 키를 모두 적는다 (모르는 칸은 `null`).
+`traits` 가 `null` 이거나 빠졌으면 "아직 보지 않음"이고, 여섯 칸이 모두 `null` 인 `traits` 는 "확인했지만 공개된 값이 없음"이다.
+범위나 어림값(예: `80~100석`, `3주 전`)은 정수로 바꿔 적지 않고 그 칸을 `null` 로 둔 채 출처의 `title` 에 원문을 적는다.
+
+| 키 | 모양 | 비고 |
+|---|---|---|
+| `location` | `{"value": 글, "source_id"}` | 위치 (건물·층). 예: `본관 2층` |
+| `seats` | `{"value": 정수, "source_id"}` | 좌석 수. 1 이상 |
+| `private_rooms` | `{"count": 정수, "max_people": 정수, "source_id"}` | 별실 수와 가장 큰 별실이 받는 인원. 모르는 쪽은 `null`. 둘 다 모르면 `private_rooms` 를 `null` 로 둔다. 별실이 없다고 확인했으면 `count` 를 0, `max_people` 을 `null` 로 둔다 (`null` 은 모른다는 뜻이라 "없음"과 가른다). 그 밖에는 둘 다 1 이상 |
+| `view` | `{"value": 글, "source_id"}` | 전망·공간. 공식 문구를 줄여 적는다 |
+| `booking` | `{"opens_months_before": 정수, "deposit": 글, "source_id"}` | 예약을 몇 달 전부터 받는지(1 이상)와 보증금(예약금. 공식 문구를 줄여 적는다). 모르는 쪽은 `null`. 둘 다 모르면 `booking` 을 `null` 로 둔다 |
+| `distance_km` | `{"value": 수, "source_id"}` | **경쟁 업장만.** 그랜드 워커힐에서 그 호텔까지 자동차 경로 거리(km, 0 보다 큼). 워커힐 업장은 `null` |
+
+- 거리는 공식 자료가 없어 지도 서비스의 자동차 경로로 잰 값이다. 출처는 `kind` 가 `measurement` 인 자료를 따로 적고, 그 `checked_on` 이 잰 날이다 (형식 오류로 막는다).
+  `title` 에 쓴 도구와 출발·도착을 적는다. 등급은 `assumption`(설계 가정)으로 읽는다 (11-20 wilstein91 답, T402). `measurement` 자료는 거리에만 쓴다. 다른 다섯 칸, 상품·영업 시간·예약·프로모션의 출처와 `default_source_id` 로 쓰면 형식 오류다 (상황이 더하는 상품·프로모션도 같다).
+- 이 칸은 엔진이 후보(9절)를 만들 때 읽지 않는다. 그래서 값을 넣어도 요청과 요청의 해시가 그대로이고, 저장된 답이 그대로 재생된다.
+  요청에 싣는 것은 3·5단계에서 따로 정한다 (그때는 요청이 바뀌어 답을 다시 받는다).
+- 업장 정의 파일이 바뀌므로 실행 기록의 `inputs.venues` 해시(10.1절)는 바뀐다. 값을 넣은 뒤에는 기준 상황을 한 번 다시 돌린다 (저장된 답을 재생한다).
 
 **상품** (`products` 의 한 줄)
 
@@ -249,7 +272,15 @@
   "sources": [
     {"source_id": "S1", "title": "업장 메뉴판 (예시)", "url": "https://example.com/menu", "checked_on": "2026-11-13"}
   ],
-  "default_source_id": "S1"
+  "default_source_id": "S1",
+  "traits": {
+    "location": {"value": "예시 건물 2층", "source_id": null},
+    "seats": {"value": 80, "source_id": null},
+    "private_rooms": {"count": 3, "max_people": 12, "source_id": null},
+    "view": null,
+    "booking": {"opens_months_before": 2, "deposit": null, "source_id": null},
+    "distance_km": null
+  }
 }
 ```
 
@@ -288,9 +319,24 @@
   ],
   "promotions": [],
   "sources": [
-    {"source_id": "S1", "title": "예시호텔 메뉴 안내 (예시)", "url": "https://example.com/competitor-menu", "checked_on": "2026-11-13"}
+    {"source_id": "S1", "title": "예시호텔 메뉴 안내 (예시)", "url": "https://example.com/competitor-menu", "checked_on": "2026-11-13"},
+    {
+      "source_id": "S2",
+      "title": "지도 경로 서버로 잰 자동차 경로, 그랜드 워커힐에서 예시호텔까지 (예시)",
+      "url": "https://example.com/route",
+      "checked_on": "2026-11-19",
+      "kind": "measurement"
+    }
   ],
-  "default_source_id": "S1"
+  "default_source_id": "S1",
+  "traits": {
+    "location": {"value": "예시호텔 본관 3층", "source_id": null},
+    "seats": null,
+    "private_rooms": null,
+    "view": {"value": "도심이 내려다보이는 창가 좌석", "source_id": null},
+    "booking": null,
+    "distance_km": {"value": 12.5, "source_id": "S2"}
+  }
 }
 ```
 
@@ -1260,7 +1306,7 @@ customer_group,venue_id,product_id,occasion,meal,day_type,month,unit,quantity,pe
   },
   "base_profile_mode": "none",
   "inputs": {
-    "venues": "048b79beafe886d2",
+    "venues": "07c628123f8136d1",
     "personas": "687c20fc4eaa5b6f",
     "conditions": "81ec9570eef55a09",
     "scenario": "7f0c40802f158f2c",
@@ -1744,6 +1790,7 @@ uv run python -m tools.check_formats --strict   # 다 만든 뒤의 기준으로
 - 다른 파일을 가리키는 식별자가 실제로 있다: 경쟁 업장의 `competes_with`, 페르소나의 `compares_with`, 상황의 `venue_id`·`product_id`, 후기의 `venue_id`.
 - 상품의 `occasion` 이 업장의 `occasions` 안에 있다. 워커힐 업장마다 경쟁 업장이 하나 이상 있다.
 - 업장 정의의 모든 `source_id` 가 `sources` 에 있고 `checked_on` 이 있다.
+  업장 특성(`traits`)의 거리는 경쟁 업장에만 있고 출처가 `measurement` 자료다. `measurement` 자료는 거리 밖의 값(다른 특성, 상품, 영업 시간, 예약, 프로모션, 상황이 더하는 상품·프로모션)과 `default_source_id` 에 쓰이지 않는다. 특성의 `source_id` 가 빈 글자면 오류다. 좌석 수, 별실 인원, 예약을 받는 달 수는 1 이상이다. 별실 수는 0 이상이고 0(별실 없음)이면 인원이 `null` 이다 (11-20, T221).
 - 결정 상수(6.1절) 가운데 등급이 `official`, `literature`, `statistic`, `industry`, `article` 인 것은 `sources` 에 그 등급과 같은 종류의 자료가 있다 (11-19 T210, 11-20 T214).
   `engine/constants.json` 과 가상 예시 집계 옆의 `data/samples/base_summary_constants.json` 을 같은 규칙으로 본다. 범위 값은 `min` 이 `max` 보다 크지 않다 (11-19, T213).
 - 라벨(방문 목적, 동행, 고른 이유, 걸린 점, 고객군)이 값 목록에 있다. 후기 라벨의 방문 목적과 동행은 비어 있어도 된다.
