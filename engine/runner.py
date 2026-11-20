@@ -17,7 +17,7 @@ from typing import Any
 from engine.answers import AnswerBook, old_style_folder, read_reply, save_rejected, save_response
 from engine.candidates import build_request, run_condition
 from engine.changes import decompose
-from engine.constants import CONSTANTS_PATH, used_constants
+from engine.constants import used_constants, values_hash
 from engine.formats.choice import ChoiceRequest, RunCondition, problems_in_response
 from engine.formats.conditions import MANUAL_CONDITION_PREFIX, ConditionBundle
 from engine.formats.constants import ConstantsFile
@@ -222,7 +222,7 @@ def load_inputs(
             "scenario": _hash_files([scenario_path]),
             "vocab": _hash_files([vocab_path]),
             "summary": _hash_files([summary_file]),
-            "constants": _hash_files([CONSTANTS_PATH]),
+            "constants": values_hash(),  # 결과를 바꾸는 부분만 본다 (T214)
         },
     )
 

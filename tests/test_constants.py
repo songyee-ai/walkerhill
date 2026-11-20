@@ -10,7 +10,7 @@ from datetime import timedelta
 import pytest
 
 from engine import calibration, weights
-from engine.constants import CONSTANTS_PATH, load_constants, used_constants
+from engine.constants import CONSTANTS_PATH, load_constants, used_constants, values_hash
 from engine.formats import ConditionBundle, RunRecord, read_model
 from engine.formats.constants import ConstantsFile
 from tests.conftest import BASELINE_RUN, EXAMPLE_ROOT, load_json, save_json
@@ -66,7 +66,7 @@ def test_scenario_is_refused_when_the_constants_changed_after_the_baseline_run(e
 
 
 def test_check_wants_a_source_for_values_from_public_material(example_copy):
-    """공개 자료에서 가져온 값(학술 자료, 통계, 업계 보고서, 기사, 공식)은 출처를 적어야 한다."""
+    """공개 자료에서 가져온 값(학술 자료, 통계, 업계 보고서, 기사, 공식)은 그 종류의 출처 자료를 적어야 한다 (11-20 목록으로 바꿈, T214)."""
     target = example_copy / "engine" / "constants.json"
     data = json.loads(CONSTANTS_PATH.read_text(encoding="utf-8"))
     save_json(target, data)
@@ -74,14 +74,77 @@ def test_check_wants_a_source_for_values_from_public_material(example_copy):
     data["constants"][0].update(grade="literature")
     save_json(target, data)
     problems = [str(p) for p in check(example_copy, strict=True)]
-    assert any("등급이 literature 인데 source 가 비어 있다" in p for p in problems)
-    data["constants"][0].update(source="Andreyeva, Long & Brownell, 2010, AJPH 100(2)")
+    assert any("등급이 literature 인데 sources 에 그 종류의 자료가 없다" in p for p in problems)
+    # 다른 종류의 자료만 있어도 막는다: 기사만 있는데 학술 자료라고 적을 수 없다.
+    data["constants"][0].update(sources=[{"title": "어느 기사 (2026-11-16 게재)", "kind": "article", "url": None}])
+    save_json(target, data)
+    assert any("등급이 literature 인데 sources 에 그 종류의 자료가 없다" in str(p) for p in check(example_copy, strict=True))
+    data["constants"][0].update(sources=[
+        {"title": "Andreyeva, Long & Brownell 2010, AJPH 100(2)", "kind": "literature", "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC2804646"},
+        {"title": "어느 기사 (2026-11-16 게재)", "kind": "article", "url": None},
+    ])
     save_json(target, data)
     assert [str(p) for p in check(example_copy, strict=True)] == []
-    # 다른 곳에서 잰 범위를 빌려 와 정한 값은 설계 가정이고, 빌려 온 자료를 source 에 적을 수 있다 (11-19 songyee-ai 지적).
+    # 다른 곳에서 잰 범위를 빌려 와 정한 값은 설계 가정이고, 빌려 온 자료를 sources 에 적을 수 있다 (11-19 songyee-ai 지적).
     data["constants"][0].update(grade="assumption")
     save_json(target, data)
     assert [str(p) for p in check(example_copy, strict=True)] == []
+
+
+def test_sources_are_listed_strongest_first():
+    """출처 목록은 센 자료부터 적는다 (공식 > 학술 자료 = 통계 > 업계 보고서 = 기사 > 직접 잰 값). 화면이 앞의 것을 대표로 보여도 근거가 세 보이지 않게 한다."""
+    data = json.loads(CONSTANTS_PATH.read_text(encoding="utf-8"))
+    paper = {"title": "어느 논문", "kind": "literature", "url": None}
+    news = {"title": "어느 기사", "kind": "article", "url": None}
+    data["constants"][0]["sources"] = [news, paper]
+    with pytest.raises(ValueError, match="센 자료부터"):
+        ConstantsFile.model_validate(data)
+    data["constants"][0]["sources"] = [paper, news, {"title": "지도 도구로 잰 거리", "kind": "measurement", "url": None}]
+    assert ConstantsFile.model_validate(data).constants[0].sources[2].kind == "measurement"
+
+
+def test_borrowed_values_keep_each_material_with_its_kind():
+    """T306 의 값 여덟은 빌려 온 자료를 하나씩 종류와 함께 적는다. 학술 자료와 기사가 섞인 것은 둘 다 남는다."""
+    by_id = {c.constant_id: c for c in load_constants().constants}
+    assert [s.kind for s in by_id["price-sensitivity-threshold-high"].sources] == ["literature", "article"]
+    assert [s.kind for s in by_id["price-elasticity-upscale-weekday"].sources] == ["statistic", "literature"]
+    assert all(c.grade == "assumption" for c in by_id.values() if c.sources)
+    assert by_id["filled-price-unit"].sources == []
+
+
+def test_old_run_records_without_sources_are_still_read():
+    """11-20 전의 실행 기록은 출처를 글 한 줄(source)로 적었고 모두 null 이었다. 빈 목록으로 읽고, 다시 쓸 때는 sources 만 남는다 (임시 호환, T212 에서 없앰)."""
+    data = json.loads((RUNS / BASELINE_RUN / "run.json").read_text(encoding="utf-8"))
+    for item in data["constants"]:
+        del item["sources"]
+        item["source"] = None
+    record = RunRecord.model_validate_json(json.dumps(data, ensure_ascii=False), strict=True)
+    assert all(c.sources == [] for c in record.constants)
+    dumped = record.model_dump(mode="json")["constants"][0]
+    assert "source" not in dumped and dumped["sources"] == []
+    data["constants"][0]["source"] = "옛 글 한 줄"
+    with pytest.raises(ValueError):
+        RunRecord.model_validate_json(json.dumps(data, ensure_ascii=False), strict=True)
+
+
+def test_constants_hash_sees_only_what_changes_results(tmp_path):
+    """상수 파일의 해시는 식별자·값·단위·쓰는지만 본다. 출처나 설명만 고치면 그대로라 기준 상황을 다시 돌리지 않아도 된다 (11-20, T214)."""
+    data = json.loads(CONSTANTS_PATH.read_text(encoding="utf-8"))
+    path = tmp_path / "constants.json"
+    save_json(path, data)
+    before = values_hash(path)
+    data["constants"][0]["note"] = "설명만 고침"
+    data["constants"][0]["sources"] = [{"title": "새로 찾은 자료", "kind": "article", "url": None}]
+    data["constants"][0]["checked_on"] = "2026-11-20"
+    save_json(path, data)
+    assert values_hash(path) == before
+    data["constants"][0]["value"] = data["constants"][0]["value"] + 1
+    save_json(path, data)
+    assert values_hash(path) != before
+    data["constants"][0]["value"] -= 1
+    data["constants"][-1]["in_use"] = not data["constants"][-1].get("in_use", True)
+    save_json(path, data)
+    assert values_hash(path) != before
 
 
 def test_constants_not_in_use_are_kept_out_of_the_run_record():
@@ -111,4 +174,4 @@ def test_constants_next_to_the_summary_are_recorded_with_their_file(example_copy
     assert [str(p) for p in check(example_copy, strict=True)] == []
     item.update(grade="statistic")
     save_json(example_copy / "data" / "samples" / "base_summary_constants.json", {"format_version": 1, "constants": [item]})
-    assert any("등급이 statistic 인데 source 가 비어 있다" in str(p) for p in check(example_copy, strict=True))
+    assert any("등급이 statistic 인데 sources 에 그 종류의 자료가 없다" in str(p) for p in check(example_copy, strict=True))

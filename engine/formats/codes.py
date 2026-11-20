@@ -16,6 +16,10 @@ Stay = Literal["guest", "visitor"]
 PriceBasis = Literal["included", "excluded_vat", "excluded_vat_service", "unknown"]
 # 근거 등급. 11-19(T210)에 학술 자료·통계·업계 보고서·기사를 더했다 (공개 자료에서 가져온 값을 설계 가정과 나눠 적으려고).
 Grade = Literal["internal", "official", "literature", "statistic", "review", "industry", "article", "assumption", "unknown"]
+# 결정 상수의 출처 자료 하나의 종류 (FORMATS 6.1절, 11-20 T214). 공개 자료 등급 다섯과, 공개 도구로 직접 잰 값(`measurement`).
+MaterialKind = Literal["official", "literature", "statistic", "industry", "article", "measurement"]
+# 종류의 세기 (FORMATS 2절의 세기를 따른다. 큰 쪽이 세다). 출처 목록은 센 자료부터 적는다.
+MATERIAL_STRENGTH: dict[str, int] = {"official": 4, "literature": 3, "statistic": 3, "industry": 2, "article": 2, "measurement": 1}
 ScenarioKind = Literal["baseline", "our_price", "our_promo", "competitor"]
 ChoiceKind = Literal["walkerhill", "competitor", "none"]
 QtyRule = Literal["per_person", "per_serves", "choice"]
