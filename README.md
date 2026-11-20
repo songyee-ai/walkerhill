@@ -191,6 +191,15 @@ uv run python -m engine.estimate --data private
 - 결과는 `private/base/estimated_constants.json` 에 쓰인다. 기본 데이터에서 계산한 값이라 저장소·커밋·연락판에 옮겨 적지 않는다. 다른 PC 는 답 폴더처럼 저장소 밖으로 받아 같은 자리에 둔다.
 - 파일이 생기거나 바뀌면 기준 상황을 다시 돌린다 (저장된 답을 재생한다). 화면에 보이는 "추정 전 / 추정 뒤"의 차이는 맞춘 정도이지 검증이 아니다 (PRD 12절).
 
+**다른 고객군에 써 보기와 단순 기준을 잰다** — 점수를 받은 기준 실행으로 2단계의 검증 두 겹을 재 그 실행 폴더에 `crosscheck.json` 을 쓴다 (T212, `docs/FORMATS.md` 10.7절). LLM 을 부르지 않는다.
+
+```powershell
+uv run python -m engine.crosscheck --data private
+```
+
+- 고객군마다 하나를 빼고 나머지로 추정한 업장 상수를 그 고객군에 써 보고, AI 점수 그대로·공개 후기 비율(단순 기준)과 함께 실제 몫과 견준다.
+- 기준 실행의 조건은 상수 추정과 같다 (점수를 받음, 일 년 전체, 실패 없음, 페르소나와 조건을 모두 돌림). 결과의 수치는 저장소·연락판에 옮겨 적지 않고, 단순 기준보다 나았는지만 적는다.
+
 **알아둘 것**
 
 - 명령은 `uv run python -m <도구>` 꼴로 쓴다. `uv run pytest` 나 `uv run streamlit` 처럼 쓰면 윈도우의 스마트 앱 컨트롤이

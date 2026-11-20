@@ -8,7 +8,7 @@ import hashlib
 import json
 import re
 from decimal import Decimal
-from typing import Any, Literal, Self
+from typing import Annotated, Any, Literal, Self
 
 from pydantic import AwareDatetime, Field, model_validator
 
@@ -361,6 +361,71 @@ class Calibration(FormatModel):
     groups: dict[str, GroupCalibration]
     uncovered_groups: list[str]
     passed: bool = Field(alias="pass")
+
+
+# 다른 고객군에 써 보기·단순 기준과 견주기에서 견주는 방법 (docs/FORMATS.md 10.7절, T212).
+CrossCheckMethod = Literal["no_constants", "held_out", "simple"]
+
+
+class GroupCrossCheck(FormatModel):
+    """한 고객군의 견주기. 몫은 워커힐 업장의 사람 수 몫이고, 잴 수 없는 방법은 null 이다."""
+
+    actual: dict[str, Annotated[float, Field(ge=0, le=1)]]
+    no_constants: dict[str, Annotated[float, Field(ge=0, le=1)]]
+    held_out: dict[str, Annotated[float, Field(ge=0, le=1)]] | None
+    simple: dict[str, Annotated[float, Field(ge=0, le=1)]] | None
+    max_diff_pp: dict[CrossCheckMethod, Annotated[float, Field(ge=0, le=100)] | None]
+    misplaced_pct: dict[CrossCheckMethod, Annotated[float, Field(ge=0, le=100)] | None]
+    # 단순 기준을 낸 공개 후기의 수.
+    simple_reviews: int = Field(ge=0)
+    # 다른 고객군으로 상수를 추정하지 못했으면 그 까닭.
+    held_out_note: str | None
+
+    @model_validator(mode="after")
+    def _rules(self) -> Self:
+        for name in ("max_diff_pp", "misplaced_pct"):
+            found = getattr(self, name)
+            if set(found) != {"no_constants", "held_out", "simple"}:
+                raise ValueError(f"{name} 에는 세 방법이 모두 있어야 한다")
+            if found["no_constants"] is None:
+                raise ValueError(f"{name}.no_constants 는 늘 적는다")
+            for method in ("held_out", "simple"):
+                if (getattr(self, method) is None) != (found[method] is None):
+                    raise ValueError(f"{name}.{method} 는 {method} 의 몫이 있을 때만 적는다")
+        if (self.held_out is None) != (self.held_out_note is not None):
+            raise ValueError("held_out 이 null 이면 held_out_note 에 까닭을 적고, 아니면 null 이다")
+        if (self.simple is None) != (self.simple_reviews == 0):
+            raise ValueError("simple 은 공개 후기가 있을 때만 적는다")
+        return self
+
+
+class CrossCheck(FormatModel):
+    """다른 고객군에 써 보기와 단순 기준과 견주기 `crosscheck.json` (docs/FORMATS.md 10.7절, T212). 점수를 받은 기준 실행에만 있다."""
+
+    format_version: Literal[1]
+    run_id: Text
+    k: float = Field(gt=0)
+    # 그 기준 실행이 기본 데이터의 요약을 LLM 에 보냈는가 (10.1절). `none` 이 아니면 페르소나마다 자기 고객군의 업장 몫 요약이 프롬프트에 들어가,
+    # "다른 고객군으로 추정"도 완전히 떼어 둔 검증이 아니다 (10.7절).
+    base_profile_mode: BaseProfileMode
+    venues: list[Id] = Field(min_length=1)
+    groups: dict[str, GroupCrossCheck] = Field(min_length=2)
+
+    @model_validator(mode="after")
+    def _venues(self) -> Self:
+        if self.venues != sorted(set(self.venues)):
+            raise ValueError("venues 는 겹치지 않고 차례대로 적는다")
+        for group, found in self.groups.items():
+            for name in ("actual", "no_constants", "held_out", "simple"):
+                value = getattr(found, name)
+                if value is not None and set(value) != set(self.venues):
+                    raise ValueError(f"고객군 '{group}' 의 {name} 업장이 venues 와 다르다")
+        return self
+
+    def held_out_better_than_simple(self) -> tuple[int, int]:
+        """(다른 고객군으로 추정한 상수의 어긋난 몫이 단순 기준보다 작은 고객군 수, 둘 다 잴 수 있는 고객군 수)."""
+        both = [g for g in self.groups.values() if g.misplaced_pct["held_out"] is not None and g.misplaced_pct["simple"] is not None]
+        return sum(g.misplaced_pct["held_out"] < g.misplaced_pct["simple"] for g in both), len(both)
 
 
 class VenueValidation(FormatModel):

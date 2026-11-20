@@ -154,7 +154,7 @@ def fit(
     fixed = dict(fixed or {})
     groups = sorted({v.group for v in visits if v.group in target})
     if not groups:
-        raise ValueError("점수를 받은 방문의 고객군이 집계 파일에 없다. 페르소나의 customer_group 이 집계 파일의 고객군 이름과 같은지 본다")
+        raise NotFitted("점수를 받은 방문의 고객군이 집계 파일에 없다. 페르소나의 customer_group 이 집계 파일의 고객군 이름과 같은지 본다")
     scored = {
         place
         for v in visits
