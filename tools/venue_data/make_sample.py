@@ -10,6 +10,10 @@
     uv run python -m tools.venue_data.make_sample            # 만들어 검사만 한다 (파일을 바꾸지 않음)
     uv run python -m tools.venue_data.make_sample --write    # data/samples/base_summary.csv 를 덮어쓴다
     uv run python -m tools.venue_data.make_sample --add-people  # 지금 예시 파일의 값은 그대로 두고 people 열만 채운다 (T402)
+    uv run python -m tools.venue_data.make_sample --constants   # 옆의 상수 파일 data/samples/base_summary_constants.json 을 쓴다 (T213)
+
+상수 파일에는 예시 파일에 나오는 세트·판·개 상품(per_serves)의 한 개당 인원(업장 정의의 serves)과, 가격이 빈 상품에 쓴 지어낸 단가를 적는다.
+인원의 근거는 업장 정의의 그 상품 가격이 공식이면 official(업장 정의의 출처), 아니면 assumption 이다.
 
 인원(people)은 업장 정의로 센다: per_person 은 수량, per_serves 는 수량 × serves, choice(더하는 상품·포장)는 빈 칸.
 기본 데이터는 상품 설명의 인원을 쓰지만(build_summary), 예시 값은 지어낸 값이라 공개된 업장 정의만 쓴다.
@@ -26,11 +30,14 @@ import random
 from pathlib import Path
 
 from engine.formats.summary import SUMMARY_COLUMNS, SummaryRow
+from tools.venue_data.constants import OWNER, load_venues, people_constant, product_source, write_constants
 
 ROOT = Path(__file__).resolve().parents[2]
 SEED = 20261113
 SAMPLE_UNIT_PRICE = 50000  # 가격이 비어 있는 상품에 쓰는 지어낸 단가 (세금 포함)
+SAMPLE_UNIT_PRICE_DECIDED = "2026-11-13"  # 그 단가를 정한 날 (T13)
 OUT = ROOT / "data" / "samples" / "base_summary.csv"
+CONSTANTS_OUT = ROOT / "data" / "samples" / "base_summary_constants.json"
 DAYS = {"weekday": ["weekday"], "weekend": ["weekend"], "all": ["weekday", "weekend"]}
 
 
@@ -49,6 +56,44 @@ def load_products(venues_dir: Path = ROOT / "data" / "venues") -> dict[tuple[str
         v = json.loads(f.read_text(encoding="utf-8"))
         for p in v["products"]:
             out[(v["venue_id"], p["product_id"])] = p
+    return out
+
+
+def sample_constants(path: Path = OUT, venues_dir: Path = ROOT / "data" / "venues") -> list[dict]:
+    """예시 파일에 나오는 per_serves 상품의 한 개당 인원과, 가격이 빈 상품에 쓴 지어낸 단가."""
+    venues = load_venues(venues_dir)
+    with path.open(encoding="utf-8-sig", newline="") as f:
+        used = sorted({(r["venue_id"], r["product_id"]) for r in csv.DictReader(f)})
+    out = []
+    unpriced = False
+    for venue_id, product_id in used:
+        venue = venues[venue_id]
+        product = next(p for p in venue["products"] if p["product_id"] == product_id)
+        if product["price"] is None:
+            unpriced = True
+        if product["qty_rule"] != "per_serves":
+            continue
+        if product["grade"] == "official":
+            source, checked_on = product_source(venue, product)
+            grade, sources, note = "official", [source], "업장 정의의 serves (공식 메뉴의 상품 구성)"
+        else:
+            grade, sources, checked_on = "assumption", [], SAMPLE_UNIT_PRICE_DECIDED
+            note = "업장 정의의 serves. 그 상품의 공식 가격·구성을 찾지 못해 설계 가정으로 적는다"
+        out.append(people_constant(venue, product, product["serves"], grade, sources, checked_on, note,
+                                   "tools/venue_data/make_sample.py 의 people 열 (FORMATS 8절)"))
+    if unpriced:
+        out.append({
+            "constant_id": "sample-unit-price-unpriced",
+            "name": "가상 예시 값에서 가격이 빈 상품에 쓴 지어낸 단가",
+            "value": SAMPLE_UNIT_PRICE,
+            "unit": "원",
+            "used_in": "tools/venue_data/make_sample.py 의 paid (엔진은 이 값으로 빈 가격을 채운다, FORMATS 3절)",
+            "grade": "assumption",
+            "sources": [],
+            "checked_on": SAMPLE_UNIT_PRICE_DECIDED,
+            "note": "기본 데이터의 단가를 따오지 않으려고 정한 값이다 (T13). 가상 예시 값으로 돌릴 때만 쓰인다",
+            "owner": OWNER,
+        })
     return out
 
 
@@ -97,7 +142,14 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--write", action="store_true", help="data/samples/base_summary.csv 를 덮어쓴다")
     parser.add_argument("--add-people", action="store_true",
                         help="지금 예시 파일의 값은 그대로 두고 people 열만 채워 쓴다 (형식에 people 이 있어야 한다)")
+    parser.add_argument("--constants", action="store_true",
+                        help="옆의 상수 파일 data/samples/base_summary_constants.json 을 쓴다 (T213)")
     args = parser.parse_args(argv)
+    if args.constants:
+        constants = sample_constants()
+        write_constants(CONSTANTS_OUT, constants)
+        print(f"상수 {len(constants)}개를 {CONSTANTS_OUT.relative_to(ROOT)} 에 썼다")
+        return
     if args.add_people:
         if "people" not in SUMMARY_COLUMNS:
             raise SystemExit("형식(engine/formats/summary.py)에 people 열이 아직 없다. 형식이 바뀐 뒤에 돌린다")

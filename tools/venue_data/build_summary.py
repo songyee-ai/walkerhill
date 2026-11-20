@@ -12,6 +12,8 @@
 만드는 것 (private/base/)
 - summary.csv  집계 파일 (한 줄 = 한 달 동안 그 고객군이 그 상품을 그 조건에서 산 것의 합)
 - meta.json    기준 기간, 만든 날, 줄 수, 바꾸지 못한 줄 수, 대조 결과, 업장 정의의 파는 때·달과 어긋난 줄
+- summary_constants.json  집계를 만들 때 쓴 상수(세트·판·개 상품의 한 개당 인원)와 근거 (FORMATS 6.1절, T213)
+  근거는 대응표의 people_basis 로 정한다: official 은 업장 정의의 공식 출처, internal 은 기본 데이터의 상품 설명(출처 없음)
 
 기본 데이터의 열 이름과 코드 값은 공개 저장소라 이 코드에 적지 않고 source.json 에서 읽는다 (tools/venue_data/README.md 의 "지킬 것").
 """
@@ -25,6 +27,7 @@ from collections import defaultdict
 from pathlib import Path
 
 from engine.formats.summary import SUMMARY_COLUMNS, SummaryRow
+from tools.venue_data.constants import load_venues, people_constant, product_source, write_constants
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "private" / "base" / "source.json"
@@ -183,8 +186,35 @@ def build(source: dict, base_file: Path, mapping: dict, products: dict) -> tuple
     return rows, meta
 
 
-def write(rows: list[dict[str, str]], meta: dict, out_dir: Path) -> None:
+def build_constants(mapping: dict, venues_dir: Path = VENUES, made_on: str | None = None) -> list[dict]:
+    """대응표에서 한 개당 인원이 1 이 아닌 상품마다 상수 하나 (`1인` 단위와 사람이 아닌 상품은 적지 않는다)."""
+    venues = load_venues(venues_dir)
+    made_on = made_on or dt.date.today().isoformat()
+    out = []
+    for m in mapping["products"]:
+        per = m.get("people_per_unit")
+        if per is None or per == 1:
+            continue
+        venue = venues[m["venue_id"]]
+        product = next(p for p in venue["products"] if p["product_id"] == m["product_id"])
+        basis = m.get("people_basis")
+        if basis == "official":
+            source, checked_on = product_source(venue, product)
+            grade, sources, note = "official", [source], "공식 메뉴의 상품 구성(세트 이름·인원)에서 정함"
+        elif basis == "internal":
+            grade, sources, checked_on = "internal", [], made_on
+            note = "기본 데이터의 상품 설명에 적힌 가정. 공식 근거가 없어 내부 자료로 적는다 (값은 private 에만)"
+        else:
+            raise ValueError(f"대응표의 {m['venue_id']}/{m['product_id']} 에 people_basis(official·internal)가 없다")
+        out.append(people_constant(venue, product, per, grade, sources, checked_on, note,
+                                   "tools/venue_data/build_summary.py 의 people 열 (FORMATS 8절)"))
+    return out
+
+
+def write(rows: list[dict[str, str]], meta: dict, out_dir: Path, constants: list[dict] | None = None) -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
+    if constants is not None:
+        write_constants(out_dir / "summary_constants.json", constants)
     with (out_dir / "summary.csv").open("w", encoding="utf-8-sig", newline="") as f:
         # people 처럼 형식에 아직 없는 열은 쓰지 않는다 (형식에 들어오면 그대로 써진다)
         w = csv.DictWriter(f, fieldnames=SUMMARY_COLUMNS, lineterminator="\n", extrasaction="ignore")
@@ -203,7 +233,9 @@ def main(argv: list[str] | None = None) -> int:
     source = load_source()
     mapping = json.loads(MAP.read_text(encoding="utf-8"))
     rows, meta = build(source, ROOT / source["base_file"], mapping, load_products())
-    write(rows, meta, args.out)
+    constants = build_constants(mapping)
+    write(rows, meta, args.out, constants)
+    print(f"상수 파일 summary_constants.json: 상수 {len(constants)}개 (한 개당 인원)")
 
     match = meta["revenue_check"]["match"]
     print(f"집계 줄 {len(rows)}개, 바꾸지 못한 줄 {meta['unmapped_rows']}개, 매출 합 대조 {'일치' if match else '불일치'}")

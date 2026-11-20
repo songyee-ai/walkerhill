@@ -21,4 +21,6 @@
   - 쓰는 것: `private/base/summary.csv`, `private/base/meta.json`
 - `make_sample.py` 가상 예시 값을 만든다. 기본 데이터를 읽지 않는다. `uv run python -m tools.venue_data.make_sample` 는 검사만 하고, `--write` 를 붙이면 `data/samples/base_summary.csv` 를 덮어쓴다.
   `--add-people` 은 지금 예시 파일의 값은 그대로 두고 인원(`people`) 열만 채운다 (형식에 `people` 이 들어온 뒤에만 돈다, T402)
+  `--constants` 는 옆의 상수 파일 `data/samples/base_summary_constants.json` 을 쓴다 (T404)
+- `constants.py` 집계 옆 상수 파일(`FORMATS.md` 6.1절)을 만드는 도움 함수. `build_summary` 는 `private/base/summary_constants.json` 을 함께 쓴다 (한 개당 인원, 근거는 `private/base/map.json` 의 `people_basis`)
 - 테스트: `tests/venue_data/test_venue_data_scripts.py`
