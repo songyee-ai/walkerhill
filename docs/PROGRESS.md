@@ -3038,7 +3038,7 @@ REVIEW_RULES 12절의 페르소나 담당 몫 넷은 모두 동의해(T101 알�
   pytest 는 `test_checker_walks_exactly_the_files_git_can_upload` 하나만 이 PC 의 Claude Code 예약 작업이 만든 `.claude/scheduled_tasks.lock`(깃이 무시하는 파일) 때문에 실패했고 나머지는 통과했다. 자동 검사로 다시 본다)
   값 목록에 새 값은 필요 없었다.
   (11-19 hojitea-ui 가 20% 묶음을 받아 대조를 통과했다 (연락판, T403). 11-20 이 PC 의 원본, 20%, 묶음을 지웠다 ("알릴 것"의 11-19 hojitea-ui 줄 아래))
-  `특이사항:` 그 "알릴 것" 줄의 hojitea-ui 체크가 남았다.
+  (11-20, hojitea-ui 가 그 "알릴 것" 줄에 확인을 적고 체크했다 (#246). 남은 확인이 없어 특이사항을 닫는다)
 
 새 가중치로 다시 한 대조 (11-20)
 
