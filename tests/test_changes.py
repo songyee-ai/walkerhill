@@ -183,13 +183,27 @@ def test_visit_that_chooses_the_changed_venue_keeps_its_own_answer(example_copy)
 
 def test_promo_tells_whether_a_discounted_visit_would_have_come_anyway():
     """상황에서 워커힐 업장의 할인을 받은 방문이 기준에서도 그 업장에 오던 방문인가 (T215, T130 ③, PRD 3절의 "혜택이 없어도 올 고객")."""
-    from engine.changes import _promo, _Visit
+    from engine.changes import _promo, _promo_shares, _Visit
 
-    at_geumryong = _Visit(kind="walkerhill", venue_id="geumryong")
-    with_discount = _Visit(kind="walkerhill", venue_id="geumryong", discounted=True)
-    assert _promo(at_geumryong, with_discount) == "would_come"
-    assert _promo(_Visit(kind="competitor", venue_id="examplehotel-chinese"), with_discount) == "drawn"
-    assert _promo(_Visit(), with_discount) == "drawn"
-    assert _promo(_Visit(kind="walkerhill", venue_id="thebuffet"), with_discount) == "drawn"
-    assert _promo(at_geumryong, at_geumryong) == "none"
-    assert _promo(at_geumryong, _Visit(kind="competitor", venue_id="examplehotel-chinese")) == "none"
+    def visit(shares: dict, discounted: str | None = None) -> _Visit:
+        v = _Visit(shares=dict(shares))
+        if discounted:
+            v.discounted[discounted] = True
+        return v
+
+    gr, buffet, rival = ("walkerhill", "geumryong"), ("walkerhill", "thebuffet"), ("competitor", "examplehotel-chinese")
+    with_discount = visit({gr: 1.0}, discounted="geumryong")
+
+    def promo(b: _Visit, a: _Visit) -> str:
+        return _promo(_promo_shares(b, a))
+
+    assert promo(visit({gr: 1.0}), with_discount) == "would_come"
+    assert promo(visit({rival: 1.0}), with_discount) == "drawn"
+    assert promo(visit({("none", None): 1.0}), with_discount) == "drawn"
+    assert promo(visit({buffet: 1.0}), with_discount) == "drawn"
+    assert promo(visit({gr: 1.0}), visit({gr: 1.0})) == "none"
+    assert promo(visit({gr: 1.0}), visit({rival: 1.0})) == "none"
+    # 몫으로 나뉜 방문 (T212): 할인을 받은 금룡의 몫 0.7 가운데 기준에도 있던 0.3 은 원래 오던 몫, 0.4 는 새로 온 몫이다.
+    shares = _promo_shares(visit({gr: 0.3, rival: 0.7}), visit({gr: 0.7, rival: 0.3}, discounted="geumryong"))
+    assert shares == pytest.approx({"would_come": 0.3, "drawn": 0.4})
+    assert _promo(shares) == "drawn"

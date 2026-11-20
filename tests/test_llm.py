@@ -667,7 +667,8 @@ def test_response_schema_has_the_keys_of_the_response_model(doc):
 
     top = RESPONSE_SCHEMA["properties"]
     choice, addon, rejected = top["choice"], top["choice"]["properties"]["addons"]["items"], top["rejected"]["items"]
-    assert keys(RESPONSE_SCHEMA) == set(ChoiceResponse.model_fields) == set(doc.response)
+    # `scores` 는 점수를 묻는 판의 요청에만 더한다 (T212). 문서의 응답 예시는 점수를 묻지 않던 판(p1)의 답이라 `scores` 가 없고, 따로 적은 예시에 있다.
+    assert keys(RESPONSE_SCHEMA) | {"scores"} == set(ChoiceResponse.model_fields) == set(doc.response) | {"scores"}
     assert keys(choice) == set(Choice.model_fields)
     assert keys(addon) == set(AddonChoice.model_fields)
     assert keys(rejected) == set(Rejected.model_fields)

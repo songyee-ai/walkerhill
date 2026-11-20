@@ -569,7 +569,10 @@ R-geumryong-0027,geumryong,map,2026-03,,,,,,meal,dinner,,,,,,대기,,no,예약�
 | `in_use` | 엔진이 지금 이 값을 쓰는가. 빠지면 `true`. 정해 두었지만 아직 쓰지 않는 값(다음 단계에서 쓸 값)은 `false` 이고 실행 기록에 남지 않는다 (10.1절) |
 
 - **넣는 것**: 결과(고르는 후보, 가중치, 보정의 통과)를 바꾸는 숫자. 엔진이 쓰는 것(`in_use` 가 `true`)은 채운 단가의 반올림 단위, 기본 데이터의 요약에 적는 상품 수와 비중의 범주를 가르는 선,
-  인원이 빈 포장·추가 상품 한 개의 팀 수·사람 수, 보정의 통과 기준 셋이다.
+  인원이 빈 포장·추가 상품 한 개의 팀 수·사람 수, 보정의 통과 기준 셋, 방문의 몫을 내는 날카로움 k (`share-sharpness-k`, 9절의 "점수와 몫". 11-20, T212)다.
+- **업장 상수**(`share-venue-constant-<venue_id>`, T212)는 업장마다 하나씩 이 파일에 둔다. 값은 상수 추정으로 정하고 근거와 함께 적는다.
+  적히지 않은 업장과 `in_use` 가 `false` 인 업장 상수는 1 로 본다 (쓰지 않는 값은 실행 기록에도 남지 않아, 형식 검사가 기록으로 몫을 다시 낼 때도 1 이다).
+  k 와 업장 상수는 값이 바뀌면 해시가 바뀌어 기준 상황을 다시 돌려야 한다 (저장된 답을 재생하므로 LLM 은 부르지 않는다).
 - **페르소나 전체에 걸린 상수**도 이 파일에 둔다. `personas/` 에 두지 않는다 (11-19 wilstein91 결정, T213). 지금은 진행 문서 T306 의 값이다:
   가격 민감도 등급마다의 문턱, 한 페르소나 안의 예산 퍼짐과 문턱 퍼짐, 가격 탄력성이 들어야 할 범위 둘. 모두 `in_use` 가 `false` 이고 `owner` 는 `borigunbbang` 이다.
   값은 페르소나 담당(borigunbbang)이 정하고, 바꿀 때는 "알릴 것"에 적어 엔진 담당에게 고쳐 달라고 한다 (11-19 wilstein91 결정, T213).
@@ -927,6 +930,7 @@ customer_group,venue_id,product_id,occasion,meal,day_type,month,unit,quantity,pe
 | `reason_text` | 이유를 한 문장으로 |
 | `used_attributes` | 판단에 쓴 페르소나의 속성. `budget`, `preferences.needs` 처럼 점으로 이어 적는다 |
 | `rejected` | 고르지 않은 후보마다: `venue_id`, `pain_labels` (`vocab.pain_points` 에서), `text` 한 문장 |
+| `scores` | 후보마다와 "이용하지 않음"의 점수와, 그곳에 간다면 고를 주문 (11-20 wilstein91 결정, T212). 항목마다 `venue_id` ("이용하지 않음"은 `null`), `percent` (정수, "이 손님이 같은 상황을 백 번 맞는다면 몇 번", 모두 더하면 100), `option_id`, `addons` (`choice` 와 같은 모양). 점수를 묻지 않던 판(`p1`, `p2`, `p3`)의 답에는 없다. 아래 "점수와 몫" |
 
 ```json
 {
@@ -952,8 +956,35 @@ customer_group,venue_id,product_id,occasion,meal,day_type,month,unit,quantity,pe
 - `used_attributes` 가 페르소나에 실제로 있는 속성이다.
 - 원장에 적을 금액을 업장 정의의 가격과 프로모션 규칙으로 다시 계산했을 때, 고른 주문의 `total` 과 같다. 추가 상품은 따로 계산해 더한다.
 
-마지막 항목을 뺀 나머지는 `engine.formats.problems_in_response` 가 본다. 마지막 항목은 업장 정의가 있어야 해서 엔진이 따로 본다 (`engine.ledger.amount_problems`).
+- 점수(`scores`)는 아래 "점수와 몫"의 규칙을 지킨다.
+
+마지막 항목과 점수의 금액을 뺀 나머지는 `engine.formats.problems_in_response` 가 본다. 금액은 업장 정의가 있어야 해서 엔진이 따로 본다 (`engine.ledger.amount_problems`).
 저장된 응답을 재생할 때도 같은 검사를 다시 한다.
+
+**점수와 몫** (11-20 wilstein91 결정, T212 의 2단계 방식) — 방문 하나가 한 곳만 고르지 않고 몫으로 나뉘어 여러 곳에 간다.
+
+- 점수를 묻는 판의 답에는 `scores` 가 꼭 있다. 후보마다 하나와 "이용하지 않음"(`venue_id` 가 `null`) 하나가 빠짐없이 한 번씩 있고, `percent` 를 더하면 100 이다.
+- 점수가 0 보다 큰 곳의 주문(`option_id`, `addons`)은 `choice` 와 같은 규칙으로 검사한다 (그 업장의 주문인지, 추가 상품과 수량, 예산, 업장 정의로 다시 낸 금액).
+  점수가 0 인 곳은 주문을 적지 않아도 된다 (`option_id` 가 `null`, `addons` 가 빈 목록). "이용하지 않음"에는 주문이 없다.
+- `choice` 에 적은 곳은 점수가 0 보다 크고, 그곳의 주문이 `choice` 와 같다. `choice` 와 이유(`reason_labels` 등)는 지금처럼 이번 한 번의 선택과 그 이유다.
+- 엔진은 점수를 몫으로 바꾼다 (`engine.shares`): 그곳의 몫 = (점수 ^ k) × 그곳의 상수를 모든 곳의 합이 1 이 되게 나눈 것.
+  k 와 업장 상수는 결정 상수다 (6.1절의 `share-sharpness-k`, `share-venue-constant-<venue_id>`). 업장 상수가 적히지 않은 곳과 "이용하지 않음"은 1 이다.
+  둘은 받은 자료로 추정한다 ("상수 추정", 선택 모형의 대안별 상수와 같은 방법). 추정에 쓴 자료로 다시 맞았다고 하지 않는다 (PRD 12절).
+- 점수를 묻지 않던 판(`p1`, `p2`, `p3`, `engine.formats.choice.SINGLE_ANSWER_PROMPTS`)의 답은 `scores` 가 없어도 되고, 엔진은 `choice` 에 적은 곳의 몫을 1 로 읽는다 (1단계 방식, 답 하나).
+  임시 호환이다: 팀이 쓰는 답과 예시 묶음을 점수를 묻는 판으로 다시 받은 뒤 없앤다 (진행 문서 T212 의 완료 조건).
+- 응답 스키마(아래 "응답의 모양을 묶는다")는 점수를 묻는 판의 요청에만 `scores` 를 더한다.
+
+```json
+{
+  "scores": [
+    {"venue_id": "geumryong", "percent": 70, "option_id": "geumryong-o1", "addons": []},
+    {"venue_id": "examplehotel-chinese", "percent": 25, "option_id": "examplehotel-chinese-o1", "addons": []},
+    {"venue_id": null, "percent": 5, "option_id": null, "addons": []}
+  ]
+}
+```
+
+위는 위의 요청에 점수를 묻는 판으로 답했다면 더해졌을 `scores` 의 예다 (지어낸 값). k 와 업장 상수가 모두 1 이면 몫은 금룡 0.70, 예시호텔 중식당 0.25, 이용하지 않음 0.05 다.
 
 **LLM 을 부르는 법** (11-14 에 정함) — 공급자가 달라도 보내는 것은 같다 (`engine/llm.py`).
 
@@ -1028,6 +1059,7 @@ customer_group,venue_id,product_id,occasion,meal,day_type,month,unit,quantity,pe
 | `status` | `ok`, `stopped_by_limit`, `failed` |
 | `constants` | 이 실행이 쓴 결정 상수와 그 값·근거의 목록. 엔진이 쓰는 것(`in_use`)만 남고, 집계 파일 옆의 상수 파일이 있으면 그것도 들어간다 (6.1절). 하나마다 `constant_id`, `name`, `value`, `unit`, `grade`, `sources` (6.1절과 같은 모양), `checked_on`, `file` (적힌 파일). 아래 "쓴 결정 상수" |
 | `baseline_answers` | 기준이 아닌 상황에서, 바꾼 업장이 기준과 상황 어느 선택에도 끼지 않아 원장을 기준의 답으로 적은 방문의 `visit_id` 목록. 기준 상황은 `null`. 11-19(T210) 전의 실행 기록에는 없다. 아래 "상관없는 방문의 답" |
+| `share_method` | 방문의 몫을 낸 방식 (11-20, T212. 9절의 "점수와 몫"): `single` 모든 방문의 답에 점수가 없어 고른 곳의 몫이 1 이다 (1단계 방식, 답 하나), `scores` 모든 방문의 답에 점수가 있어 몫으로 나눴다 (2단계 방식), `mixed` 둘이 섞였다. 답이 하나도 없는 실행(후보 없음·실패뿐)은 `single` 이다. 화면은 이 값으로 "1단계 방식 (답 하나)"과 "2단계 방식 (몫)"을 가른다. 11-20 전의 실행 기록에는 없고, 그 실행은 모두 1단계 방식이다 |
 
 - 묶음의 조건으로 돌린 실행은 `weights` 에 페르소나마다의 가중치와, 고객군과 조건마다의 비율이 빠짐없이 있어야 한다. 없으면 원장의 `represented` 를 확인할 수 없다.
   화면에서 조건을 직접 넣어 돌린 방문(`manual-`)에는 가중치가 없다.
@@ -1187,7 +1219,7 @@ customer_group,venue_id,product_id,occasion,meal,day_type,month,unit,quantity,pe
     "scenario": "7f0c40802f158f2c",
     "vocab": "8198206734bb16a5",
     "summary": "b2e533d5aec19534",
-    "constants": "4564161ba53d7ed6",
+    "constants": "a45c688652baa74c",
     "prompt": "9fee7d4f42a62d8b"
   },
   "weights": {
@@ -1216,9 +1248,11 @@ customer_group,venue_id,product_id,occasion,meal,day_type,month,unit,quantity,pe
     {"constant_id": "calibration-top-venue-must-match", "name": "보정 통과: 가장 큰 업장이 같아야 하는가", "value": true, "unit": null, "grade": "assumption", "sources": [], "checked_on": "2026-11-17", "file": "engine/constants.json"},
     {"constant_id": "calibration-max-diff-pp", "name": "보정 통과: 업장별 비중 차이의 한도", "value": 15, "unit": "%p", "grade": "assumption", "sources": [], "checked_on": "2026-11-17", "file": "engine/constants.json"},
     {"constant_id": "calibration-diff-min-personas", "name": "보정 통과: 업장별 차이를 따지는 최소 페르소나 수", "value": 2, "unit": "명", "grade": "assumption", "sources": [], "checked_on": "2026-11-17", "file": "engine/constants.json"},
+    {"constant_id": "share-sharpness-k", "name": "방문의 몫을 낼 때 AI 점수에 거는 지수 (날카로움 k)", "value": 1, "unit": null, "grade": "assumption", "sources": [], "checked_on": "2026-11-20", "file": "engine/constants.json"},
     {"constant_id": "meal-lunch-dinner", "name": "집계 파일에서 끼니가 비어 있는 식사 매출", "value": {"lunch": 0.5, "dinner": 0.5}, "unit": null, "grade": "assumption", "sources": [], "checked_on": "2026-11-13", "file": "engine/conditions.json"}
   ],
-  "baseline_answers": null
+  "baseline_answers": null,
+  "share_method": "single"
 }
 ```
 
@@ -1248,17 +1282,25 @@ customer_group,venue_id,product_id,occasion,meal,day_type,month,unit,quantity,pe
 | `paid` | 고객이 낸 금액 (세금 포함). 경쟁 업장이면 그곳에 낸 금액이다 |
 | `revenue_net` | **워커힐의** 세금을 뺀 매출. 경쟁 업장과 "이용하지 않음"은 0 |
 | `represented` | 이 방문이 대표하는 크기 = 페르소나의 가중치 × 묶음의 비율 |
-| `counted_share` | 그 업장·상품의 것으로 세는 몫. 일 년 내내 팔면 1, 일부 달만 팔면 파는 달 수 ÷ 12. 조건에 `month` 가 있으면 그 달의 방문이라 1 이다 |
-| `weighted_revenue` | `revenue_net` × `represented` × `counted_share`. 원 단위로 반올림해 적는다 |
+| `counted_share` | 그 업장·상품의 것으로 세는 파는 달의 몫. 일 년 내내 팔면 1, 일부 달만 팔면 파는 달 수 ÷ 12. 조건에 `month` 가 있으면 그 달의 방문이라 1 이다 |
+| `choice_share` | 방문이 이 곳으로 간 몫 (0 ~ 1. 11-20, T212. 9절의 "점수와 몫"). 답 하나로 고른 방문(1단계 방식)은 1 이다. 11-20 전의 원장에는 이 열이 없어 1 로 읽는다 |
+| `score` | 이 곳에 AI 가 적은 점수 (0 ~ 100). 1단계 방식의 답과 응답 없이 엔진이 정한 줄은 빈 칸이다. 11-20 전의 원장에는 이 열이 없다 |
+| `season_gap_of` | 일부 달에만 파는 곳의 나머지 몫을 센 "이용하지 않음" 줄이면 그 곳의 `venue_id`. 그 밖에는 빈 칸이다. 11-20 전의 원장에는 이 열이 없다 (그 원장의 그런 줄은 `reason_text` 로 가른다) |
+| `weighted_revenue` | `revenue_net` × `represented` × `counted_share` × `choice_share`. 원 단위로 반올림해 적는다 |
 | `reason_labels`, `reason_text`, `used_attributes` | 응답에서 온 이유. 라벨과 속성이 여럿이면 `;` |
 | `llm_call` | `new` 새로 부름, `replay` 저장된 응답을 재생 |
 | `request_hash` | 저장된 응답의 파일 이름 |
 | `status`, `fail_reason` | `ok` 또는 `failed`, 실패한 이유 |
 
-- 일부 달에만 파는 업장·상품을 고르면 줄을 하나 더 만든다: `choice_kind` 는 `none`, `counted_share` 는 1 에서 위의 몫을 뺀 값,
-  `reason_text` 는 "파는 달이 아님". 나머지 몫을 "이용하지 않음"으로 세기 위해서다 (PRD 7.2절).
-- **방문 하나의 몫은 더해서 1 이다.** 한 방문에서 고른 줄들은 `counted_share` 가 같다. 그 값이 1 이면 "이용하지 않음" 줄이 없고,
-  1 보다 작으면 위의 줄이 꼭 하나 있다. "이용하지 않음"을 고른 방문은 `counted_share` 가 1 인 줄 하나다.
+- **방문은 몫으로 나뉘어 여러 곳에 간다** (11-20, T212). 몫이 0 보다 큰 곳마다 그곳의 주문을 줄로 적고, 그 줄들의 `choice_share` 에 그곳의 몫을 적는다.
+  "이용하지 않음"의 몫은 `choice_kind` 가 `none` 인 줄 하나다 (`season_gap_of` 는 빈 칸). 몫이 0 인 곳은 줄이 없다.
+  고른 이유(`reason_labels`, `reason_text`, `used_attributes`)는 응답의 `choice` 에 적은 곳의 줄에만 적고, 다른 곳의 줄은 비어 있다.
+  곳마다의 주문은 "그곳에 간다면"의 주문이라, 예산·인원·수량 같은 조건은 곳마다 따로 본다 (곳의 금액을 더해 예산과 견주지 않는다).
+  곳마다의 `choice_share` 를 더하면 1 이다. 답 하나로 고른 방문(1단계 방식)은 고른 곳 하나의 `choice_share` 가 1 이라 11-20 전과 같은 줄이 된다.
+- 일부 달에만 파는 업장·상품을 고르면 그 곳의 줄을 하나 더 만든다: `choice_kind` 는 `none`, `counted_share` 는 1 에서 위의 몫을 뺀 값,
+  `choice_share` 는 그 곳의 몫, `season_gap_of` 는 그 곳의 `venue_id`, `reason_text` 는 "파는 달이 아님". 나머지 몫을 "이용하지 않음"으로 세기 위해서다 (PRD 7.2절).
+- **한 곳의 파는 달의 몫은 더해서 1 이다.** 한 곳에서 고른 줄들은 `counted_share` 가 같다. 그 값이 1 이면 그 곳의 "파는 달이 아님" 줄이 없고,
+  1 보다 작으면 그 줄이 꼭 하나 있다. "이용하지 않음"의 줄은 `counted_share` 가 1 이다.
   몫은 방문이 어디로 갔는지를 세는 값이라 방문에 하나다. 그래서 엔진은 주문 하나에 파는 달이 서로 다른 상품을 함께 넣지 않고,
   추가 상품의 줄에도 고른 주문과 같은 몫을 적는다.
   주문 없이 추가 상품만 고른 방문(9절)의 몫은 고른 상품을 모두 함께 파는 달 수 ÷ 12 다. 함께 파는 달이 없으면 그 답은 실패다.
@@ -1282,9 +1324,9 @@ customer_group,venue_id,product_id,occasion,meal,day_type,month,unit,quantity,pe
 - 아래 예시의 두 줄은 서로 다른 실행의 원장에서 한 줄씩 가져온 것이다. 원장 파일 하나에는 실행 하나의 줄만 들어간다.
 
 ```csv
-run_id,scenario_id,visit_id,persona_id,customer_group,condition_id,choice_kind,venue_id,product_id,quantity,unit,list_price,discount,paid,revenue_net,represented,counted_share,weighted_revenue,reason_labels,reason_text,used_attributes,llm_call,request_hash,status,fail_reason
-20261117-101500-baseline,baseline,family-elders__meal-dinner-weekend,family-elders,가족·친족,meal-dinner-weekend,walkerhill,geumryong,course-a,4,1인,150000,0,600000,545455,105.0,1.0,57272775,별실;주차·접근,어르신을 모시는 자리라 별실이 있고 차로 오기 편한 곳을 골랐다.,visit.purposes;preferences.needs,new,44f617297b40af86,ok,
-20261117-103000-competitor-chinese-discount,competitor-chinese-discount,family-elders__meal-dinner-weekend,family-elders,가족·친족,meal-dinner-weekend,competitor,examplehotel-chinese,course,4,1인,140000,56000,504000,0,105.0,1.0,0,혜택·할인,할인 폭이 커서 이번에는 다른 호텔로 갔다.,buying.price_sensitivity,new,4f37e77301272ce3,ok,
+run_id,scenario_id,visit_id,persona_id,customer_group,condition_id,choice_kind,venue_id,product_id,quantity,unit,list_price,discount,paid,revenue_net,represented,counted_share,choice_share,score,season_gap_of,weighted_revenue,reason_labels,reason_text,used_attributes,llm_call,request_hash,status,fail_reason
+20261117-101500-baseline,baseline,family-elders__meal-dinner-weekend,family-elders,가족·친족,meal-dinner-weekend,walkerhill,geumryong,course-a,4,1인,150000,0,600000,545455,105.0,1.0,1.0,,,57272775,별실;주차·접근,어르신을 모시는 자리라 별실이 있고 차로 오기 편한 곳을 골랐다.,visit.purposes;preferences.needs,new,44f617297b40af86,ok,
+20261117-103000-competitor-chinese-discount,competitor-chinese-discount,family-elders__meal-dinner-weekend,family-elders,가족·친족,meal-dinner-weekend,competitor,examplehotel-chinese,course,4,1인,140000,56000,504000,0,105.0,1.0,1.0,,,0,혜택·할인,할인 폭이 커서 이번에는 다른 호텔로 갔다.,buying.price_sensitivity,new,4f37e77301272ce3,ok,
 ```
 
 ### 10.3 저장된 LLM 응답 `llm/<request_hash>.json`
@@ -1494,6 +1536,20 @@ run_id,scenario_id,visit_id,persona_id,customer_group,condition_id,choice_kind,v
         "kind": "competitor",
         "venue_id": "examplehotel-chinese"
       },
+      "before_shares": [
+        {
+          "kind": "walkerhill",
+          "venue_id": "geumryong",
+          "share": 1.0
+        }
+      ],
+      "after_shares": [
+        {
+          "kind": "competitor",
+          "venue_id": "examplehotel-chinese",
+          "share": 1.0
+        }
+      ],
       "parts": [
         {
           "venue_id": "geumryong",
@@ -1501,7 +1557,11 @@ run_id,scenario_id,visit_id,persona_id,customer_group,condition_id,choice_kind,v
           "amount": -57272775
         }
       ],
-      "promo": "none"
+      "promo": "none",
+      "promo_shares": {
+        "would_come": 0.0,
+        "drawn": 0.0
+      }
     }
   ]
 }
@@ -1517,11 +1577,14 @@ run_id,scenario_id,visit_id,persona_id,customer_group,condition_id,choice_kind,v
 | `venues[].before`, `venues[].after` | 그 업장의 기준과 상황의 가상 매출 (원) |
 | `venues[].parts` | 그 업장의 갈래별 금액과 `total` (`after` − `before`) |
 | `visits[].visit_id`, `visits[].represented` | 방문(페르소나 × 조건)과 그 방문이 대표하는 팀 수. 두 실행에서 같다 |
-| `visits[].before`, `visits[].after` | 방문이 간 곳. `kind` 는 `walkerhill`, `competitor`, `none` 이고, `venue_id` 는 `none` 이면 `null` 이다 |
+| `visits[].before`, `visits[].after` | 방문이 간 곳 가운데 몫이 가장 큰 곳 (같으면 워커힐, 경쟁, 이용하지 않음 순서, 그다음 `venue_id` 순서). `kind` 는 `walkerhill`, `competitor`, `none` 이고, `venue_id` 는 `none` 이면 `null` 이다. 답 하나로 고른 방문은 그 곳이다 |
+| `visits[].before_shares`, `visits[].after_shares` | 방문이 간 곳마다 `kind`, `venue_id`, `share` (원장의 `choice_share`. 11-20, T212). 몫이 0 인 곳은 없다. 11-20 전의 파일에는 없다 |
 | `visits[].parts` | 그 방문이 든 갈래: `venue_id`, `part`(갈래의 키), `amount`(원). 금액이 바뀌지 않은 방문도 적는다 (`parts` 가 비거나 금액이 0 이다) |
-| `visits[].promo` | 상황에서 워커힐 업장의 할인을 받았는지로 본 방문의 구분 (11-20 wilstein91 결정, T215. 화면의 "혜택이 없어도 올 고객", PRD 3절): `none` 상황에서 워커힐 업장의 할인을 받지 않았다, `would_come` 기준에서도 그 업장을 고르던 방문이 할인을 받았다, `drawn` 기준에서는 그 업장을 고르지 않던 방문이 할인을 받으며 그 업장을 골랐다. 할인은 원장의 `discount` 가 0 보다 큰 줄이 있는지로 본다 (기존 프로모션의 할인도 든다) |
+| `visits[].promo` | 상황에서 워커힐 업장의 할인을 받았는지로 본 방문의 구분 (11-20 wilstein91 결정, T215. 화면의 "혜택이 없어도 올 고객", PRD 3절): `none` 상황에서 워커힐 업장의 할인을 받지 않았다, `would_come` 기준에서도 그 업장을 고르던 방문이 할인을 받았다, `drawn` 기준에서는 그 업장을 고르지 않던 방문이 할인을 받으며 그 업장을 골랐다. 할인은 원장의 `discount` 가 0 보다 큰 줄이 있는지로 본다 (기존 프로모션의 할인도 든다). 방문이 몫으로 나뉘면 아래 `promo_shares` 의 두 몫 가운데 큰 쪽이다 (같으면 `would_come`, 둘 다 0 이면 `none`) |
+| `visits[].promo_shares` | 상황에서 워커힐 업장의 할인을 받은 몫 (11-20, T212): `would_come` 기준에도 그 업장에 있던 몫(두 실행의 그 업장 몫 가운데 작은 쪽), `drawn` 상황에서 늘어난 몫. 할인을 받은 업장마다 더한다. 11-20 전의 파일에는 없다 |
 
 **갈래** — 방문 하나가 기준에서 상황으로 어디에 갔나로 정한다. 금액은 원 단위 정수이고 세금을 뺀 가상 매출이다.
+아래 표는 답 하나로 고른 방문(몫이 0 아니면 1)의 경우다. 몫으로 나뉜 방문은 아래 "몫으로 나뉜 방문"의 규칙으로 같은 갈래에 나눈다.
 
 | 갈래 | 키 | 방문이 간 곳 (기준 → 상황) | 금액 |
 |---|---|---|---|
@@ -1541,6 +1604,17 @@ run_id,scenario_id,visit_id,persona_id,customer_group,condition_id,choice_kind,v
 - 한쪽 실행에서라도 실패했거나(`status` 가 `ok` 가 아니다) 한쪽에만 있는 방문은 두 실행 모두에서 빼고 `excluded_visits` 에 적는다 (화면의 비교와 같다).
 - 워커힐 안에서 옮긴 방문은 두 업장에 한 번씩 적힌다 (떠난 곳에 `to_walkerhill`, 온 곳에 `from_walkerhill`). `walkerhill` 에서 둘을 더하면 옮기면서 달라진 금액만 남는다.
 - PRD 8절의 넷으로 보일 때는 `from_competitor` 와 `from_walkerhill` 을 더해 옮겨 온 매출, `to_` 로 시작하는 셋을 더해 잃은 매출, `price` 와 `order` 를 더해 단가 효과로 묶는다.
+
+**몫으로 나뉜 방문** (11-20 wilstein91 결정, T212. 비례 배분) — 방문 하나에서 워커힐 업장 하나의 몫이 기준 `b`, 상황 `a` 이고 그 업장의 가중 매출이 `B`, `A` 일 때:
+
+- 남은 몫 `min(b, a)` 의 금액 차이 `A × min/a − B × min/b` 는 가격 효과(`price`)나 주문 변화(`order`)다. 고른 상품·수량·`counted_share` 가 같으면 가격 효과다.
+- 몫이 늘었으면(`a > b`) 늘어난 몫의 금액 `A × (a − b)/a` 를, 이 업장을 뺀 곳들 가운데 몫이 줄어든 곳들이 줄어든 만큼에 비례해 나눈다:
+  "이용하지 않음"이 준 몫은 `new`, 경쟁 업장이 준 몫은 `from_competitor`, 다른 워커힐 업장이 준 몫은 `from_walkerhill`.
+- 몫이 줄었으면(`b > a`) 줄어든 몫의 금액 `−B × (b − a)/b` 를, 몫이 늘어난 곳들이 늘어난 만큼에 비례해 나눈다 (`to_none`, `to_competitor`, `to_walkerhill`).
+- "비례로 옮겼다"는 것은 가정이다. AI 는 어디서 어디로 옮겼는지 따로 말하지 않는다. 결과를 보일 때 이 가정을 함께 적는다.
+- 금액은 원 단위로 반올림하되, 방문·업장마다 갈래의 합이 그 업장의 `A` 와 `B` 를 반올림한 값의 차이와 같게 한다 (나머지가 큰 갈래부터 1원씩 맞춘다).
+- 파는 달이 아닌 몫(원장의 `season_gap_of`)은 그 곳의 몫 안에서 금액으로만 들어간다. 그래서 몫을 견줄 때는 원장의 `choice_share` 만 본다.
+- 답 하나로 고른 방문은 이 규칙이 위의 갈래 표와 같은 결과를 낸다 (남은 몫이 1 이면 가격 효과나 주문 변화, 0 이면 온 곳이나 간 곳 하나로 모두 간다).
 
 **맞아야 하는 것** — 모델(`engine/formats/changes.py`)이 읽을 때 본다. 남는 금액이 없다.
 

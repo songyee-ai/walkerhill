@@ -36,7 +36,7 @@ from pydantic import ValidationError
 
 from engine.changes import decompose
 from engine.formats.changes import Changes
-from engine.formats.choice import problems_in_response
+from engine.formats.choice import Choice, ChoiceRequest, Score, problems_in_response
 from engine.formats.codes import WALKERHILL_VENUE_IDS
 from engine.formats.conditions import MANUAL_CONDITION_PREFIX, ConditionBundle
 from engine.formats.constants import ConstantsFile
@@ -152,6 +152,11 @@ OPAQUE_SUFFIXES = frozenset(
 )
 MAX_DATA_BYTES = 5_000_000
 MAX_SCAN_BYTES = 100_000_000
+
+# 방문의 몫을 내는 결정 상수 (docs/FORMATS.md 9절의 "점수와 몫", T212). 엔진(engine/shares.py)을 쓰지 않고 실행 기록의 값으로 따로 낸다.
+# 같은 코드로 만들고 같은 코드로 확인하면 틀린 계산을 틀린 채로 통과시키기 때문이다.
+SHARPNESS_ID = "share-sharpness-k"
+VENUE_CONSTANT_PREFIX = "share-venue-constant-"
 
 
 @dataclass(frozen=True)
@@ -976,8 +981,14 @@ class Checker:
                     if label not in allowed:
                         bad(f"reason_labels 의 '{label}' 가 값 목록에 없다")
 
+        shares = _share_params(record)
+        if shares is None and any(entry.response.scores is not None for entry in saved.values()):
+            self.error(
+                path,
+                f"점수가 있는 답이 있는데 실행 기록의 constants 에 '{SHARPNESS_ID}' (0 보다 큰 수)가 없어 몫(choice_share)을 다시 낼 수 없다",
+            )
         for visit_rows in visits.values():
-            self._check_visit(path, visit_rows, saved, record.month)
+            self._check_visit(path, visit_rows, saved, record.month, shares)
 
         # 어긋난 응답은 실패한 방문에서만 나온다. 원장에 그 방문의 실패한 줄이 있고, 그 줄이 파일과 같은 말을 해야 한다.
         failed_rows = {row.request_hash: row for rows_ in visits.values() for _, row in rows_ if row.status == "failed"}
@@ -1003,6 +1014,16 @@ class Checker:
             self.error(path, f"원장의 방문이 {len(visits)}건인데 실행 기록의 counts.visits 는 {record.counts.visits} 다")
         if failed != record.counts.failed:
             self.error(path, f"원장의 실패한 방문이 {failed}건인데 실행 기록의 counts.failed 는 {record.counts.failed} 다")
+        # 몫 방식(10.1절의 share_method, T212): 답이 있는 방문의 줄에 점수가 적혔는가로 다시 낸다. 11-20 전의 기록에는 없다.
+        if record.share_method is not None:
+            kinds = set()
+            for visit_rows in visits.values():
+                rows_ = [row for _, row in visit_rows]
+                if all(row.status == "ok" for row in rows_) and any(row.request_hash for row in rows_):
+                    kinds.add(any(row.score is not None for row in rows_))
+            method = "mixed" if kinds == {True, False} else "scores" if kinds == {True} else "single"
+            if method != record.share_method:
+                self.error(path, f"원장으로 다시 낸 몫 방식은 {method} 인데 실행 기록의 share_method 는 {record.share_method} 다")
         if record.status == "ok":
             planned = {
                 f"{persona_id}{VISIT_ID_SEPARATOR}{condition_id}"
@@ -1018,12 +1039,21 @@ class Checker:
                 )
 
     def _check_visit(
-        self, path: Path, rows: list[tuple[int, LedgerRow]], saved: dict[str, SavedResponse], month: int | None
+        self,
+        path: Path,
+        rows: list[tuple[int, LedgerRow]],
+        saved: dict[str, SavedResponse],
+        month: int | None,
+        shares: tuple[float, dict[str, float]] | None = None,
     ) -> None:
         """한 방문의 줄들이 앞뒤가 맞는지, 저장된 응답과 같은지 본다. `month` 는 실행 기록의 달이다.
 
         원장은 저장된 응답에서 만든 것이라, 누가 어느 조건에서 무엇을 골랐는지가 응답과 같아야 한다.
         금액을 업장 정의의 가격과 프로모션으로 다시 계산하는 것은 엔진의 몫이라 여기서는 하지 않는다.
+
+        방문은 몫으로 나뉘어 여러 곳에 갈 수 있다 (10.2절, T212). 줄을 곳마다 묶어 본다:
+        업장의 줄은 `venue_id` 로, "파는 달이 아님" 줄은 `season_gap_of` 의 곳으로 (11-20 전의 원장은 방문의 한 업장으로),
+        남은 "이용하지 않음" 줄은 "이용하지 않음"의 곳으로. `shares` 는 실행 기록에서 읽은 k 와 업장 상수다 (`_share_params`).
         """
         line, first = rows[0]
 
@@ -1042,31 +1072,67 @@ class Checker:
             bad("같은 방문의 줄인데 request_hash 가 서로 다르다")
             return
 
-        # 방문 하나의 몫은 고른 곳의 몫과 "이용하지 않음"의 몫을 더해 1 이다 (10.2절).
         picked = [row for _, row in rows if row.choice_kind != "none"]
         nothing = [row for _, row in rows if row.choice_kind == "none"]
+        # 곳마다 묶는다. 순서는 원장에 적힌 순서다.
+        by_venue: dict[str, list[LedgerRow]] = defaultdict(list)
+        for row in picked:
+            by_venue[row.venue_id or ""].append(row)
+        gaps: dict[str, list[LedgerRow]] = defaultdict(list)
+        unused: list[LedgerRow] = []  # "이용하지 않음"의 몫을 센 줄
+        for row in nothing:
+            if row.season_gap_of is not None:
+                gaps[row.season_gap_of].append(row)
+            elif row.reason_text == SEASON_GAP_REASON and len(by_venue) == 1:
+                gaps[next(iter(by_venue))].append(row)  # 11-20 전의 원장에는 season_gap_of 가 없다
+            else:
+                unused.append(row)
+        several = len(by_venue) > 1
+
+        # 한 곳의 파는 달의 몫은 그 곳의 줄과 "파는 달이 아님" 줄을 더해 1 이다 (10.2절).
         if not picked:
             if len(nothing) != 1 or abs(nothing[0].counted_share - 1) > SHARE_TOLERANCE:
                 bad("'이용하지 않음'인 방문은 counted_share 가 1 인 줄 하나다")
-        elif len({row.counted_share for row in picked}) > 1:
-            bad("한 방문에서 고른 줄들의 counted_share 가 서로 다르다")
-        else:
-            share = picked[0].counted_share
+        for venue_id, venue_rows in by_venue.items():
+            where = f" ('{venue_id}')" if several else ""
+            gap = gaps.get(venue_id, [])
+            if len({row.counted_share for row in venue_rows}) > 1:
+                bad(f"한 방문에서 고른 줄들의 counted_share 가 서로 다르다{where}")
+                continue
+            share = venue_rows[0].counted_share
             # 달을 주고 돌린 실행의 방문은 그 달의 방문이라 몫이 늘 1 이다 (10.1절의 "실행의 달").
             if month is not None and not first.condition_id.startswith(MANUAL_CONDITION_PREFIX) and share <= 1 - SHARE_TOLERANCE:
-                bad("달을 주고 돌린 실행의 방문인데 고른 줄의 counted_share 가 1 이 아니다")
+                bad(f"달을 주고 돌린 실행의 방문인데 고른 줄의 counted_share 가 1 이 아니다{where}")
             if share > 1 - SHARE_TOLERANCE:
-                if nothing:
-                    bad("일 년 내내 파는 곳을 고른 방문인데 '이용하지 않음' 줄이 더 있다")
+                if gap:
+                    bad(f"일 년 내내 파는 곳을 고른 방문인데 '이용하지 않음' 줄이 더 있다{where}")
             elif (
-                len(nothing) != 1
-                or abs(nothing[0].counted_share - (1 - share)) > SHARE_TOLERANCE
-                or nothing[0].reason_text != SEASON_GAP_REASON
+                len(gap) != 1
+                or abs(gap[0].counted_share - (1 - share)) > SHARE_TOLERANCE
+                or gap[0].reason_text != SEASON_GAP_REASON
             ):
                 bad(
                     "일부 달에만 파는 곳을 고른 방문에는 '이용하지 않음' 줄이 하나 더 있어야 한다: "
-                    f"counted_share 는 1 에서 고른 줄의 몫을 뺀 값, reason_text 는 '{SEASON_GAP_REASON}'"
+                    f"counted_share 는 1 에서 고른 줄의 몫을 뺀 값, reason_text 는 '{SEASON_GAP_REASON}'{where}"
                 )
+        for venue_id in gaps:
+            if venue_id not in by_venue:
+                bad(f"'{SEASON_GAP_REASON}' 줄의 season_gap_of '{venue_id}' 를 고른 줄이 이 방문에 없다")
+        if picked and len(unused) > 1:
+            bad("'이용하지 않음'의 몫을 센 줄이 둘 이상이다 (한 방문에 하나다)")
+        if picked and any(abs(row.counted_share - 1) > SHARE_TOLERANCE for row in unused):
+            bad("'이용하지 않음'의 몫을 센 줄은 counted_share 가 1 이다")
+
+        # 방문이 곳마다 간 몫(choice_share)은 한 곳의 줄에서 같고, 곳마다 더하면 1 이다 (10.2절, T212).
+        place_shares: dict[str | None, float] = {}
+        for venue_id, venue_rows in by_venue.items():
+            if len({row.choice_share for row in venue_rows + gaps.get(venue_id, [])}) > 1:
+                bad(f"곳 '{venue_id}' 의 줄들('{SEASON_GAP_REASON}' 줄 포함)의 choice_share 가 서로 다르다")
+            place_shares[venue_id] = venue_rows[0].choice_share
+        if unused:
+            place_shares[None] = unused[0].choice_share
+        if place_shares and abs(sum(place_shares.values()) - 1) > SHARE_TOLERANCE:
+            bad(f"곳마다의 choice_share 를 더하면 1 이어야 하는데 {sum(place_shares.values()):g} 다")
 
         entry = saved.get(first.request_hash or "")
         if entry is None:
@@ -1081,56 +1147,71 @@ class Checker:
             bad("저장된 응답의 요청의 달(condition.month)이 실행 기록의 month 와 다르다")
 
         choice = response.choice
-        if choice.venue_id is None:
-            if picked:
-                bad("저장된 응답은 '이용하지 않음'인데 원장에는 업장을 고른 줄이 있다")
-            told = nothing
-        else:
-            candidate = request.candidate(choice.venue_id)
-            option = candidate.option(choice.option_id) if candidate else None
-            # 주문이 없는 후보에서는 추가 상품만 고른다 (option_id 가 null). 그때는 주문의 줄이 없다.
-            addons_only = candidate is not None and not candidate.options and choice.option_id is None
-            if candidate is None or (option is None and not addons_only):
-                return  # 응답이 후보 밖을 골랐다. 저장된 응답의 검사에서 이미 적었다.
-            lines = option.lines if option else []
-            if not picked:
-                bad("저장된 응답은 업장을 골랐는데 원장에는 업장을 고른 줄이 없다")
-                return
-            if any(row.venue_id != choice.venue_id for row in picked):
-                bad("원장의 업장이 저장된 응답에서 고른 업장과 다르다")
-            # 고른 주문의 줄과 추가 상품의 줄을 금액까지 견준다.
-            # 추가 상품에는 프로모션 할인을 적용하지 않는다 (11-16 회의. docs/FORMATS.md 9절). 할인은 0, 낸 금액은 수량 × 표시가다.
-            line_ids = {ordered.product_id for ordered in lines}
-            addons = {addon.product_id: addon for addon in candidate.addons}
-            extra = {
-                p.product_id: p.quantity
-                for p in choice.addons
-                if p.quantity > 0 and p.product_id in addons and p.product_id not in line_ids
-            }
-            want_lines = sorted(
-                (o.product_id, o.quantity, o.unit, o.unit_price, o.discount, o.line_total) for o in lines
-            )
-            want_extra = sorted(
-                (pid, qty, addons[pid].unit, addons[pid].unit_price, 0, qty * addons[pid].unit_price)
-                for pid, qty in extra.items()
-            )
-            have_lines = sorted(
-                (r.product_id or "", r.quantity, r.unit or "", r.list_price, r.discount, r.paid)
-                for r in picked
-                if r.product_id not in extra
-            )
-            have_extra = sorted(
-                (r.product_id or "", r.quantity, r.unit or "", r.list_price, r.discount, r.paid)
-                for r in picked
-                if r.product_id in extra
-            )
-            if have_lines != want_lines or have_extra != want_extra:
-                bad("원장의 줄이 저장된 응답에서 고른 주문과 다르다 (상품, 수량, 단위, 표시가, 할인, 낸 금액을 견준다)")
-            # 일부 달에만 파는 곳을 골라 더 생긴 "이용하지 않음" 줄(10.2절)은 이유가 따로라 견주지 않는다.
-            told = picked
         answer = (response.reason_labels, response.reason_text, response.used_attributes)
+        if response.scores is None:
+            # 점수가 없는 답(1단계 방식): 고른 곳 하나의 몫이 1 이고, 점수는 빈 칸이다.
+            if any(row.score is not None for _, row in rows):
+                bad("점수가 없는 답(1단계 방식)인데 원장에 score 가 적혀 있다")
+            if choice.venue_id is None:
+                if picked:
+                    bad("저장된 응답은 '이용하지 않음'인데 원장에는 업장을 고른 줄이 있다")
+                told = nothing
+            else:
+                matches = _order_matches(request, choice, picked)
+                if matches is None:
+                    return  # 응답이 후보 밖을 골랐다. 저장된 응답의 검사에서 이미 적었다.
+                if not picked:
+                    bad("저장된 응답은 업장을 골랐는데 원장에는 업장을 고른 줄이 없다")
+                    return
+                if any(row.venue_id != choice.venue_id for row in picked):
+                    bad("원장의 업장이 저장된 응답에서 고른 업장과 다르다")
+                if unused:
+                    bad("저장된 응답은 업장 하나를 골랐는데(점수 없는 답) 원장에 '이용하지 않음'의 몫을 센 줄이 있다")
+                if not matches:
+                    bad("원장의 줄이 저장된 응답에서 고른 주문과 다르다 (상품, 수량, 단위, 표시가, 할인, 낸 금액을 견준다)")
+                # 일부 달에만 파는 곳을 골라 더 생긴 "이용하지 않음" 줄(10.2절)은 이유가 따로라 견주지 않는다.
+                told = picked
+            if any((row.reason_labels, row.reason_text, row.used_attributes) != answer for row in told):
+                bad("고른 이유(reason_labels, reason_text, used_attributes)가 저장된 응답과 다르다")
+            return
+
+        # 점수가 있는 답(2단계 방식): 점수가 0 보다 큰 곳마다 그곳의 주문을 줄로 적고, 몫은 점수와 결정 상수로 낸 값이다.
+        expected = _expected_shares(response.scores, *shares) if shares is not None else None
+        for score in response.scores:
+            label = score.venue_id or "이용하지 않음"
+            place_rows = by_venue.get(score.venue_id, []) if score.venue_id is not None else unused
+            if score.percent == 0:
+                if place_rows:
+                    bad(f"점수가 0 인 곳 '{label}' 의 줄이 원장에 있다")
+                continue
+            if not place_rows:
+                bad(f"점수가 0 보다 큰 곳 '{label}' 의 줄이 원장에 없다")
+                continue
+            with_gap = place_rows + (gaps.get(score.venue_id, []) if score.venue_id is not None else [])
+            if any(row.score != score.percent for row in with_gap):
+                bad(f"'{label}' 의 줄의 score 가 저장된 응답의 점수({score.percent})와 다르다")
+            if expected is not None and abs(place_rows[0].choice_share - expected[score.venue_id]) > SHARE_TOLERANCE:
+                bad(f"'{label}' 의 choice_share 가 점수와 결정 상수로 다시 낸 몫({expected[score.venue_id]:g})과 다르다")
+            if score.venue_id is not None and _order_matches(request, score.as_choice(), place_rows) is False:
+                bad(
+                    f"원장의 줄이 저장된 응답에서 고른 주문과 다르다 ('{label}' 의 scores 주문과 "
+                    "상품, 수량, 단위, 표시가, 할인, 낸 금액을 견준다)"
+                )
+        scored = {score.venue_id for score in response.scores}
+        for venue_id in by_venue:
+            if venue_id not in scored:
+                bad(f"원장의 업장 '{venue_id}' 가 저장된 응답의 scores 에 없다")
+        # 고른 이유는 `choice` 에 적은 곳의 줄에만 적고, 다른 곳의 줄은 비어 있다. "파는 달이 아님" 줄은 이유가 따로라 보지 않는다.
+        told = by_venue.get(choice.venue_id, []) if choice.venue_id is not None else unused
         if any((row.reason_labels, row.reason_text, row.used_attributes) != answer for row in told):
             bad("고른 이유(reason_labels, reason_text, used_attributes)가 저장된 응답과 다르다")
+        chosen = {id(row) for row in told}
+        if any(
+            row.reason_labels or row.reason_text or row.used_attributes
+            for row in picked + unused
+            if id(row) not in chosen
+        ):
+            bad("고른 이유는 응답의 choice 에 적은 곳의 줄에만 적는다. 다른 곳의 줄은 이유가 비어 있어야 한다")
 
     def _check_calibration(self, run_dir: Path, record: RunRecord) -> None:
         path = run_dir / "calibration.json"
@@ -1177,7 +1258,12 @@ class Checker:
             base_rows = [LedgerRow.from_row(r) for r in read_csv(base_ledger, LEDGER_COLUMNS)]
         except (ValueError, ValidationError):
             return  # 원장의 형식 오류는 원장 검사가 알린다
-        if decompose(base_rows, rows, record.weights_from, record.run_id) != changes:
+        again = decompose(base_rows, rows, record.weights_from, record.run_id)
+        # 11-20 전의 파일에는 방문의 몫 칸이 없다 (임시 호환, 진행 문서 T212). 그 파일은 그 칸을 빼고 견준다.
+        if changes.visits and changes.visits[0].before_shares is None:
+            empty = {"before_shares": None, "after_shares": None, "promo_shares": None}
+            again = again.model_copy(update={"visits": [v.model_copy(update=empty) for v in again.visits]})
+        if again != changes:
             self.error(path, "두 실행의 원장으로 다시 나눈 것과 다르다 (손으로 고치지 않는다. 엔진이 상황 실행을 쓸 때 함께 쓴다)")
 
     # ── 저장소에 올리면 안 되는 것 ──────────────────────────────────────────
@@ -1293,6 +1379,65 @@ class Checker:
             self.problems += [Problem(p.level, f"{prefix}/{p.path}", p.message) for p in nested.problems]
             self.files_checked += nested.files_checked
         return self.problems
+
+
+def _share_params(record: RunRecord) -> tuple[float, dict[str, float]] | None:
+    """실행 기록의 결정 상수(`constants`)에서 몫을 내는 k 와 업장 상수를 읽는다. k 가 없거나 0 보다 큰 수가 아니면 None 이다.
+
+    업장 상수가 적히지 않은 업장은 1 로 본다 (docs/FORMATS.md 9절의 "점수와 몫"). 0 보다 큰 수가 아닌 업장 상수는 건너뛴다
+    (그러면 몫이 엔진과 달라 원장의 choice_share 가 오류로 나온다).
+    """
+    k: Any = None
+    venue_constants: dict[str, float] = {}
+    for item in record.constants or []:
+        value = item.value
+        number = not isinstance(value, bool) and isinstance(value, (int, float)) and value > 0
+        if item.constant_id == SHARPNESS_ID:
+            k = value if number else None
+        elif item.constant_id.startswith(VENUE_CONSTANT_PREFIX) and number:
+            venue_constants[item.constant_id.removeprefix(VENUE_CONSTANT_PREFIX)] = float(value)
+    return None if k is None else (float(k), venue_constants)
+
+
+def _expected_shares(scores: list[Score], k: float, venue_constants: dict[str, float]) -> dict[str | None, float]:
+    """점수가 0 보다 큰 곳마다의 몫: (점수 ^ k) × 그곳의 상수를 합이 1 이 되게 나눈 것. "이용하지 않음"의 상수는 늘 1 이다."""
+    weights = {
+        s.venue_id: s.percent**k * (1.0 if s.venue_id is None else venue_constants.get(s.venue_id, 1.0))
+        for s in scores
+        if s.percent > 0
+    }
+    total = sum(weights.values())
+    return {venue_id: weight / total for venue_id, weight in weights.items()} if total else {}
+
+
+def _order_matches(request: ChoiceRequest, choice: Choice, rows: list[LedgerRow]) -> bool | None:
+    """원장의 줄들이 요청에서 고른 주문(줄과 추가 상품)과 금액까지 같은가. 주문이 후보 밖이면 None 이다 (저장된 응답의 검사가 적는다).
+
+    추가 상품에는 프로모션 할인을 적용하지 않는다 (11-16 회의. docs/FORMATS.md 9절). 할인은 0, 낸 금액은 수량 × 표시가다.
+    """
+    candidate = request.candidate(choice.venue_id) if choice.venue_id is not None else None
+    option = candidate.option(choice.option_id) if candidate else None
+    # 주문이 없는 후보에서는 추가 상품만 고른다 (option_id 가 null). 그때는 주문의 줄이 없다.
+    addons_only = candidate is not None and not candidate.options and choice.option_id is None
+    if candidate is None or (option is None and not addons_only):
+        return None
+    lines = option.lines if option else []
+    line_ids = {ordered.product_id for ordered in lines}
+    addons = {addon.product_id: addon for addon in candidate.addons}
+    extra = {
+        p.product_id: p.quantity for p in choice.addons if p.quantity > 0 and p.product_id in addons and p.product_id not in line_ids
+    }
+    want_lines = sorted((o.product_id, o.quantity, o.unit, o.unit_price, o.discount, o.line_total) for o in lines)
+    want_extra = sorted(
+        (pid, qty, addons[pid].unit, addons[pid].unit_price, 0, qty * addons[pid].unit_price) for pid, qty in extra.items()
+    )
+    have_lines = sorted(
+        (r.product_id or "", r.quantity, r.unit or "", r.list_price, r.discount, r.paid) for r in rows if r.product_id not in extra
+    )
+    have_extra = sorted(
+        (r.product_id or "", r.quantity, r.unit or "", r.list_price, r.discount, r.paid) for r in rows if r.product_id in extra
+    )
+    return have_lines == want_lines and have_extra == want_extra
 
 
 def check(root: Path, strict: bool = False) -> list[Problem]:
