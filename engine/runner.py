@@ -42,6 +42,7 @@ from engine.llm import (
 )
 from engine.scenarios import apply_scenario
 from engine.shares import VENUE_CONSTANT_PREFIX, ShareParams, share_params
+from engine.thresholds import grade_thresholds, with_price_threshold
 from engine.weights import (
     average_parties,
     base_profiles,
@@ -124,6 +125,8 @@ class Inputs:
     # 추정한 상수 파일 (집계 파일 옆. 없으면 None). 실행 기록에 남길 그 자리도 함께.
     estimated: ConstantsFile | None = None
     estimated_file: str | None = None
+    # 가격 민감도 등급마다의 문턱(%) (`engine.thresholds`, T212). 점수를 묻는 판의 요청에만 넣는다.
+    thresholds: dict[str, float] | None = None
 
 
 def runs_folder(root: Path, data_mode: str) -> Path:
@@ -244,6 +247,7 @@ def load_inputs(
             **hashes,
         },
         shares=shares,
+        thresholds=grade_thresholds(load_constants()),
         estimated=estimated,
         estimated_file=estimated_path.relative_to(root).as_posix() if estimated is not None else None,
     )
@@ -388,7 +392,8 @@ def run_visit(
     }
     request, skipped = build_request(
         prompt_version=prompt_version,
-        persona=inputs.persona_json[persona.persona_id],
+        # 점수를 묻는 판이면 가격 민감도의 문턱을 더한다 (`engine.thresholds`). 옛 판의 요청은 그대로다.
+        persona=with_price_threshold(inputs.persona_json[persona.persona_id], prompt_version, inputs.thresholds),
         condition=condition,
         venues=list(inputs.venues.values()),
         vocab=inputs.vocab,

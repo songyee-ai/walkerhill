@@ -571,12 +571,14 @@ R-geumryong-0027,geumryong,map,2026-03,,,,,,meal,dinner,,,,,,대기,,no,예약�
 | `in_use` | 엔진이 지금 이 값을 쓰는가. 빠지면 `true`. 정해 두었지만 아직 쓰지 않는 값(다음 단계에서 쓸 값)은 `false` 이고 실행 기록에 남지 않는다 (10.1절) |
 
 - **넣는 것**: 결과(고르는 후보, 가중치, 보정의 통과)를 바꾸는 숫자. 엔진이 쓰는 것(`in_use` 가 `true`)은 채운 단가의 반올림 단위, 기본 데이터의 요약에 적는 상품 수와 비중의 범주를 가르는 선,
-  인원이 빈 포장·추가 상품 한 개의 팀 수·사람 수, 보정의 통과 기준 셋, 방문의 몫을 내는 날카로움 k (`share-sharpness-k`, 9절의 "점수와 몫". 11-20, T212)다.
+  인원이 빈 포장·추가 상품 한 개의 팀 수·사람 수, 보정의 통과 기준 셋, 방문의 몫을 내는 날카로움 k (`share-sharpness-k`, 9절의 "점수와 몫". 11-20, T212),
+  가격 민감도 문턱의 분포 두 값(`price-threshold-median-pct`, `price-threshold-90pct-range`, 9절의 "가격 민감도의 문턱". 11-20, T212)이다.
 - **업장 상수**(`share-venue-constant-<venue_id>`, T212)는 업장마다 하나씩 이 파일에 둔다. 값은 상수 추정으로 정하고 근거와 함께 적는다.
   적히지 않은 업장과 `in_use` 가 `false` 인 업장 상수는 1 로 본다 (쓰지 않는 값은 실행 기록에도 남지 않아, 형식 검사가 기록으로 몫을 다시 낼 때도 1 이다).
-  k 와 업장 상수는 값이 바뀌면 해시가 바뀌어 기준 상황을 다시 돌려야 한다 (저장된 답을 재생하므로 LLM 은 부르지 않는다).
+  k, 업장 상수, 가격 민감도 문턱의 분포 두 값은 값이 바뀌거나 새로 쓰이면 해시가 바뀌어 기준 상황을 다시 돌려야 한다 (저장된 답을 재생하므로 LLM 은 부르지 않는다).
 - **페르소나 전체에 걸린 상수**도 이 파일에 둔다. `personas/` 에 두지 않는다 (11-19 wilstein91 결정, T213). 지금은 진행 문서 T306 의 값이다:
   가격 민감도 등급마다의 문턱, 한 페르소나 안의 예산 퍼짐과 문턱 퍼짐, 가격 탄력성이 들어야 할 범위 둘. 모두 `in_use` 가 `false` 이고 `owner` 는 `borigunbbang` 이다.
+  등급마다의 문턱 셋은 11-20 부터 쓰지 않고, 위의 분포 두 값(역시 `owner` 는 `borigunbbang`)으로 등급 값을 낸다 (등급마다 다른 것을 잰 연구에서 하나씩 가져와 기준이 없었다. T212).
   값은 페르소나 담당(borigunbbang)이 정하고, 바꿀 때는 "알릴 것"에 적어 엔진 담당에게 고쳐 달라고 한다 (11-19 wilstein91 결정, T213).
 - **2단계(T212)**: 엔진이 페르소나의 가격 민감도 등급에 맞는 문턱을 이 파일에서 꺼내 요청에 넣는다. 프롬프트에는 그 숫자를 적지 않는다 (값은 이 파일 한 곳에만 둔다. 11-19 wilstein91 결정, T213).
 - **범위 값**: 다른 곳에서 잰 범위를 빌려 온 값은 범위로 적는다 (예: 가격 민감도 낮음 15 ~ 20%, 가격 탄력성 −1.0 ~ −0.7). `min` 이 `max` 보다 크면 오류다.
@@ -952,6 +954,20 @@ customer_group,venue_id,product_id,occasion,meal,day_type,month,unit,quantity,pe
 
 위 예시의 `persona` 는 줄여 적었다. 실제 요청에는 5절의 모든 키가 들어간다.
 
+**가격 민감도의 문턱** (11-20 wilstein91 결정, T212) — 점수를 묻는 판(`p1` ~ `p3` 이 아닌 판)의 요청에는 엔진이 `persona.price_threshold` 를 더한다 (`engine/thresholds.py`).
+
+```json
+{"price_threshold": {"sensitivity": "mid", "pct": 10.0, "basis": "per_person", "amount": 132000}}
+```
+
+- `sensitivity` 는 페르소나의 `buying.price_sensitivity`, `pct` 는 그 등급의 문턱(%), `basis` 는 `budget.basis`, `amount` 는 `budget.typical` × (1 + `pct` ÷ 100) 을 100원 단위로 반올림한 금액이다.
+  "평소 금액보다 `pct`% 넘게 비싸지면(`amount` 를 넘으면) 망설인다"는 뜻이다. 계산은 엔진이 하고 판단은 AI 가 한다. 후보마다 "넘음" 표시는 붙이지 않는다.
+- 등급의 값은 한 기준에서 낸다: 고급 외식 손님의 문턱을 가운데 `price-threshold-median-pct`(10%), 90% 가 `price-threshold-90pct-range`(5 ~ 20%) 안에 드는 로그정규 분포로 보고,
+  손님을 문턱이 낮은 차례로 세 무리로 나눠 무리마다 가운데 사람의 문턱을 쓴다 (높음 분위 1/6 → 6.7%, 중간 1/2 → 10%, 낮음 5/6 → 15%).
+  범위는 공개 연구(T306)에 근거가 있고, 세 무리로 나눈 것과 어느 페르소나가 어느 무리인지는 설계 가정이다. 전체 반응의 크기는 4단계에서 k 로 맞춘다.
+- 옛 판의 요청에는 넣지 않는다. 그래서 받아 둔 답(p1 ~ p3)이 그대로 재생된다.
+- 프롬프트에는 숫자를 쓰지 않고 이 칸을 읽는 법만 쓴다 (11-19, T213: 값이 한 곳에만 있게).
+
 **응답** — LLM 이 이 모양으로 답한다. 금액은 답에 넣지 않는다.
 
 | 키 | 뜻 |
@@ -1250,7 +1266,7 @@ customer_group,venue_id,product_id,occasion,meal,day_type,month,unit,quantity,pe
     "scenario": "7f0c40802f158f2c",
     "vocab": "8198206734bb16a5",
     "summary": "b2e533d5aec19534",
-    "constants": "a45c688652baa74c",
+    "constants": "ea94b6f214677cc2",
     "prompt": "9fee7d4f42a62d8b"
   },
   "weights": {
@@ -1280,6 +1296,8 @@ customer_group,venue_id,product_id,occasion,meal,day_type,month,unit,quantity,pe
     {"constant_id": "calibration-max-diff-pp", "name": "보정 통과: 업장별 비중 차이의 한도", "value": 15, "unit": "%p", "grade": "assumption", "sources": [], "checked_on": "2026-11-17", "file": "engine/constants.json"},
     {"constant_id": "calibration-diff-min-personas", "name": "보정 통과: 업장별 차이를 따지는 최소 페르소나 수", "value": 2, "unit": "명", "grade": "assumption", "sources": [], "checked_on": "2026-11-17", "file": "engine/constants.json"},
     {"constant_id": "share-sharpness-k", "name": "방문의 몫을 낼 때 AI 점수에 거는 지수 (날카로움 k)", "value": 1, "unit": null, "grade": "assumption", "sources": [], "checked_on": "2026-11-20", "file": "engine/constants.json"},
+    {"constant_id": "price-threshold-median-pct", "name": "고급 외식 손님이 망설이기 시작하는 인상 폭의 가운데 값", "value": 10, "unit": "%", "grade": "assumption", "sources": [{"title": "Andreyeva, Long & Brownell 2010, American Journal of Public Health 100(2)", "kind": "literature", "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC2804646"}, {"title": "TouchBistro 2024 U.S. Diner Report (pmq.com, 2024-04-30 보도)", "kind": "article", "url": null}], "checked_on": "2026-11-20", "file": "engine/constants.json"},
+    {"constant_id": "price-threshold-90pct-range", "name": "고급 외식 손님 90% 의 망설이는 인상 폭이 드는 범위", "value": {"min": 5.0, "max": 20.0}, "unit": "%", "grade": "assumption", "sources": [{"title": "Raab 외 2009, Journal of Hospitality & Tourism Research 33(1):93-105", "kind": "literature", "url": "https://vtechworks.lib.vt.edu/handle/10919/97044"}, {"title": "Dominique-Ferreira & Antunes 2020, European Journal of Management and Business Economics 29(2) (emerald.com)", "kind": "literature", "url": null}, {"title": "Wakefield & Inman 2003, Journal of Retailing 79(4):199-212", "kind": "literature", "url": null}, {"title": "Toast 설문 (abc17news.com, 2026-11-16 게재)", "kind": "article", "url": null}], "checked_on": "2026-11-20", "file": "engine/constants.json"},
     {"constant_id": "meal-lunch-dinner", "name": "집계 파일에서 끼니가 비어 있는 식사 매출", "value": {"lunch": 0.5, "dinner": 0.5}, "unit": null, "grade": "assumption", "sources": [], "checked_on": "2026-11-13", "file": "engine/conditions.json"}
   ],
   "baseline_answers": null,
