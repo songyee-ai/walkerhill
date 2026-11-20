@@ -79,3 +79,13 @@ def test_score_problems_wants_every_place_once_and_a_total_of_100():
     assert trial.score_problems([{"venue_id": "geumryong", "percent": 70}], places)
     assert trial.score_problems([{"venue_id": "geumryong", "percent": 70}, {"venue_id": "none", "percent": 20}], places)
     assert trial.score_problems(None, places) == ["scores 가 없다"]
+
+
+def test_trial_on_base_data_needs_the_same_confirmation_as_the_engine(copy_root, monkeypatch):
+    """기본 데이터로 돌리면 본 실행처럼 BASE_PROFILE_CONFIRMED_FOR 가 받는 곳과 같아야 한다. 없으면 부르지 않는다."""
+    fake = FakeProvider()
+    monkeypatch.setattr(trial, "make_provider", lambda settings: fake)
+    monkeypatch.setattr(trial, "load_dotenv", lambda path: None)
+    monkeypatch.delenv("BASE_PROFILE_CONFIRMED_FOR", raising=False)
+    code = trial.main(["--root", str(copy_root), "--data", "private", "--personas", PERSONA, "--conditions", CONDITION, "--ask", "1", "--score", "0", "--limit", "1"])
+    assert code == 1 and fake.calls == []

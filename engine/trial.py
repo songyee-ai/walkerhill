@@ -5,7 +5,8 @@
 - 점수 받기(`score`): 같은 요청에 "후보마다 고를 몫(%)"을 함께 적게 해 M번 묻는다. 점수의 평균과, 점수가 부를 때마다 얼마나 흔들리는지를 본다.
 점수 받기의 지시는 프롬프트 파일을 고치지 않고 이 실험에서만 시스템 프롬프트 끝에 붙인다 (`SCORE_NOTE`). 방식이 정해지면 페르소나 담당이 프롬프트에 옮긴다.
 
-가상 예시 값(`--data sample`)으로만 돈다. 기본 데이터의 요약을 보내지 않는다.
+가상 예시 값(`--data sample`, 기본)이나 기본 데이터(`--data private`)로 돈다. 기본 데이터로 돌리면 본 실행과 같은 요청(두 층을 합친 페르소나,
+기본 데이터의 요약)을 보내므로 본 실행처럼 `.env` 의 `BASE_PROFILE_CONFIRMED_FOR` 가 지금 받는 곳과 같아야 돈다 (`CLAUDE.md` "스택", 11-20 추가).
 받은 답과 요약은 `private/trials/<시각>/` 에 쓴다 (깃이 무시한다). 호출 수가 `--limit` 을 넘을 계획이면 부르기 전에 멈춘다.
 
     uv run python -m engine.trial --personas couple-anniversary --conditions meal-dinner-weekend dessert-weekend --ask 10 --score 2 --limit 25
@@ -14,6 +15,7 @@
 import argparse
 import json
 import math
+import os
 import sys
 from collections import Counter
 from datetime import datetime
@@ -32,11 +34,12 @@ from engine.llm import (
     Provider,
     load_prompt,
     make_provider,
+    receiver_of,
     response_schema,
     settings_from_env,
     user_message,
 )
-from engine.runner import load_inputs
+from engine.runner import BASE_PROFILE_CONFIRMED_ENV, load_inputs
 
 NONE = "none"
 
@@ -146,8 +149,9 @@ def summarize(places: list[str], asks: list[dict], scores: list[dict]) -> list[d
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(prog="python -m engine.trial", description="2단계 방식(여러 번 묻기·점수 받기)을 가상 예시 값으로 견준다 (T212).")
+    parser = argparse.ArgumentParser(prog="python -m engine.trial", description="2단계 방식(여러 번 묻기·점수 받기)을 견준다 (T212).")
     parser.add_argument("--root", type=Path, default=Path.cwd())
+    parser.add_argument("--data", choices=["sample", "private"], default="sample")
     parser.add_argument("--personas", nargs="+", required=True)
     parser.add_argument("--conditions", nargs="+", required=True)
     parser.add_argument("--ask", type=int, default=10, help="여러 번 묻기의 횟수 (방문마다)")
@@ -162,14 +166,19 @@ def main(argv: list[str] | None = None) -> int:
     if planned > args.limit:
         print(f"계획한 호출 {planned}번이 상한 {args.limit}번을 넘어 부르지 않는다", file=sys.stderr)
         return 1
-    inputs = load_inputs(root, "sample", persona_ids=args.personas, base_profile_mode="none")
     settings = settings_from_env()
+    if args.data == "private":
+        receiver = receiver_of(settings)
+        if os.environ.get(BASE_PROFILE_CONFIRMED_ENV, "").strip() != receiver:
+            print(f"기본 데이터의 요약을 '{receiver}' 로 보내도 된다는 확인({BASE_PROFILE_CONFIRMED_ENV})이 .env 에 없어 부르지 않는다", file=sys.stderr)
+            return 1
+    inputs = load_inputs(root, args.data, persona_ids=args.personas)
     provider = make_provider(settings)
     system = load_prompt(root, args.prompt)
     out = root / "private" / "trials" / datetime.now().strftime("%Y%m%d-%H%M%S")
     out.mkdir(parents=True)
     print(f"실험 폴더: {out}")
-    print(f"공급자 {settings.provider} · 모델 {settings.model} · 프롬프트 {args.prompt} · 계획한 호출 {planned}번")
+    print(f"자료 {args.data} · 공급자 {settings.provider} · 모델 {settings.model} · 프롬프트 {args.prompt} · 계획한 호출 {planned}번")
 
     visits = []
     calls = 0
@@ -203,13 +212,13 @@ def main(argv: list[str] | None = None) -> int:
                 visits.append({"visit_id": visit_id, "asks": asks, "scores": scores})
                 break
             places = places_of(request)
-            visits.append({"visit_id": visit_id, "places": places, "asks": asks, "scores": scores, "summary": summarize(places, asks, scores)})
+            visits.append({"visit_id": visit_id, "persona_id": persona_id, "condition_id": condition_id, "places": places, "asks": asks, "scores": scores, "summary": summarize(places, asks, scores)})
     tokens_in = sum(r["tokens_in"] for v in visits for r in v["asks"] + v["scores"])
     tokens_out = {
         "ask": [r["tokens_out"] for v in visits for r in v["asks"] if r["tokens_out"]],
         "score": [r["tokens_out"] for v in visits for r in v["scores"] if r["tokens_out"]],
     }
-    result = {"calls": calls, "tokens_in": tokens_in, "tokens_out": tokens_out, "visits": visits}
+    result = {"data": args.data, "prompt": args.prompt, "calls": calls, "tokens_in": tokens_in, "tokens_out": tokens_out, "visits": visits}
     (out / "trial.json").write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n")
 
     for visit in visits:
