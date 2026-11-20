@@ -383,8 +383,8 @@ class Checker:
         )
         self._managed(
             data / "samples",
-            "가상 예시 값 `base_summary.csv` 와 그 옆의 상수 파일 `base_summary_constants.json`",
-            files=("base_summary.csv", "base_summary_constants.json"),
+            "가상 예시 값 `base_summary.csv` 와 그 옆의 상수 파일 `base_summary_constants.json`, 추정한 상수 파일 `base_estimated_constants.json`",
+            files=("base_summary.csv", "base_summary_constants.json", "base_estimated_constants.json"),
         )
         self._managed(self.root / "engine" / "samples", "runs 폴더", dirs=("runs",))
 
@@ -588,7 +588,23 @@ class Checker:
     # ── 결정 상수 (6.1절) ───────────────────────────────────────────────────
 
     def check_constants(self) -> None:
-        """결정 상수 파일(엔진의 것, 가상 예시 집계 옆의 것). 공개 자료에서 가져온 값(공식, 학술 자료, 통계, 업계 보고서, 기사)은 그 종류의 출처 자료를 적는다 (11-19 T210, 11-20 T214)."""
+        """결정 상수 파일(엔진의 것, 가상 예시 집계 옆의 것, 가상 예시로 추정한 것). 공개 자료에서 가져온 값(공식, 학술 자료, 통계, 업계 보고서, 기사)은 그 종류의 출처 자료를 적는다 (11-19 T210, 11-20 T214).
+
+        추정한 상수 파일(T212)에는 업장 상수(`share-venue-constant-<venue_id>`)만 두고, 그 업장은 워커힐 업장 정의에 있어야 한다.
+        """
+        estimated = self.root / "data" / "samples" / "base_estimated_constants.json"
+        if estimated.is_file():
+            found = self._load(estimated, ConstantsFile)
+            for item in found.constants if found is not None else []:
+                venue_id = item.constant_id.removeprefix(VENUE_CONSTANT_PREFIX)
+                if not item.constant_id.startswith(VENUE_CONSTANT_PREFIX):
+                    self.error(estimated, f"추정한 상수 파일에는 업장 상수만 둔다: '{item.constant_id}'")
+                elif venue_id not in self.venues or self.venues[venue_id].is_competitor:
+                    self.error(estimated, f"업장 상수 '{item.constant_id}' 의 업장이 워커힐 업장 정의에 없다")
+                elif item.grade == "internal":
+                    self.error(estimated, f"가상 예시로 추정한 상수 '{item.constant_id}' 의 등급이 internal 이다 (기본 데이터로 낸 값은 private/ 에만 둔다)")
+                if item.grade in SOURCED_GRADES and item.grade not in {src.kind for src in item.sources}:
+                    self.error(estimated, f"결정 상수 '{item.constant_id}' 의 등급이 {item.grade} 인데 sources 에 그 종류의 자료가 없다")
         for path in (self.root / "engine" / "constants.json", self.root / "data" / "samples" / "base_summary_constants.json"):
             if not path.is_file():
                 continue

@@ -126,6 +126,9 @@ def calibrate(root: Path, data_mode: str, run_id: str | None = None) -> tuple[Pa
     record = _record(root, data_mode, run_id)
     inputs = load_inputs(root, data_mode, BASELINE_ID, None, record.persona_ids, record.base_profile_mode)
     changed = [key for key in COMPARED_INPUTS if record.inputs.get(key) != inputs.hashes[key]]
+    # 추정한 상수 파일(T212)은 있을 때만 해시가 남는다. 실행 뒤에 생기거나 바뀌었으면 원장의 몫이 지금 상수와 다르다.
+    if record.inputs.get("estimated") != inputs.hashes.get("estimated"):
+        changed.append("estimated")
     if changed:
         raise ValueError(
             f"기준 실행 '{record.run_id}' 과 달라진 것이 있다: {', '.join(changed)}. "

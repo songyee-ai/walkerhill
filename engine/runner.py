@@ -17,8 +17,8 @@ from typing import Any
 from engine.answers import AnswerBook, old_style_folder, read_reply, save_rejected, save_response
 from engine.candidates import build_request, run_condition
 from engine.changes import decompose
-from engine.constants import load_constants, used_constants, values_hash
-from engine.formats.choice import ChoiceRequest, RunCondition, problems_in_response
+from engine.constants import load_constants, used_constants, used_from, values_hash
+from engine.formats.choice import ChoiceRequest, RunCondition, problems_in_response, scores_required
 from engine.formats.conditions import MANUAL_CONDITION_PREFIX, ConditionBundle
 from engine.formats.constants import ConstantsFile
 from engine.formats.evidence import Vocab
@@ -41,12 +41,13 @@ from engine.llm import (
     user_message,
 )
 from engine.scenarios import apply_scenario
-from engine.shares import ShareParams, share_params
+from engine.shares import VENUE_CONSTANT_PREFIX, ShareParams, share_params
 from engine.weights import (
     average_parties,
     base_profiles,
     decide_weights,
     empty_profile,
+    estimated_constants_path,
     fill_prices,
     group_people,
     read_summary,
@@ -118,8 +119,11 @@ class Inputs:
     # 가격이 비어 있어 집계 파일로 단가를 채운 상품 (`<venue_id>:<product_id>`).
     filled: list[str]
     hashes: dict[str, str]
-    # 방문의 몫을 내는 k 와 업장 상수 (`engine/constants.json`, T212).
+    # 방문의 몫을 내는 k 와 업장 상수 (`engine/constants.json` 과 추정한 상수 파일, T212).
     shares: ShareParams
+    # 추정한 상수 파일 (집계 파일 옆. 없으면 None). 실행 기록에 남길 그 자리도 함께.
+    estimated: ConstantsFile | None = None
+    estimated_file: str | None = None
 
 
 def runs_folder(root: Path, data_mode: str) -> Path:
@@ -151,6 +155,7 @@ def load_inputs(
     venue_ids: list[str] | None = None,
     persona_ids: list[str] | None = None,
     base_profile_mode: str | None = None,
+    with_estimated: bool = True,
 ) -> Inputs:
     """입력 파일을 읽는다. `venue_ids`, `persona_ids` 를 주면 그것만 읽는다.
 
@@ -209,6 +214,16 @@ def load_inputs(
         for persona_id, layered in persona_json.items():
             layered["base_profile"] = profiles.get(personas[persona_id].customer_group, empty_profile())
     filled_venues, filled = fill_prices(apply_scenario(venues, scenario), summary, data_mode)
+    shares = share_params(load_constants())
+    estimated_path = estimated_constants_path(root, data_mode)
+    # `with_estimated` 가 거짓이면 추정한 상수 파일을 읽지 않는다 (상수를 다시 추정할 때, `engine.estimate`).
+    estimated = read_model(estimated_path, ConstantsFile) if with_estimated and estimated_path.is_file() else None
+    if estimated is not None:
+        shares = _with_estimated(shares, estimated, estimated_path)
+    hashes = {}
+    if estimated is not None:
+        # 추정한 상수는 결과를 바꾼다. 파일이 있을 때만 해시를 남긴다 (없던 때의 실행과 견줄 때 어긋나지 않게).
+        hashes["estimated"] = values_hash(estimated_path)
     return Inputs(
         venues=filled_venues,
         personas=personas,
@@ -226,9 +241,29 @@ def load_inputs(
             "vocab": _hash_files([vocab_path]),
             "summary": _hash_files([summary_file]),
             "constants": values_hash(),  # 결과를 바꾸는 부분만 본다 (T214)
+            **hashes,
         },
-        shares=share_params(load_constants()),
+        shares=shares,
+        estimated=estimated,
+        estimated_file=estimated_path.relative_to(root).as_posix() if estimated is not None else None,
     )
+
+
+def _with_estimated(shares: ShareParams, estimated: ConstantsFile, path: Path) -> ShareParams:
+    """추정한 상수 파일의 업장 상수를 더한다 (FORMATS 6.1절의 "추정한 상수 파일", T212). 업장 상수만 둘 수 있고, `engine/constants.json` 과 겹치면 멈춘다."""
+    found = dict(shares.venue_constants)
+    for c in estimated.constants:
+        if not c.constant_id.startswith(VENUE_CONSTANT_PREFIX):
+            raise ValueError(f"추정한 상수 파일({path})에는 업장 상수(`{VENUE_CONSTANT_PREFIX}<venue_id>`)만 둔다: '{c.constant_id}'")
+        if not c.in_use:
+            continue
+        venue_id = c.constant_id.removeprefix(VENUE_CONSTANT_PREFIX)
+        if venue_id in found:
+            raise ValueError(f"업장 상수 '{c.constant_id}' 가 engine/constants.json 과 추정한 상수 파일에 함께 있다")
+        if isinstance(c.value, bool) or not isinstance(c.value, (int, float)) or c.value <= 0:
+            raise ValueError(f"추정한 상수 '{c.constant_id}' 는 0 보다 큰 수다")
+        found[venue_id] = float(c.value)
+    return ShareParams(k=shares.k, venue_constants=found)
 
 
 def latest_baseline_run(root: Path, data_mode: str, month: int | None | str = ANY_MONTH) -> str | None:
@@ -292,6 +327,9 @@ def _changed_since_baseline(base: RunRecord, hashes: dict[str, str], provider: s
     # 집계 파일이 바뀌면 채운 단가와 기본 데이터의 요약이 달라진다. 그래서 집계 파일도 견준다.
     keys = ("venues", "personas", "conditions", "vocab", "summary", "constants")
     changed = [key for key in keys if base.inputs.get(key) != hashes[key]]
+    # 추정한 상수 파일은 있을 때만 해시가 남는다. 한쪽에만 있거나 둘이 다르면 몫이 달라진다 (T212).
+    if base.inputs.get("estimated") != hashes.get("estimated"):
+        changed.append("estimated")
     # 프롬프트의 글은 LLM 을 부를 수 있게 돌린 실행에만 해시가 남는다. 둘 다 있을 때만 견준다.
     if "prompt" in base.inputs and "prompt" in hashes and base.inputs["prompt"] != hashes["prompt"]:
         changed.append("prompt")
@@ -430,6 +468,11 @@ def share_method(visit_rows: list[list[LedgerRow]]) -> str:
     return "mixed" if found == {True, False} else "scores" if found == {True} else "single"
 
 
+def _used_estimated(inputs: Inputs) -> list:
+    """실행 기록에 남길 추정한 업장 상수 (쓰는 것만, 자리와 함께)."""
+    return used_from(inputs.estimated, inputs.estimated_file)
+
+
 def _summary_constants(root: Path, data_mode: str) -> tuple[ConstantsFile | None, str | None]:
     """집계 파일 옆의 상수 파일과 실행 기록에 적을 그 자리. 없으면 (None, None) 이다."""
     path = summary_constants_path(root, data_mode)
@@ -504,6 +547,7 @@ def run(
     month: int | None = None,
     base_profile_confirmed_for: str | None = None,
     receiver: str | None = None,
+    before_estimate: bool = False,
 ) -> Path:
     """상황 하나를 돌려 실행 폴더(`run.json`, `ledger.csv`, `llm/`, `llm_rejected/`)를 쓰고 그 경로를 돌려준다.
 
@@ -580,6 +624,18 @@ def run(
             "확인 전에는 요약을 보내지 않고 돌린다: --base-profile none (CLAUDE.md 의 \"스택\")"
         )
     inputs = load_inputs(root, data_mode, scenario_id, venue_ids, persona_ids, base_profile_mode)
+    # 기본 데이터로 점수를 묻는 판을 돌리면 업장 상수가 결과를 바꾼다. 추정한 상수 파일이 없는 PC 에서 조용히 상수 1 로 돌면
+    # PC 마다 결과가 달라지므로 멈춘다. 상수 추정에 쓸 첫 기준 실행만 `before_estimate` 로 돌린다 (T212).
+    if before_estimate and (scenario_id != BASELINE_ID or inputs.estimated is not None):
+        raise ValueError(
+            "--before-estimate 는 추정한 상수 파일이 아직 없을 때 상수 추정에 쓸 기준 상황에만 쓴다"
+            + (" (기준이 아닌 상황이다)" if scenario_id != BASELINE_ID else f" (이미 있다: {estimated_constants_path(root, data_mode)})")
+        )
+    if data_mode == "private" and scores_required(prompt_version) and inputs.estimated is None and not before_estimate:
+        raise ValueError(
+            f"추정한 상수 파일이 없다: {estimated_constants_path(root, data_mode)}. 엔진 담당이 추정한 파일을 저장소 밖으로 받아 그 자리에 둔다. "
+            "상수 추정에 쓸 첫 기준 실행이면 --before-estimate 를 붙여 업장 상수를 모두 1 로 돌린다"
+        )
     if not inputs.personas:
         raise ValueError("돌릴 페르소나가 없다")
 
@@ -717,7 +773,8 @@ def run(
                 "weights_from": base.run_id if base else None,
                 "counts": {"visits": visits, "failed": failed},
                 "status": status,
-                "constants": used_constants(inputs.conditions, *_summary_constants(root, data_mode)),
+                "constants": used_constants(inputs.conditions, *_summary_constants(root, data_mode))
+                + (_used_estimated(inputs) if inputs.estimated is not None else []),
                 "baseline_answers": kept_baseline if base is not None else None,
                 # 몫 방식은 원장에 적힌 줄(기준의 답으로 바꾼 방문이면 그 줄)로 낸다.
                 "share_method": share_method(_by_visit(rows)),
