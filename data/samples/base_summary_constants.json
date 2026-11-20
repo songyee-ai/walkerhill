@@ -1,0 +1,101 @@
+{
+  "format_version": 1,
+  "constants": [
+    {
+      "constant_id": "people-per-unit-myongwolgwan-special-platter-set",
+      "name": "명월관 명월관 스페셜 모둠 특선 (2인 식사 포함) 한 개당 인원",
+      "value": 2,
+      "unit": "명",
+      "used_in": "tools/venue_data/make_sample.py 의 people 열 (FORMATS 8절)",
+      "grade": "official",
+      "sources": [
+        {
+          "title": "명월관 공식 메뉴판",
+          "kind": "official",
+          "url": "https://www.walkerhill.com/FileDownload.wh?guid=DE1838B1-EC33-A2FE-902A-2A98160C4175"
+        }
+      ],
+      "checked_on": "2026-11-13",
+      "note": "업장 정의의 serves (공식 메뉴의 상품 구성)",
+      "owner": "hojitea-ui"
+    },
+    {
+      "constant_id": "people-per-unit-pavilion-bingsu",
+      "name": "더파빌리온 빙수 한 개당 인원",
+      "value": 2,
+      "unit": "명",
+      "used_in": "tools/venue_data/make_sample.py 의 people 열 (FORMATS 8절)",
+      "grade": "assumption",
+      "sources": [],
+      "checked_on": "2026-11-13",
+      "note": "업장 정의의 serves. 그 상품의 공식 가격·구성을 찾지 못해 설계 가정으로 적는다",
+      "owner": "hojitea-ui"
+    },
+    {
+      "constant_id": "people-per-unit-pavilion-fall-dessert-set",
+      "name": "더파빌리온 FALL IN PAVILION 가을 디저트 세트 한 개당 인원",
+      "value": 2,
+      "unit": "명",
+      "used_in": "tools/venue_data/make_sample.py 의 people 열 (FORMATS 8절)",
+      "grade": "official",
+      "sources": [
+        {
+          "title": "더파빌리온 공식 메뉴판 (2026 가을 판)",
+          "kind": "official",
+          "url": "https://www.walkerhill.com/FileDownload.wh?guid=399F668C-C039-577D-BD94-5EC79640848B"
+        }
+      ],
+      "checked_on": "2026-11-13",
+      "note": "업장 정의의 serves (공식 메뉴의 상품 구성)",
+      "owner": "hojitea-ui"
+    },
+    {
+      "constant_id": "people-per-unit-pizzahill-couple-set",
+      "name": "피자힐 커플 세트 한 개당 인원",
+      "value": 2,
+      "unit": "명",
+      "used_in": "tools/venue_data/make_sample.py 의 people 열 (FORMATS 8절)",
+      "grade": "official",
+      "sources": [
+        {
+          "title": "피자힐 공식 메뉴판 (2026-07 판)",
+          "kind": "official",
+          "url": "https://www.walkerhill.com/FileDownload.wh?guid=EBFBDC8A-1115-8498-EAED-F8EC0DB7CDAC"
+        }
+      ],
+      "checked_on": "2026-11-13",
+      "note": "업장 정의의 serves (공식 메뉴의 상품 구성)",
+      "owner": "hojitea-ui"
+    },
+    {
+      "constant_id": "people-per-unit-pizzahill-triple-set",
+      "name": "피자힐 트리플 세트 한 개당 인원",
+      "value": 3,
+      "unit": "명",
+      "used_in": "tools/venue_data/make_sample.py 의 people 열 (FORMATS 8절)",
+      "grade": "official",
+      "sources": [
+        {
+          "title": "피자힐 공식 메뉴판 (2026-07 판)",
+          "kind": "official",
+          "url": "https://www.walkerhill.com/FileDownload.wh?guid=EBFBDC8A-1115-8498-EAED-F8EC0DB7CDAC"
+        }
+      ],
+      "checked_on": "2026-11-13",
+      "note": "업장 정의의 serves (공식 메뉴의 상품 구성)",
+      "owner": "hojitea-ui"
+    },
+    {
+      "constant_id": "sample-unit-price-unpriced",
+      "name": "가상 예시 값에서 가격이 빈 상품에 쓴 지어낸 단가",
+      "value": 50000,
+      "unit": "원",
+      "used_in": "tools/venue_data/make_sample.py 의 paid (엔진은 이 값으로 빈 가격을 채운다, FORMATS 3절)",
+      "grade": "assumption",
+      "sources": [],
+      "checked_on": "2026-11-13",
+      "note": "기본 데이터의 단가를 따오지 않으려고 정한 값이다 (T13). 가상 예시 값으로 돌릴 때만 쓰인다",
+      "owner": "hojitea-ui"
+    }
+  ]
+}
