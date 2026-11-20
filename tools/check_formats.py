@@ -49,6 +49,7 @@ from engine.formats.run import (
     SEASON_GAP_REASON,
     VISIT_ID_SEPARATOR,
     Calibration,
+    CrossCheck,
     LedgerRow,
     RejectedResponse,
     RunRecord,
@@ -209,6 +210,7 @@ RUN_RECORD = Kind("실행 기록", _RUN + r"/run\.json", _RUN_WHERE)
 SAVED_RESPONSE = Kind("저장된 LLM 응답", _RUN + r"/llm(?:_rejected)?/[^/]+\.json", _RUN_WHERE)
 CALIBRATION = Kind("보정의 대조 결과", _RUN + r"/calibration\.json", _RUN_WHERE)
 CHANGES = Kind("매출 변화 나누기", _RUN + r"/changes\.json", _RUN_WHERE)
+CROSSCHECK = Kind("다른 고객군에 써 보기와 단순 기준", _RUN + r"/crosscheck\.json", _RUN_WHERE)
 
 # 표의 머리글이나 JSON 묶음의 키에 이 이름이 모두 있으면 그 종류다.
 # 표는 CSV·TSV·글 파일의 첫 줄과 마크다운 표의 머리글을 본다. JSON 은 맨 위뿐 아니라 안쪽의 묶음도 모두 본다
@@ -222,6 +224,7 @@ NAME_SET_MARKS = (
     (frozenset({"data_mode", "run_id"}), RUN_RECORD),
     (frozenset({"request_hash", "raw_text"}), SAVED_RESPONSE),
     (frozenset({"criteria", "groups", "uncovered_groups"}), CALIBRATION),
+    (frozenset({"no_constants", "held_out", "misplaced_pct"}), CROSSCHECK),
 )
 
 PRIVATE_RUN_NOTE = "기본 데이터로 돌린 실행 기록이 들어 있다 (data_mode 가 private). 그런 결과는 private/runs/ 에만 둔다"
@@ -239,12 +242,13 @@ NAME_MARKS = {
     "ledger.csv": LEDGER,
     "calibration.json": CALIBRATION,
     "changes.json": CHANGES,
+    "crosscheck.json": CROSSCHECK,
     "validation.json": VALIDATION,
     "validation_reviews.csv": VALIDATION,
     **dict.fromkeys(URL_LIST_FILENAMES, URL_LIST),
 }
 # 실행 하나의 폴더에 둘 수 있는 파일. 검증 결과는 이름을 알아보고 따로 오류를 낸다.
-RUN_FILES = ("run.json", "ledger.csv", "calibration.json", "changes.json", "validation.json", "validation_reviews.csv")
+RUN_FILES = ("run.json", "ledger.csv", "calibration.json", "changes.json", "crosscheck.json", "validation.json", "validation_reviews.csv")
 
 
 @dataclass(frozen=True)
@@ -796,6 +800,7 @@ class Checker:
             self._check_ledger(run_dir, record, stems, saved, rejected)
             self._check_calibration(run_dir, record)
             self._check_changes(run_dir, record, records)
+            self._check_crosscheck(run_dir, record)
 
     def _check_run_record(self, path: Path, dir_name: str, record: RunRecord) -> None:
         if record.run_id != dir_name:
@@ -1251,6 +1256,27 @@ class Checker:
                 venue = self.venues.get(venue_id)
                 if venue is None or venue.is_competitor:
                     self.error(path, f"고객군 '{group}' — '{venue_id}' 가 워커힐 업장 정의에 없다")
+
+    def _check_crosscheck(self, run_dir: Path, record: RunRecord) -> None:
+        """다른 고객군에 써 보기와 단순 기준(10.7절, T212)은 점수를 받은 기준 실행에만 있다."""
+        path = run_dir / "crosscheck.json"
+        if not path.is_file():
+            return
+        found = self._load(path, CrossCheck)
+        if found is None:
+            return
+        if record.scenario_id != BASELINE_ID or record.share_method != "scores":
+            self.error(path, "다른 고객군에 써 보기는 모든 방문이 점수를 받은 기준 실행에만 둔다")
+        if record.status != "ok" or record.month is not None or record.counts.failed:
+            self.error(path, "다른 고객군에 써 보기는 끝까지 돌았고, 달을 주지 않았고, 실패한 방문이 없는 기준 실행에만 둔다")
+        if found.run_id != record.run_id:
+            self.error(path, "run_id 가 실행 기록과 다르다")
+        if found.base_profile_mode != record.base_profile_mode:
+            self.error(path, "base_profile_mode 가 실행 기록과 다르다")
+        for venue_id in found.venues:
+            venue = self.venues.get(venue_id)
+            if venue is None or venue.is_competitor:
+                self.error(path, f"'{venue_id}' 가 워커힐 업장 정의에 없다")
 
     def _check_changes(self, run_dir: Path, record: RunRecord, records: dict[str, RunRecord]) -> None:
         """매출 변화 나누기(10.6절)는 상황 실행에만 있고, 두 실행의 원장으로 다시 낸 것과 같아야 한다."""
