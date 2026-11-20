@@ -97,7 +97,7 @@ Get-ChildItem "$env:LOCALAPPDATA\Claude-Data" -Recurse -Filter claude.exe -Error
 ```
 
   - 데스크톱 앱의 로그인은 앱 안에서만 쓰인다. 앱에 로그인돼 있어도 `claude auth login` 은 따로 한 번 해야 한다. 경로를 적었으면 `& "<그 경로>" auth login` 이다.
-  - **보정·시연에 쓸 답은 팀장 PC 한 곳에서 받는다.** 나머지는 그 답을 받아 재생한다 (`docs/MEETING_1117.md` ②).
+  - **보정·시연에 쓸 답은 엔진 담당의 PC 한 곳에서 받는다** (11-19 부터. 그 전에는 팀장 PC 가 받았다, T209). 나머지는 그 답을 받아 재생한다 (`docs/MEETING_1117.md` ②).
     각자 시험할 때는 가상 예시 값(`--data sample`)을 `--personas`, `--conditions` 로 작게 돌린다.
   - 구독의 사용 한도는 자기 Claude Code 작업과 함께 쓴다. 호출 하나가 입력 1만 5천 ~ 3만 토큰이다 (T104·T114 실측).
     한도에 닿으면 엔진이 멈추고, 한도가 풀린 뒤 다시 돌리면 받은 답은 재생한다.
