@@ -17,7 +17,7 @@ from typing import Any
 from engine.answers import AnswerBook, old_style_folder, read_reply, save_rejected, save_response
 from engine.candidates import build_request, run_condition
 from engine.changes import decompose
-from engine.constants import load_constants, used_constants, used_from, values_hash
+from engine.constants import RunUse, load_constants, used_constants, used_from, values_hash
 from engine.formats.choice import ChoiceRequest, RunCondition, problems_in_response, scores_required
 from engine.formats.conditions import MANUAL_CONDITION_PREFIX, ConditionBundle
 from engine.formats.constants import ConstantsFile
@@ -44,8 +44,11 @@ from engine.scenarios import apply_scenario
 from engine.shares import VENUE_CONSTANT_PREFIX, ShareParams, share_params
 from engine.thresholds import grade_thresholds, with_price_threshold
 from engine.weights import (
+    MEAL_SPLIT_ID,
+    GroupRevenue,
     average_parties,
     base_profiles,
+    blank_people_kinds,
     decide_weights,
     empty_profile,
     estimated_constants_path,
@@ -473,9 +476,49 @@ def share_method(visit_rows: list[list[LedgerRow]]) -> str:
     return "mixed" if found == {True, False} else "scores" if found == {True} else "single"
 
 
-def _used_estimated(inputs: Inputs) -> list:
-    """실행 기록에 남길 추정한 업장 상수 (쓰는 것만, 자리와 함께)."""
-    return used_from(inputs.estimated, inputs.estimated_file)
+def _used_estimated(inputs: Inputs, use: RunUse) -> list:
+    """실행 기록에 남길 추정한 업장 상수 (쓰는 것만, 자리와 함께, 이 실행의 계산에 쓰였는지와 함께)."""
+    return used_from(inputs.estimated, inputs.estimated_file, use)
+
+
+# 인원이 빈 칸인 줄을 세는 결정 상수와 그 갈래 (`engine.weights.blank_people_kinds`).
+BLANK_PEOPLE_CONSTANTS = {"takeout-teams-per-item": "takeout", "add-on-people-per-item": "other"}
+
+
+WeightUse = tuple[frozenset[str], frozenset[str]]
+
+
+def _weight_use(
+    people: dict[str, GroupRevenue], summary: list[SummaryRow], conditions: list, bundle: ConditionBundle, venues: dict[str, Venue], month: int | None
+) -> WeightUse:
+    """가중치를 낼 때 계산에 든 상수의 사실 (`RunUse` 의 `blank_people`, `splits`). 실행 기록의 `applied` 에 쓴다 (T212).
+
+    `people` 은 가중치를 낸 `group_people` 의 결과다. 가중치가 나누는 비율은 끼니를 나누는 것 하나다 (`engine.weights._parts`).
+    나눈 몫이 돌리는 조건에 든 고객군이 있으면 쓰였다.
+    """
+    return (
+        frozenset(blank_people_kinds(summary, conditions, bundle.assumed_splits, venues, month)),
+        frozenset({MEAL_SPLIT_ID} if any(found.assumed for found in people.values()) else set()),
+    )
+
+
+def _baseline_weight_use(
+    base: RunRecord, root: Path, data_mode: str, venue_ids: list[str] | None, inputs: Inputs, conditions: list, personas: list[Persona]
+) -> WeightUse:
+    """기준이 아닌 상황의 가중치 쪽 상수의 사실. 기준 실행의 가중치를 그대로 쓰므로 기준 실행의 기록(`applied`)을 따른다.
+
+    그 기록에 `applied` 가 없으면(11-20 전의 기준 실행) 기준 실행과 같은 입력(상황을 적용하지 않은 업장 정의, 같은 집계 파일·조건·달)으로 다시 낸다.
+    입력이 기준 실행 뒤에 바뀌지 않았는지는 부르기 전에 본다 (`_changed_since_baseline`).
+    """
+    if base.constants and all(c.applied is not None for c in base.constants):
+        on = {c.constant_id for c in base.constants if c.applied}
+        return (
+            frozenset(kind for constant_id, kind in BLANK_PEOPLE_CONSTANTS.items() if constant_id in on),
+            frozenset(s.split_id for s in inputs.conditions.assumed_splits if s.split_id in on),
+        )
+    venues = load_inputs(root, data_mode, BASELINE_ID, venue_ids, base.persona_ids, "none", with_estimated=False).venues
+    people = group_people(inputs.summary, conditions, inputs.conditions.assumed_splits, venues, average_parties(personas), base.month)
+    return _weight_use(people, inputs.summary, conditions, inputs.conditions, venues, base.month)
 
 
 def _summary_constants(root: Path, data_mode: str) -> tuple[ConstantsFile | None, str | None]:
@@ -654,11 +697,15 @@ def run(
     personas = list(inputs.personas.values())
 
     # 기준 상황은 가중치를 집계 파일의 인원에서 방문을 돌기 전에 정한다 (T210). 달을 주면 그 달의 인원이다.
+    # 가중치를 따로 받은 기준 상황(테스트)은 집계 파일로 가중치를 내지 않아, 가중치 쪽 상수가 계산에 들지 않는다.
+    # 기준이 아닌 상황의 것은 아래에서 기준 실행과 입력을 견준 뒤에 낸다 (`_baseline_weight_use`).
+    weight_use: WeightUse = (frozenset(), frozenset())
     if weights is None:
         people = group_people(
             inputs.summary, conditions, inputs.conditions.assumed_splits, inputs.venues, average_parties(personas), month
         )
         weights = decide_weights(personas, people, condition_ids, data_mode)
+        weight_use = _weight_use(people, inputs.summary, conditions, inputs.conditions, inputs.venues, month)
 
     run_id = f"{now:%Y%m%d-%H%M%S}-{scenario_id}"
     run_dir = runs_folder(root, data_mode) / run_id
@@ -688,6 +735,7 @@ def run(
                 f"기준 실행 '{base.run_id}' 과 달라진 것이 있다: {', '.join(changed)}. "
                 "기준 상황을 다시 돌린 뒤에 이 상황을 돌린다 (상황 사이의 차이에 상황의 변경만 남아야 한다)"
             )
+        weight_use = _baseline_weight_use(base, root, data_mode, venue_ids, inputs, conditions, personas)
 
     rows: list[LedgerRow] = []
     skipped: set[str] = set()
@@ -747,6 +795,18 @@ def run(
         # 폴더가 남으면 형식 검사가 막고, 가상 예시로 돌린 것이면 그 폴더가 저장소 안이다.
         if not finished:
             status = "failed"
+        # 결정 상수마다 이 실행의 계산에 쓰였는지 (실행 기록의 `applied`, FORMATS 10.1절의 "쓴 결정 상수", T212·T130 ②).
+        # 원장에 적힌 줄(기준의 답으로 바꾼 방문이면 그 줄)로 낸다. 기준의 줄도 같은 상수로 낸 것이다 (상수의 해시가 같아야 돈다).
+        use = RunUse(
+            filled_prices=bool(inputs.filled),
+            base_profile_mode=base_profile_mode,
+            blank_people=weight_use[0],
+            splits=weight_use[1],
+            scored=any(r.status == "ok" and r.score is not None for r in rows),
+            scored_venues=frozenset(r.venue_id for r in rows if r.status == "ok" and r.score is not None and r.venue_id),
+            scores_asked=scores_required(prompt_version),
+            requests=any(r.request_hash for r in rows),
+        )
         _write_run(
             run_dir,
             rows,
@@ -778,8 +838,8 @@ def run(
                 "weights_from": base.run_id if base else None,
                 "counts": {"visits": visits, "failed": failed},
                 "status": status,
-                "constants": used_constants(inputs.conditions, *_summary_constants(root, data_mode))
-                + (_used_estimated(inputs) if inputs.estimated is not None else []),
+                "constants": used_constants(inputs.conditions, *_summary_constants(root, data_mode), use)
+                + (_used_estimated(inputs, use) if inputs.estimated is not None else []),
                 "baseline_answers": kept_baseline if base is not None else None,
                 # 몫 방식은 원장에 적힌 줄(기준의 답으로 바꾼 방문이면 그 줄)로 낸다.
                 "share_method": share_method(_by_visit(rows)),
