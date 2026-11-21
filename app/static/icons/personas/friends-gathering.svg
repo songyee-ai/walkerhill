@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="4 1 72 58" role="img" aria-labelledby="name detail">
+  <title id="name">친구·동료 모임</title>
+  <desc id="detail">세 사람이 둘러앉은 원탁</desc>
+  <style>:root{color-scheme:light dark;--ink:light-dark(#49594e,#34463b);--paper:light-dark(#fffdf2,#eceee1);--side:light-dark(#ced6c8,#a8b9a8);--mid:light-dark(#9daf9f,#97ab98);--forest:light-dark(#3f6150,#6f8c76);--shadow:light-dark(#d9dfd1,#3c4b41);--stone:light-dark(#ecede1,#889b8b);}
+    .model{fill:none;stroke:var(--ink);stroke-width:1.15;stroke-linecap:round;stroke-linejoin:round}
+    .paper{fill:var(--paper)} .stone{fill:var(--stone)} .side{fill:var(--side)}
+    .mid{fill:var(--mid)} .forest{fill:var(--forest)}
+    .thin,.fine{fill:none} .thin{stroke-width:.9} .fine{stroke-width:1.05}
+    .glint{fill:none;stroke:var(--paper);stroke-width:1.3}
+    .nostroke{stroke:none} .seam{stroke-width:.65}
+    .jacket{fill:var(--jacket,light-dark(#86a7a5,#9bbbb4))}
+  </style>
+  <ellipse cx="40.8" cy="51" rx="31.5" ry="5.5" fill="var(--shadow)"/>
+  <path d="m9 47.8 28-7.6 34 8.7-29.2 8Z" fill="var(--stone)" stroke="var(--ink)" stroke-width=".58" stroke-linejoin="round"/>
+  <g class="model">
+  <defs><g id="guest">
+    <path class="jacket" d="M-5.8 1.9q.1-5.6 5.7-6.2 5.9 0 6.5 5.8l1.1 6.4q-6.5 4.1-14.2.1Z"/>
+    <path class="paper" d="M-3.9-9q-.2-5.1 4-5.4 4.5 0 4.6 4.6.4 5.8-4 6.1-4.3 0-4.6-5.3Z"/>
+    <path class="forest" d="M-3.9-9.6q-1-5.1 3.9-5.4 4.4-.2 4.9 3.7L2-12l-2.5 2.1Z"/>
+  </g></defs>
+  <use href="#guest" transform="translate(39 22)"/>
+  <path class="side" d="m26 40 1.8 1.2-1.1 7.5-2-.5Zm21 .5 2.4-.5 1.8 8-2 .6Z"/>
+  <use href="#guest" style="--jacket:light-dark(#718cab,#91a8c3)" transform="translate(19 35) rotate(-6)"/>
+  <use href="#guest" style="--jacket:light-dark(#b38187,#c9989f)" transform="translate(59 34) rotate(6)"/>
+  <path class="forest" d="m38 35 4 .7-.2 13.5 4.2 1.2-6.4 2.3-6.9-1.9 5.4-1.9Z"/>
+  <path class="side" d="M19.1 34v2.7c.1 7.8 37.6 10.8 40.6.3v-3Z"/>
+  <ellipse class="paper" cx="39.4" cy="33.7" rx="20.4" ry="7.7"/>
+  <ellipse class="stone" cx="29.7" cy="34.5" rx="4.2" ry="1.5"/>
+  <ellipse class="stone" cx="48.2" cy="34.3" rx="4.2" ry="1.5"/>
+  <ellipse class="mid" cx="39.2" cy="30.5" rx="3.4" ry="1.1"/>
+  <path class="jacket" style="--jacket:light-dark(#718cab,#91a8c3)" d="M16.2 39.8q2.1-3.6 4.3-4l3.7-1.1 1.1 1.6-4.1 2.3-2.4 3.4Z"/>
+  <path class="jacket" style="--jacket:light-dark(#b38187,#c9989f)" d="m60.7 37.5-4.4-3.2-3-1.1-.6 1.5 3.3 2.3 2.4 3.1Z"/>
+  </g>
+</svg>

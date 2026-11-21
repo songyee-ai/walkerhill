@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="4 1 72 58" role="img" aria-labelledby="name detail">
+  <title id="name">부모님을 모시는 성인 자녀 가족</title>
+  <desc id="detail">식탁에 올린 카네이션 화병</desc>
+  <style>:root{color-scheme:light dark;--ink:light-dark(#49594e,#34463b);--paper:light-dark(#fffdf2,#eceee1);--side:light-dark(#ced6c8,#a8b9a8);--mid:light-dark(#9daf9f,#97ab98);--forest:light-dark(#3f6150,#6f8c76);--shadow:light-dark(#d9dfd1,#3c4b41);--stone:light-dark(#ecede1,#889b8b);}
+    .model{fill:none;stroke:var(--ink);stroke-width:1.15;stroke-linecap:round;stroke-linejoin:round}
+    .paper{fill:var(--paper)} .stone{fill:var(--stone)} .side{fill:var(--side)}
+    .mid{fill:var(--mid)} .forest{fill:var(--forest)}
+    .thin,.fine{fill:none} .thin{stroke-width:.9} .fine{stroke-width:1.05}
+    .glint{fill:none;stroke:var(--paper);stroke-width:1.3}
+    .nostroke{stroke:none} .seam{stroke-width:.65}
+    .carnation{fill:light-dark(#c87982,#d88d96)} .petal{fill:light-dark(#ecc0b6,#f0c7c0)}
+  </style>
+  <ellipse cx="40.8" cy="51" rx="31.5" ry="5.5" fill="var(--shadow)"/>
+  <path d="m9 47.8 28-7.6 34 8.7-29.2 8Z" fill="var(--stone)" stroke="var(--ink)" stroke-width=".58" stroke-linejoin="round"/>
+  <g class="model">
+  <defs><g id="flower">
+    <path class="carnation mid" d="m-9.2-.1-2.1-4.1 3-1.4-.3-3.6 3.6.5 2-3.3 3.6 1.9 2.5-2.2 2.2 3.1 3.2-.5-.2 3.1 2.9.9-1.7 3.8-4.4 3.9-6.9.4Z"/>
+    <path class="petal paper" d="m-7.7-4.4 3.8 1.5.4-3 3.1 1.2 1.3-3 2.9 2.2 3.6-1-1.9 3.4-5.6 2.5Z"/>
+    <path class="forest" d="m-6 1.1 4.8 1L2.5.6l3.8-.8-3.2 4.6-3.1 1.7-2-1.6Z"/>
+  </g></defs>
+  <path class="fine" d="m39 35-8-17m9 17 10-13m-9 12 1-23" style="stroke-width:1.6"/>
+  <path class="forest" d="M37.5 29q-11-1-15.3-9.2 9.8 1.4 15.3 9.2Zm5.7 2.8q6.4-8.1 15.7-8.4-5.1 6.8-15.7 8.4Z"/>
+  <use href="#flower" transform="translate(41 14) scale(.83)"/>
+  <use href="#flower" transform="translate(29.5 18.5) rotate(-18) scale(.96)"/>
+  <use href="#flower" transform="translate(49 21.3) rotate(15) scale(.84)"/>
+  <path class="side" d="m28.9 32.2 11.5-3.6 10.8 3.4-11.1 3.9Z"/>
+  <path class="paper" d="m28.9 32.2 11.2 3.7-.7 15-7.3-2.4Z"/>
+  <path class="mid" d="m40.1 35.9 11.1-3.9-2.7 15.6-9.1 3.3Z"/>
+  <path class="fine" d="m32 35 2 11.5m12-10.2-1.5 10.1"/>
+  </g>
+</svg>

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-33 -30 70 45" style="color-scheme:light dark">
+  <title>온달</title>
+  <ellipse cx="2" cy="5" rx="31" ry="6" fill="light-dark(#d9dfd1,#3c4b41)" />
+  <path d="M-27 0 L4 8 30 0 -3 -8 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#ecede1,#889b8b)" stroke-width="0.5" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M-23 -4 V-19 L4 -12 V3 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#fffdf2,#eceee1)" stroke-width="0.9" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M4 3 V-12 L23 -19 V-4 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#ced6c8,#a8b9a8)" stroke-width="0.9" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M-20 -13.2 l3 .7 v4 l-3 -.7 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#9daf9f,#97ab98)" stroke-width="0.5" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M-14.2 -11.7 l3 .7 v4 l-3 -.7 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#9daf9f,#97ab98)" stroke-width="0.5" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M-8.5 -10.2 l3 .7 v4 l-3 -.7 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#9daf9f,#97ab98)" stroke-width="0.5" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M-2.7 -8.7 l3 .7 v4 l-3 -.7 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#9daf9f,#97ab98)" stroke-width="0.5" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M8 -12.4 l3 -1 v4 l-3 1 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#9daf9f,#97ab98)" stroke-width="0.5" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M14 -14.6 l3 -1 v4 l-3 1 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#9daf9f,#97ab98)" stroke-width="0.5" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M-27 -17 Q-21 -18 -13 -26 L15 -24 Q21 -18 27 -18 L4 -10 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#7a9c8c,#9cb3a1)" stroke-width="1.1" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M15 -24 Q12 -20 4 -10" stroke="light-dark(#49594e,#34463b)" fill="none" stroke-width="0.8" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M-10 -25 q-2 5 -7 10" stroke="light-dark(#49594e,#34463b)" fill="none" stroke-width="0.5" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M-5 -24.7 q-2 5 -7 10" stroke="light-dark(#49594e,#34463b)" fill="none" stroke-width="0.5" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M0 -24.4 q-2 5 -7 10" stroke="light-dark(#49594e,#34463b)" fill="none" stroke-width="0.5" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M-20.5 -3.5 v-6 l3.4 1 v6 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#49594e,#34463b)" stroke-width="0.6" stroke-linejoin="round" stroke-linecap="round" data-door="left" />
+  <path d="M20.5 -3.5 v-6 l-3.4 1 v6 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#49594e,#34463b)" stroke-width="0.6" stroke-linejoin="round" stroke-linecap="round" data-door="right" />
+</svg>

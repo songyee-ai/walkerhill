@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-39 -41 82 56" style="color-scheme:light dark">
+  <title>스테이크하우스</title>
+  <ellipse cx="2" cy="5" rx="37" ry="6" fill="light-dark(#d9dfd1,#3c4b41)" />
+  <path d="M-33 0 L4 8 36 0 -3 -8 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#ecede1,#889b8b)" stroke-width="0.5" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M-29 -4 V-25 L4 -18 V3 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#fffdf2,#eceee1)" stroke-width="0.9" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M4 3 V-18 L29 -25 V-4 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#ced6c8,#a8b9a8)" stroke-width="0.9" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M-26 -19.3 l3 .7 v4 l-3 -.7 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#9daf9f,#97ab98)" stroke-width="0.5" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M-18.7 -17.8 l3 .7 v4 l-3 -.7 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#9daf9f,#97ab98)" stroke-width="0.5" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M-11.5 -16.2 l3 .7 v4 l-3 -.7 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#9daf9f,#97ab98)" stroke-width="0.5" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M-4.2 -14.7 l3 .7 v4 l-3 -.7 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#9daf9f,#97ab98)" stroke-width="0.5" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M8 -18.1 l3 -1 v4 l-3 1 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#9daf9f,#97ab98)" stroke-width="0.5" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M14 -19.8 l3 -1 v4 l-3 1 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#9daf9f,#97ab98)" stroke-width="0.5" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M-26 -12.8 l3 .7 v4 l-3 -.7 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#9daf9f,#97ab98)" stroke-width="0.5" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M-18.7 -11.3 l3 .7 v4 l-3 -.7 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#9daf9f,#97ab98)" stroke-width="0.5" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M-11.5 -9.7 l3 .7 v4 l-3 -.7 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#9daf9f,#97ab98)" stroke-width="0.5" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M-4.2 -8.2 l3 .7 v4 l-3 -.7 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#9daf9f,#97ab98)" stroke-width="0.5" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M8 -11.6 l3 -1 v4 l-3 1 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#9daf9f,#97ab98)" stroke-width="0.5" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M14 -13.3 l3 -1 v4 l-3 1 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#9daf9f,#97ab98)" stroke-width="0.5" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M-31 -25 L-5 -33 L31 -26 L4 -17 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#a0acbc,#b7c1cb)" stroke-width="0.9" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M-10 -28 v-5 l10 -4 12 3 v6 l-10 3 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#ced6c8,#a8b9a8)" stroke-width="0.8" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M-26.5 -3.5 v-6 l3.4 1 v6 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#49594e,#34463b)" stroke-width="0.6" stroke-linejoin="round" stroke-linecap="round" data-door="left" />
+  <path d="M26.5 -3.5 v-6 l-3.4 1 v6 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#49594e,#34463b)" stroke-width="0.6" stroke-linejoin="round" stroke-linecap="round" data-door="right" />
+</svg>
