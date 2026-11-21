@@ -34,7 +34,9 @@ from engine.formats.run import (
     RunRecord,
     SavedResponse,
     Validation,
+    ValidationReview,
     compute_request_hash,
+    validation_problems,
 )
 from engine.formats.scenario import Scenario
 from engine.formats.summary import SUMMARY_COLUMNS, SummaryRow
@@ -67,6 +69,7 @@ __all__ = [
     "Scenario",
     "SummaryRow",
     "Validation",
+    "ValidationReview",
     "Slot",
     "Venue",
     "Vocab",
@@ -80,5 +83,6 @@ __all__ = [
     "read_model",
     "round_half_up",
     "to_paid_price",
+    "validation_problems",
     "weighted_amount",
 ]

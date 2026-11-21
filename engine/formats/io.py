@@ -38,7 +38,8 @@ def write_json(path: Path, data: Any) -> None:
 # 나중에 더한 열과, 그 열이 없던 옛 파일을 읽을 때 채울 값. 머리글이 약속에서 이 열들만 뺀 것이면 옛 파일로 보고 채운다.
 # 소비 원장의 몫 열 셋 (11-20, T212. 옛 원장은 모두 답 하나로 고른 1단계 방식이라 고른 몫이 1 이다).
 # 임시 호환이다 (`CLAUDE.md` "임시 허용"): 팀이 쓰는 실행을 점수를 받는 판으로 다시 돌린 뒤 없앤다. 조건과 확인은 진행 문서 T212 의 완료 조건에 있다.
-ADDED_LATER = {"choice_share": "1", "score": "", "season_gap_of": ""}
+# 검증의 후기마다 결과의 몫 열 `venue_share` (11-21, T226. 옛 결과는 빈 칸으로 읽는다). 떼어 둔 후기 검증을 점수를 받은 답으로 다시 채점한 뒤 없앤다 (진행 문서 T212 완료 조건의 T226 줄).
+ADDED_LATER = {"choice_share": "1", "score": "", "season_gap_of": "", "venue_share": ""}
 
 
 def read_csv(path: Path, columns: list[str]) -> list[dict[str, str]]:

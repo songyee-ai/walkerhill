@@ -439,6 +439,9 @@ class VenueValidation(FormatModel):
     enough: bool
     venue_match: int | None = Field(ge=0)
     venue_match_baseline: int | None = Field(ge=0)
+    # 기대 일치 건수: 후기마다 그 후기의 업장에 시뮬레이션이 준 몫(`validation_reviews.csv` 의 `venue_share`)의 합 (11-21, T226).
+    # `enough` 가 false 면 null 이다. 11-21 전의 결과에는 없다 (임시 호환, `Validation` 이 본다).
+    venue_expected: float | None = Field(default=None, ge=0)
     reason_n: int = Field(ge=0)
     reason_enough: bool
     reason_match: int | None = Field(ge=0)
@@ -448,6 +451,10 @@ class VenueValidation(FormatModel):
     def _rules(self) -> Self:
         if self.reason_n > self.n:
             raise ValueError("reason_n 이 n 보다 크다 (이유 일치는 n 건 가운데 고른 이유 라벨이 있는 후기로 잰다)")
+        if self.venue_expected is not None:
+            _check_expected(self.venue_expected, self.n, "venue_expected")
+            if not self.enough:
+                raise ValueError("enough 가 false 면 venue_expected 는 null 이다 (검증 건수 부족)")
         _check_counts(self.enough, self.n, (self.venue_match, self.venue_match_baseline), "enough", "n")
         _check_counts(
             self.reason_enough,
@@ -468,6 +475,25 @@ def _check_counts(enough: bool, total: int, counts: tuple[int | None, ...], flag
         raise ValueError(f"건수가 {total_name} 보다 크다")
 
 
+# 기대 일치 건수(`venue_expected`)는 소수 둘째 자리까지 적는다 (T226).
+# 후기마다의 몫(`venue_share`)은 원장의 `choice_share` 처럼 반올림하지 않는다 (상수가 아주 작은 곳의 몫이 반올림으로 0 이 되지 않게).
+EXPECTED_DIGITS = 2
+# 소수를 반올림해 적은 값끼리 견줄 때 반올림 한 번의 폭 (둘째 자리의 반).
+EXPECTED_ROUNDING = 0.5 * 10**-EXPECTED_DIGITS
+_FLOAT_NOISE = 1e-9
+
+
+def _check_digits(value: float, digits: int, name: str) -> None:
+    if abs(value - round(value, digits)) > _FLOAT_NOISE:
+        raise ValueError(f"{name} 은 소수점 아래 {digits}자리까지 반올림해 적는다")
+
+
+def _check_expected(value: float, n: int, name: str) -> None:
+    _check_digits(value, EXPECTED_DIGITS, name)
+    if value > n + _FLOAT_NOISE:
+        raise ValueError(f"{name} 이 n 보다 크다 (후기마다의 몫은 1 을 넘지 않는다)")
+
+
 class ValidationTotal(FormatModel):
     """모든 업장을 합친 검증 건수. 검증 건수가 모자란 업장의 후기도 들어간다 (PRD 6.6절, T117)."""
 
@@ -478,6 +504,14 @@ class ValidationTotal(FormatModel):
     reason_n: int = Field(ge=0)
     reason_match: int = Field(ge=0)
     reason_match_baseline: int = Field(ge=0)
+    # 모든 후기의 몫을 더한 기대 일치 건수 (T226). 11-21 전의 결과에는 없다.
+    venue_expected: float | None = Field(default=None, ge=0)
+
+    @model_validator(mode="after")
+    def _rules(self) -> Self:
+        if self.venue_expected is not None:
+            _check_expected(self.venue_expected, self.n, "total 의 venue_expected")
+        return self
 
 
 # total 의 일치 건수마다, 그 건수를 잰 분모의 칸
@@ -520,7 +554,135 @@ class Validation(FormatModel):
                     f"total 의 {name} 은 업장들에 적힌 건수의 합 {low} 이상, "
                     f"건수가 모자란 업장의 {denominator} 까지 더한 {high} 이하다 (지금 {total})"
                 )
+        self._expected(venues)
         return self
+
+    def _expected(self, venues: list[VenueValidation]) -> None:
+        """기대 일치 건수(T226): 새 결과면 total 과 검증 건수가 넉넉한 업장에 모두 있고, 옛 결과면 어디에도 없다.
+
+        total 의 한계는 일치 건수와 같다. 다만 값마다 반올림해 적어, 반올림 폭만큼은 같은 것으로 본다.
+        """
+        total = self.total.venue_expected
+        if total is None:
+            if any(v.venue_expected is not None for v in venues):
+                raise ValueError("total 에 venue_expected 가 없는데 업장에는 있다 (새 칸은 total 과 업장에 함께 적는다)")
+            return
+        for venue_id, venue in self.venues.items():
+            if venue.enough and venue.venue_expected is None:
+                raise ValueError(f"업장 '{venue_id}' 의 venue_expected 가 없다 (total 에 적었으면 enough 인 업장에도 적는다)")
+        written = [v.venue_expected for v in venues if v.venue_expected is not None]
+        low = sum(written)
+        high = low + sum(v.n for v in venues if v.venue_expected is None)
+        slack = EXPECTED_ROUNDING * (len(written) + 1) + _FLOAT_NOISE
+        if not low - slack <= total <= high + slack:
+            raise ValueError(
+                f"total 의 venue_expected 는 업장들에 적힌 값의 합 {low:.2f} 이상, "
+                f"건수가 모자란 업장의 n 까지 더한 {high:.2f} 이하다 (반올림 폭은 봐줌, 지금 {total})"
+            )
+
+
+class ValidationReview(FormatModel):
+    """후기 한 건마다의 검증 결과 `validation_reviews.csv` 의 한 줄 (docs/FORMATS.md 10.5절)."""
+
+    review_id: Text
+    venue_id: Id
+    customer_group: str | None
+    persona_id: Id | None
+    occasion: str | None
+    meal: str | None
+    day_type: str | None
+    # 페르소나가 고른 곳: 답의 `choice` 의 곳이다 (점수를 받은 답이어도 같다). "이용하지 않음"이면 빈 칸.
+    chosen_venue_id: Id | None
+    # 고른 곳이 후기의 업장인가 (`Y`, `N`). 단순 기준과 견주는 0/1 건수다.
+    venue_match: Literal["Y", "N"] | None
+    # 후기의 업장에 시뮬레이션이 준 몫 (0 ~ 1, 반올림하지 않음. 11-21, T226). 그 방문의 원장에서 그 업장 줄들이 함께 갖는 `choice_share` 다.
+    # 점수가 없는 답(1단계 방식)이면 Y 는 1, N 은 0 이다.
+    # 11-21 전의 파일에는 이 열이 없어 빈 칸으로 읽는다 (`engine.formats.io.ADDED_LATER`, 임시 호환).
+    venue_share: float | None = Field(default=None, ge=0, le=1)
+    reason_match: Literal["Y", "N"] | None
+    baseline_venue_id: Id | None
+    baseline_venue_match: Literal["Y", "N"] | None
+    baseline_reason_match: Literal["Y", "N"] | None
+    skipped: str | None
+
+    @model_validator(mode="after")
+    def _rules(self) -> Self:
+        results = [name for name in VALIDATION_REVIEW_COLUMNS[3:-1] if getattr(self, name) is not None]
+        if self.skipped is not None:
+            if results:
+                raise ValueError(f"돌리지 못한 후기(skipped)는 돌린 결과의 칸이 빈 칸이다 (적힌 칸 {results})")
+            return self
+        if self.venue_match is None or self.baseline_venue_match is None:
+            raise ValueError("돌린 후기에는 venue_match 와 baseline_venue_match 를 적는다")
+        if (self.venue_match == "Y") != (self.chosen_venue_id == self.venue_id):
+            raise ValueError("venue_match 는 chosen_venue_id 가 후기의 venue_id 와 같을 때만 Y 다")
+        if (self.baseline_venue_match == "Y") != (self.baseline_venue_id == self.venue_id):
+            raise ValueError("baseline_venue_match 는 baseline_venue_id 가 후기의 venue_id 와 같을 때만 Y 다")
+        # `choice` 의 곳은 점수가 0 보다 크고(9절) 업장 상수도 0 보다 커서, 고른 곳이 후기의 업장이면 몫이 0 보다 크다.
+        # 파는 달의 몫은 `counted_share` 에 따로 들어 `choice_share` 를 줄이지 않는다 (10.2절).
+        if self.venue_match == "Y" and self.venue_share is not None and self.venue_share <= 0:
+            raise ValueError("venue_match 가 Y 면 venue_share 는 0 보다 크다 (choice 의 곳은 점수가 0 보다 크다)")
+        # 다른 곳(또는 "이용하지 않음")을 골랐으면 그 곳도 점수가 0 보다 커 몫을 받으므로, 후기의 업장의 몫은 1 보다 작다.
+        if self.venue_match == "N" and self.venue_share is not None and self.venue_share >= 1:
+            raise ValueError("venue_match 가 N 이면 venue_share 는 1 보다 작다 (choice 의 곳도 몫을 받는다)")
+        return self
+
+    @classmethod
+    def from_row(cls, row: dict[str, str]) -> Self:
+        return cls.model_validate({key: blank_to_none(value) for key, value in row.items()})
+
+
+def validation_problems(
+    validation: Validation, reviews: list[ValidationReview], share_method: str | None = None
+) -> list[str]:
+    """`validation.json` 과 `validation_reviews.csv` 가 서로 맞는지 본다 (T226). 맞으면 빈 목록이다.
+
+    형식 검사(`tools/check_formats.py`)는 검증 결과를 저장소에서 찾으면 오류만 내고 내용을 읽지 않는다 (저장소에 둘 수 없다).
+    그래서 두 파일을 쓰는 검증 스크립트가 쓴 뒤 이것으로 본다. `share_method` 는 그 실행 기록의 것이다 (10.1절).
+    """
+    problems: list[str] = []
+    ran = [r for r in reviews if r.skipped is None]
+    # n 은 그 업장의 돌린 후기(skipped 가 빈 후기) 수다 (10.5절).
+    counts: dict[str, int] = {}
+    for review in ran:
+        counts[review.venue_id] = counts.get(review.venue_id, 0) + 1
+    unknown = sorted(set(counts) - set(validation.venues))
+    if unknown:
+        problems.append(f"validation.json 의 venues 에 없는 업장의 돌린 후기가 있다: {unknown}")
+    for venue_id, venue in validation.venues.items():
+        if counts.get(venue_id, 0) != venue.n:
+            problems.append(f"업장 '{venue_id}' 의 n {venue.n} 이 돌린 후기 수 {counts.get(venue_id, 0)} 와 다르다")
+    if validation.total.n != len(ran):
+        problems.append(f"total 의 n {validation.total.n} 이 돌린 후기 수 {len(ran)} 와 다르다")
+
+    total = validation.total.venue_expected
+    if total is None:
+        # 옛 모양(11-18 T19)은 모두 1단계 답이다. 점수를 받은 실행의 결과는 몫 칸이 있어야 한다.
+        if share_method in ("scores", "mixed"):
+            problems.append(f"점수를 받은 실행(share_method {share_method})의 검증 결과인데 venue_expected 가 없다")
+        if any(r.venue_share is not None for r in reviews):
+            problems.append("validation.json 에 venue_expected 가 없는데 validation_reviews.csv 에 venue_share 가 있다")
+        return problems
+    missing = [r.review_id for r in ran if r.venue_share is None]
+    if missing:
+        problems.append(f"돌린 후기의 venue_share 가 비어 있다: {missing}")
+        return problems
+    shares: dict[str, float] = {}
+    for review in ran:
+        shares[review.venue_id] = shares.get(review.venue_id, 0.0) + review.venue_share
+    for venue_id, venue in validation.venues.items():
+        found = shares.get(venue_id, 0.0)
+        if venue.venue_expected is not None and abs(venue.venue_expected - found) > EXPECTED_ROUNDING + _FLOAT_NOISE:
+            problems.append(f"업장 '{venue_id}' 의 venue_expected {venue.venue_expected} 가 후기들의 venue_share 합 {found:.4f} 와 다르다")
+    found = sum(shares.values())
+    if abs(total - found) > EXPECTED_ROUNDING + _FLOAT_NOISE:
+        problems.append(f"total 의 venue_expected {total} 가 후기들의 venue_share 합 {found:.4f} 와 다르다")
+    if share_method == "single":
+        # 점수가 없는 답은 고른 곳의 몫이 1 이다. 그래서 Y 면 1, N 이면 0 이다.
+        wrong = [r.review_id for r in ran if r.venue_share != (1 if r.venue_match == "Y" else 0)]
+        if wrong:
+            problems.append(f"점수가 없는 답(share_method single)인데 venue_share 가 Y 면 1, N 이면 0 이 아니다: {wrong}")
+    return problems
 
 
 VALIDATION_REVIEW_COLUMNS = [
@@ -533,6 +695,7 @@ VALIDATION_REVIEW_COLUMNS = [
     "day_type",
     "chosen_venue_id",
     "venue_match",
+    "venue_share",
     "reason_match",
     "baseline_venue_id",
     "baseline_venue_match",
