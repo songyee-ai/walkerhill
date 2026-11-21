@@ -94,6 +94,7 @@
 | T223 | 퍼센트 가격 변경이 채운 단가에도 걸리게 엔진 순서 바꾸기 | wilstein91 | 완료, 11-20, 단가를 먼저 채우고 상황을 적용하게 바꿔 테스트와 형식 검사로 확인했다. |
 | T225 | 개선 5단계 설계: 달마다의 무게, 좌석 한도와 넘침, 하루 여정 | wilstein91 | 진행 중, 11-21, 세 조각의 방식을 정하고 근거를 원문으로 확인했으며 팀원 자료와 코드 시작 조건을 기다린다. |
 | T220 | 3단계의 무리를 페르소나에 적는 형식 (T308 ① ② ③ 답) | wilstein91 | 완료, 11-20, 페르소나에 무리(`segment`)를 더하고 3단계 전까지 엔진이 워커힐 고객만 돌리게 해, 다른 무리를 올려도 기준 실행이 그대로인 것을 테스트로 확인했다. |
+| T226 | 떼어 둔 후기 검증의 몫 칸 (`venue_share`, `venue_expected`) | wilstein91 | 완료, 11-21, 검증 결과에 후기마다의 몫과 기대 일치 건수 칸을 규칙·테스트와 함께 더했고 옛 결과도 그대로 읽힌다. |
 | T101 | 수집 파일 분석 규칙 | songyee-ai | 완료, 11-18, 페르소나 담당이 문서 전체를 확인해 알린 빠진 것 다섯을 지금 방식대로 넣고 문서를 확정했다. |
 | T102 | 화면 담당의 공통 틀 요청 (무시 목록, README, 옛 화면 테스트) | songyee-ai | 완료, 11-16, 세 가지를 고쳤고 형식 검사와 테스트가 통과했다. |
 | T103 | 공급자를 OpenAI 로 바꾸고 응답 모양 묶기 | songyee-ai | 완료, 11-18, 응답 스키마는 쓰고 있고, 팀 공급자를 Claude 구독으로 바꿔(T114) 남은 둘은 하지 않기로 닫았다. |
@@ -1733,6 +1734,10 @@ songyee-ai 에게서 `engine/`, `tools/`, `tests/`, 형식 문서(`FORMATS.md`),
 - [ ] 위의 임시 호환 둘을 없앴다: 점수를 묻지 않던 판의 답을 고른 곳 100% 로 읽기(`engine/formats/choice.py` 의 `SINGLE_ANSWER_PROMPTS`)와
   몫 열이 없던 옛 원장 읽기(`engine/formats/io.py` 의 `ADDED_LATER`, `changes.json` 의 `before_shares`·`after_shares`·`promo_shares` 를 비워 읽기).
   없애는 조건: 팀이 쓰는 기준·시연 답과 예시 묶음을 점수를 묻는 판으로 다시 받고, 화면이 그 실행으로 돈다. 확인: 지운 뒤 팀 PC 의 쓰는 실행과 예시 묶음이 모두 읽히는지 (11-20 더함, `CLAUDE.md` "임시 허용")
+- [ ] T226 의 임시 호환 "몫 칸이 없던 옛 검증 결과 읽기"를 없앴다: `validation_reviews.csv` 의 `venue_share` 를 빈 칸으로 채워 읽기(`engine/formats/io.py` 의 `ADDED_LATER`)와
+  `validation.json` 의 `venue_expected` 가 없어도 읽기(`engine/formats/run.py` 의 `VenueValidation`·`ValidationTotal`. 없애면 `total` 에 늘 있고 `enough` 인 업장에 늘 있다).
+  없애는 조건: 떼어 둔 후기 검증을 점수를 받은 답(p4)으로 다시 채점해(위 검증 세 겹 줄) 팀이 쓰는 기준 실행 폴더의 검증 결과에 새 칸이 있다.
+  확인: 지운 뒤 그 검증 결과를 화면이 읽고, 두 파일이 `engine.formats.validation_problems` 를 통과하는지 (11-21 더함, `CLAUDE.md` "임시 허용")
 - [x] 실행 기록의 결정 상수마다 그 실행의 계산에 쓰였는지를 엔진이 적고, `FORMATS.md` 10.1절에 적어 화면 담당에게 알렸다 (T130 ② 의 답, 11-20 더함)
   (11-20, 윈도우 11. 실행 기록의 `constants` 의 `applied`, `engine/constants.py` 의 `RunUse`, `FORMATS.md` 10.1절의 규칙 표, "알릴 것"의 11-20 T212·T130 ② 줄.
   `tests/test_constants.py` 가 규칙마다 켜지는 상수, 모든 상수에 규칙이 있는 것, 인원이 빈 줄의 갈래(달·조건·업장), 예시 사본의 기준 실행이 예시 묶음과 같은 표시인 것,
@@ -2102,6 +2107,47 @@ songyee-ai 에게서 `engine/`, `tools/`, `tests/`, 형식 문서(`FORMATS.md`),
 - 엔진 핵심 파일을 고치는 3단계 형식 PR(#272 T220)과 4단계 엔진 PR 이 합쳐졌다. 5단계도 `engine/runner.py`·`engine/weights.py` 를 고쳐 같이 고치면 충돌한다 (PRD 8절: 4·5·6 은 3단계 뒤).
 - hojitea-ui 의 좌석 수·회차·이용 시간 값과 달력 파일이 들어왔다 (②). 없으면 ②는 가상 예시 값으로만 시험하고 기본 데이터 실행은 기다린다.
 - borigunbbang 의 여정 질문 프롬프트가 들어왔다 (③). 12달 답 받기는 2·3단계의 답 다시 받기와 시기를 맞춘다 (요청이 바뀌는 변경을 모아 한 번에 받는다, PRD 8절 2단계 행).
+
+### T226 떼어 둔 후기 검증의 몫 칸 (`venue_share`, `venue_expected`)
+
+담당 wilstein91 · 기한 11-21 · 기다리는 것 없음
+
+계획에 없던 작업이다 (11-21). 2단계에서는 방문이 AI 점수로 여러 업장에 몫으로 나뉜다 (원장의 `choice_share`, T212).
+11-20 에 떼어 둔 후기 검증(T19, borigunbbang)도 몫으로 채점하기로 정했다: 업장 일치는 그 후기의 업장에 시뮬레이션이 준 몫(0 ~ 1)이고, 합이 "기대 일치 건수"다.
+점수가 없는 답(1단계)이면 몫이 0 아니면 1 이라 11-18 결과와 같다. 단순 기준은 지금처럼 0/1 건수, 이유 일치도 지금처럼 잰다.
+borigunbbang 이 "10.5절과 모델에 후기마다 `venue_share` 와 업장·전체의 기대 일치 합을 더해 달라, 정해지면 스크립트가 그 칸을 쓴다"고 답했다 ("알릴 것"의 11-20 T212·T19 줄).
+
+정한 것 (11-21 wilstein91, `FORMATS.md` 10.5절)
+- `validation_reviews.csv` 에 `venue_share`(후기의 업장에 준 몫, 0 ~ 1, 원장의 `choice_share` 처럼 반올림하지 않음)를 `venue_match` 바로 뒤에 둔다. 돌리지 못한 후기(`skipped`)는 빈 칸이다.
+- `validation.json` 의 업장마다와 `total` 에 `venue_expected`(기대 일치 건수, 소수 둘째 자리, 0 이상 `n` 이하)를 둔다. 업장마다는 `venue_match` 처럼 `enough` 가 `false` 면 `null` 이다.
+  `total` 은 `venue_match` 와 같은 한계(적힌 업장의 합 이상, `null` 인 업장의 `n` 까지 더한 것 이하)를 반올림 폭만큼 봐주고 본다.
+- `venue_match`(Y/N)는 남긴다. 뜻은 "고른 곳(`chosen_venue_id`)이 후기의 업장인가"이고, 고른 곳은 점수를 받은 답이어도 지금처럼 답의 `choice` 의 곳이다.
+  단순 기준(`venue_match_baseline`)과 같은 0/1 잣대로 견줄 수 있게 남긴다.
+  "몫이 가장 큰 곳"으로 다시 정하지 않은 까닭: 이유 일치를 `choice` 의 이유로 재기로 했고(11-20 T19 채점), p4 는 `choice` 의 곳이 점수 > 0 인 것만 보장해 가장 큰 곳이라는 보장이 없다.
+  또 몫은 k 와 업장 상수로 바뀌어, 몫으로 정하면 같은 답의 고른 곳이 상수를 추정할 때마다 바뀐다.
+- 둘 사이의 규칙: `Y` 면 `venue_share` > 0. `choice` 의 곳은 점수 > 0 이고 업장 상수도 0 보다 크다(추정 도구의 가장 작은 값 0.001). 파는 달의 몫은 `counted_share` 에 따로 들고 `choice_share` 를 줄이지 않는다.
+  다만 상수가 아주 작고 점수가 낮으면 몫이 0.0001 보다 작을 수 있어, 반올림하면 `Y` 인데 0 이 된다. 그래서 몫은 반올림하지 않고 적는다.
+  `N` 이면 0 이상 1 미만이다 (고른 곳도 점수 > 0 이라 몫을 받는다. 1 미만이면 후기의 업장이 고른 곳보다 큰 몫을 받아도 된다).
+  실행 기록이 점수 없는 답(`share_method` `single`)이면 1단계 답은 고른 곳의 몫이 1 이라 `Y` 는 1, `N` 은 0 이다.
+- 두 파일이 서로 맞는지(업장마다 돌린 후기 수가 `n`, 기대 일치가 몫의 합과 반올림 폭 0.005 안에서 같음, 새 칸이 두 파일에 함께 있음, 1단계 규칙,
+  점수를 받은 실행(`scores`·`mixed`)의 결과에는 새 칸이 있음)는 `engine.formats.validation_problems` 가 본다.
+  형식 검사(`tools/check_formats.py`)는 검증 결과를 저장소에서 찾으면 오류만 내고 내용을 읽지 않아(저장소에 둘 수 없다) 거기에 넣지 않았다. 검증 스크립트가 두 파일을 쓴 뒤 부른다.
+- 옛 결과(11-18 T19, 새 칸 없음)는 그대로 읽는다: CSV 는 `ADDED_LATER` 로 빈 칸, JSON 은 `null`. 한 파일 안에서 `total` 과 업장에 함께 있거나 함께 없다.
+  임시 호환이고 없애는 조건은 T212 의 완료 조건에 있다 (`CLAUDE.md` "임시 허용").
+- 단순 기준은 늘 한 업장을 골라 몫이 0/1 이므로 기대 일치 칸을 따로 두지 않는다 (`venue_match_baseline` 과 견준다).
+
+완료 조건
+- [x] `FORMATS.md` 10.5절, 형식 모델(`VenueValidation`, `ValidationTotal`, `Validation`, 새 줄 모델 `ValidationReview`, `VALIDATION_REVIEW_COLUMNS`), 두 파일을 함께 보는 `validation_problems` 가 같다
+  (11-21, 윈도우 11. 문서 예시에 `venue_expected` 를 넣었고 `tests/test_examples.py`·`tests/test_validation_format.py` 가 그 예시를 읽음.
+  예시 묶음(`tests/fixtures/example/`)에는 검증 결과가 없어(저장소에 둘 수 없는 파일) 고칠 것이 없었다)
+- [x] 새 칸의 규칙을 테스트가 본다
+  (11-21, 윈도우 11. `tests/test_validation_format.py` 가 범위·반올림 자리, `enough` 가 아니면 `null`, `total` 의 한계와 반올림 폭, 새 칸이 함께 있거나 함께 없음,
+  줄마다 `Y`/`N` 과 몫의 규칙(`Y` 면 몫 > 0, `N` 은 0 이상 1 미만, 반올림하지 않은 아주 작은 몫), 두 파일의 후기 수와 `n`, 점수를 받은 실행에 새 칸이 없으면 문제, 돌리지 못한 후기의 빈 칸, 두 파일의 합 일치, 1단계(`single`) 규칙, 옛 JSON(엄격하게 읽기)·옛 CSV(열 없음) 읽기를 봄)
+- [x] 화면이 새 칸이 든 결과와 옛 결과를 모두 읽는다
+  (11-21, 윈도우 11. `tests/test_validation_format.py` 의 화면 테스트가 `app/validation.py` 의 표를 두 결과로 그려 같은 표를 냄. `tests/app/` 의 검증 테스트도 그대로 통과.
+  화면에 기대 일치를 보이는 것은 화면 담당에게 "알릴 것"으로 알림)
+- [x] `uv run python -m ruff check .`, `uv run python -m tools.check_formats`(오류 0), `uv run python -m pytest -o addopts="" -q`(1062개 통과) (11-21, 윈도우 11)
+- [x] borigunbbang 과 songyee-ai 에게 알렸다 (11-21, "알릴 것"의 11-21 T226 두 줄)
 
 ### T22 근거 보기 화면
 
@@ -5604,6 +5650,27 @@ T212 PR 과 같은 때 합쳐 답을 한 번에 받는다 (11-20 연락판에서
   - 답 받기: 5단계는 12달을 모두 다시 묻습니다. 2·3단계의 답 다시 받기와 시기를 맞춰 한 번에 받습니다.
   읽으면 이 줄에 확인을 적어 주세요.
 
+- [ ] borigunbbang ← wilstein91 (11-21): **T226·T19: 검증 결과의 몫 칸 이름과 규칙이 정해져 스크립트가 쓸 수 있습니다.** (11-20 T212·T19 줄의 답에서 부탁하신 것. `FORMATS.md` 10.5절, 진행 문서 T226 절)
+  - `validation_reviews.csv`: `venue_share`(후기의 업장에 준 몫, 0 ~ 1)를 `venue_match` 바로 뒤 열에 씁니다. 그 방문 원장의 그 업장 줄들이 함께 갖는 `choice_share` 값입니다
+    (줄마다 같은 값이라 한 번만 셉니다). 반올림하지 않고 그대로 씁니다. 돌리지 못한 후기는 빈 칸입니다.
+  - `validation.json`: 업장마다와 `total` 에 `venue_expected`(그 후기들의 `venue_share` 합, 소수 둘째 자리로 반올림. 합 × 100 을 `engine.formats.round_half_up` 으로 반올림해 100 으로 나눔)를 씁니다. `enough` 가 `false` 인 업장은 `null` 입니다.
+  - `chosen_venue_id` 와 `venue_match` 는 지금 그대로입니다: 답의 `choice` 의 곳("이용하지 않음"이면 빈 칸)과, 그 곳이 후기의 업장인가(Y/N).
+    규칙은 `Y` 면 몫 > 0 (`choice` 의 곳은 점수 > 0), 1단계 답(`share_method` `single`)이면 `Y` 는 1, `N` 은 0 입니다. `N` 의 몫은 0 이상 1 미만입니다 (고른 곳도 몫을 받으므로).
+  - 두 파일을 쓴 뒤 `engine.formats.validation_problems(validation, reviews, share_method)` 로 서로 맞는지 봐 주세요 (빈 목록이면 맞음. `reviews` 는 `read_csv` 와 `ValidationReview.from_row` 로 읽은 줄,
+    `share_method` 는 붙인 기준 실행의 실행 기록 값). 형식 검사는 검증 결과를 저장소에서 막기만 하고 내용을 읽지 않아 거기서는 보지 않습니다.
+    **`share_method` 는 꼭 `run.json` 의 값을 넘겨 주세요.** 빠지면 1단계 규칙(`Y` 는 1, `N` 은 0)과 "점수를 받은 실행인데 새 칸이 없음"을 보지 못합니다.
+  - 스크립트가 `VALIDATION_REVIEW_COLUMNS` 를 그대로 머리글로 쓰면 이제 `venue_share` 열이 들어갑니다. 빈 칸으로 두지 말고 값을 채워 써 주세요.
+  - 11-18 결과(새 칸 없음)는 그대로 읽힙니다. 다만 새 결과를 쓸 때는 두 파일에 새 칸을 함께 써야 합니다 (한쪽만 있으면 위 함수가 잡습니다).
+  읽으면 이 줄에 확인을 적어 주세요.
+
+- [ ] songyee-ai ← wilstein91 (11-21): **T226: 검증 결과에 기대 일치 건수(`venue_expected`)가 생깁니다. 화면에 보이려면 아래가 필요합니다.** (`FORMATS.md` 10.5절, 진행 문서 T226 절)
+  - 지금 화면(`app/validation.py` 의 `validation_rows`)은 새 칸을 읽지 않아 깨지지 않습니다. 새 칸이 든 결과와 옛 결과에서 같은 표가 나오는 것을 테스트로 봤습니다 (`tests/test_validation_format.py`).
+  - 2단계 답으로 다시 채점한 결과에서는 "고른 업장이 같음"(0/1 건수, `venue_match`) 옆에 "기대 일치"(`venue_expected`, 예: "12건 중 7.35건")를 보여 주셔야 2단계 방식의 업장 일치가 보입니다.
+    `venue_expected` 가 `null` 이면 옛 결과(11-18)이거나 검증 건수 부족이니 칸을 비우면 됩니다. 합계 줄도 `total.venue_expected` 로 같습니다 (합계 줄의 5건 기준은 지금처럼 화면이 정함).
+  - 단순 기준은 늘 한 업장을 골라 기대 일치 칸이 따로 없습니다. "같음 (단순 기준)"(`venue_match_baseline`)과 견주면 됩니다.
+  - 높고 낮음(`_versus`)을 기대 일치로도 낼지는 화면 담당이 정해 주세요. 고치는 곳은 `app/validation.py` 의 `_row`·`validation_rows` 입니다.
+  읽으면 이 줄에 확인을 적어 주세요.
+
 - [ ] borigunbbang ← wilstein91 (11-20): **T220·T308: 경쟁 호텔 고객 페르소나의 형식을 정했습니다. 지금 `personas/` 에 올리셔도 됩니다.** (T220 절, `FORMATS.md` 5절의 "무리")
   - 파일에 적을 것: 지금 형식 그대로에 `"segment": "rival"` 을 더합니다. 워커힐 고객 페르소나에는 적지 않습니다 (적으면 요청이 바뀌어 저장된 답이 재생되지 않습니다). 비공개 층에는 `segment` 를 적지 않습니다.
   - `customer_group` 은 값 목록의 값(가족·친족, 커플·기념일 등)을 그대로 씁니다.
@@ -5647,6 +5714,7 @@ T212 PR 과 같은 때 합쳐 답을 한 번에 받는다 (11-20 연락판에서
   읽으면 이 줄에 확인을 적어 주세요.
   (확인: songyee-ai 11-21, 동의합니다. 이번 마감에는 경쟁 업장을 지금의 8곳으로 두고, 발표에서 한계로 말합니다 (T24 의 한계 장).
   PRD 17절에 정한 것으로 적었습니다. 조사해 둔 후보와 정의 초안 세 곳은 마감 뒤 이어 할 일로 남깁니다)
+  (확인: wilstein91 11-21, 동의합니다. 이번 마감에는 지금의 8곳으로 둡니다. 엔진은 고칠 것이 없습니다. 4단계의 일상 시장은 피자힐과 경쟁 업장 하나, 두 곳이라 k 가 그 경쟁 업장에 많이 기대는 것을 4단계 PR 의 한계에 함께 적겠습니다)
 
 - [ ] songyee-ai ← wilstein91 (11-20): **T212·T130 ②: 실행 기록의 결정 상수마다 "이 실행의 계산에 쓰였는가"(`applied`)가 들어왔습니다.** (`FORMATS.md` 10.1절의 "쓴 결정 상수")
   - 모양: `run.json` 의 `constants` 의 상수마다 `applied` 가 `true`(이 실행의 계산에 실제로 들어감) 또는 `false`(기록에는 있지만 이 실행에서는 쓰이지 않음)입니다.

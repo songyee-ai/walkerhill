@@ -1590,6 +1590,7 @@ run_id,scenario_id,visit_id,persona_id,customer_group,condition_id,choice_kind,v
       "enough": true,
       "venue_match": 8,
       "venue_match_baseline": 7,
+      "venue_expected": 7.35,
       "reason_n": 6,
       "reason_enough": true,
       "reason_match": 4,
@@ -1600,13 +1601,14 @@ run_id,scenario_id,visit_id,persona_id,customer_group,condition_id,choice_kind,v
       "enough": true,
       "venue_match": 5,
       "venue_match_baseline": 6,
+      "venue_expected": 4.62,
       "reason_n": 2,
       "reason_enough": false,
       "reason_match": null,
       "reason_match_baseline": null
     },
     "thebuffet": {
-      "n": 3, "enough": false, "venue_match": null, "venue_match_baseline": null,
+      "n": 3, "enough": false, "venue_match": null, "venue_match_baseline": null, "venue_expected": null,
       "reason_n": 1, "reason_enough": false, "reason_match": null, "reason_match_baseline": null
     }
   },
@@ -1614,6 +1616,7 @@ run_id,scenario_id,visit_id,persona_id,customer_group,condition_id,choice_kind,v
     "n": 24,
     "venue_match": 15,
     "venue_match_baseline": 14,
+    "venue_expected": 13.2,
     "reason_n": 9,
     "reason_match": 5,
     "reason_match_baseline": 4
@@ -1630,6 +1633,14 @@ run_id,scenario_id,visit_id,persona_id,customer_group,condition_id,choice_kind,v
 - `total`: 모든 업장을 합친 건수. 검증 건수가 모자란 업장의 후기도 들어간다. 그래서 `total` 의 일치 건수는 업장에 적힌 건수의 합보다 클 수 있다.
   다만 건수가 `null` 인 업장의 분모(`n` 또는 `reason_n`)를 더한 것보다 클 수는 없다. `n`, `reason_n` 은 업장들의 합과 같다.
   업장마다 이유 일치의 건수가 모자라도 `total` 로는 견줄 수 있다. `total` 에도 5건 기준은 같다: `total` 의 `reason_n` 이 `min_reviews` 보다 작으면 합친 이유 일치도 "검증 건수 부족"으로 보인다.
+- `venue_expected` (기대 일치 건수, 11-21 T226): 후기마다 그 후기의 업장에 시뮬레이션이 준 몫(`validation_reviews.csv` 의 `venue_share`)을 더한 것이다.
+  2단계에서 방문이 몫으로 나뉘어(10.2절의 `choice_share`) "고른 곳이 맞으면 1건"만으로는 셀 수 없어 더했다 (11-20 T19 채점 방식).
+  점수가 없는 답(1단계 방식)이면 몫이 0 아니면 1 이라 `venue_match` 와 같다. 0 이상 `n` 이하다.
+  소수 둘째 자리까지 반올림해 적는다: 몫의 합 × 100 을 저장소의 `round_half_up`(`engine/formats/money.py`, 0.5 는 올린다)으로 반올림해 100 으로 나눈다.
+  업장마다의 값은 `venue_match` 와 같이 `enough` 가 `false` 면 `null` 이다 (옛 파일을 읽는 임시 호환 동안은 키를 빼도 `null` 로 읽힌다). `total` 의 값은 모든 후기의 몫을 더한 것이라, `venue_match` 와 같은 한계(업장에 적힌 값의 합 이상,
+  `null` 인 업장의 `n` 까지 더한 것 이하)를 반올림 폭만큼 봐주고 본다.
+  단순 기준은 늘 한 업장을 골라 몫이 0 아니면 1 이므로 기대 일치를 따로 두지 않는다. `venue_match_baseline` 과 견준다.
+  11-21 전의 결과(11-18 T19)에는 이 칸이 `total` 에도 업장에도 없다. 그런 결과는 그대로 읽고, 한 파일 안에서는 `total` 과 업장에 함께 있거나 함께 없다 (임시 호환. 없애는 조건은 진행 문서 T212 의 완료 조건).
 
 **후기 한 건마다의 결과** `validation_reviews.csv`
 
@@ -1638,10 +1649,28 @@ run_id,scenario_id,visit_id,persona_id,customer_group,condition_id,choice_kind,v
 | `review_id`, `venue_id`, `customer_group` | 떼어 둔 후기 |
 | `persona_id` | 돌린 페르소나. 그 고객군에 페르소나가 둘이면 후기의 `purpose`, `party` 가 더 많이 겹치는 쪽, 같으면 몫이 큰 쪽 (PRD 6.6절). 후기에 비어 있는 칸은 겹치지 않는 것으로 센다 |
 | `occasion`, `meal`, `day_type` | 돌린 조건. 후기에 끼니나 요일이 비어 있으면 그 페르소나의 `visit.meals`, `visit.day_types` 의 첫 값을 쓴다 |
-| `chosen_venue_id` | 페르소나가 고른 곳. "이용하지 않음"이면 빈 칸 |
-| `venue_match`, `reason_match` | 업장이 같은가, 이유 라벨이 하나 이상 겹치는가 (`Y`, `N`). 후기에 고른 이유 라벨이 없으면 `reason_match` 는 빈 칸이다 (11-17, T117) |
+| `chosen_venue_id` | 페르소나가 고른 곳: 답의 `choice` 의 곳이다. "이용하지 않음"이면 빈 칸. 점수를 받은 답(2단계 방식)이어도 같다. 이유 일치도 이 `choice` 의 이유로 잰다 (11-21, T226) |
+| `venue_match`, `reason_match` | 고른 곳(`chosen_venue_id`)이 후기의 업장(`venue_id`)과 같은가, 이유 라벨이 하나 이상 겹치는가 (`Y`, `N`). 후기에 고른 이유 라벨이 없으면 `reason_match` 는 빈 칸이다 (11-17, T117). `venue_match` 는 몫이 생긴 뒤에도 0/1 건수로 남겨 `venue_match_baseline` 과 같은 잣대로 견준다 |
+| `venue_share` | 후기의 업장에 시뮬레이션이 준 몫 (0 ~ 1. 11-21, T226). 그 방문의 원장에서 그 업장 줄들이 함께 갖는 `choice_share` 다 (줄마다 같은 값이라 한 번만 센다). 원장처럼 반올림하지 않는다. 점수가 없는 답(1단계 방식)이면 `venue_match` 가 `Y` 면 1, `N` 이면 0 이다 |
 | `baseline_venue_id`, `baseline_venue_match`, `baseline_reason_match` | 단순 기준이 고른 곳과 그 결과. 후기에 고른 이유 라벨이 없으면 `baseline_reason_match` 는 빈 칸이다 |
-| `skipped` | 돌리지 못한 이유. 고객군이 비어 있거나 그 고객군에 페르소나가 없으면 적는다. 이런 후기는 `n` 에서 빼고, 돌린 결과의 칸(`persona_id` 부터 `baseline_reason_match` 까지)은 모두 빈 칸이다 |
+| `skipped` | 돌리지 못한 이유. 고객군이 비어 있거나 그 고객군에 페르소나가 없으면 적는다. 이런 후기는 `n` 에서 빼고, 돌린 결과의 칸(`persona_id` 부터 `baseline_reason_match` 까지, `venue_share` 도)은 모두 빈 칸이다 |
+
+열은 위의 차례로 적는다 (`venue_share` 는 `venue_match` 바로 뒤). 줄의 규칙 (`engine.formats.ValidationReview`, 11-21 T226):
+
+- 돌린 후기는 `venue_match` 와 `baseline_venue_match` 가 있다. `venue_match` 는 `chosen_venue_id` 가 `venue_id` 와 같을 때만 `Y` 다 (`baseline_venue_match` 도 `baseline_venue_id` 로 같다).
+- `venue_match` 가 `Y` 면 `venue_share` 는 0 보다 크다. `choice` 의 곳은 점수가 0 보다 크고(9절) 업장 상수도 0 보다 크기 때문이다.
+  파는 달의 몫은 `counted_share` 에 따로 들어 `choice_share` 를 줄이지 않는다 (10.2절).
+  `N` 이면 `venue_share` 는 0 이상 1 미만이다. 다른 곳(또는 "이용하지 않음")을 골랐으면 그 곳도 점수가 0 보다 커 몫을 받기 때문이다.
+  1 미만이면 어느 값이어도 된다 (`choice` 는 점수가 가장 큰 곳이라는 보장이 없고, 몫은 k 와 업장 상수로 바뀌므로 다른 곳을 골랐어도 후기의 업장이 더 큰 몫을 받을 수 있다).
+  몫을 반올림하지 않는 것은 상수가 아주 작은 곳의 몫이 반올림으로 0 이 되어 이 규칙에 걸리지 않게 하려는 것이다.
+- 그 실행의 실행 기록이 점수가 없는 답(`share_method` 가 `single`, 10.1절)이면 1단계 답은 고른 곳의 몫이 1 이라 `venue_share` 는 `Y` 면 1, `N` 이면 0 이다.
+- 두 파일의 건수가 맞는다: 업장마다 돌린 후기(`skipped` 가 빈 후기) 수가 그 업장의 `n` 이고, 돌린 후기의 `venue_id` 는 모두 `venues` 에 있으며, 모든 돌린 후기 수가 `total` 의 `n` 이다.
+- `validation.json` 의 `venue_expected` 는 업장마다 그 업장 후기의 `venue_share` 를 더한 것과, `total` 은 모든 후기의 합과 반올림 폭(0.005) 안에서 같다.
+- 11-21 전의 파일(11-18 T19)에는 `venue_share` 열이 없다. 빈 칸으로 읽고(`engine.formats.io.ADDED_LATER`), 그 결과의 `validation.json` 에도 `venue_expected` 가 없어야 한다.
+  새 결과는 돌린 후기마다 `venue_share` 가 있다. 11-18 결과는 모두 1단계 답이라, 옛 모양은 `share_method` 가 `single` 인 실행에서만 받는다
+  (`scores`·`mixed` 인 실행의 결과에 `venue_expected` 가 없으면 문제다).
+- 두 파일을 함께 보는 규칙은 `engine.formats.validation_problems` 가 본다. 형식 검사(11절)는 검증 결과를 저장소에서 찾으면 오류만 내고 내용을 읽지 않으므로(저장소에 둘 수 없다),
+  두 파일을 쓰는 검증 스크립트가 쓴 뒤 이것으로 본다.
 
 ### 10.6 매출 변화 나누기 `changes.json`
 
