@@ -17,7 +17,7 @@
 | `tests/` | wilstein91 | 테스트와 예시 파일 한 벌(`tests/fixtures/example/`). 다른 영역은 자기 테스트를 `tests/<자기 폴더 이름>/` 아래에 새 파일로 더한다 (예: `tests/app/`). 테스트에 쓸 예시 파일을 더할 때는 `tests/fixtures/<이름>/` 아래에 저장소와 같은 폴더 모양으로 둔다. 그 묶음도 저장소와 같은 형식 검사를 받는다 (`tests/fixtures/example/` 을 베껴서 고치면 된다) |
 | `data/venues/`, `data/samples/`, `data/evidence/extra/` | hojitea-ui | 워커힐 8개 업장과 경쟁 업장의 정의 파일 (이용 상황, 상품과 가격, 판매 단위, 운영 정보, 출처), 가상 예시 값 |
 | `data/evidence/`, `personas/` | borigunbbang | 후기를 요약하고 라벨을 붙인 결과, 라벨 값 목록, 페르소나 정의의 공개 층, LLM 프롬프트(`personas/prompts/`) |
-| `app/` | songyee-ai | Streamlit 화면. 새 결과 화면의 HTML·CSS·JS 는 `app/report/`, 배너 그림과 아이콘은 `app/static/` (T130) |
+| `app/` | songyee-ai | Streamlit 화면. 새 화면의 HTML·CSS·JS 는 결과 `app/report/`, 시나리오 만들기 `app/builder/`, 배너 그림과 아이콘은 `app/static/` (T130) |
 | `scenarios/` | songyee-ai | 상황 정의 (시연 시나리오) |
 | `slides/` | songyee-ai | 발표 자료 안내 (자료 자체는 11-20 부터 저장소 밖에서 주고받는다) |
 

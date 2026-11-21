@@ -1,0 +1,68 @@
+<div class="wh-builder">
+<a class="skip" href="#" data-scroll="main">본문으로 이동</a>
+  <header class="mast"><div class="wrap mast-in">
+    <a class="brand" href="#" data-scroll="main"><strong>WALKERHILL</strong><span>페르소나 시뮬레이터</span></a>
+    <p class="mast-note"><i data-icon="info"></i>금액은 모두 시뮬레이션이 낸 가상 값입니다</p>
+    <nav aria-label="시나리오 도구">
+      <button id="new-scenario" aria-current="page" title="지금 이 페이지입니다"><i data-icon="plus"></i>새 시나리오</button>
+      <button id="compare"><i data-icon="stack"></i>저장된 시나리오</button>
+      <div class="themes" role="group" aria-label="화면 밝기"><button data-theme="light" aria-label="밝은 화면"><i data-icon="sun"></i></button><button data-theme="dark" aria-label="어두운 화면"><i data-icon="moon"></i></button></div>
+    </nav>
+  </div></header>
+  <main id="main" class="wrap">
+    <div id="builder">
+      <div class="page-title"><div><h1>시나리오 만들기</h1><p>가격과 혜택을 바꿔 고객의 선택과 가상 매출이 어떻게 달라지는지 살펴보세요.</p></div>
+        <ol class="steps" id="steps" aria-label="진행 단계"></ol>
+      </div>
+      <section class="start" aria-labelledby="start-title">
+        <div class="section-line"><h2 id="start-title">시나리오 불러오기</h2><button class="small-btn" id="open-file" hidden><i data-icon="upload"></i>파일에서 불러오기</button></div>
+        <div id="presets" class="presets"></div>
+        <div class="start-foot"><span class="hint">누르면 아래 입력란에 채워집니다.</span><button id="browse-library" class="text-button">전체 보기 <i data-icon="arrow"></i></button></div>
+        <input id="import-file" type="file" hidden accept=".zip">
+        <div id="import-feedback" role="status" aria-live="polite"></div>
+      </section>
+      <div class="workspace">
+        <div class="form-column">
+          <section class="panel setup">
+            <div class="section-line"><h2>시나리오 설정</h2></div>
+            <label class="field"><span>시나리오 이름</span><input id="name" maxlength="140" required placeholder="예: 금룡 주말 가족 할인"></label>
+            <div class="field"><span>바꿀 쪽</span><div id="side" class="side-options" role="group" aria-label="바꿀 쪽"></div></div>
+            <div class="change-area"><div class="section-line"><h3>바꿀 것 <span class="count" id="change-count"></span></h3><button class="small-btn" id="add"><i data-icon="plus"></i>바꿀 것 추가</button></div>
+              <div id="changes"></div></div>
+          </section>
+          <section class="panel"><div class="section-line"><h2>방문할 페르소나 <span class="count" id="people-count"></span></h2><button id="all-people" class="text-button"></button></div>
+            <div id="people" class="people"></div>
+            <p class="note"><i data-icon="info"></i>한 고객군에서 한 명만 고르면 그 고객군의 가상 매출 전체가 그 사람의 선택으로 계산됩니다.</p>
+          </section>
+          <section class="panel"><div class="section-line"><h2>방문 조건과 기간</h2></div>
+            <div class="when-row"><div class="field"><span>요일</span><div class="chips" id="days" role="group" aria-label="요일"></div></div>
+              <div class="field"><span>이용 상황</span><div id="occasions" class="chips" role="group" aria-label="이용 상황"></div></div></div>
+            <div class="period"><div class="section-line"><h3>기간</h3><output id="period-label"></output></div>
+              <div id="period-mode" class="chips" role="group" aria-label="기간 선택 방식"></div><div id="months" class="months" role="group" aria-label="달 선택"></div><p class="hint" id="month-hint"></p></div>
+          </section>
+          <details class="panel advanced"><summary><span><i data-icon="sliders"></i>고급 설정</span><small id="advanced-label"></small><i data-icon="chevron"></i></summary>
+            <div class="advanced-fields">
+              <label class="field"><span>사용할 데이터</span><select id="data-mode" disabled></select><small id="data-mode-note"></small></label>
+              <label class="field"><span>AI 새로 부르기</span><select id="answer"><option value="replay">새로 부르지 않음 (저장된 응답만)</option><option value="ai">없으면 새로 부름</option></select><small>새 AI 응답은 담당자 PC에서만 받을 수 있습니다.</small></label>
+              <label class="field"><span>업장·페르소나 자료</span><select id="source"><option value="team">팀 자료</option><option value="practice">연습용 사본</option></select></label>
+              <label class="field"><span>AI 지시문 버전</span><select id="prompt"></select></label>
+            </div>
+          </details>
+        </div>
+        <aside class="summary panel" aria-labelledby="summary-title">
+          <div class="summary-head"><i data-icon="clipboard"></i><h2 id="summary-title">시나리오 요약</h2></div>
+          <div class="summary-body"><p class="sum-name" id="sum-name"></p><p class="sum-side" id="sum-side"></p>
+            <p id="run-state" class="run-state"></p><ul id="sum-changes"></ul><dl id="sum-details"></dl>
+            <div class="volume"><span>예상 방문 수</span><p><strong id="visits"></strong><b>건씩</b></p><small>기본 시나리오와 바꾼 뒤 각각</small></div>
+            <p id="calls" class="note"></p><div id="issues" aria-live="polite"></div>
+            <button id="run" class="primary run" aria-describedby="run-state issues">시뮬레이션 실행 <i data-icon="arrow"></i></button>
+            <button id="reset" class="secondary reset">처음부터 다시</button>
+          </div>
+        </aside>
+      </div>
+      <div class="mobile-bar"><span id="mobile-status"></span><button id="run-mobile" class="primary">시뮬레이션 실행 <i data-icon="arrow"></i></button></div>
+    </div>
+  </main>
+  <footer class="site-foot"><div class="wrap foot-in"><span class="foot-brand"><b>WALKERHILL</b>페르소나 시뮬레이터 · 2026</span><span class="foot-team">만든 사람 songyee-ai · wilstein91 · borigunbbang · hojitea-ui</span></div></footer>
+  <dialog id="modal" aria-labelledby="modal-title"><div class="dialog-head"><h2 id="modal-title"></h2><button class="icon-btn" id="close" aria-label="닫기"><i data-icon="close"></i></button></div><div class="dialog-body" id="dialog-body"></div><div class="dialog-foot" id="dialog-foot"></div></dialog>
+</div>

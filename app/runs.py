@@ -164,6 +164,14 @@ def _read_env(repo_root: Path) -> dict[str, str] | None:
     return {key: (value or "").strip() for key, value in dotenv_values(env_file).items()}
 
 
+def replay_only_pc(repo_root: Path) -> bool:
+    """이 PC 가 저장된 답을 재생만 하는가 (`.env` 의 `LLM_CALL_LIMIT=0`, CLAUDE.md "답을 받는 PC 는 엔진 담당의 PC 하나다").
+
+    값은 읽어서 0 인지만 본다. 시나리오 만들기 페이지(T130)가 "AI 새로 부르기"를 끌 때 쓴다.
+    """
+    return (_read_env(repo_root) or {}).get("LLM_CALL_LIMIT", "").strip() == "0"
+
+
 # 화면에서 고르는 AI 두 가지 (11-17, 화면 담당). 고른 것은 그 실행에만 넘기고 `.env` 는 고치지 않는다.
 # 모델 이름은 코드에 적지 않고 `.env` 에서 읽는다 (CLAUDE.md "스택"): 그 AI 의 모델 칸(`CLAUDE_MODEL`, `OPENAI_MODEL`)을
 # 먼저 보고, 없으면 `.env` 의 `LLM_PROVIDER` 가 그 AI 일 때의 `LLM_MODEL` 을 쓴다.

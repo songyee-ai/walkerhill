@@ -59,5 +59,9 @@ def render(repo_root: Path, builder_page: st.Page) -> None:
     if kind == "open_result" and action.get("result_id"):
         st.query_params["result"] = action["result_id"]
         st.rerun()
-    elif kind in ("open_builder", "edit"):
+    elif kind == "edit":
+        # 고쳐서 새로 만들기: 만들기 페이지가 이 결과로 입력을 채운다 (app/builder_page.py)
+        st.session_state["builder_preload"] = f"run/{record.result_id}"
+        st.switch_page(builder_page)
+    elif kind == "open_builder":
         st.switch_page(builder_page)
