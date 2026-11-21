@@ -106,6 +106,9 @@ class UsedConstant(FormatModel):
     sources: list[SourceRef] = Field(default_factory=list)
     checked_on: date
     file: Text
+    # 이 실행의 계산에 실제로 쓰였는가 (11-20 wilstein91 결정, T212·T130 ②). 가르는 규칙은 `engine/constants.py` 의 `RunUse` 와 FORMATS 10.1절.
+    # "값을 바꿨다면 결과가 달라졌는가"가 아니다. 이 칸이 생기기 전(11-20)의 실행 기록에는 없어 null 로 읽는다 (모름).
+    applied: bool | None = None
     # 11-20 전의 실행 기록은 출처를 글 한 줄(`source`)로 적었고, 그때 기록에 남은 상수는 모두 null 이었다. 읽을 때만 받고 쓰지 않는다.
     # 임시 호환이다 (`CLAUDE.md` "임시 허용"). 없애는 조건과 확인은 진행 문서 T212 의 완료 조건에 있다.
     source: None = Field(default=None, exclude=True)

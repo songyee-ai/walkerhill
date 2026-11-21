@@ -59,7 +59,8 @@ from engine.formats.run import (
 from engine.formats.scenario import BASELINE_ID, Scenario
 from engine.formats.summary import SUMMARY_COLUMNS, SummaryRow
 from engine.formats.venue import Venue
-from engine.scenarios import ScenarioError, apply_scenario
+from engine.scenarios import apply_with_prices
+from engine.weights import fill_prices, read_summary, summary_path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
@@ -275,6 +276,8 @@ class Checker:
     personas: dict[str, Persona] = field(default_factory=dict)
     conditions: ConditionBundle | None = None
     scenarios: dict[str, Scenario] = field(default_factory=dict)
+    sample_rows: list[SummaryRow] | None = field(default=None, init=False)  # 상황을 적용해 볼 때 단가를 채우는 가상 예시 값
+    sample_rows_unread: bool = field(default=False, init=False)  # 가상 예시 값을 읽지 못해 채우지 않고 적용했는가
 
     # 깃 저장소의 맨 위를 보는가. 아니면(예시 묶음과 그 사본) 깃이 맨 위에서만 무시하는 실행 폴더도 검사한다.
     at_repo_root: bool = field(init=False)
@@ -657,6 +660,8 @@ class Checker:
 
             known_products = products[venue.venue_id]
             known_promos = promos[venue.venue_id]
+            # 지도로 잰 출처(T221)는 거리에만 쓴다. 상황이 더하는 상품·프로모션도 같다.
+            measured = {s.source_id for s in venue.sources if s.kind == "measurement"}
             if change.op in ("set_price", "remove_product") or (
                 change.op == "change_price_pct" and change.product_id is not None
             ):
@@ -672,6 +677,8 @@ class Checker:
                     self.error(path, f"{where} — 상품의 occasion 이 업장의 occasions 에 없다")
                 if product.source_id is not None and product.source_id not in {s.source_id for s in venue.sources}:
                     self.error(path, f"{where} — 상품의 source_id 가 업장의 sources 에 없다")
+                if product.source_id in measured:
+                    self.error(path, f"{where} — 상품의 출처가 measurement 자료다 (지도로 잰 출처는 거리에만 쓴다)")
                 known_products.add(product.product_id)
             elif change.op == "add_promotion":
                 promotion = change.promotion
@@ -684,6 +691,8 @@ class Checker:
                     s.source_id for s in venue.sources
                 }:
                     self.error(path, f"{where} — 프로모션의 source_id 가 업장의 sources 에 없다")
+                if promotion.source_id in measured:
+                    self.error(path, f"{where} — 프로모션의 출처가 measurement 자료다 (지도로 잰 출처는 거리에만 쓴다)")
                 known_promos.add(promotion.promo_id)
             elif change.op == "remove_promotion":
                 if change.promo_id not in known_promos:
@@ -692,11 +701,27 @@ class Checker:
 
         # 하나씩 볼 때는 맞아도 다 적용한 업장 정의가 3절의 규칙에 어긋날 수 있다 (예: 뺀 상품을 가리키는 프로모션이 남는다).
         # 엔진이 실행할 때와 같은 코드로 적용해 본다. 위에서 이미 오류를 적었으면 겹쳐 적지 않는다.
+        # 엔진은 가격이 빈 상품을 먼저 채우고 적용하므로(T223), 가상 예시 값으로 채운 단가 위에 적용한다.
+        # 기본 데이터로 돌릴 때 채우지 못하는 상품을 퍼센트로 바꾸라고 했으면 그때 엔진이 멈춘다.
         if len(self.problems) == before:
             try:
-                apply_scenario(self.venues, scenario)
-            except ScenarioError as exc:
-                self.error(path, str(exc))
+                apply_with_prices(self.venues, scenario, self._sample_rows(), "sample")
+            except ValueError as exc:  # ScenarioError 와, 더한 상품의 단위가 집계 파일과 달라 채우지 못할 때
+                # 단가를 채우지 않고 적용했으면 엔진과 결과가 다를 수 있어, 오류가 그 때문일 수 있다고 함께 적는다.
+                unread = " (가상 예시 값을 읽지 못해 단가를 채우지 않고 적용함)" if self.sample_rows_unread else ""
+                self.error(path, f"{exc}{unread}")
+
+    def _sample_rows(self) -> list[SummaryRow]:
+        """상황을 적용해 볼 때 단가를 채울 가상 예시 값. 없거나 읽지 못하면 채우지 않는다 (그 오류는 가상 예시 값의 검사가 적는다)."""
+        if self.sample_rows is None:
+            try:
+                rows = read_summary(summary_path(self.root, "sample"))
+                fill_prices(self.venues, rows, "sample")
+            except (FileNotFoundError, ValueError):
+                rows = []
+                self.sample_rows_unread = True
+            self.sample_rows = rows
+        return self.sample_rows
 
     def _products_in(self, scenario_id: str) -> dict[str, set[str]]:
         """그 상황에서 업장마다 있을 수 있는 상품 (기준의 상품과 상황이 더한 상품)."""
@@ -1050,6 +1075,29 @@ class Checker:
             method = "mixed" if kinds == {True, False} else "scores" if kinds == {True} else "single"
             if method != record.share_method:
                 self.error(path, f"원장으로 다시 낸 몫 방식은 {method} 인데 실행 기록의 share_method 는 {record.share_method} 다")
+        # 상수마다 이 실행의 계산에 쓰였는가(10.1절의 applied, T212): 엔진은 모두 적는다. 11-20 전의 기록은 모두 비어 있다.
+        # 실행 기록과 원장으로 다시 낼 수 있는 것(채운 단가, 요약, 몫)은 견준다.
+        applied = [item.applied for item in record.constants or []]
+        if None in applied and any(value is not None for value in applied):
+            self.error(path, "실행 기록의 constants 에 applied 가 적힌 상수와 없는 상수가 섞여 있다 (엔진은 모두 적는다)")
+        elif applied and None not in applied:
+            ok_rows = [row for visit_rows in visits.values() for _, row in visit_rows if row.status == "ok"]
+            scored_venues = {row.venue_id for row in ok_rows if row.score is not None and row.venue_id}
+            for item in record.constants or []:
+                if item.constant_id == "filled-price-unit":
+                    expected = bool(record.filled_products)
+                elif item.constant_id == "base-profile-top-products":
+                    expected = record.base_profile_mode != "none"
+                elif item.constant_id.startswith("base-profile-bucket-"):
+                    expected = record.base_profile_mode == "bucketed"
+                elif item.constant_id == SHARPNESS_ID:
+                    expected = any(row.score is not None for row in ok_rows)
+                elif item.constant_id.startswith(VENUE_CONSTANT_PREFIX):
+                    expected = item.constant_id.removeprefix(VENUE_CONSTANT_PREFIX) in scored_venues
+                else:
+                    continue
+                if item.applied != expected:
+                    self.error(path, f"결정 상수 '{item.constant_id}' 의 applied 가 {item.applied} 인데 실행 기록과 원장으로 다시 내면 {expected} 다")
         if record.status == "ok":
             planned = {
                 f"{persona_id}{VISIT_ID_SEPARATOR}{condition_id}"
