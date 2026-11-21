@@ -298,6 +298,29 @@ def group_people(
     )
 
 
+def blank_people_kinds(
+    rows: list[SummaryRow],
+    conditions: list[Condition],
+    splits: list[AssumedSplit],
+    venues: dict[str, Venue],
+    month: int | None = None,
+) -> set[str]:
+    """`group_people` 이 인원이 빈 칸인 줄을 결정 상수로 센 갈래: `takeout`(포장)과 `other`(추가 상품). 실행 기록의 `applied` 에 쓴다 (T212).
+
+    `group_people` 과 같은 줄을 본다: 그 달의 줄, 읽은 워커힐 업장의 줄, 돌리는 조건에 드는 몫이 있는 줄.
+    한 개당 0 명이라 인원이 0 이 되는 줄도 든다 (그 상수로 0 으로 센 것이다).
+    """
+    split = next((s for s in splits if s.split_id == MEAL_SPLIT_ID), None)
+    ours = {venue_id: venue for venue_id, venue in venues.items() if not venue.is_competitor}
+    found: set[str] = set()
+    for row in rows:
+        if row.people is not None or row.venue_id not in ours or (month is not None and row.month != month):
+            continue
+        if any(condition_id is not None for condition_id, _, _ in _parts(row, conditions, split, ours)):
+            found.add("takeout" if row.occasion == "takeout" else "other")
+    return found
+
+
 def group_venue_revenue(
     rows: list[SummaryRow], conditions: list[Condition], splits: list[AssumedSplit], venues: dict[str, Venue]
 ) -> dict[str, dict[str, float]]:

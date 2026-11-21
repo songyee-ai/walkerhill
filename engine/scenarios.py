@@ -2,6 +2,7 @@
 
 상황은 업장 정의 파일을 고치지 않는다. 읽어 둔 업장 정의의 사본에 `changes` 를 순서대로 적용해 돌려준다.
 적용한 뒤의 업장 정의도 업장 정의의 규칙(3절)을 지켜야 한다. 어긋나면 틀린 금액을 내지 않고 멈춘다.
+엔진은 가격이 빈 상품의 단가를 먼저 채우고 상황을 적용한다 (`apply_with_prices`, docs/FORMATS.md 3절, T223).
 """
 
 import json
@@ -20,7 +21,9 @@ from engine.formats.scenario import (
     Scenario,
     SetPrice,
 )
+from engine.formats.summary import SummaryRow
 from engine.formats.venue import Venue
+from engine.weights import fill_prices
 
 
 class ScenarioError(ValueError):
@@ -108,3 +111,39 @@ def apply_scenario(venues: dict[str, Venue], scenario: Scenario) -> dict[str, Ve
                 f"상황 '{scenario.scenario_id}' 를 적용한 업장 '{venue_id}' 의 정의가 형식에 어긋난다: {problems}"
             ) from exc
     return applied
+
+
+def apply_with_prices(
+    venues: dict[str, Venue], scenario: Scenario, rows: list[SummaryRow], data_mode: str
+) -> tuple[dict[str, Venue], list[str]]:
+    """가격이 빈 상품의 단가를 집계 파일로 채우고, 그 위에 상황을 적용한다 (docs/FORMATS.md 3절·7절, T223).
+
+    순서: 단가 채우기 → 상황 적용 → 상황이 더한 가격 빈 상품 채우기.
+    그래서 `change_price_pct` 가 채운 단가에도 걸린다 (11-20 까지는 상황을 먼저 적용해, 업장 전체를 올려도 채운 단가는 그대로였다).
+    `set_price` 로 값을 정한 상품은 채운 상품이 아니다. 채울 때 붙인 등급과 가격 표기를 업장 정의의 것으로 되돌리고
+    `filled_products` 에서 뺀다 (상황을 먼저 적용하던 때와 같은 결과). 상황이 뺀 상품도 목록에서 뺀다.
+    돌려주는 것: 적용한 업장 정의(받은 것은 고치지 않는다), 채운 상품의 목록(`<venue_id>:<product_id>`).
+    """
+    prefilled, filled = fill_prices(venues, rows, data_mode)
+    applied = apply_scenario(prefilled, scenario)
+    still_filled = set(filled)
+    restore: set[tuple[str, str]] = set()  # 값을 정해 등급과 표기를 되돌릴 상품
+    for change in scenario.changes:
+        if not isinstance(change, (SetPrice, RemoveProduct)):
+            continue
+        key = f"{change.venue_id}:{change.product_id}"
+        if isinstance(change, SetPrice) and key in still_filled:
+            restore.add((change.venue_id, change.product_id))
+        elif isinstance(change, RemoveProduct):
+            restore.discard((change.venue_id, change.product_id))
+        still_filled.discard(key)
+    for venue_id, product_id in sorted(restore):
+        original = venues[venue_id].product(product_id)
+        products = [
+            p.model_copy(update={"price_basis": original.price_basis, "grade": original.grade}) if p.product_id == product_id else p
+            for p in applied[venue_id].products
+        ]
+        applied[venue_id] = applied[venue_id].model_copy(update={"products": products})
+    # 상황이 더한 상품 가운데 가격이 빈 것을 채운다. 처음에 채우지 못한 상품은 집계가 같아 이번에도 채워지지 않는다.
+    refilled, added = fill_prices(applied, rows, data_mode)
+    return refilled, sorted(still_filled | set(added))
