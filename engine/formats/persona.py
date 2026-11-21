@@ -19,6 +19,7 @@ from engine.formats.codes import (
     Level,
     Meal,
     Occasion,
+    Segment,
     Text,
     Won,
     has_duplicates,
@@ -32,7 +33,7 @@ REASON_EVIDENCE_KEYS = ("visit", "preferences", "buying")
 
 
 class ShareInGroup(FormatModel):
-    """고객군 안의 몫. 한 고객군의 페르소나 몫을 더하면 1 이어야 한다."""
+    """고객군 안의 몫. 같은 무리(`segment`)의 한 고객군 페르소나 몫을 더하면 1 이어야 한다 (11-20 T220)."""
 
     value: float = Field(ge=0, le=1)
     grade: Grade
@@ -124,6 +125,8 @@ class Persona(FormatModel):
     format_version: Literal[1]
     persona_id: Id
     name: Text
+    # 속한 무리 (11-20 T220). 적지 않으면 워커힐 고객이다. 엔진은 3단계 전까지 워커힐 고객만 돌린다 (`engine.runner.RUN_SEGMENTS`).
+    segment: Segment = "walkerhill"
     customer_group: Text
     share_in_group: ShareInGroup
     visit: Visit
@@ -151,7 +154,8 @@ class Persona(FormatModel):
 
 
 # 비공개 층에 적을 수 있는 맨 위의 키. 식별에 쓰는 두 키와 내용 키다.
-PRIVATE_LAYER_KEYS = frozenset(Persona.model_fields) - {"overridden_by_private"}
+# 무리(`segment`)는 공개 층에만 적는다. 어느 페르소나를 돌리고 기본 데이터와 맞출지가 가상 예시와 기본 데이터에서 같아야 한다 (11-20 T220).
+PRIVATE_LAYER_KEYS = frozenset(Persona.model_fields) - {"overridden_by_private", "segment"}
 
 # 페르소나 형식의 판. 비공개 층에도 같은 값을 적는다.
 PERSONA_FORMAT_VERSION = 1
