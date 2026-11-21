@@ -71,6 +71,29 @@ def _ids(folder: Path) -> list[str]:
     return sorted(path.stem for path in folder.glob("*.json")) if folder.is_dir() else []
 
 
+# 3단계 전에 엔진이 돌리는 무리. 칸이 없으면 이것이다 (FORMATS.md 5절의 "무리 `segment`", engine/formats/persona.py).
+RUNNABLE_SEGMENT = "walkerhill"
+
+
+def runnable_persona(path: Path) -> bool:
+    """3단계 전에 돌릴 수 있는 페르소나 파일인가 (11-20 T220).
+
+    경쟁 호텔 고객(`segment: rival`) 같은 다른 무리를 `--personas` 로 가리키면 엔진이 멈춘다.
+    화면은 그 파일을 고르기·"모두 고르기"에 넣지 않는다. 읽을 수 없는 파일은 지금처럼 넘겨 엔진의 형식 오류로 보이게 한다.
+    """
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return True
+    return not isinstance(data, dict) or data.get("segment", RUNNABLE_SEGMENT) == RUNNABLE_SEGMENT
+
+
+def persona_ids(root: Path) -> list[str]:
+    """화면에서 고를 수 있는 페르소나: `personas/` 의 정의 가운데 3단계 전에 엔진이 돌리는 무리만."""
+    folder = root / "personas"
+    return [path.stem for path in sorted(folder.glob("*.json")) if runnable_persona(path)] if folder.is_dir() else []
+
+
 @dataclass
 class Choices:
     """폴더에 있어 고를 수 있는 것."""
@@ -100,7 +123,7 @@ def choices(root: Path) -> Choices:
     """돌릴 수 있는 상황, 페르소나, 방문 조건, 업장, 프롬프트. 모자란 것은 `missing` 에 문장으로 적는다."""
     found = Choices(
         scenarios=_ids(root / "scenarios"),
-        personas=_ids(root / "personas"),
+        personas=persona_ids(root),
         venues=_ids(root / "data" / "venues"),
         prompts=prompt_versions(root),
     )

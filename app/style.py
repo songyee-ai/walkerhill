@@ -96,7 +96,7 @@ HEADER_NOTE = (
 
 def header() -> None:
     """머리글. 제목과 "가상" 안내는 테스트가 보는 Streamlit 요소(제목, 첫 캡션) 그대로 둔다 (tests/test_app.py)."""
-    st.html('<div class="app-eyebrow">WALKERHILL DINING · PERSONA SIMULATOR</div>')
-    st.title("워커힐 다이닝 페르소나 시뮬레이터")
+    st.html('<div class="app-eyebrow">WALKERHILL F&amp;B · PERSONA SIMULATOR</div>')
+    st.title("워커힐 F&B 페르소나 시뮬레이터")
     # 공식 가격은 출처가 있는 실제 공개 가격이라 "가상"이 아니다. "가상"은 시뮬레이션이 낸 금액에만 붙인다 (11-18 팀장 회신, PR 174)
     st.caption(HEADER_NOTE)

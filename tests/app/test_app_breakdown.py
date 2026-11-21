@@ -20,7 +20,7 @@ from app.breakdown import (  # noqa: E402
     Breakdown,
     Group,
     VenueBreakdown,
-    average,
+    add_up,
     load_breakdown,
     share_text,
 )
@@ -98,14 +98,17 @@ def test_breakdown_is_dropped_when_it_does_not_match_the_ledgers(tmp_path: Path)
     assert compare(load_run(runs / BASE), load_run(runs / SCEN)).breakdown is None
 
 
-def test_months_are_averaged_and_a_missing_month_drops_the_breakdown():
+def test_months_are_added_and_a_missing_month_drops_the_breakdown():
+    # 기간의 값은 달마다의 합이다 (FORMATS.md 10.1절 "여러 달을 합치는 법", T216. 11-20 까지는 달 평균).
     comparison = compare(load_run(RUNS / BASE), load_run(RUNS / SCEN))
     found = comparison.breakdown
     assert found is not None
-    twice = average([found, found])
-    assert [g.amount for g in twice.groups] == [g.amount for g in found.groups] and twice.before == found.before
-    assert combine_months([(11, comparison), (12, comparison)]).breakdown is not None
-    # 한 달이라도 나누기가 없으면 평균을 내지 않는다 (빠진 달이 0 으로 섞이면 갈래가 작아 보인다).
+    twice = add_up([found, found])
+    assert [g.amount for g in twice.groups] == [2 * g.amount for g in found.groups]
+    assert twice.before == 2 * found.before and twice.total == 2 * found.total
+    assert [v.after for v in twice.venues] == [2 * v.after for v in found.venues]
+    assert combine_months([(11, comparison), (12, comparison)]).breakdown == twice
+    # 한 달이라도 나누기가 없으면 더하지 않는다 (빠진 달이 0 으로 섞이면 갈래가 작아 보인다).
     missing = compare(load_run(RUNS / BASE), load_run(RUNS / SCEN))
     missing.breakdown = None
     assert combine_months([(11, comparison), (12, missing)]).breakdown is None

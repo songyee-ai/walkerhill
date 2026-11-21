@@ -67,7 +67,7 @@ def money_table(rows: list[dict]) -> None:
     st.dataframe(rows, hide_index=True, column_config=money)
 
 
-st.set_page_config(page_title="워커힐 다이닝 페르소나 시뮬레이터", layout="wide")
+st.set_page_config(page_title="워커힐 F&B 페르소나 시뮬레이터", layout="wide")
 style.inject()
 style.header()
 

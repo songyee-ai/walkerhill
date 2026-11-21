@@ -82,18 +82,15 @@ def test_persona_without_review_numbers_for_reasons_is_flagged():
     assert marks["방문 모습"] == marks["기호와 제약"] == marks["구매 성향"] == "후기 없음"
 
 
-def test_weights_show_grades_and_hide_base_data_numbers():
-    # 가중치와 묶음 비율의 근거 등급 (T22 완료 조건 3). 기본 데이터 실행의 수치는 PRD 17절의 결정 전까지 가린다.
+def test_weights_show_grades_and_base_data_numbers():
+    # 가중치와 묶음 비율의 근거 등급 (T22 완료 조건 3). 11-20 가림을 거둬 기본 데이터 실행의 수치도 그대로 보인다 (T131).
     [run_id] = baseline_runs(EXAMPLE_RUNS)[:1]
     record = load_run(EXAMPLE_RUNS / run_id).record
     tables = weight_rows(record, {})
     assert set(tables) == {"고객군 배수", "페르소나 가중치", "묶음 비율"}
     assert all(row["근거 등급"] for rows in tables.values() for row in rows)
-    assert tables["고객군 배수"][0]["고객군 배수"] != "가림"  # 가상 예시 값은 보인다
     private = record.model_copy(update={"data_mode": "private"})
-    hidden = weight_rows(private, {})
-    assert {row["고객군 배수"] for row in hidden["고객군 배수"]} == {"가림"}
-    assert [r["근거 등급"] for r in hidden["묶음 비율"]] == [r["근거 등급"] for r in tables["묶음 비율"]]
+    assert weight_rows(private, {}) == tables
 
 
 def test_product_notes_name_filled_and_skipped_products():

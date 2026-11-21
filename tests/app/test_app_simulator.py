@@ -179,8 +179,8 @@ def test_months_between_wraps_the_year():
     assert months_text([]) == "일 년 전체"
 
 
-def test_months_are_averaged_not_added(tmp_path: Path):
-    # 달마다의 비교를 합칠 때 매출은 더하지 않고 평균한다. 엔진은 달마다 일 년 합계에 맞추기 때문이다 (FORMATS 10.1절).
+def test_months_are_added_not_averaged(tmp_path: Path):
+    # 달마다의 비교를 합칠 때 매출과 방문은 더한다. 달마다 그 달의 인원으로 무게를 내기 때문이다 (FORMATS 10.1절 "여러 달을 합치는 법", T216).
     from app.compare import combine_months
 
     root = _copy(tmp_path)
@@ -190,9 +190,9 @@ def test_months_are_averaged_not_added(tmp_path: Path):
     )  # fmt: skip
     one = compare(load_run(result.baseline.run_dir), load_run(result.scenario.run_dir))
     both = combine_months([(11, one), (12, one)])
-    assert both.total_before == one.total_before and both.total_after == one.total_after
+    assert both.total_before == 2 * one.total_before and both.total_after == 2 * one.total_after
     assert [m.condition for m in both.moves] == [f"{one.moves[0].condition} · 11월", f"{one.moves[0].condition} · 12월"]
-    assert sum(m.represented for m in both.moves) == one.moves[0].represented
+    assert [m.represented for m in both.moves] == [one.moves[0].represented] * 2  # 방문은 (방문, 달)마다 따로 센다
 
 
 def _one_month(tmp_path: Path):
@@ -204,8 +204,8 @@ def _one_month(tmp_path: Path):
     return compare(load_run(result.baseline.run_dir), load_run(result.scenario.run_dir))
 
 
-def test_venue_change_rate_comes_from_averaged_amounts(tmp_path: Path):
-    # 업장별 변화율은 달마다의 비율을 평균하지 않고, 금액을 평균한 뒤에 낸다 (11-17 팀장 요청).
+def test_venue_change_rate_comes_from_added_amounts(tmp_path: Path):
+    # 업장별 변화율은 달마다의 비율을 평균하지 않고, 더한 금액으로 다시 낸다 (11-17 팀장 요청, T216).
     from dataclasses import replace
 
     from app.board import pct_change
@@ -215,12 +215,12 @@ def test_venue_change_rate_comes_from_averaged_amounts(tmp_path: Path):
     nov = replace(one, venues=[VenueChange("geumryong", "금룡", 100, 50)])
     dec = replace(one, venues=[VenueChange("geumryong", "금룡", 300, 300)])
     [venue] = combine_months([(11, nov), (12, dec)]).venues
-    assert (venue.before, venue.after) == (200, 175)
-    assert pct_change(venue.before, venue.after) == pct_change(200, 175) != pct_change(1, 0.75 - 0.5)
+    assert (venue.before, venue.after) == (400, 350)
+    assert pct_change(venue.before, venue.after) == pct_change(400, 350) != pct_change(1, 0.75 - 0.5)
 
 
 def test_zero_multiplier_groups_are_reported_with_their_month(tmp_path: Path):
-    # 그 달에 워커힐을 고른 방문이 없는 고객군은 배수가 0 이다. 평균이 낮아지므로 화면에 달과 함께 알린다 (11-17 팀장 요청).
+    # 그 달에 인원이 없는 고객군은 배수가 0 이다. 합에서 그 달 몫이 빠지므로 화면에 달과 함께 알린다 (11-17 팀장 요청, T216).
     from dataclasses import replace
 
     from app.compare import zero_groups
@@ -254,12 +254,11 @@ def test_one_persona_by_default_and_a_button_for_all():
     assert persona_scope(6, 6) == "페르소나 6명 모두"
 
 
-def test_period_note_says_equal_weights_are_an_assumption():
-    # 기간의 달을 같은 무게로 평균한 것은 설계 가정이라고 적는다 (11-17 팀장 회신 ①, T206).
-    # 11-19 T210 뒤로 달마다 그 달의 인원으로 무게를 내므로, 금액은 일 년 규모가 아니라 한 달 평균이라고 적는다 (T127).
+def test_period_note_says_months_are_added():
+    # 기간은 달마다 돌려 더하고 변화율은 더한 금액으로 다시 낸다고 적는다 (T216. 11-17 ~ 11-20 에는 "달 평균"이라고 적었다).
     from app.simulator import period_note
 
     note = period_note([11, 12, 1, 2])
     assert note.startswith("11월 ~ 2월 (4개월)")
-    assert "같은 무게로 평균한 것은 설계 가정" in note and "한 달 평균" in note
-    assert "일 년 규모" not in note
+    assert "더했습니다" in note and "더한 금액으로 다시" in note
+    assert "평균" not in note and "일 년 규모" not in note and "일 년 기준" not in note

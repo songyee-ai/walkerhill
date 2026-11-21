@@ -1,7 +1,8 @@
-"""기본 데이터로 돌린 실행에서 금액·손님 수·채운 단가를 가린다 (PRD 17절, 11-18 팀장 회신. 정하기 전에도 가리는 쪽이 기본).
+"""기본 데이터로 돌린 실행도 화면이 수치를 가리지 않는다 (11-20 넷이 동의해 가림을 거둠, T131. 그 전 11-18 ~ 11-20 에는 가렸다).
 
 예시 실행 둘을 임시 폴더에 베껴 `data_mode` 를 `private` 으로, 기준 실행에서 고른 상품 하나를 `filled_products` 로 바꿔 본다.
 값은 모두 예시 묶음의 지어낸 값이다. 실제 기본 데이터로 돌린 실행은 쓰지 않는다.
+가림 함수(`mask_amounts`, `masked=True` 로 그리는 그림과 표)는 새 화면으로 옮길 때(T130) 지운다. 그때까지 함수 자체의 테스트는 둔다.
 """
 
 import csv
@@ -66,20 +67,16 @@ def test_index_is_100_at_the_baseline():
     assert index_text(0, 5) == "새로 생김" and index_text(0, 0) == "없음"
 
 
-def test_private_run_hides_filled_prices_but_sample_run_does_not(tmp_path: Path):
+def test_private_run_shows_filled_prices_like_a_sample_run(tmp_path: Path):
+    # 11-18 ~ 11-20 에는 채운 단가가 든 금액을 "가격 미확인"으로 가렸다. 가림을 거둬 기본 데이터 실행도 금액을 그대로 보인다 (T131).
     runs, filled = _private_copy(tmp_path)
     base = load_run(runs / BASE)
-    assert not shows_numbers(base.record)
+    assert shows_numbers(base.record)
     view = visit_view(base, PERSONA, CONDITION)
-    assert view.hidden and all(line.hidden for line in view.lines)
-    [row] = [r for r in visit_table(base) if r["낸 금액 (가상, 원)"] == FILLED_PRICE]
-    assert row["워커힐 매출 (가상, 세금 뺀 원)"] == FILLED_PRICE
-    # 상황 실행에서는 그 업장을 고르지 않았다. "가장 싼 주문"에 채운 단가가 들 수 있어 가린다.
+    assert not view.hidden and not any(line.hidden for line in view.lines)
+    assert not [r for r in visit_table(base) if FILLED_PRICE in (r["낸 금액 (가상, 원)"], r["워커힐 매출 (가상, 세금 뺀 원)"])]
     scen_view = visit_view(load_run(runs / SCEN), PERSONA, CONDITION)
-    hidden = [item for item in scen_view.not_chosen if item.hidden]
-    assert len(hidden) == 1 and filled.startswith("geumryong:") and hidden[0].venue == "금룡"
-    assert not scen_view.hidden  # 고른 경쟁 업장의 금액은 공식 가격이라 그대로 보인다
-    # 가상 예시 값 실행은 지어낸 값이라 아무것도 가리지 않는다.
+    assert filled.startswith("geumryong:") and not any(item.hidden for item in scen_view.not_chosen)
     sample = load_run(RUNS / BASE)
     assert shows_numbers(sample.record) and not visit_view(sample, PERSONA, CONDITION).hidden
 
@@ -100,30 +97,26 @@ def test_masked_picture_shows_change_rates_not_amounts(tmp_path: Path):
     assert "(가상 · 일 년 규모)" in plain and "지수 100" not in plain
 
 
-def test_detail_tab_shows_masked_cells_without_error(tmp_path: Path):
+def test_detail_tab_shows_base_data_numbers_without_error(tmp_path: Path):
     runs, _ = _private_copy(tmp_path)
     app = AppTest.from_file(str(REPO_ROOT / "app" / "main.py"), default_timeout=60).run()
     app.text_input(key="other_folder").set_value(str(runs)).run()
     app.selectbox(key="run_id").set_value(BASE).run()
     assert not app.exception
-    assert any(m.value == FILLED_PRICE_SHORT for m in app.metric)  # 큰 숫자 칸은 짧게, 까닭은 도움말에
+    assert not any(m.value == FILLED_PRICE_SHORT for m in app.metric)
     cells = [str(v) for frame in app.dataframe for v in frame.value.to_numpy().ravel()]
-    assert FILLED_PRICE in cells
+    assert FILLED_PRICE not in cells
 
 
-def test_calibration_shows_pass_and_top_match_but_hides_numbers_for_base_data(tmp_path: Path):
-    # 보정 결과(T116)는 근거 보기에서 읽는다. 기본 데이터 실행이면 통과·미달과 가장 큰 업장이 같은지만 보인다 (PRD 17절).
+def test_calibration_shows_the_same_columns_for_base_data_and_sample(tmp_path: Path):
+    # 보정 결과(T116)는 근거 보기에서 읽는다. 11-20 가림을 거둬 기본 데이터 실행도 가장 큰 차이까지 보인다 (T131).
     runs, _ = _private_copy(tmp_path)
     calibration = load_calibration(runs / BASE)
     assert calibration is not None
     private = calibration_rows(calibration, load_run(runs / BASE).record, {})
     sample = calibration_rows(calibration, load_run(RUNS / BASE).record, {})
-    assert private and len(private) == len(sample)
-    for row in private:
-        assert set(row) == {"고객군", "페르소나 수", "가장 큰 업장이 같음", "업장별 비중 차이", "결과"}
-        assert row["결과"] in ("통과", "미달") and row["가장 큰 업장이 같음"] in ("예", "아니오")
-    # 가상 예시 값은 지어낸 값이라 어느 업장인지와 가장 큰 차이까지 보인다.
-    assert all("가장 큰 차이 (%p)" in row for row in sample)
+    assert private and [set(row) for row in private] == [set(row) for row in sample]
+    assert all("가장 큰 차이 (%p)" in row for row in private)
 
 
 def test_amounts_in_text_are_masked():
@@ -147,21 +140,13 @@ def _put_amount_in_reason(run_dir: Path) -> None:
         writer.writerows(rows)
 
 
-def test_reason_amounts_are_masked_only_when_the_visit_bought_a_filled_price(tmp_path: Path):
-    # 11-18 borigunbbang: 금액 칸은 "가격 미확인"인데 바로 아래 AI 의 이유 문장에 채운 단가로 계산한 금액이 그대로 보였다.
+def test_reason_amounts_are_shown_for_base_data_too(tmp_path: Path):
+    # 11-18 ~ 11-20 에는 채운 단가가 든 방문의 이유 문장 속 금액도 가렸다 (borigunbbang 이 찾음). 가림을 거둬 그대로 보인다 (T131).
     runs, _ = _private_copy(tmp_path)
     _put_amount_in_reason(runs / BASE)
     view = visit_view(load_run(runs / BASE), PERSONA, CONDITION)
-    assert view.hidden and "48,300원" not in view.reason_text and MASKED_IN_TEXT in view.reason_text
-    # 모든 방문 표와 비교(식당가 그림, 한 사람씩 자세히 보기)도 같은 이유를 쓴다.
-    assert all("48,300원" not in row["고른 이유"] for row in visit_table(load_run(runs / BASE)))
-    comparison = compare(load_run(runs / BASE), load_run(runs / SCEN))
-    assert all("48,300원" not in (m.reason_after or "") for m in comparison.moves)
-    # 가상 예시 값 실행은 가리지 않는다.
-    sample = tmp_path / "sample"
-    shutil.copytree(RUNS, sample)
-    _put_amount_in_reason(sample / BASE)
-    assert "48,300원" in visit_view(load_run(sample / BASE), PERSONA, CONDITION).reason_text
+    assert "48,300원" in view.reason_text and MASKED_IN_TEXT not in view.reason_text
+    assert any("48,300원" in row["고른 이유"] for row in visit_table(load_run(runs / BASE)))
 
 
 def test_one_persona_groups_carry_the_calibration_limit(tmp_path: Path):
@@ -201,20 +186,17 @@ def test_validation_shows_higher_or_lower_instead_of_counts_for_base_data():
     assert plain[0]["고른 업장이 같음"] == "12건 중 8건"  # 가상 예시 값 실행은 지금처럼 건수
 
 
-def test_engine_output_hides_people_coverage_from_base_data():
-    # 11-19 T210 뒤로 엔진이 "페르소나가 있는 고객군이 차지하는 인원의 몫"을 남긴다. 기본 데이터에서 낸 비율이라
-    # 기본 데이터 실행에서는 "엔진이 남긴 말"에서도 가린다 (T127). 나머지 말은 고쳐 쓰지 않는다 (팀장 요청, 11-16). 값은 지어낸 것이다.
+def test_engine_output_is_shown_as_it_is_for_base_data_too():
+    # 11-19 ~ 11-20 에는 엔진이 남긴 "인원 가운데 NN%" 를 기본 데이터 실행에서 가렸다 (T127). 가림을 거둬 남긴 말을 그대로 보인다 (T131).
+    # 값은 지어낸 것이다.
     said = (
         "공급자 claude-code · 모델 claude-opus-5-5 · 프롬프트 p3\n"
         "페르소나가 있는 고객군이 집계 파일의 인원 가운데 61.3% 를 차지한다 (나머지 고객군은 시뮬레이션에 나오지 않는다)\n"
         "방문 48건 (실패 0건) · 새로 부름 0번 · 재생 48번 · 호출 상한 0번"
     )
-    hidden = engine_output_for_screen(said, "private")
-    assert "61.3%" not in hidden and f"인원 가운데 {MASKED_SHARE} 를 차지한다" in hidden
-    assert hidden.replace(f"인원 가운데 {MASKED_SHARE}", "인원 가운데 61.3%") == said  # 그 밖은 한 글자도 바뀌지 않는다
-    assert engine_output_for_screen(said, None) == hidden  # 어느 자료였는지 모르면 가린다
-    assert engine_output_for_screen(said, "sample") == said  # 가상 예시 값은 그대로
-    assert engine_output_for_screen("", "private") == ""
+    for mode in ("private", None, "sample"):
+        assert engine_output_for_screen(said, mode) == said
+    assert MASKED_SHARE not in engine_output_for_screen(said, "private")
 
 
 def test_masked_amount_note_no_longer_says_revenue_was_fitted():
