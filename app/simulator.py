@@ -15,6 +15,7 @@ from app.board import WALKERHILL_NAMES, index_text, pct_change, venue_cards
 from app.breakdown import NO_FILE_NOTE, PART_LABEL, Breakdown, share_text
 from app.compare import Comparison, combine_months, compare, summary_groups, zero_groups
 from app.icons import as_img, persona_icon
+from app.result_store import Pair, new_record, save_record
 from app.results import (
     FILLED_PRICE,
     MASKED_AMOUNT_NOTE,
@@ -488,6 +489,15 @@ def render(repo_root: Path) -> None:
                             month=month,
                         )
                     results.append((month, result))
+                # 새 결과 화면(T130)이 한 결과로 열 수 있게, 달마다의 기준·상황 실행 짝을 묶어 적어 둔다 (app/result_store.py)
+                pairs = [
+                    Pair(month, r.baseline.run_dir.name, r.scenario.run_dir.name)
+                    for month, r in results
+                    if r.ok and r.baseline.run_dir is not None
+                ]
+                if pairs and inputs.scenario_id:
+                    folder = next(r.scenario.run_dir.parent for _, r in results if r.ok)
+                    save_record(repo_root, new_record(repo_root, folder, inputs.data_mode, inputs.scenario_id, pairs))
                 # 방금 돌린 실행을 상세 분석의 "실행 (새것이 위)"에서 고른 상태로 둔다. 그러지 않으면 전에 고른 실행이
                 # 그대로 남아 새로고침 전까지 예전 실행이 보였다 (11-17 업장 데이터 담당이 찾아 줌).
                 # 상세 분석 탭은 이 탭 뒤에 그려져, 같은 그리기에서 main.apply_pick 이 이 값을 받는다.

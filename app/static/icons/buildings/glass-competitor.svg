@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-39 -31 82 46" style="color-scheme:light dark">
+  <title>마루</title>
+  <ellipse cx="2" cy="5" rx="37" ry="6" fill="light-dark(#d9dfd1,#3c4b41)" />
+  <path d="M-33 0 L4 8 36 0 -3 -8 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#ecede1,#889b8b)" stroke-width="0.5" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M-29 -4 V-19 L4 -12 V3 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#fffdf2,#eceee1)" stroke-width="0.9" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M4 3 V-12 L29 -19 V-4 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#ced6c8,#a8b9a8)" stroke-width="0.9" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M-26 -13.3 l3 .7 v4 l-3 -.7 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#9daf9f,#97ab98)" stroke-width="0.5" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M-18.7 -11.8 l3 .7 v4 l-3 -.7 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#9daf9f,#97ab98)" stroke-width="0.5" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M-11.5 -10.2 l3 .7 v4 l-3 -.7 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#9daf9f,#97ab98)" stroke-width="0.5" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M-4.2 -8.7 l3 .7 v4 l-3 -.7 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#9daf9f,#97ab98)" stroke-width="0.5" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M8 -12.1 l3 -1 v4 l-3 1 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#9daf9f,#97ab98)" stroke-width="0.5" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M14 -13.8 l3 -1 v4 l-3 1 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#9daf9f,#97ab98)" stroke-width="0.5" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M-31 -19 L-5 -27 L31 -20 L4 -11 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#9cb5bb,#b2c7cb)" stroke-width="0.9" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M-14 -21 l13 -5 17 5 -12 5 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#fffdf2,#eceee1)" stroke-width="0.8" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M-14 -21 l14 1 -1 -6 m1 6 16 -1" stroke="light-dark(#49594e,#34463b)" fill="none" stroke-width="0.7" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M-26.5 -3.5 v-6 l3.4 1 v6 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#49594e,#34463b)" stroke-width="0.6" stroke-linejoin="round" stroke-linecap="round" data-door="left" />
+  <path d="M26.5 -3.5 v-6 l-3.4 1 v6 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#49594e,#34463b)" stroke-width="0.6" stroke-linejoin="round" stroke-linecap="round" data-door="right" />
+</svg>

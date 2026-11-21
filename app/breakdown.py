@@ -98,7 +98,11 @@ def load_breakdown(scen_dir: Path | None, run_id: str, baseline_run_id: str | No
     path = scen_dir / "changes.json"
     if not path.is_file():
         return None
-    changes = read_model(path, Changes)
+    try:
+        changes = read_model(path, Changes)
+    except ValueError:
+        # 형식이 바뀌기 전의 파일 (예: 11-20 전에는 방문마다의 할인 칸 `promo` 가 없었다). 나누기 없이 그린다 (T130)
+        return None
     if changes.run_id != run_id or changes.baseline_run_id != baseline_run_id:
         return None
     return from_changes(changes)

@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="4 1 72 58" role="img" aria-labelledby="name detail">
+  <title id="name">호텔 다이닝을 찾아다니는 미식가</title>
+  <desc id="detail">손잡이가 달린 코스 요리 클로슈</desc>
+  <style>:root{color-scheme:light dark;--ink:light-dark(#49594e,#34463b);--paper:light-dark(#fffdf2,#eceee1);--side:light-dark(#ced6c8,#a8b9a8);--mid:light-dark(#9daf9f,#97ab98);--forest:light-dark(#3f6150,#6f8c76);--shadow:light-dark(#d9dfd1,#3c4b41);--stone:light-dark(#ecede1,#889b8b);}
+    .model{fill:none;stroke:var(--ink);stroke-width:1.15;stroke-linecap:round;stroke-linejoin:round}
+    .paper{fill:var(--paper)} .stone{fill:var(--stone)} .side{fill:var(--side)}
+    .mid{fill:var(--mid)} .forest{fill:var(--forest)}
+    .thin,.fine{fill:none} .thin{stroke-width:.9} .fine{stroke-width:1.05}
+    .glint{fill:none;stroke:var(--paper);stroke-width:1.3}
+    .nostroke{stroke:none} .seam{stroke-width:.65}
+    .silver{fill:light-dark(#a9bfca,#b6c9d0)} .steel{fill:light-dark(#6d8b9e,#829faf)} .brass{fill:light-dark(#bd9457,#d7b173)}
+  </style>
+  <ellipse cx="40.8" cy="51" rx="31.5" ry="5.5" fill="var(--shadow)"/>
+  <path d="m9 47.8 28-7.6 34 8.7-29.2 8Z" fill="var(--stone)" stroke="var(--ink)" stroke-width=".58" stroke-linejoin="round"/>
+  <g class="model">
+  <ellipse class="side" cx="39" cy="43.5" rx="24" ry="6.7"/>
+  <ellipse class="stone" cx="39" cy="41.9" rx="25.8" ry="7.1"/>
+  <ellipse class="paper" cx="39" cy="41" rx="22.3" ry="5.2"/>
+  <path class="silver mid" d="M17.2 38.5C18.5 22.8 26.3 15 37.3 14.4c13.1-.7 22.7 9.4 24.3 24.3-2.1 7.7-40 8.4-44.4-.2Z"/>
+  <path class="paper nostroke" d="M18.3 37.2c1.7-12.5 8.6-21.4 19.4-22.2-6.8 3.2-10.3 12.2-10.7 23.7-4-.3-6.4-.9-8.7-1.5Z"/>
+  <path class="steel forest nostroke" d="M43 15.3c10.3 2.7 16.7 11.1 17.9 23.3-1.5 2-5.8 3.5-11.1 4.1 3-11.6.5-21.2-6.8-27.4Z"/>
+  <path class="thin" d="M18 38.1c7.8 4.9 35 5.7 42.5.1"/>
+  <ellipse class="brass side" cx="38.2" cy="14.3" rx="4.6" ry="1.4"/>
+  <path class="brass forest" d="M37 14.2v-2.8c-2.8-1-3-3.7.1-4.3 4-1 6.4 2.6 2.6 4.1v3Z"/>
+  <path class="fine" d="M22 31.6q1.4-5.9 5.4-9.3"/>
+  </g>
+</svg>

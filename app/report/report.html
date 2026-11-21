@@ -1,0 +1,147 @@
+<div class="wh-page">
+<a class="skip-link" href="#" data-scroll="overview">결과 요약으로 건너뛰기</a>
+<header class="mast"><div class="pagewrap mast-in">
+  <a class="mast-brand" href="#" data-scroll="overview" aria-label="워커힐 페르소나 시뮬레이터 결과 요약"><span>WALKERHILL</span><i></i><b>페르소나 시뮬레이터</b></a>
+  <p class="mast-note"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.6v.1"/></svg>금액은 모두 시뮬레이션이 낸 가상 값입니다</p>
+  <a class="compare-trigger new-trigger" href="#" data-action="open_builder"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 4v12M4 10h12"/></svg>새 시나리오</a>
+  <button class="compare-trigger" type="button" data-dialog="compare"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3" y="7" width="14" height="10" rx="2"/><path d="M6 4.5h8M8 2.5h4"/></svg>저장된 시나리오</button>
+  <div class="theme-seg" role="group" aria-label="화면 밝기"><button type="button" data-theme-set="light" aria-label="밝게" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg></button><button type="button" data-theme-set="dark" aria-label="어둡게" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.5 14.8A7.8 7.8 0 0 1 9.2 4.5a7.8 7.8 0 1 0 10.3 10.3Z"/></svg></button></div>
+</div></header>
+<main>
+<section id="overview" class="pagewrap overview" aria-labelledby="report-name">
+  <div class="cover">
+    <div class="cover-image" aria-hidden="true"></div>
+    <div class="cover-tools" role="group" aria-label="이 결과로 할 일"><a href="#" data-action="edit" hidden title="고쳐서 새로 만들기" aria-label="고쳐서 새로 만들기"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 16 11-11 4 4L8 20l-5 1zM13 7l4 4"/></svg></a><button type="button" data-dialog="export" title="결과 내보내기" aria-label="결과 내보내기"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m-4-4 4 4 4-4M5 20h14"/></svg></button></div>
+    <div class="cover-copy">
+      <div class="edition"><div id="report-period" class="period-pick"></div><i></i><button class="basis-trigger" type="button" data-dialog="basis">가상 방문 시뮬레이션 <span aria-hidden="true">ⓘ</span></button></div>
+      <h1 id="report-name"></h1>
+      <p id="finding"></p>
+      <ul class="assumptions" aria-label="시나리오에 적용한 조건"></ul>
+    </div>
+  </div>
+  <div class="metrics">
+    <div><span class="metric-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 7h13m-4-4 4 4-4 4M20 17H7m4-4-4 4 4 4"/></svg></span><div><h2>방문 장소 변경</h2><p><strong id="place-count"></strong> <small>건</small></p><small class="metric-split" id="place-split"></small></div></div>
+    <div><span class="metric-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 17h18M5 15a7 7 0 0 1 14 0M12 6V4m-2 0h4M5 20h14"/></svg></span><div><h2>같은 업장에서 주문 변경</h2><p><strong id="order-count"></strong> <small>건</small></p><small class="metric-split" id="order-split"></small></div></div>
+    <a href="#" data-scroll="revenue" aria-label="워커힐 가상 매출 증감 · 가상 매출 변화로 이동"><span class="metric-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 18v-3m5 3v-6m5 6v-4m5 4V9M4 11l5-5 4 3 6-6m-4 0h4v4"/></svg></span><div><h2>워커힐 가상 매출 증감</h2><p id="sales-kpi"></p><small class="metric-split" id="sales-split"></small></div><span class="metric-arrow" aria-hidden="true">↗</span></a>
+  </div>
+</section>
+<section id="guests" class="pagewrap guests" aria-labelledby="guest-title">
+  <div class="sectionline"><div><h2 id="guest-title">페르소나별 방문</h2><p>페르소나를 선택하면 바뀐 업장과 주문을 확인할 수 있습니다.</p></div><span class="scope" id="guest-scope"></span></div>
+  <div id="guest-grid" class="guest-grid"></div>
+  <div id="guest-detail" class="guest-detail" hidden><div><h3 id="guest-label"></h3><div id="guest-routes"></div></div><button id="guest-records" type="button">전체 방문 기록 보기 <span aria-hidden="true">→</span></button></div>
+</section>
+<section class="wh-part wh-summary" aria-label="자세한 결과">
+  <div class="wh-bound"><div class="wh-summary-box">
+    <div class="wh-summary-body">
+      <section id="movement" class="wh-move wh-move-b-mixed" data-embedded aria-label="이동시뮬레이션">
+ 
+ <header class="brand"><div class="wrap brand-inner"><div class="brand-name"><span>페르소나 시뮬레이터</span></div><div class="brand-tools"><span>시안용 가상 예시</span><button class="theme" type="button" aria-label="화면 밝기 전환"></button></div></div></header>
+ <div class="wrap content">
+  <div class="crumb">총정리</div>
+  <div class="title-row"><div><h2 class="map-heading">방문 이동 지도</h2><p class="map-intro">같은 페르소나의 선택이 어느 업장에서 어디로 바뀌었는지 보여 줍니다.</p><p class="scenario" hidden><span data-title></span><span class="inputs"></span></p></div><p class="map-month" data-map-month aria-live="polite"></p></div>
+   <section class="map-card" aria-label="방문 이동 재생"><figure><svg class="atlas" role="img" aria-label="워커힐 8개 업장을 중심에, 짝 경쟁 업장 8곳을 같은 방향의 외곽에 배치한 지도"></svg>
+    <figcaption class="map-foot"><span>점 하나는 가상 방문 1건</span><span>안쪽은 워커힐, 바깥쪽은 같은 방향의 경쟁 업장</span><span data-motion-note></span><span>재생 속도는 실제 방문 시간과 상관없습니다</span><span data-failed></span><span data-test-month></span></figcaption></figure>
+    <div class="playback-dock">
+     <section class="legend" aria-label="재생월의 이동 유형"><div class="legend-head"><h2>방문 변화</h2><span class="legend-month" aria-live="polite"></span></div><ul class="keys"></ul></section>
+     <div class="controls"><button type="button" class="play">▶ 재생</button><label class="track"><span class="sr">기본 시나리오와 조건 적용 후 사이 재생 위치</span><input type="range" min="0" max="1000" step="1" value="0"><span class="track-label"><span>기본 시나리오</span><span>조건 적용 후</span></span></label><button class="light-btn end" type="button">최종 위치 보기</button></div>
+    </div>
+    <section class="insights" hidden><h2>업장별 선택 변화</h2><ul></ul></section>
+   </section>
+  <section class="record-index" aria-label="이동시뮬레이션 기록">
+   <div class="index-tabs" role="group" aria-label="기록 색인">
+    <button type="button" data-open="venues" aria-expanded="false">업장별 전후 건수<i aria-hidden="true"></i></button>
+    <button type="button" data-open="visits" aria-expanded="false">방문별 전후 기록<i aria-hidden="true"></i></button>
+   </div>
+   
+   
+  </section>
+  <div class="sr" role="status" aria-live="polite" data-status></div>
+ </div>
+ 
+ 
+</section>
+      <section class="wh-venues" aria-labelledby="wh-venues-title">
+    <div class="wh-section-head"><h2 class="wh-section-title" id="wh-venues-title">업장별 방문 변화</h2><span class="wh-scope"></span></div>
+    <ul class="wh-venues-list wh-stagger"></ul>
+    <p class="wh-venues-note">숫자는 기본 시나리오와 조건 적용 후에 각 업장을 고른 방문 건수입니다.</p>
+  <details class="wh-full wh-move wh-move-borrow"><summary class="wh-full-head"><span>17개 선택지 전체 보기</span><small>경쟁 업장과 외식 안 함까지</small><i class="wh-chevron" aria-hidden="true"></i></summary><section data-panel="venues" role="region">
+    <form class="filters" aria-label="업장별 전후 건수 필터">
+     <label>업장 구분<select name="kind"><option value="">전체</option><option value="walkerhill">워커힐</option><option value="competitor">경쟁 업장</option><option value="none">외식 안 함</option></select></label>
+     <label>선택 건수<select name="delta"><option value="">전체</option><option value="up">늘어난 곳</option><option value="down">줄어든 곳</option><option value="same">증감 없는 곳</option></select></label>
+     <label class="search-field">업장 검색<input type="search" name="search" placeholder="업장명 또는 호텔명"></label><button type="reset" class="light-btn">필터 초기화</button>
+    </form>
+    <p class="shown" role="status"></p><table><thead><tr><th>구분</th><th>업장</th><th>기본 선택</th><th>조건 적용 후</th><th>차이</th></tr></thead><tbody data-balances></tbody></table><p class="no-match" hidden>조건에 맞는 업장이 없습니다.</p>
+   </section></details>
+  <details class="wh-ev"><summary class="wh-ev-head"><span class="wh-ev-label">근거 보기</span><small>업장 값의 등급 · 출처 · 확인일</small><i class="wh-chevron" aria-hidden="true"></i></summary><div class="wh-ev-body"><p class="wh-ev-scope">달과 상관없이 같은 값입니다</p><div class="wh-ev-scroll"><table><thead><tr><th>업장</th><th>값</th><th>내용</th><th>근거 등급</th><th>출처</th><th>확인일</th></tr></thead><tbody data-ev-venues></tbody></table></div><p class="wh-ev-note">공식 공개 가격은 시뮬레이션이 낸 금액이 아니라서 "가상"을 붙이지 않습니다. 가격 미확인인 상품은 집계로 채운 단가를 씁니다.</p></div></details>
+  </section>
+      <section id="visit-records" class="wh-list" aria-labelledby="wh-list-title">
+    <div class="wh-section-head"><h2 class="wh-section-title" id="wh-list-title">방문별 선택과 이유</h2><span class="wh-scope"></span></div>
+    <p class="wh-list-filter" hidden><span data-filter-label></span><button type="button" class="wh-button wh-list-all">모두 보기</button></p>
+    <ul class="wh-list-rows wh-stagger"></ul>
+    <p class="wh-list-other" id="list-other-month" hidden></p>
+    <p class="wh-list-stay"></p>
+  <details class="wh-full wh-move wh-move-borrow"><summary class="wh-full-head"><span>전체 방문 기록</span><small>페르소나·방문 유형별 조회</small><i class="wh-chevron" aria-hidden="true"></i></summary><section data-panel="visits" role="region">
+    <form class="filters" aria-label="방문별 전후 기록 필터">
+     <label>방문 유형<select name="type"><option value="">전체</option></select></label>
+     <label>페르소나<select name="persona"><option value="">전체</option></select></label>
+     <label>달<select name="month"><option value="">전체</option><option value="12">12월</option><option value="1">1월</option></select></label>
+     <label class="search-field">방문 검색<input type="search" name="search" placeholder="업장 이름 또는 방문 번호(V44)"></label><button type="reset" class="light-btn">필터 초기화</button>
+    </form>
+    <p class="shown" role="status"></p><table><thead><tr><th>방문과 조건</th><th>기본 시나리오</th><th>조건 적용 후</th><th>유형</th></tr></thead><tbody data-register></tbody></table><p class="no-match" hidden>조건에 맞는 방문이 없습니다.</p>
+   </section></details>
+  <details class="wh-ev"><summary class="wh-ev-head"><span class="wh-ev-label">근거 보기</span><small>페르소나 묶음의 등급과 근거 후기</small><i class="wh-chevron" aria-hidden="true"></i></summary><div class="wh-ev-body"><p class="wh-ev-scope">달과 상관없이 같은 값입니다</p><div class="wh-ev-scroll"><table><thead><tr><th>페르소나</th><th>몫</th><th>방문</th><th>예산</th><th>취향</th><th>구매</th><th>재방문</th><th>비교</th><th>근거 후기</th></tr></thead><tbody data-ev-personas></tbody></table></div><p class="wh-ev-legend"><span><span class="wh-g">후기</span> 후기에서 관찰</span><span><span class="wh-g wh-g--weak">가정</span> 설계 가정</span></p><p class="wh-ev-note">묶음마다 가장 약한 근거의 등급입니다. 후기 번호는 페르소나 정의 파일의 <code>evidence</code> 에 있습니다. 근거 후기가 5건보다 적으면 "근거 제한적"으로 표시합니다.</p></div></details>
+  </section>
+      <section id="revenue" class="wh-revenue" aria-labelledby="wh-revenue-title">
+    <div class="wh-section-head"><h2 class="wh-section-title" id="wh-revenue-title">가상 매출 변화</h2><span class="wh-scope">가상 매출 네 갈래</span></div>
+    <p id="sales-empty" class="empty-note" hidden>1월 예시에는 가상 매출 집계가 없습니다.</p><p id="sales-partial" class="wh-sales-partial" hidden></p><div id="sales-detail"><figure class="wh-revenue-figure" aria-label="매출 변화 네 갈래. 0 기준 왼쪽은 감소, 오른쪽은 증가. 값은 그림 오른쪽에 적었습니다.">
+      <div class="wh-revenue-plot">
+        <span></span><div class="wh-revenue-axis" aria-hidden="true"><span>감소</span><span class="wh-revenue-zero">0</span><span class="wh-revenue-plus">증가</span></div><span></span></div>
+    </figure>
+    <p class="wh-revenue-inside" hidden></p>
+    <p class="wh-revenue-total"></p></div>
+  <details class="wh-full wh-months" id="sales-months" hidden><summary class="wh-full-head"><span>달별로 보기</span><small>항목별 · 달별</small><i class="wh-chevron" aria-hidden="true"></i></summary><div class="wh-months-body"><div class="wh-ev-scroll"><table class="wh-months-table"></table></div><p class="wh-months-note">합계는 달마다의 가상 매출을 더한 값이고, 변화율은 더한 금액으로 다시 계산합니다. 집계가 없는 달은 더하지 않습니다.</p></div></details>
+  <details class="wh-ev"><summary class="wh-ev-head"><span class="wh-ev-label">근거 보기</span><small>가중치의 등급과 검증 결과</small><i class="wh-chevron" aria-hidden="true"></i></summary><div class="wh-ev-body"><p class="wh-ev-scope" id="ev-weights-scope"></p><div class="wh-ev-scroll"><table data-ev-weights></table></div><div class="wh-ev-scroll"><table data-ev-checks></table></div><p class="wh-ev-note">여러 값을 합쳐 낸 값의 등급은 그 가운데 가장 약한 것입니다. 가상 매출은 방문마다 이 가중치를 곱해 냅니다.</p></div></details>
+  </section>
+    </div>
+  </div></div>
+</section>
+<section class="pagewrap" aria-labelledby="export-band-title"><div class="export-band">
+  <div><h2 id="export-band-title">이 결과를 파일로 내려받기</h2><p>다른 PC에서는 "파일에서 불러오기"로 엽니다.</p></div>
+  <button type="button" data-dialog="export"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m-4-4 4 4 4-4M5 20h14"/></svg>결과 내보내기</button>
+</div></section>
+</main>
+<footer class="site-foot"><div class="pagewrap foot-in"><span class="foot-brand"><b>WALKERHILL</b>페르소나 시뮬레이터 · 2026</span><span class="foot-team">만든 사람 songyee-ai · wilstein91 · borigunbbang · hojitea-ui</span></div></footer>
+<dialog id="basis" aria-labelledby="basis-title"><div class="dialog-pad"><div class="sectionline"><h2 id="basis-title">시뮬레이션 기준</h2><form method="dialog"><button class="close-dialog" aria-label="기준 닫기">×</button></form></div>
+<dl class="basis-list"><dt>비교 조건</dt><dd data-basis-compare></dd>
+<dt>가상 방문 1건</dt><dd>페르소나 하나가 한 가지 이용 조건에서 고른 업장과 주문입니다. 평일과 주말 각각 점심, 저녁, 디저트·차, 포장·구매를 비교합니다.</dd>
+<dt>선택 변화</dt><dd>방문 장소나 주문이 달라진 경우입니다. 장소와 주문이 같고 가격만 달라진 방문은 매출 분석에 따로 반영합니다.</dd>
+<dt>가상 매출</dt><dd>각 방문이 대표하는 팀 수를 반영해 계산합니다.</dd></dl></div></dialog>
+<dialog id="export" aria-labelledby="export-title"><div class="dialog-pad"><div class="sectionline"><div><h2 id="export-title">결과 내보내기</h2></div><form method="dialog"><button class="close-dialog" aria-label="결과 내보내기 닫기">×</button></form></div>
+<p class="export-what"></p>
+<p class="export-warn">기본 데이터로 돌린 결과에는 내부 자료로 계산한 값이 들어 있습니다. 회사 안(팀 PC 사이)에서만 주고받으세요.</p>
+<form method="dialog" class="export-foot"><button class="export-cancel">취소</button><button class="export-go" value="download">내려받기</button></form>
+</div></dialog>
+
+<dialog id="sv-del" aria-labelledby="sv-del-title"><div class="dialog-pad"><h2 id="sv-del-title" class="sv-del-title">결과를 지울까요?</h2><p class="export-what">되돌릴 수 없습니다. 기본 시나리오 결과는 남습니다.</p><form method="dialog" class="export-foot"><button class="export-cancel" value="cancel">취소</button><button class="export-go" value="delete">지우기</button></form></div></dialog>
+
+<dialog id="compare" aria-labelledby="compare-title"><div class="dialog-pad"><div class="sectionline"><div><h2 id="compare-title">저장된 시나리오</h2><p>시나리오를 누르면 결과를 엽니다. 둘 이상(최대 4개) 고르면 함께 비교합니다. "조건 다름"은 지금 열린 결과와 조건이 다르다는 뜻입니다.</p><p class="sv-del-status" role="status" hidden></p></div><form method="dialog"><button class="close-dialog" aria-label="저장된 시나리오 닫기">×</button></form></div><div class="sv-list"></div><div class="sv-foot"><button type="button" class="sv-import"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8zM14 3v5h5m-7 10v-7m-3 3 3-3 3 3"/></svg>파일에서 불러오기</button><span class="sv-count" aria-live="polite"></span><a class="sv-go" href="#">선택한 시나리오 비교하기</a></div></div></dialog>
+
+
+
+
+
+
+
+<dialog id="sv-imp" aria-labelledby="sv-imp-title"><div class="dialog-pad"><h2 id="sv-imp-title" class="sv-del-title">파일에서 불러오기</h2><p class="export-what"><b>결과 내보내기</b>로 받은 .zip 파일을 골라 주세요.</p><p class="export-what" style="color:var(--o-ink2)">기본 데이터로 돌린 결과는 회사 안에서만 주고받으세요.</p><form method="dialog" class="export-foot"><button class="export-cancel" value="cancel">취소</button><button class="export-go" type="button" data-pick-file>파일 고르기</button></form><input type="file" accept=".zip" hidden></div></dialog>
+
+
+
+
+
+
+
+
+
+
+<div class="wh-snack" role="status" hidden></div>
+</div>

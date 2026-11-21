@@ -20,6 +20,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from app import evidence, simulator, style  # noqa: E402
+from app import result_page as result_page_module  # noqa: E402
 from app.compare import venue_names  # noqa: E402
 from app.results import (  # noqa: E402
     FILLED_PRICE,
@@ -68,8 +69,7 @@ def money_table(rows: list[dict]) -> None:
 
 
 st.set_page_config(page_title="워커힐 F&B 페르소나 시뮬레이터", layout="wide")
-style.inject()
-style.header()
+
 
 def run_panel() -> None:
     """1. 돌리기 — 조건을 골라 엔진을 돌린다. 끝나면 새 실행을 2. 결과 보기에서 고른 상태로 다시 그린다."""
@@ -310,12 +310,29 @@ def detail_view() -> None:
         money_table(visit_table(run))
 
 
-# 탭 이름 (11-17, T204): 첫 탭은 결과를 견주는 시뮬레이터, 둘째 탭은 실행 하나의 선택과 이유를 보는 상세 분석,
-# 셋째 탭은 값마다 근거 등급과 출처를 보는 근거 보기 (11-17, T22).
-tab_sim, tab_detail, tab_evidence = st.tabs(["시뮬레이터", "상세 분석", "근거 보기"])
-with tab_sim:
-    simulator.render(REPO_ROOT)
-with tab_detail:
-    detail_view()
-with tab_evidence:
-    evidence.render(REPO_ROOT)
+def classic_screen() -> None:
+    """이전 화면: 탭 셋 (시뮬레이터, 상세 분석, 근거 보기). 새 화면(T130)이 모두 들어올 때까지 시나리오는 여기서 돌린다."""
+    style.inject()
+    style.header()
+    st.page_link(result_page, label="새 결과 화면으로 가기 →")
+    # 탭 이름 (11-17, T204): 첫 탭은 결과를 견주는 시뮬레이터, 둘째 탭은 실행 하나의 선택과 이유를 보는 상세 분석,
+    # 셋째 탭은 값마다 근거 등급과 출처를 보는 근거 보기 (11-17, T22).
+    tab_sim, tab_detail, tab_evidence = st.tabs(["시뮬레이터", "상세 분석", "근거 보기"])
+    with tab_sim:
+        simulator.render(REPO_ROOT)
+    with tab_detail:
+        detail_view()
+    with tab_evidence:
+        evidence.render(REPO_ROOT)
+
+
+def result_screen() -> None:
+    result_page_module.render(REPO_ROOT, classic_page)
+
+
+# 페이지 둘 (T130, 11-21): 이전 화면과 새 결과 화면. 페이지 사이 이동은 화면 안의 단추로 한다 (메뉴는 숨김).
+# 새 화면(시나리오 만들기·결과·비교)이 모두 들어올 때까지 첫 페이지는 이전 화면이다. 시연과 기존 화면 테스트가 그대로 돈다.
+# 새 결과 화면은 이전 화면 맨 위의 링크나 주소 /result 로 연다. 이전 화면은 마지막 정리 때 뺀다.
+classic_page = st.Page(classic_screen, title="이전 화면", url_path="classic", default=True)
+result_page = st.Page(result_screen, title="결과", url_path="result")
+st.navigation([classic_page, result_page], position="hidden").run()

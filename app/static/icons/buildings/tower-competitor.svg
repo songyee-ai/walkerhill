@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-29 -49 62 64" style="color-scheme:light dark">
+  <title>웨이루</title>
+  <ellipse cx="2" cy="5" rx="27" ry="6" fill="light-dark(#d9dfd1,#3c4b41)" />
+  <path d="M-23 0 L4 8 26 0 -3 -8 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#ecede1,#889b8b)" stroke-width="0.5" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M-19 -4 V-33 L4 -26 V3 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#fffdf2,#eceee1)" stroke-width="0.9" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M4 3 V-26 L19 -33 V-4 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#ced6c8,#a8b9a8)" stroke-width="0.9" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M-16 -27.0 l3 .7 v4 l-3 -.7 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#9daf9f,#97ab98)" stroke-width="0.5" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M-11.2 -25.6 l3 .7 v4 l-3 -.7 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#9daf9f,#97ab98)" stroke-width="0.5" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M-6.5 -24.1 l3 .7 v4 l-3 -.7 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#9daf9f,#97ab98)" stroke-width="0.5" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M-1.7 -22.7 l3 .7 v4 l-3 -.7 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#9daf9f,#97ab98)" stroke-width="0.5" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M8 -26.8 l3 -1 v4 l-3 1 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#9daf9f,#97ab98)" stroke-width="0.5" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M14 -29.6 l3 -1 v4 l-3 1 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#9daf9f,#97ab98)" stroke-width="0.5" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M-16 -20.5 l3 .7 v4 l-3 -.7 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#9daf9f,#97ab98)" stroke-width="0.5" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M-11.2 -19.1 l3 .7 v4 l-3 -.7 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#9daf9f,#97ab98)" stroke-width="0.5" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M-6.5 -17.6 l3 .7 v4 l-3 -.7 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#9daf9f,#97ab98)" stroke-width="0.5" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M-1.7 -16.2 l3 .7 v4 l-3 -.7 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#9daf9f,#97ab98)" stroke-width="0.5" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M8 -20.3 l3 -1 v4 l-3 1 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#9daf9f,#97ab98)" stroke-width="0.5" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M14 -23.1 l3 -1 v4 l-3 1 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#9daf9f,#97ab98)" stroke-width="0.5" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M-16 -14.0 l3 .7 v4 l-3 -.7 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#9daf9f,#97ab98)" stroke-width="0.5" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M-11.2 -12.6 l3 .7 v4 l-3 -.7 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#9daf9f,#97ab98)" stroke-width="0.5" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M-6.5 -11.1 l3 .7 v4 l-3 -.7 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#9daf9f,#97ab98)" stroke-width="0.5" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M-1.7 -9.7 l3 .7 v4 l-3 -.7 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#9daf9f,#97ab98)" stroke-width="0.5" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M8 -13.8 l3 -1 v4 l-3 1 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#9daf9f,#97ab98)" stroke-width="0.5" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M14 -16.6 l3 -1 v4 l-3 1 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#9daf9f,#97ab98)" stroke-width="0.5" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M-21 -33 L-5 -41 L21 -34 L4 -25 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#c69b91,#d4b0a6)" stroke-width="0.9" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M-10 -36 v-5 l10 -4 12 3 v6 l-10 3 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#ced6c8,#a8b9a8)" stroke-width="0.8" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M-16.5 -3.5 v-6 l3.4 1 v6 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#49594e,#34463b)" stroke-width="0.6" stroke-linejoin="round" stroke-linecap="round" data-door="left" />
+  <path d="M16.5 -3.5 v-6 l-3.4 1 v6 Z" stroke="light-dark(#49594e,#34463b)" fill="light-dark(#49594e,#34463b)" stroke-width="0.6" stroke-linejoin="round" stroke-linecap="round" data-door="right" />
+</svg>

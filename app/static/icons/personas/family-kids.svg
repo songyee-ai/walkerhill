@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="4 1 72 58" role="img" aria-labelledby="name detail">
+  <title id="name">아이를 데려온 가족</title>
+  <desc id="detail">유아용 높은 식탁 의자</desc>
+  <style>:root{color-scheme:light dark;--ink:light-dark(#49594e,#34463b);--paper:light-dark(#fffdf2,#eceee1);--side:light-dark(#ced6c8,#a8b9a8);--mid:light-dark(#9daf9f,#97ab98);--forest:light-dark(#3f6150,#6f8c76);--shadow:light-dark(#d9dfd1,#3c4b41);--stone:light-dark(#ecede1,#889b8b);}
+    .model{fill:none;stroke:var(--ink);stroke-width:1.15;stroke-linecap:round;stroke-linejoin:round}
+    .paper{fill:var(--paper)} .stone{fill:var(--stone)} .side{fill:var(--side)}
+    .mid{fill:var(--mid)} .forest{fill:var(--forest)}
+    .thin,.fine{fill:none} .thin{stroke-width:.9} .fine{stroke-width:1.05}
+    .glint{fill:none;stroke:var(--paper);stroke-width:1.3}
+    .nostroke{stroke:none} .seam{stroke-width:.65}
+    .ochre{fill:light-dark(#d9a55d,#e4b676)} .honey{fill:light-dark(#a98047,#b48950)} .apricot{fill:light-dark(#d89570,#dea184)}
+  </style>
+  <ellipse cx="40.8" cy="51" rx="31.5" ry="5.5" fill="var(--shadow)"/>
+  <path d="m9 47.8 28-7.6 34 8.7-29.2 8Z" fill="var(--stone)" stroke="var(--ink)" stroke-width=".58" stroke-linejoin="round"/>
+  <g class="model">
+  <path class="mid" d="m42 29 3.8-1.2 7.5 16.3-2.9 1.1Z"/>
+  <path class="side" d="m30 29 3.3.5-5.8 16.7-3.4 1.2Z"/>
+  <path class="forest" d="m31.8 33.4 3.7 1-9.3 17.1-3.5 1.2Z"/>
+  <path class="mid" d="m46 33.7 3-1.4 8.3 17.2-3.6 1.4Z"/>
+  <path class="side" d="m27.8 43.4 23 6 .9 2.2-24.7-6.2Z"/>
+  <path class="honey forest" d="m22.4 11 4.6-1.9 18.5 5.3-4.4 1.8Z"/>
+  <path class="ochre mid" d="m22.4 11 18.7 5.2 3.6 16.1-19.3-5.7Z"/>
+  <path class="honey side" d="m41.1 16.2 4.4-1.8 3.6 15.3-4.4 2.6Z"/>
+  <path class="paper" d="m25.8 27.9 18.8 5.2 11-5.1-18.5-4.9Z"/>
+  <path class="ochre mid" d="m25.8 27.9 18.8 5.2v4.2L26.3 32Z"/>
+  <path class="forest" d="m44.6 33.1 11-5.1v4l-11 5.3Z"/>
+  <path class="paper" d="m29.5 23.5 18.3 5.6 12.7-5.7-18.3-5.3Z"/>
+  <path class="side" d="m29.5 23.5 18.3 5.6v2l-18.3-5.4Zm18.3 5.6 12.7-5.7v2l-12.7 5.7Z"/>
+  <path class="fine" d="m28 16.6 5.8 1.6"/>
+  <path class="apricot stone" d="M44 20.4v-5.2l4.9.9v5.4Z"/>
+  <ellipse class="paper" cx="46.4" cy="15.7" rx="2.5" ry="1"/>
+  </g>
+</svg>

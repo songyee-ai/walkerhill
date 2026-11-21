@@ -17,7 +17,7 @@
 | `tests/` | wilstein91 | 테스트와 예시 파일 한 벌(`tests/fixtures/example/`). 다른 영역은 자기 테스트를 `tests/<자기 폴더 이름>/` 아래에 새 파일로 더한다 (예: `tests/app/`). 테스트에 쓸 예시 파일을 더할 때는 `tests/fixtures/<이름>/` 아래에 저장소와 같은 폴더 모양으로 둔다. 그 묶음도 저장소와 같은 형식 검사를 받는다 (`tests/fixtures/example/` 을 베껴서 고치면 된다) |
 | `data/venues/`, `data/samples/`, `data/evidence/extra/` | hojitea-ui | 워커힐 8개 업장과 경쟁 업장의 정의 파일 (이용 상황, 상품과 가격, 판매 단위, 운영 정보, 출처), 가상 예시 값 |
 | `data/evidence/`, `personas/` | borigunbbang | 후기를 요약하고 라벨을 붙인 결과, 라벨 값 목록, 페르소나 정의의 공개 층, LLM 프롬프트(`personas/prompts/`) |
-| `app/` | songyee-ai | Streamlit 화면 |
+| `app/` | songyee-ai | Streamlit 화면. 새 결과 화면의 HTML·CSS·JS 는 `app/report/`, 배너 그림과 아이콘은 `app/static/` (T130) |
 | `scenarios/` | songyee-ai | 상황 정의 (시연 시나리오) |
 | `slides/` | songyee-ai | 발표 자료 안내 (자료 자체는 11-20 부터 저장소 밖에서 주고받는다) |
 
@@ -46,7 +46,7 @@
 | `engine/constants.json` | wilstein91 | 결정 상수: 결과에 영향을 주는 엔진의 숫자와 그 근거 (`FORMATS.md` 6.1절). 바꾸면 기준 상황부터 다시 돌린다. 값을 바꾸자는 제안은 "알릴 것"에 적는다 (11-19 wilstein91 결정, T210) |
 | `tools/check_formats.py` | wilstein91 | 형식 검사 도구 |
 | `tests/conftest.py`, `tests/fixtures/example/` | wilstein91 | 테스트가 함께 쓰는 것과 예시 파일 한 벌 |
-| `.streamlit/config.toml` | songyee-ai | 화면의 설정. 이 PC 에서만 열리게 하고 사용 통계를 보내지 않는다 |
+| `.streamlit/config.toml` | songyee-ai | 화면의 설정. 이 PC 에서만 열리게 하고 사용 통계를 보내지 않는다. `app/static/` 을 내준다 (11-22, T130) |
 | `README.md` | "실행 방법"은 wilstein91, 그 밖의 절은 songyee-ai | 11-19 에 나눴다 (T125). 실행 방법은 엔진 명령의 설명이라 엔진이 바뀌는 PR 에서 엔진 담당이 함께 고친다 |
 | `docs/FORMATS.md` | wilstein91 | 형식을 바꾸자는 제안은 누구나 "알릴 것"에 적는다. 쓰는 사람이 모두 체크한 뒤 바꾼다 |
 
