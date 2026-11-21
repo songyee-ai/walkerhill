@@ -15,11 +15,19 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
+from engine.formats.codes import KO
 from engine.formats.io import read_csv, read_model
 from engine.formats.run import LEDGER_COLUMNS, RunRecord
 from engine.formats.scenario import BASELINE_ID
 from engine.llm import LlmFatal, make_provider, receiver_of, settings_from_env
-from engine.runner import BASE_PROFILE_CONFIRMED_ENV, latest_baseline_run, month_label, run, runs_folder
+from engine.runner import (
+    BASE_PROFILE_CONFIRMED_ENV,
+    latest_baseline_run,
+    month_label,
+    run,
+    runs_folder,
+    skipped_by_segment,
+)
 
 EXIT_OK, EXIT_FAILED, EXIT_STOPPED_BY_LIMIT = 0, 1, 2
 
@@ -137,6 +145,9 @@ def main(argv: list[str] | None = None) -> int:
         print(f"상황 {record.scenario_id} · 페르소나, 방문 조건, 가중치는 기준 실행 {record.weights_from} 의 것")
     print(f"공급자 {record.llm.provider} · 모델 {record.llm.model} · 프롬프트 {record.llm.prompt_version}")
     print(f"달 {month_label(record.month)}")
+    # 워커힐 고객이 아닌 무리의 페르소나는 3단계 전까지 돌리지 않는다 (11-20 T220). 빠진 것이 조용히 지나가지 않게 보인다.
+    for segment, persona_ids in skipped_by_segment(root).items():
+        print(f"3단계 전이라 돌리지 않은 {KO['segment'][segment]} 페르소나 {len(persona_ids)}명: {', '.join(persona_ids)}")
     print(
         f"기본 데이터의 요약 {record.base_profile_mode} · "
         f"가격을 집계 파일로 채운 상품 {len(record.filled_products)}개 · 채우지 못해 뺀 상품 {len(record.skipped_products)}개"

@@ -29,6 +29,10 @@ Level = Literal["low", "mid", "high"]
 BudgetBasis = Literal["per_person", "party"]
 DataMode = Literal["private", "sample"]
 BaseProfileMode = Literal["none", "bucketed", "raw"]
+# 페르소나가 속한 무리 (FORMATS 5절, 11-20 T220). 개선 3단계(PRD 8절)의 세 무리다. 적지 않으면 워커힐 고객(`walkerhill`)이다.
+# 기본 데이터와 맞춰 보는 것(가중치, 기본 데이터의 요약, 보정 대조, 상수 추정, 다른 고객군에 써 보기)은 워커힐 고객만 쓴다.
+Segment = Literal["walkerhill", "rival", "occasional"]
+BASE_SEGMENT = "walkerhill"
 
 # 식별자: 영어 소문자, 숫자, 하이픈만 쓴다.
 ID_PATTERN = r"^[a-z0-9]+(-[a-z0-9]+)*$"
@@ -87,6 +91,7 @@ KO: dict[str, dict[str, str]] = {
     "audience": {"adult": "성인", "child": "어린이", "all": "구분 없음"},
     "source_kind": {"blog": "블로그", "map": "지도 서비스", "booking": "예약 서비스", "reference": "받은 참고 소스"},
     "level": {"low": "낮음", "mid": "보통", "high": "높음"},
+    "segment": {"walkerhill": "워커힐 고객", "rival": "경쟁 호텔 고객", "occasional": "가끔만 쓰는 사람"},
 }
 
 
