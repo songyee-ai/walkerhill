@@ -13,6 +13,7 @@ from engine.formats.codes import (
     FormatModel,
     Grade,
     Id,
+    MaterialKind,
     Meal,
     Month,
     Occasion,
@@ -26,12 +27,16 @@ from engine.formats.codes import (
 
 
 class Source(FormatModel):
-    """출처 한 건. 확인일은 그 값을 마지막으로 확인한 날이다."""
+    """출처 한 건. 확인일은 그 값을 마지막으로 확인한 날이다 (직접 잰 값이면 잰 날).
+
+    `kind` 는 자료의 종류다 (6.1절과 같은 값). 빠지면 정하지 않은 것이고, 지금은 지도로 잰 거리의 출처에만 `measurement` 를 적는다 (11-20, T221).
+    """
 
     source_id: Text
     title: Text
     url: Text
     checked_on: date
+    kind: MaterialKind | None = None
 
 
 class Hours(FormatModel):
@@ -179,6 +184,74 @@ class Promotion(FormatModel):
     source_id: str | None
 
 
+class TextTrait(FormatModel):
+    """글로 적는 업장 특성 하나 (위치, 전망·공간). 공식 문구를 줄여 한국어로 적는다."""
+
+    value: Text
+    source_id: str | None
+
+
+class SeatsTrait(FormatModel):
+    """좌석 수."""
+
+    value: int = Field(ge=1)
+    source_id: str | None
+
+
+class PrivateRooms(FormatModel):
+    """별실. `max_people` 은 가장 큰 별실이 받는 인원이다. 둘 가운데 모르는 것은 null 이고, 둘 다 모르면 별실 칸 전체를 null 로 둔다.
+
+    별실이 없다고 확인했으면 `count` 를 0 으로, `max_people` 을 null 로 둔다 (null 은 모른다는 뜻이라 "없음"과 가른다).
+    """
+
+    count: int | None = Field(ge=0)
+    max_people: int | None = Field(ge=1)
+    source_id: str | None
+
+    @model_validator(mode="after")
+    def _known(self) -> Self:
+        if self.count is None and self.max_people is None:
+            raise ValueError("private_rooms 의 count 와 max_people 을 둘 다 모르면 private_rooms 를 null 로 둔다")
+        if self.count == 0 and self.max_people is not None:
+            raise ValueError("private_rooms 의 count 가 0 (별실 없음)이면 max_people 은 null 이다")
+        return self
+
+
+class Booking(FormatModel):
+    """예약을 받는 조건. `opens_months_before` 는 몇 달 전부터 예약을 받는지, `deposit` 은 보증금(예약금)을 공식 문구를 줄여 적은 것이다."""
+
+    opens_months_before: int | None = Field(ge=1)
+    deposit: Text | None
+    source_id: str | None
+
+    @model_validator(mode="after")
+    def _known(self) -> Self:
+        if self.opens_months_before is None and self.deposit is None:
+            raise ValueError("booking 의 opens_months_before 와 deposit 을 둘 다 모르면 booking 을 null 로 둔다")
+        return self
+
+
+class DistanceTrait(FormatModel):
+    """그랜드 워커힐에서 이 업장의 호텔까지 자동차 경로 거리(km). 지도 서비스로 잰 값이라 출처는 `measurement` 자료이고 확인일이 잰 날이다."""
+
+    value: float = Field(gt=0)
+    source_id: str | None
+
+
+class Traits(FormatModel):
+    """업장 특성 (11-20, T221). 개선 3·5단계에서 쓴다. 지금은 LLM 요청에 싣지 않는다.
+
+    공식 페이지에 없는 값은 null 로 두고 지어내지 않는다. 거리는 경쟁 업장만 적는다.
+    """
+
+    location: TextTrait | None
+    seats: SeatsTrait | None
+    private_rooms: PrivateRooms | None
+    view: TextTrait | None
+    booking: Booking | None
+    distance_km: DistanceTrait | None
+
+
 class Venue(FormatModel):
     """업장 하나가 파일 하나다."""
 
@@ -197,6 +270,8 @@ class Venue(FormatModel):
     promotions: list[Promotion]
     sources: list[Source] = Field(min_length=1)
     default_source_id: Text
+    # 업장 특성 (11-20, T221). 그 전에 만든 업장 정의에는 없어 빠지면 null 로 읽는다.
+    traits: Traits | None = None
 
     @model_validator(mode="after")
     def _rules(self) -> Self:
@@ -240,7 +315,40 @@ class Venue(FormatModel):
             for product_id in promo.applies_to or []:
                 if product_id not in product_ids:
                     raise ValueError(f"프로모션 '{promo.promo_id}' 의 applies_to 에 없는 상품 '{product_id}'")
+
+        # 지도로 잰 출처(`measurement`)는 거리(traits.distance_km)에만 쓴다 (T221). 다른 값은 공식 자료에서 온다.
+        measured = {s.source_id for s in self.sources if s.kind == "measurement"}
+        if self.default_source_id in measured:
+            raise ValueError("default_source_id 가 measurement 자료다. 지도로 잰 출처는 traits.distance_km 에만 쓴다")
+        cited = (
+            [(f"상품 '{p.product_id}'", p.source_id) for p in self.products]
+            + [(f"hours[{index}]", h.source_id) for index, h in enumerate(self.hours or [])]
+            + [("reservation", self.reservation.source_id if self.reservation else None)]
+            + [(f"프로모션 '{p.promo_id}'", p.source_id) for p in self.promotions]
+        )
+        for where, source_id in cited:
+            if source_id in measured:
+                raise ValueError(f"{where} 의 출처가 measurement 자료다. 지도로 잰 출처는 traits.distance_km 에만 쓴다")
+        if self.traits is not None:
+            self._check_traits(self.traits, {s.source_id: s for s in self.sources})
         return self
+
+    def _check_traits(self, traits: Traits, sources: dict[str, Source]) -> None:
+        if traits.distance_km is not None and not self.is_competitor:
+            raise ValueError("traits.distance_km 은 경쟁 업장만 적는다 (그랜드 워커힐에서 경쟁 호텔까지의 거리)")
+        for key in Traits.model_fields:
+            trait = getattr(traits, key)
+            if trait is None:
+                continue
+            # 빈 글자("")는 기본 출처로 넘기지 않고 오류로 본다 (상품의 source_id 와 같다).
+            source = sources.get(self.default_source_id if trait.source_id is None else trait.source_id)
+            if source is None:
+                raise ValueError(f"traits.{key} 의 source_id 가 sources 에 없다")
+            # 거리는 지도로 잰 값이고, 나머지는 공식 페이지에서 옮긴 값이다.
+            if key == "distance_km" and source.kind != "measurement":
+                raise ValueError("traits.distance_km 의 출처는 kind 가 measurement 인 자료다 (지도로 잰 거리)")
+            if key != "distance_km" and source.kind == "measurement":
+                raise ValueError(f"traits.{key} 의 출처가 measurement 자료다. 지도로 잰 출처는 거리에만 쓴다")
 
     def product(self, product_id: str) -> Product | None:
         return next((p for p in self.products if p.product_id == product_id), None)
