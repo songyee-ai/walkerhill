@@ -67,7 +67,7 @@ export default function (component) {
     R.querySelector(".assumptions").replaceChildren(...S.changes_text.map(text => el("li", "", text)));
     R.querySelector("[data-basis-compare]").textContent = "기본 시나리오와, ‘" + S.name + "’의 바꿀 것을 적용한 결과를 비교했습니다.";
     R.querySelector(".export-what").textContent = "‘" + S.name + "’의 시나리오 파일과 실행 결과를 파일 하나로 내려받습니다.";
-    // 결과 내보내기·가져오기, 고쳐서 새로 만들기, 비교, 지우기는 다음 작업에서 넣는다. 그때까지 단추를 보이지 않는다
+    // 결과 내보내기·가져오기, 비교, 지우기는 다음 작업에서 넣는다. 그때까지 단추를 보이지 않는다
     for (const node of R.querySelectorAll('.cover-tools [data-dialog="export"], .export-band, #compare .sv-foot')) {
       (node.closest(".pagewrap[aria-labelledby=export-band-title]") || node).hidden = true;
     }
