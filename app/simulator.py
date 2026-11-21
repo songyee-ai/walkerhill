@@ -34,6 +34,7 @@ from app.runs import (
     has_private_summary,
     make_example_copy,
     most_calls,
+    runnable_persona,
     simulate,
     summary_check,
 )
@@ -51,12 +52,12 @@ from app.validation import LIMITS_SOURCE, VALIDATION_LIMITS, limits_not_in, load
 from engine.formats import KO, RunRecord, read_model
 
 # 기간은 "X월 ~ Y월"로 고른다 (11-17, 화면 담당 결정). 엔진의 "실행의 달"(--month, T112)은 달 하나를 받으므로
-# 기간의 달마다 기본 시나리오와 변수 적용 후를 돌리고, 결과는 달 평균으로 합친다 (app/compare.py 의 combine_months).
+# 기간의 달마다 기본 시나리오와 변수 적용 후를 돌리고, 결과는 달마다의 합으로 합친다 (app/compare.py 의 combine_months, T216).
 MONTHS = list(range(1, 13))
-# 달을 줘도 바뀌는 것은 그 달에 파는 메뉴와 AI 의 판단뿐이다. 가중치는 일 년 합계에 맞춘다 (FORMATS.md 10.1절 "실행의 달").
+# 달을 주면 그 달에 파는 메뉴, AI 의 판단, 그 달의 방문 인원(가중치)이 바뀐다. 가격은 달에 따라 바뀌지 않는다 (FORMATS.md 10.1절 "실행의 달", T210).
 SEASON_NOTE = (
-    "달은 그 달에 파는 메뉴와 AI 의 판단으로만 반영됩니다. 달에 따른 매출 변동은 아직 넣지 않았습니다 "
-    "(매출 합계는 일 년 기준이라, 기간이 다른 결과끼리 합계를 견주지 마세요)."
+    "달은 그 달에 파는 메뉴, AI 의 판단, 그 달의 방문 인원으로 반영됩니다. 가격은 달에 따라 바뀌지 않습니다 "
+    "(달마다 다른 요금은 상황으로 얹습니다)."
 )
 # 11-17 회의 ④: 날씨는 근거 자료가 없어 이번에 넣지 않고 "다음 단계"로 둔다.
 WEATHER_NOTE = "날씨는 다음 단계에서 넣습니다. 날씨와 매출을 같은 날짜로 묶은 자료가 있어야 근거 있게 반영할 수 있습니다."
@@ -119,9 +120,11 @@ def venue_catalog(root: Path) -> dict[str, VenueInfo]:
 
 
 def persona_cards(root: Path) -> list[dict]:
-    """페르소나 정의(공개 층)에서 카드에 보일 것만 읽는다."""
+    """페르소나 정의(공개 층)에서 카드에 보일 것만 읽는다. 3단계 전에 돌리지 않는 무리는 빼서 "모두 고르기"가 넘기지 않게 한다 (T220)."""
     cards = []
     for path in sorted((root / "personas").glob("*.json")):
+        if not runnable_persona(path):
+            continue
         data = _read(path)
         if not data.get("persona_id"):
             continue
@@ -304,7 +307,7 @@ def variable_panel(repo_root: Path) -> Inputs:
         how = (
             f"{months_text(months)}로 돌립니다. "
             if len(months) == 1
-            else f"{months_text(months)}을 달마다 돌려 달 평균으로 보입니다. 처음 해 보는 조합이면 달 수만큼 시간이 더 걸립니다. "
+            else f"{months_text(months)}을 달마다 돌려 기간의 합으로 보입니다. 처음 해 보는 조합이면 달 수만큼 시간이 더 걸립니다. "
         )
         st.caption(how + SEASON_NOTE)
 
@@ -556,8 +559,7 @@ def show_result(saved: tuple) -> None:
         )
         st.warning(
             f"그 달의 집계 파일에 인원이 없어 무게가 0 인 고객군이 있습니다: {listed}. "
-            "그 달에는 이 고객군의 가상 매출이 0 으로 들어가"
-            + (" 달 평균이 그만큼 낮아집니다." if len(per_month) > 1 else " 합계에서 빠집니다.")
+            "그 달에는 이 고객군의 가상 매출이 0 으로 들어가 합계에서 빠집니다."
         )
     if per_month:
         comparison = combine_months(per_month)
@@ -600,13 +602,13 @@ ONE_PERSONA_NOTE = "한 고객군에서 한 명만 고르면 그 고객군의 �
 
 
 def period_note(months: list[int]) -> str:
-    """기간을 골랐을 때 결과 위의 안내 (11-17 팀장 회신 ①): 달 평균, 같은 무게는 설계 가정, 금액은 한 달 평균 규모.
+    """기간을 골랐을 때 결과 위의 안내: 달마다 돌려 더한 값이고, 변화율은 더한 금액으로 다시 낸다 (FORMATS.md 10.1절 "여러 달을 합치는 법", T216).
 
-    11-19 T210 뒤로 달마다 그 달의 인원으로 무게를 내므로, 달 평균의 금액은 한 달 규모다 (T127. 그 전에는 일 년 규모로 맞췄다).
+    11-17 ~ 11-20 에는 달 평균을 냈다 (11-17 팀장 회신 ①, T127). 11-19 T210 뒤로 달마다 그 달의 인원으로 무게를 내므로 합이 그 기간의 크기다.
     """
     return (
-        f"{months_text(months)}: 달마다 돌려 평균했습니다 (달마다 같은 무게로 평균한 것은 설계 가정입니다). "
-        f"금액은 달마다 그 달의 인원으로 낸 가상 값의 한 달 평균이라 그 기간의 매출 합이 아니고, 볼 것은 변화율입니다. {SEASON_NOTE}"
+        f"{months_text(months)}: 달마다 돌려 더했습니다. 금액은 달마다 그 달의 인원으로 낸 가상 값의 합이라 그 기간의 가상 매출이고, "
+        f"변화율은 더한 금액으로 다시 냈습니다. {SEASON_NOTE}"
     )
 
 

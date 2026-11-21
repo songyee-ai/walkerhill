@@ -65,6 +65,25 @@ def test_example_has_everything_to_run():
     assert "meal-dinner-weekend" in found.conditions and "p1" in found.prompts
 
 
+def test_other_segment_personas_are_not_offered(tmp_path: Path):
+    """경쟁 호텔 고객(`segment: rival`)은 3단계 전에 엔진이 돌리지 않아, 고르기와 카드("모두 고르기")에서 뺀다 (T220)."""
+    import json
+
+    from app.simulator import persona_cards
+
+    root = tmp_path / "copy"
+    shutil.copytree(EXAMPLE, root)
+    rival = json.loads((root / "personas" / "family-kids.json").read_text(encoding="utf-8"))
+    rival.update({"persona_id": "rival-family", "segment": "rival"})
+    (root / "personas" / "rival-family.json").write_text(json.dumps(rival, ensure_ascii=False), encoding="utf-8")
+    walkerhill = json.loads((root / "personas" / "family-elders.json").read_text(encoding="utf-8"))
+    walkerhill["segment"] = "walkerhill"  # 적어 두어도 워커힐 고객이면 그대로 고를 수 있다
+    (root / "personas" / "family-elders.json").write_text(json.dumps(walkerhill, ensure_ascii=False), encoding="utf-8")
+
+    assert choices(root).personas == ["family-elders", "family-kids"]
+    assert [card["id"] for card in persona_cards(root)] == ["family-elders", "family-kids"]
+
+
 def test_missing_parts_are_named(tmp_path: Path):
     (tmp_path / "scenarios").mkdir()
     (tmp_path / "scenarios" / "baseline.json").write_text("{}", encoding="utf-8")

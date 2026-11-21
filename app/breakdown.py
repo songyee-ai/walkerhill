@@ -61,7 +61,7 @@ class VenueBreakdown:
 
     @property
     def parts_total(self) -> int:
-        """갈래의 합. 한 달이면 `after` − `before` 와 같고, 달 평균이면 반올림만큼 다를 수 있어 표의 합계는 이 값을 쓴다."""
+        """갈래의 합. 표의 합계는 이 값을 쓴다 (기간을 더해도 `after` − `before` 와 같다. 11-20 까지의 달 평균은 반올림만큼 달랐다)."""
         return sum(g.amount for g in self.groups)
 
 
@@ -104,38 +104,32 @@ def load_breakdown(scen_dir: Path | None, run_id: str, baseline_run_id: str | No
     return from_changes(changes)
 
 
-def _average_groups(lists: list[list[Group]], n: int) -> list[Group]:
+def _add_groups(lists: list[list[Group]]) -> list[Group]:
     parts = {part: 0 for _, _, keys, _ in GROUPS for part in keys}
     for groups in lists:
         for group in groups:
             for part, amount in group.parts.items():
                 parts[part] += amount
-    return _groups({part: round(amount / n) for part, amount in parts.items()})
+    return _groups(parts)
 
 
-def average(breakdowns: list[Breakdown]) -> Breakdown:
-    """기간의 달마다 나눈 것을 달 평균으로 (app/compare.py 의 `combine_months` 와 같은 뜻).
+def add_up(breakdowns: list[Breakdown]) -> Breakdown:
+    """기간의 달마다 나눈 것을 더한다 (app/compare.py 의 `combine_months` 와 같은 뜻, FORMATS.md 10.1절 "여러 달을 합치는 법", T216).
 
-    갈래마다 반올림하므로 합계는 갈래를 더한 값으로 다시 낸다 (반올림만큼 화면의 매출 변화와 몇 원 다를 수 있다).
+    갈래·업장·합계를 모두 달마다의 값을 더해 낸다. 11-17 ~ 11-20 에는 달 평균을 냈다.
     """
     if len(breakdowns) == 1:
         return breakdowns[0]
-    n = len(breakdowns)
-    groups = _average_groups([b.groups for b in breakdowns], n)
+    groups = _add_groups([b.groups for b in breakdowns])
     by_venue: dict[str, list[VenueBreakdown]] = {}
     for b in breakdowns:
         for v in b.venues:
             by_venue.setdefault(v.venue_id, []).append(v)
     venues = [
-        VenueBreakdown(
-            venue_id,
-            round(sum(v.before for v in items) / n),
-            round(sum(v.after for v in items) / n),
-            _average_groups([v.groups for v in items], n),
-        )
+        VenueBreakdown(venue_id, sum(v.before for v in items), sum(v.after for v in items), _add_groups([v.groups for v in items]))
         for venue_id, items in sorted(by_venue.items())
     ]
-    return Breakdown(round(sum(b.before for b in breakdowns) / n), sum(g.amount for g in groups), groups, venues)
+    return Breakdown(sum(b.before for b in breakdowns), sum(g.amount for g in groups), groups, venues)
 
 
 def share_text(amount: float, before: float, unit: str = "%p") -> str:

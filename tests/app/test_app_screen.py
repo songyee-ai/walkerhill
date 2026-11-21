@@ -39,7 +39,7 @@ def _all_text(app: AppTest) -> str:
 def test_screen_renders_and_every_amount_column_is_virtual():
     app = _app().run()
     assert not app.exception
-    assert app.title[0].value == "워커힐 다이닝 페르소나 시뮬레이터"
+    assert app.title[0].value == "워커힐 F&B 페르소나 시뮬레이터"
     assert "가상" in app.caption[0].value
     for frame in app.dataframe:
         for column in frame.value.columns:
