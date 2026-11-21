@@ -78,13 +78,33 @@ def summary_constants_path(root: Path, data_mode: str) -> Path:
     return summary.with_name(summary.stem + "_constants.json") if data_mode == "sample" else summary.with_name("summary_constants.json")
 
 
-def estimated_constants_path(root: Path, data_mode: str) -> Path:
+def estimated_constants_path(root: Path, data_mode: str, data_until: int | None = None) -> Path:
     """추정한 상수 파일의 자리 (docs/FORMATS.md 6.1절, T212): 집계 파일 옆이다.
 
     기본 데이터는 `private/base/estimated_constants.json`, 가상 예시는 `data/samples/base_estimated_constants.json`. 없어도 된다 (`engine.estimate` 가 쓴다).
+    `data_until` 을 주면 그 달까지의 자료로 추정한 파일이다: 이름 끝에 `.until-<두 자리 달>` 이 붙는다
+    (예: `estimated_constants.until-06.json`. 6단계의 되돌려 맞혀 보기, T224). 일 년 전체로 추정한 파일과 섞이지 않게 한다.
     """
     summary = summary_path(root, data_mode)
-    return summary.with_name("base_estimated_constants.json" if data_mode == "sample" else "estimated_constants.json")
+    name = "base_estimated_constants" if data_mode == "sample" else "estimated_constants"
+    suffix = "" if data_until is None else f".until-{data_until:02d}"
+    return summary.with_name(f"{name}{suffix}.json")
+
+
+def cut_summary(rows: list[SummaryRow], data_until: int | None) -> list[SummaryRow]:
+    """집계 파일의 줄 가운데 `data_until` 달까지의 것만 남긴다 (6단계의 되돌려 맞혀 보기, T224. docs/FORMATS.md 10.1절의 `data_until`).
+
+    `None` 이면 그대로다. 집계 파일의 달은 한 해 안의 1 ~ 12 라 달의 차례가 곧 시간의 차례다 (8절).
+    1 ~ 11 이어야 한다 (12 면 자르는 것이 없다). 남는 줄이 없으면 멈춘다 (가중치가 조용히 0 이 되지 않게).
+    """
+    if data_until is None:
+        return rows
+    if isinstance(data_until, bool) or not isinstance(data_until, int) or not 1 <= data_until <= 11:
+        raise ValueError(f"data_until 은 1 ~ 11 의 정수다 (그 달까지의 자료만 읽는다): {data_until!r}")
+    kept = [row for row in rows if row.month <= data_until]
+    if not kept:
+        raise ValueError(f"집계 파일에 {data_until}월까지의 줄이 없다")
+    return kept
 
 
 def read_summary(path: Path) -> list[SummaryRow]:

@@ -200,6 +200,22 @@ uv run python -m engine.crosscheck --data private
 - 고객군마다 하나를 빼고 나머지로 추정한 업장 상수를 그 고객군에 써 보고, AI 점수 그대로·공개 후기 비율(단순 기준)과 함께 실제 몫과 견준다.
 - 기준 실행의 조건은 상수 추정과 같다 (점수를 받음, 일 년 전체, 실패 없음, 페르소나와 조건을 모두 돌림). 결과의 수치는 저장소·연락판에 옮겨 적지 않고, 단순 기준보다 나았는지만 적는다.
 
+**되돌려 맞혀 본다 (6단계)** — 과거의 가격 변경·프로모션(사건)을 그 앞 달까지의 자료로 돌린 예측과 사건 뒤의 실제를 견줘 채점한다 (T224, `docs/FORMATS.md` 10.9절, 기준은 PRD 6.6절). 채점은 LLM 을 부르지 않는다.
+
+```powershell
+uv run python -m engine.backtest find --data private
+```
+
+```powershell
+uv run python -m engine.backtest score --data private --events private/backtest/events.json
+```
+
+- `find` 는 집계 파일에서 가격이 바뀐 달을 찾아 사건 후보와 상황 초안을 `private/backtest/` 에 쓴다. 검토해 사건 목록(`events.json`)과 상황 파일(`private/scenarios/`)을 확정한다.
+- 채점 전에 사건마다 엔진을 사건 앞 달까지의 자료로 돌린다: 기준 상황과 그 상황 모두 `--data-until <사건 달 − 1>` (예: 7월 사건이면 `--data-until 6`).
+  `--data-until` 로 돈 실행은 보통의 상황이 가중치를 가져오는 기준 실행으로 고르지 않는다.
+- 4단계의 결과가 있으면 `--elasticity <elasticity.json>` 을 붙여 k 를 맞추는 데 쓴 상황과 구간을 빼고 크기를 잰다.
+- 결과에는 기본 데이터에서 계산한 변화가 들어 있다. 저장소·연락판에는 판정과 건수만 적는다.
+
 **알아둘 것**
 
 - 명령은 `uv run python -m <도구>` 꼴로 쓴다. `uv run pytest` 나 `uv run streamlit` 처럼 쓰면 윈도우의 스마트 앱 컨트롤이

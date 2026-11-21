@@ -49,6 +49,7 @@ from engine.weights import (
     average_parties,
     base_profiles,
     blank_people_kinds,
+    cut_summary,
     decide_weights,
     empty_profile,
     estimated_constants_path,
@@ -161,6 +162,7 @@ def load_inputs(
     persona_ids: list[str] | None = None,
     base_profile_mode: str | None = None,
     with_estimated: bool = True,
+    data_until: int | None = None,
 ) -> Inputs:
     """입력 파일을 읽는다. `venue_ids`, `persona_ids` 를 주면 그것만 읽는다.
 
@@ -171,6 +173,9 @@ def load_inputs(
     `venue_ids` 로 업장을 골랐으면 상황이 바꾸는 업장도 그 안에 있어야 한다.
     `base_profile_mode` 가 `bucketed` 나 `raw` 면 페르소나마다 그 고객군의 기본 데이터 요약을 `base_profile` 로 붙인다 (기본 데이터로 돌릴 때만).
     주지 않으면 실행과 같은 기본값이다 (`default_base_profile_mode`). 그래야 다른 영역이 이 함수로 만든 요청이 실행의 요청과 같다.
+    `data_until` 을 주면 집계 파일을 그 달까지만 읽는다 (가중치, 기본 데이터의 요약, 빈 가격 채우기, 추정한 상수 파일의 자리 모두. T224).
+    기본 데이터로 돌릴 때 상황 파일이 `scenarios/` 에 없으면 `private/scenarios/` 에서 찾는다
+    (기본 데이터에서 찾은 사건의 상황처럼 내부 수치가 든 상황. 두 곳에 다 있으면 멈춘다, T224).
     """
     runs_folder(root, data_mode)  # data_mode 가 맞는지 먼저 본다
     if base_profile_mode is None:
@@ -210,18 +215,18 @@ def load_inputs(
         persona_json[persona.persona_id] = layered
 
     conditions_path = root / "engine" / "conditions.json"
-    scenario_path = root / "scenarios" / f"{scenario_id}.json"
+    scenario_file = scenario_path(root, data_mode, scenario_id)
     vocab_path = root / "data" / "evidence" / "vocab.json"
     summary_file = summary_path(root, data_mode)
-    scenario = read_model(scenario_path, Scenario)
-    summary = read_summary(summary_file)
+    scenario = read_model(scenario_file, Scenario)
+    summary = cut_summary(read_summary(summary_file), data_until)
     if base_profile_mode != "none":
         profiles = base_profiles(summary, base_profile_mode)
         for persona_id, layered in persona_json.items():
             layered["base_profile"] = profiles.get(personas[persona_id].customer_group, empty_profile())
     filled_venues, filled = apply_with_prices(venues, scenario, summary, data_mode)
     shares = share_params(load_constants())
-    estimated_path = estimated_constants_path(root, data_mode)
+    estimated_path = estimated_constants_path(root, data_mode, data_until)
     # `with_estimated` 가 거짓이면 추정한 상수 파일을 읽지 않는다 (상수를 다시 추정할 때, `engine.estimate`).
     estimated = read_model(estimated_path, ConstantsFile) if with_estimated and estimated_path.is_file() else None
     if estimated is not None:
@@ -243,9 +248,9 @@ def load_inputs(
             "venues": _hash_files(venue_paths),
             "personas": _hash_files(hashed),
             "conditions": _hash_files([conditions_path]),
-            "scenario": _hash_files([scenario_path]),
+            "scenario": _hash_files([scenario_file]),
             "vocab": _hash_files([vocab_path]),
-            "summary": _hash_files([summary_file]),
+            "summary": summary_hash(summary_file, data_until),
             "constants": values_hash(),  # 결과를 바꾸는 부분만 본다 (T214)
             **hashes,
         },
@@ -254,6 +259,30 @@ def load_inputs(
         estimated=estimated,
         estimated_file=estimated_path.relative_to(root).as_posix() if estimated is not None else None,
     )
+
+
+def summary_hash(path: Path, data_until: int | None) -> str:
+    """집계 파일의 해시. 그 달까지만 읽었으면 달도 넣는다: 같은 파일을 다르게 자른 실행끼리 섞이지 않게 한다 (T224).
+
+    일 년 전체를 읽은 실행의 해시는 이 칸이 생기기 전과 같다 (옛 실행과 그대로 견준다).
+    """
+    if data_until is None:
+        return _hash_files([path])
+    digest = hashlib.sha256()
+    digest.update(_hash_files([path]).encode("utf-8"))
+    digest.update(f"until-{data_until:02d}".encode())
+    return digest.hexdigest()[:16]
+
+
+def scenario_path(root: Path, data_mode: str, scenario_id: str) -> Path:
+    """상황 파일의 자리. 기본 데이터로 돌릴 때는 `scenarios/` 에 없으면 `private/scenarios/` 를 본다 (T224)."""
+    public = root / "scenarios" / f"{scenario_id}.json"
+    if data_mode != "private":
+        return public
+    private = root / "private" / "scenarios" / f"{scenario_id}.json"
+    if public.is_file() and private.is_file():
+        raise ValueError(f"상황 '{scenario_id}' 가 scenarios/ 와 private/scenarios/ 에 함께 있다. 하나만 둔다")
+    return private if private.is_file() else public
 
 
 def _with_estimated(shares: ShareParams, estimated: ConstantsFile, path: Path) -> ShareParams:
@@ -273,11 +302,14 @@ def _with_estimated(shares: ShareParams, estimated: ConstantsFile, path: Path) -
     return ShareParams(k=shares.k, venue_constants=found)
 
 
-def latest_baseline_run(root: Path, data_mode: str, month: int | None | str = ANY_MONTH) -> str | None:
+def latest_baseline_run(
+    root: Path, data_mode: str, month: int | None | str = ANY_MONTH, data_until: int | None = None
+) -> str | None:
     """끝까지 돈 기준 실행 가운데 가장 새것의 `run_id`. 없으면 None. 같은 `data_mode` 의 실행만 본다.
 
     `month` 를 주면 실행의 달이 그것과 같은 기준 실행만 본다: 1 ~ 12 는 그 달로 돌린 실행, None 은 일 년 전체로 돌린 실행.
     주지 않으면(`ANY_MONTH`) 달을 가리지 않는다.
+    `data_until` 이 같은 기준 실행만 본다 (기본은 일 년 전체를 읽은 실행. 되돌려 맞혀 보기의 실행이 보통의 상황에 섞이지 않게, T224).
     실패한 방문이 있는 실행도 고른다. 그 실행으로 상황을 돌리면 `baseline_record` 가 막는다 (docs/FORMATS.md 10.1절).
     화면에서 쓸 기준 실행을 미리 보여 줄 때는 `counts.failed` 도 함께 본다.
     """
@@ -287,9 +319,18 @@ def latest_baseline_run(root: Path, data_mode: str, month: int | None | str = AN
             record = read_model(run_dir / "run.json", RunRecord)
         except (OSError, ValueError):
             continue
-        if record.scenario_id == BASELINE_ID and record.status == "ok" and month in (ANY_MONTH, record.month):
+        if (
+            record.scenario_id == BASELINE_ID
+            and record.status == "ok"
+            and month in (ANY_MONTH, record.month)
+            and record.data_until == data_until
+        ):
             return record.run_id
     return None
+
+
+def _until_label(data_until: int | None) -> str:
+    return "일 년 전체를" if data_until is None else f"{data_until}월까지"
 
 
 def month_label(month: int | None) -> str:
@@ -516,7 +557,9 @@ def _baseline_weight_use(
             frozenset(kind for constant_id, kind in BLANK_PEOPLE_CONSTANTS.items() if constant_id in on),
             frozenset(s.split_id for s in inputs.conditions.assumed_splits if s.split_id in on),
         )
-    venues = load_inputs(root, data_mode, BASELINE_ID, venue_ids, base.persona_ids, "none", with_estimated=False).venues
+    venues = load_inputs(
+        root, data_mode, BASELINE_ID, venue_ids, base.persona_ids, "none", with_estimated=False, data_until=base.data_until
+    ).venues
     people = group_people(inputs.summary, conditions, inputs.conditions.assumed_splits, venues, average_parties(personas), base.month)
     return _weight_use(people, inputs.summary, conditions, inputs.conditions, venues, base.month)
 
@@ -596,6 +639,7 @@ def run(
     base_profile_confirmed_for: str | None = None,
     receiver: str | None = None,
     before_estimate: bool = False,
+    data_until: int | None = None,
 ) -> Path:
     """상황 하나를 돌려 실행 폴더(`run.json`, `ledger.csv`, `llm/`, `llm_rejected/`)를 쓰고 그 경로를 돌려준다.
 
@@ -619,6 +663,9 @@ def run(
       요청의 `condition.month` 에 그 달이 실린다. 주지 않으면 일 년 전체로 본다. 가중치는 그 달의 인원으로 낸다
       (11-19 wilstein91 결정. docs/FORMATS.md 10.1절의 "실행의 달").
       기준이 아닌 상황은 기준 실행의 달을 따른다. 다른 달을 따로 주면 돌리지 않는다.
+    - `data_until`: 집계 파일을 이 달(1 ~ 11)까지만 읽는다 (6단계의 되돌려 맞혀 보기, T224. docs/FORMATS.md 10.1절).
+      가중치, 기본 데이터의 요약, 빈 가격 채우기가 그 달까지의 줄로 나오고, 추정한 상수 파일도 그 달까지로 추정한 것을 읽는다.
+      기준이 아닌 상황은 기준 실행의 `data_until` 을 따른다. 다른 값을 따로 주면 돌리지 않는다. `month` 와 함께 주면 `month` 가 그 달 안이어야 한다.
     - `llm`: 저장된 응답이 없는 방문에서 부를 공급자. 주지 않으면 부르지 않고 그 방문을 실패로 남긴다 (재생만).
       `provider` 와 `model` 은 `llm` 이 실제로 부르는 곳과 같아야 한다 (요청의 해시와 실행 기록에 들어간다).
     - `call_limit`: 이 실행에서 새로 부를 수 있는 횟수. 주지 않으면 `DEFAULT_CALL_LIMIT` 이다.
@@ -659,6 +706,14 @@ def run(
                 "상황은 기준 실행과 같은 달로 돌린다. 다른 달로 보려면 기준 상황을 그 달로 먼저 돌린다"
             )
         month = base.month
+        if data_until is not None and data_until != base.data_until:
+            raise ValueError(
+                f"기준 실행 '{base.run_id}' 은 집계 파일을 {_until_label(base.data_until)} 읽었는데 {_until_label(data_until)} 읽으라고 했다. "
+                "상황은 기준 실행과 같은 자료로 돌린다"
+            )
+        data_until = base.data_until
+    if data_until is not None and month is not None and month > data_until:
+        raise ValueError(f"{month}월은 {data_until}월까지의 자료 밖이다. --month 는 --data-until 안의 달로 준다")
     if base_profile_mode is None:
         base_profile_mode = default_base_profile_mode(data_mode)
     # 기본 데이터의 요약이 밖의 LLM 으로 나가는 실행은, 그 공급자로 보내도 된다고 확인한 PC 에서만 돌린다.
@@ -671,17 +726,17 @@ def run(
             f"확인했으면 이 PC 의 .env 에 {BASE_PROFILE_CONFIRMED_ENV}={sent_to} 를 적는다. "
             "확인 전에는 요약을 보내지 않고 돌린다: --base-profile none (CLAUDE.md 의 \"스택\")"
         )
-    inputs = load_inputs(root, data_mode, scenario_id, venue_ids, persona_ids, base_profile_mode)
+    inputs = load_inputs(root, data_mode, scenario_id, venue_ids, persona_ids, base_profile_mode, data_until=data_until)
     # 기본 데이터로 점수를 묻는 판을 돌리면 업장 상수가 결과를 바꾼다. 추정한 상수 파일이 없는 PC 에서 조용히 상수 1 로 돌면
     # PC 마다 결과가 달라지므로 멈춘다. 상수 추정에 쓸 첫 기준 실행만 `before_estimate` 로 돌린다 (T212).
     if before_estimate and (scenario_id != BASELINE_ID or inputs.estimated is not None):
         raise ValueError(
             "--before-estimate 는 추정한 상수 파일이 아직 없을 때 상수 추정에 쓸 기준 상황에만 쓴다"
-            + (" (기준이 아닌 상황이다)" if scenario_id != BASELINE_ID else f" (이미 있다: {estimated_constants_path(root, data_mode)})")
+            + (" (기준이 아닌 상황이다)" if scenario_id != BASELINE_ID else f" (이미 있다: {estimated_constants_path(root, data_mode, data_until)})")
         )
     if data_mode == "private" and scores_required(prompt_version) and inputs.estimated is None and not before_estimate:
         raise ValueError(
-            f"추정한 상수 파일이 없다: {estimated_constants_path(root, data_mode)}. 엔진 담당이 추정한 파일을 저장소 밖으로 받아 그 자리에 둔다. "
+            f"추정한 상수 파일이 없다: {estimated_constants_path(root, data_mode, data_until)}. 엔진 담당이 추정한 파일을 저장소 밖으로 받아 그 자리에 둔다. "
             "상수 추정에 쓸 첫 기준 실행이면 --before-estimate 를 붙여 업장 상수를 모두 1 로 돌린다"
         )
     if not inputs.personas:
@@ -821,6 +876,7 @@ def run(
                 "persona_ids": [p.persona_id for p in personas],
                 "condition_ids": condition_ids,
                 "month": month,
+                "data_until": data_until,
                 "llm": {
                     "provider": provider,
                     "model": model,
@@ -857,7 +913,11 @@ def run(
 def _write_run(run_dir: Path, rows: list[LedgerRow], replayed: dict[str, Path], record_data: dict[str, Any]) -> None:
     """실행 폴더에 실행 기록과 원장을 쓰고, 재생한 응답을 llm/ 에 베껴 둔다."""
     record = RunRecord.model_validate(record_data)
-    write_json(run_dir / "run.json", record.model_dump(mode="json", by_alias=True))
+    dumped = record.model_dump(mode="json", by_alias=True)
+    # 일 년 전체를 읽은 실행에는 `data_until` 을 적지 않는다 (이 칸이 생기기 전의 실행 기록과 같게, T224).
+    if dumped.get("data_until") is None:
+        dumped.pop("data_until", None)
+    write_json(run_dir / "run.json", dumped)
     write_ledger(run_dir / "ledger.csv", rows)
     (run_dir / "llm").mkdir(exist_ok=True)
     for name, path in replayed.items():

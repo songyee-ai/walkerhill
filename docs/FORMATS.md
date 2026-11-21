@@ -28,6 +28,8 @@
 | 10 | 실행 결과 | `private/runs/<run_id>/` | 엔진 | 화면, 페르소나 | `private/`. 가상 예시로 만든 것은 `engine/samples/runs/` (깃이 무시한다. 올리는 예시는 `tests/fixtures/<이름>/engine/samples/runs/`) |
 | 10.6 | 매출 변화 나누기 | `private/runs/<run_id>/changes.json` (상황 실행만) | 엔진 | 화면 | 실행 결과와 같다 (10절) |
 | 10.7 | 다른 고객군에 써 보기와 단순 기준 | `private/runs/<run_id>/crosscheck.json` (점수를 받은 기준 실행만) | 엔진 (`python -m engine.crosscheck`) | 화면, 발표 | 실행 결과와 같다 (10절) |
+| 10.9 | 되돌려 맞혀 보기의 사건 목록 | `private/backtest/events.json` | 엔진 (`python -m engine.backtest find` 의 초안을 검토해 확정) | 엔진 | `private/`. 가상 예시는 깃이 무시하는 `engine/samples/runs/backtest/` |
+| 10.9 | 되돌려 맞혀 보기의 결과 | `private/backtest/result-<시각>.json` | 엔진 (`python -m engine.backtest score`) | 발표 | 위와 같다. 저장소 어디에도 두지 않는다 |
 
 파일 하나는 한 사람이 쓴다. 남이 만든 파일은 읽기만 하고, 고칠 것은 주인에게 요청한다.
 
@@ -659,6 +661,8 @@ R-geumryong-0027,geumryong,map,2026-03,,,,,,meal,dinner,,,,,,대기,,no,예약�
 
 - 자리: 기본 데이터는 `private/base/estimated_constants.json`, 가상 예시는 `data/samples/base_estimated_constants.json` 이다. **기본 데이터로 추정한 값은 기본 데이터에서 계산한 값이라 `private/` 에만 둔다**
   (저장소의 `engine/constants.json` 에 옮겨 적지 않는다. `CLAUDE.md` 의 "비밀값과 공개 저장소").
+  집계 파일을 어느 달까지만 읽은 기준 실행(10.1절의 `data_until`)으로 추정하면 이름 끝에 `.until-<두 자리 달>` 이 붙은 파일에 쓰고
+  (예: `estimated_constants.until-06.json`), 같은 `data_until` 로 돈 실행만 그 파일을 읽는다 (11-20 wilstein91 결정, T224. 10.9절).
 - 만드는 것: `python -m engine.estimate --data private` (`engine/estimate.py`). 답을 받는 PC(엔진 담당)에서 추정하고, 다른 PC 는 답 폴더처럼 저장소 밖으로 받아 같은 자리에 둔다.
   받아 둔 답과 이 파일이 같으면 어느 PC 에서 돌려도 결과가 같다.
 - 추정하는 법:
@@ -781,6 +785,8 @@ R-geumryong-0027,geumryong,map,2026-03,,,,,,meal,dinner,,,,,,대기,,no,예약�
   (업장을 다르게 고르면 읽은 업장 정의가 기준 실행과 달라 10.1절의 검사가 `venues` 가 달라졌다며 막는다).
 - 다 적용한 업장 정의도 3절의 규칙을 지켜야 한다 (예: 뺀 상품을 가리키는 프로모션이 남아 있으면 안 된다). 형식 검사도 엔진과 같은 코드로 적용해 본다.
 - 기준이 아닌 상황은 기준 실행의 페르소나, 방문 조건, 가중치로 돌린다 (10.1절의 "기준이 아닌 상황을 돌리는 법").
+- 기본 데이터로 돌릴 때(`--data private`) 엔진은 상황 파일이 `scenarios/` 에 없으면 `private/scenarios/` 에서 찾는다 (11-20 wilstein91 결정, T224).
+  기본 데이터에서 찾은 사건의 상황(10.9절)처럼 바꾼 값에 내부 수치가 든 상황을 저장소 밖에 두려는 것이다. 두 곳에 같은 이름이 있으면 멈춘다.
 
 ```json
 {
@@ -1147,6 +1153,7 @@ customer_group,venue_id,product_id,occasion,meal,day_type,month,unit,quantity,pe
 | `data_mode` | `private` 기본 데이터로 돌림, `sample` 가상 예시 값으로 돌림 |
 | `scenario_id`, `persona_ids`, `condition_ids` | 무엇을 돌렸나 |
 | `month` | 실행의 달 (1 ~ 12). 묶음의 조건을 모두 그 달의 방문으로 돌렸다. 일 년 전체로 돌렸으면 `null` 이다. 명령의 `--month` 로 준다. 기준이 아닌 상황은 기준 실행의 값을 따른다 (아래 "실행의 달") |
+| `data_until` | 집계 파일을 이 달(1 ~ 11)까지만 읽었다 (명령의 `--data-until`, 10.9절의 되돌려 맞혀 보기. 11-20, T224). 일 년 전체를 읽었으면 이 칸을 적지 않는다 (없으면 일 년 전체다. 이 칸이 생기기 전의 실행 기록과 같게). 기준이 아닌 상황은 기준 실행의 값을 따른다 |
 | `llm` | `provider`, `model`, `prompt_version`, `calls_new` (새로 부른 수), `calls_replayed` (저장된 응답을 재생한 수), `call_limit`, `stopped_by_limit` |
 | `base_profile_mode` | 기본 데이터의 요약(5절의 `base_profile`)을 LLM 에 어떻게 보냈나: `none` 보내지 않음, `bucketed` 범주로 바꿔 보냄, `raw` 그대로 보냄. 기본 데이터로 돌릴 때의 기본값은 `bucketed` 다 (11-13 결정). 가상 예시로 돌릴 때는 늘 `none` 이다. 명령의 `--base-profile` 로 바꾼다. 기준이 아닌 상황은 기준 실행의 값을 따른다 요약을 보내는 실행(`bucketed`, `raw`)은 그 공급자로 보내도 된다고 확인한 PC 에서만 돈다 (아래 "요약을 보내기 전의 확인") |
 | `inputs` | 입력 파일들의 해시. 같은 입력인지 견줄 때 쓴다. 읽은 것만 적는다: `venues`, `personas`, `conditions`, `scenario`, `vocab`, 집계 파일 `summary` (늘 읽는다), 결정 상수 `constants` (6.1절. 늘 읽는다. 11-19 부터), 추정한 상수 파일이 있으면 `estimated` (6.1절. 11-20 부터, T212), LLM 을 부를 수 있게 돌렸으면 프롬프트 파일의 `prompt` (재생만 하는 실행은 프롬프트를 읽지 않는다) |
@@ -1167,6 +1174,10 @@ customer_group,venue_id,product_id,occasion,meal,day_type,month,unit,quantity,pe
 - 11-20(T214) 전에 돌린 실행 기록은 출처를 글 한 줄(`source`)로 적었고 모두 `null` 이었다. 엔진과 화면은 그 기록을 `sources` 가 빈 목록인 것으로 읽는다 (임시 호환. 없애는 조건은 진행 문서 T212).
   또 그 전의 `inputs.constants` 는 파일 전체의 해시라 새 해시와 달라, 그 기준 실행으로는 상황도 보정의 대조도 돌지 않는다. 기준 상황을 한 번 다시 돌린다 (저장된 답을 재생한다).
 - `month` 가 생기기 전(T112, 11-17)에 돌린 실행 기록에는 이 칸이 없다. 달을 주지 않고 돌린 것이라 `null` 로 읽는다. 다시 돌리지 않아도 된다.
+- **그 달까지만 읽기** (`data_until`, 11-20 wilstein91 결정, T224): 가중치, 기본 데이터의 요약(`base_profile`), 빈 가격 채우기가 모두 그 달까지의 집계 파일 줄로 나오고,
+  추정한 상수 파일도 그 달까지로 추정한 것(6.1절의 `.until-<달>`)을 읽는다. `inputs.summary` 는 파일의 해시에 그 달을 더해 낸 값이라, 같은 파일을 다르게 자른 실행끼리 섞이지 않는다
+  (일 년 전체를 읽은 실행의 해시는 이 칸이 생기기 전과 같다). `month` 와 함께 주면 `month` 가 그 달 안이어야 한다.
+  기준이 아닌 상황을 기준 실행 없이 돌릴 때 엔진은 `data_until` 이 같은 가장 새 기준 실행을 고른다. 그래서 보통의 상황은 일 년 전체를 읽은 기준 실행만 쓴다.
 - T210(11-19) 전에 돌린 실행 기록은 가중치를 매출로 맞춘 것이고 `people_coverage` 가 없다. 읽히지만 가중치의 뜻이 다르다.
   집계 파일에 `people` 이 더해져 해시가 달라졌으므로 그 기준 실행으로는 상황이 돌지 않는다. 기준 상황부터 다시 돌린다.
 
@@ -1814,6 +1825,118 @@ run_id,scenario_id,visit_id,persona_id,customer_group,condition_id,choice_kind,v
   모델의 규칙(세 방법이 모두 있음, `no_constants` 는 늘 있음, `null` 이 서로 맞음, 몫 0 ~ 1·차이 0 ~ 100, 업장이 `venues` 와 같음, `venues` 는 겹치지 않고 차례대로, 고객군 둘 이상)을 본다.
   이름이나 자리를 바꾼 파일도 안쪽 키(`no_constants`, `held_out`, `misplaced_pct`)로 알아본다 (기본 데이터에서 계산한 값이 든다).
 - 예시 묶음(`tests/fixtures/example/`)에는 이 파일의 예가 없다. 예시의 기준 실행이 점수가 없는 1단계 방식이라 둘 수 없고, 모양은 `tests/test_crosscheck.py` 가 본다.
+
+### 10.9 되돌려 맞혀 보기 `backtest/` (6단계의 채점 장치)
+
+개선 6단계(PRD 8절, 12절)의 엔진 몫이다 (11-20 wilstein91 결정, T224). 시뮬레이터에게 답을 가린 시험을 보게 한다:
+과거에 실제로 있었던 가격 변경·프로모션(사건)마다, **사건이 있던 달의 앞 달까지의 자료만으로** 기준 상황과 그 사건의 상황을 돌리고,
+그 예측을 사건 뒤에 실제로 일어난 일과 견준다. `python -m engine.backtest` (`engine/backtest.py`)이며 LLM 을 부르지 않는다 (엔진이 돌려 둔 실행 폴더를 읽는다).
+실제 판매 자료가 들어오면 집계 파일(8절)과 같은 모양으로 `private/base/summary.csv` 자리에 두고 그대로 돌린다. 지금은 기본 데이터를 실제 자료 자리에 둔다.
+10.8절은 4단계(T222)의 `elasticity.json` 이다.
+
+```powershell
+uv run python -m engine.backtest find --data private
+uv run python -m engine --data private --data-until 6
+uv run python -m engine --data private --scenario <사건의 상황> --data-until 6
+uv run python -m engine.backtest score --data private --events private/backtest/events.json --elasticity <elasticity.json>
+```
+
+- **순서**: ① `find` 가 집계 파일에서 가격이 바뀐 달을 찾아 사건 후보(`candidates.json`)와 상황 초안(`scenarios/backtest-<업장>-<달>.json`)을 쓴다.
+  ② 사람(또는 클로드)이 후보를 검토해 사건 목록(`events.json`)과 상황 파일을 확정한다. 기본 데이터의 상황은 `private/scenarios/` 에 둔다 (7절).
+  ③ 사건마다 엔진을 `--data-until <사건 달 − 1>` 로 기준 상황, 그 상황 순서로 돌린다 (10.1절의 `data_until`). 점수를 묻는 판이면 그 자료로 상수도 추정한다 (`engine.estimate --data-until`).
+  ④ `score` 가 채점해 결과(`result-<시각>.json`)를 쓴다. 사건마다 `data_until` 이 맞고, 일 년 전체(달 없음)로 끝까지 돌고, 실패가 없는 가장 새 기준 실행과 그 가중치로 돈 그 상황의 실행을 찾아 쓴다.
+- **두는 곳**: 기본 데이터로 만든 것은 모두 `private/backtest/` (가격과 변화가 들어 있다). 가상 예시로 만든 것은 깃이 무시하는 `engine/samples/runs/backtest/` (실행 기록이 없어 실행 폴더로 읽히지 않는다).
+  결과와 사건 후보는 저장소 어디에도 두지 않는다. 형식 검사가 이름이나 자리를 바꾼 파일도 안쪽 키(`summary_hash`·`criteria`·`events`, `price_changes`·`temporary`)로 알아본다.
+- 예시 묶음(`tests/fixtures/example/`)에는 이 파일들의 예가 없다 (모두 깃이 무시하는 자리에 생긴다). 모양은 `tests/test_backtest.py` 가 본다.
+
+**사건 찾기** (`find`, 11-20 wilstein91 결정. 사람이 고른 것만큼 정확하게 가르는 것이 목표다)
+
+- 워커힐 업장의 상품마다, 달마다의 평균 가격 = Σ `paid` ÷ Σ `quantity` (고객군·조건을 모두 더함)의 흐름을 본다.
+  수준은 가운데 값이고, 3% 넘게 다르면 바뀐 것, 1.5% 안이면 같은 수준이다 (할인 쿠폰이 섞여 달마다 조금씩 흔들리는 것).
+- **가격 변경**: 바로 앞 달을 포함해 앞 3달 가운데 둘 이상이 한 수준에 있다가, 그 달부터 다른 수준으로 바뀌어 뒤 3달 가운데 둘 이상과 마지막 달이 새 수준에 머문다.
+  그다음 3달 안에 원래 수준으로 돌아오면 가격 변경이 아니라 잠깐의 바뀜이다 (석 달짜리 프로모션). 잠깐의 바뀜이 끝나 원래 가격으로 돌아온 것도 가격 변경으로 세지 않는다.
+  달 중간에 바뀌어 그 달의 평균이 두 수준 사이에 있으면 그 달을 사건 달로 보고 `mid_month` 로 표시한다 (새 수준은 다음 달부터 3달로 본다). 검토할 때 사건 달을 그 달로 둘지 다음 달로 둘지 정한다.
+- **잠깐의 바뀜** (`temporary`): 앞뒤 달이 같은 수준인데 그 사이의 한두 달(또는 위의 석 ~ 다섯 달)만 다르다. 할인·프로모션 후보로 따로 적고 사건 초안을 만들지 않는다.
+- **끝 달의 바뀜** (`edge`): 자료의 마지막 한두 달만 앞의 수준과 다르다. 뒤 달이 없어 가격 변경인지 잠깐의 바뀜인지 가를 수 없어 따로 적는다.
+- 사건 초안은 같은 업장·같은 달의 가격 변경을 하나로 묶는다 (상품마다의 퍼센트·새 평균 가격·`mid_month`, 가운데 값, 오른 것과 내린 것이 섞였는지 `mixed`).
+  상황 초안은 업장 정의에 가격이 있는 상품은 `change_price_pct` 로, 가격이 비어 집계 파일로 채우는 상품은 `set_price`(새 평균 가격)로 적는다 (빈 가격에는 퍼센트를 걸 수 없다, 7절).
+- 프로모션은 집계 파일만으로 찾을 수 없다. 공개 자료나 자료를 준 쪽이 알려 준 것은 사건 목록에 손으로 더한다 (`source`).
+- 정확도: 가상 예시에 가격 변경 셋, 할인 쿠폰, 두 달·석 달짜리 프로모션, 쿠폰의 흔들림과 가를 수 없는 2% 변경, 끝 달의 바뀜을 섞어 심고,
+  가격 변경만 모두 찾고 나머지를 잠깐의 바뀜·끝 달의 바뀜으로 가르는지 `tests/test_backtest.py` 가 본다.
+
+**사건 목록** `events.json`
+
+| 키 | 뜻 |
+|---|---|
+| `event_id`, `name` | 사건의 식별자와 이름 |
+| `kind` | `price` 가격 변경, `promotion` 프로모션 |
+| `venue_id` | 바꾼 워커힐 업장 (경쟁 업장의 사건은 받지 않는다) |
+| `start_month` | 바뀐 것이 시작된 달 (1 ~ 12. 채점할 수 있는 것은 앞뒤 3달이 한 해에 드는 4 ~ 10월) |
+| `scenario_id` | 그 바뀜을 시뮬레이터에 넣는 상황 (7절). 사건 업장을 바꾸는 상황이어야 한다 |
+| `source` | `detected` 자료에서 찾아 검토함, `public` 공개 자료, `given` 자료를 준 쪽이 알려 줌 |
+| `note` | 넣은 이유 (무엇을 보고 그 달의 가격 변경으로 봤는지) |
+
+같은 업장·같은 달의 사건은 둘을 두지 않는다 (하나로 합친다).
+
+```json
+{
+  "format_version": 1,
+  "events": [
+    {
+      "event_id": "geumryong-price-up-07",
+      "name": "금룡 가격 +10%",
+      "kind": "price",
+      "venue_id": "geumryong",
+      "start_month": 7,
+      "scenario_id": "geumryong-backtest-price-up",
+      "source": "given",
+      "note": "지어낸 예다. 7월부터 금룡의 모든 상품 가격이 10% 올랐다."
+    }
+  ]
+}
+```
+
+**채점** (`score`. 기준은 PRD 6.6절의 "6단계의 통과 기준". 11-20 wilstein91 결정, 돌려 본 뒤에 바꾸지 않는다)
+
+- **잣대**: 사람 수(집계 파일의 `people`, 가중치와 같은 셈. 시뮬레이터는 대표하는 수 × 일행 수 × 파는 달의 몫 × 고른 몫)로 채점하고 합격을 정한다.
+  매출(세금 뺀. 시뮬레이터는 `weighted_revenue`)도 같은 셈으로 채점해 적는다. 매출의 방향은 "그 업장이 가격에 민감한 곳인가"를 맞혔는지 보는 해석용이고 합격에 넣지 않는다.
+- **변화** (이중 차분): (사건 업장의 뒤 ÷ 앞) ÷ (견줄 업장들의 뒤 ÷ 앞) − 1. 실제는 집계 파일의 사건 전 3달(앞)과 사건 달부터 3달(뒤)로, 예측은 기준 실행(앞)과 상황 실행(뒤)으로 낸다.
+  모두에게 같이 온 변화(철, 경기)가 빠진다. 견줄 업장은 자료에 있는 워커힐 업장 가운데 사건 업장, 상황이 바꾼 업장, 창과 섞이는 제 사건이 있는 업장을 뺀 것이다.
+  창과 섞이는 사건: 가격 변경은 사건 달이 이 달의 앞뒤 두 달 안, 프로모션은 끝나면 원래대로 돌아가므로 이 달의 다섯 달 전 ~ 두 달 뒤 (프로모션은 사건 달부터 3달로 본다).
+  조식은 실제 쪽에서도 넣지 않는다 (방문 조건 묶음에 없어 시뮬레이터가 돌리지 않는다).
+- **변화 없음**: 실제는 사건 업장에 사건이 없던 달마다(4 ~ 10월 가운데 두 달 안에 그 업장의 사건이 없는 달) 같은 셈을 해 본 가짜 사건의 절댓값 가운데 가장 큰 것(`actual_band`)보다 작으면 변화 없음이다.
+  예측은 기준 실행을 한 번 더 물은 원장(`repeat_ledger.csv`, 2단계의 흔들림 폭)으로 z × √Σ(다시 물은 답 − 기준 답)² ÷ 기준의 사건 업장 값(`predicted_band`)보다 작으면 변화 없음이다.
+  z 는 결정 상수 `wobble-band-z` 다. 그 원장이 없으면 `predicted_band` 는 `null` 이고 폭을 0 으로 본다.
+- **방향**: 늘었다(`up`)·줄었다(`down`)·변화 없음(`none`)이 실제와 예측에서 같으면 맞음이다.
+- **크기**: 실제가 변화 없음이 아닐 때 예측 ÷ 실제가 0.5 ~ 2 면 맞음이다 (방향이 반대면 0 보다 작아 틀림). 4단계(10.8절, T222)의 결과를 주면(`--elasticity`)
+  그 `fitted_on.price_runs` 의 상황은 크기를 보지 않고, `fitted_on.segments` 구간(정의는 `engine/elasticity_segments.json`)에 든 업장의 (이용 상황, 평일 주말) 조각은 빼고 나머지 방문으로 잰다.
+  구간의 페르소나 조건은 보지 않는다 (집계 파일에 페르소나가 없어 실제 쪽에서 가를 수 없다. 그 조각을 통째로 빼는, 더 넓게 빼는 쪽이다). 남는 방문이 없으면 크기는 보지 않고 방향만 채점한다.
+- **건너뛰는 사건** (이유를 `skip_reason` 에 적고 채점에 넣지 않는다): 사건 달이 4 ~ 10월 밖, 같은 업장의 다른 사건이 창과 섞임(겹침), 상황이 사건 업장을 바꾸지 않음,
+  맞는 실행이 없음, 기준 실행 뒤에 집계 파일이 바뀜, 견줄 업장이 없음, 실제나 예측의 변화를 낼 수 없음(어느 쪽이 0), 흔들림을 잴 가짜 사건이 없음,
+  그 밖에 상황 파일이나 실행을 읽지 못함 (사건 하나가 잘못돼도 나머지 사건은 채점한다).
+- **합격** (`verdict`): 채점한 사건이 5건 이상이고, 사람 수의 방향을 2/3 이상 맞히고, 크기를 채점한 사건의 절반 이상이 맞으면 `pass`. 크기를 채점한 사건이 없으면 방향만 본다
+  (`magnitude_said` 가 `false` 다. 그때는 크기를 말하지 않는다, PRD 12절). 5건에 못 미치면 `too_few` (건수 부족, 합격·불합격을 말하지 않는다). 나머지는 `fail`.
+- **남는 한계**: 집계 파일의 달은 한 해 안의 1 ~ 12 라 해를 넘는 자료는 아직 받지 못한다. 견줄 업장으로 옮겨 간 손님이 견줄 업장을 부풀린다 (양쪽에 같은 셈을 써서 공평하게는 맞다).
+  가짜 사건은 한 해에 몇 개뿐이라 변화 없음의 폭이 거칠다.
+  `data_until` 은 집계 파일만 자른다. 업장 정의(가격, 프로모션)와 페르소나는 자르지 않는다: 업장 정의의 가격이 사건 뒤의 메뉴판이면 기준 실행이 이미 오른 가격으로 돌고 상황이 한 번 더 올린다.
+  그래서 사건 목록을 확정할 때 사건 업장의 업장 정의 가격이 사건 전의 것인지 확인한다.
+  다시 물은 원장(`repeat_ledger.csv`)은 2단계의 흔들림 폭 작업(T212, `engine.repeat`)이 만든다. 그것이 들어오기 전에는 예측의 변화 없음 폭이 0 이라 작은 흔들림도 늘었다·줄었다로 판정된다.
+  `score` 는 페르소나나 조건을 일부만 돌린 실행도 받는다 (시험용). 판정을 적을 때는 모두 돌린 실행으로 한다.
+
+**결과 파일의 키**
+
+| 키 | 뜻 |
+|---|---|
+| `created_at`, `data_mode`, `events_file`, `summary_hash` | 만든 때, 자료, 사건 목록, 채점에 쓴 집계 파일의 해시 (일 년 전체) |
+| `fitted_on` | 4단계 결과를 주었으면 `elasticity_file`, 뺀 상황 `price_scenarios`, 뺀 구간 `segments`. 주지 않았으면 `null` |
+| `criteria` | 채점의 기준: `metric` (`people`), `window_before`·`window_after` (3), `magnitude_low`·`magnitude_high` (0.5, 2), `direction_pass` (2/3), `magnitude_pass` (0.5), `min_events` (5) |
+| `events[]` | 사건마다 `event_id`, `venue_id`, `start_month`, `scenario_id`, `status` (`scored` 채점함, `skipped` 건너뜀), `skip_reason`, `baseline_run`, `scenario_run`, `control_venues` (견줄 업장), `people`·`revenue` (아래 "잣대 하나"), `people_magnitude`·`revenue_magnitude` (아래 "크기") |
+| 잣대 하나 | `actual`·`predicted` (변화. 0.1 이면 10% 늘었다), `actual_band`·`predicted_band` (변화 없음의 폭), `actual_direction`·`predicted_direction`, `direction_correct` |
+| 크기 | `status` (`scored` 채점함, `excluded` 4단계와 겹쳐 뺌, `no_change` 실제가 변화 없음, `unmeasured` 낼 수 없음), `reason`, `excluded_slices` (뺀 (이용 상황, 평일 주말)), `actual`, `actual_band`, `predicted`, `ratio` (예측 ÷ 실제), `correct` |
+| `summary` | `events` (사건 수), `people`·`revenue` (`scored` 채점한 사건, `direction_correct`, `magnitude_scored`, `magnitude_correct`), `verdict`, `magnitude_said` |
+
+- 저장소, 진행 문서, PR, 연락판에는 판정과 건수, 잰 방법만 적는다. 변화, 폭, 비율과 사건 후보의 가격은 기본 데이터에서 계산한 값이라 `private/` 에만 둔다.
+- 기본 데이터는 판매량이 가격과 상관없이 정해진 가공 자료다 (PRD 2절, 8절). 이 자료로 합격해도 고객의 실제 반응을 맞혔다는 뜻이 아니다 (PRD 12절).
 
 ## 11. 형식이 맞는지 볼 것
 
